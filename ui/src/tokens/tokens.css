@@ -8,10 +8,10 @@
  * derives from --sp-accent-h/s/l updates together.
  */
 :root {
-  /* accent — default approximates Visual Studio's community purple */
-  --sp-accent-h: 291;
-  --sp-accent-s: 55%;
-  --sp-accent-l: 52%;
+  /* accent — Yog's default brand emerald; user-configurable at runtime */
+  --sp-accent-h: 152;
+  --sp-accent-s: 45%;
+  --sp-accent-l: 42%;
 
   --sp-accent: hsl(var(--sp-accent-h) var(--sp-accent-s) var(--sp-accent-l));
   --sp-accent-soft: hsl(var(--sp-accent-h) var(--sp-accent-s) var(--sp-accent-l) / 0.16);
