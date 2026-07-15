@@ -101,21 +101,11 @@
   color: var(--sp-text);
 }
 
-/*
- * Real Visual Studio tool-window tabs are just rotated text, no icon.
- * Left-edge tabs read bottom-to-top; right-edge tabs mirror that (rotated
- * the other way) so both read "outward from the main area" naturally —
- * `vertical-rl` alone rotates both edges the same direction, so the right
- * side needs an extra 180° flip.
- */
+/* Real Visual Studio tool-window tabs are just rotated text, no icon. */
 .sp-dock-strip--left .sp-dock-tab,
 .sp-dock-strip--right .sp-dock-tab {
   writing-mode: vertical-rl;
   text-orientation: mixed;
-}
-
-.sp-dock-strip--right .sp-dock-tab {
-  transform: rotate(180deg);
 }
 
 .sp-dock-tab-title {
