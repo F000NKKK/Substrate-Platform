@@ -1,7 +1,11 @@
 import { useRef, useState } from "react";
 import { ColorWheel } from "./ColorWheel";
 import { Button } from "./Button";
-import { hslToCss, sameColor, type HslColor } from "./color";
+import { IconButton } from "./IconButton";
+import { Label } from "./Label";
+import { Swatch } from "./Swatch";
+import { sameColor, type HslColor } from "./color";
+import { IconClose } from "../icons";
 import "./ColorPickerWindow.css";
 
 export interface ColorPickerWindowProps {
@@ -45,10 +49,10 @@ export function ColorPickerWindow({ title = "Select Color", value, presets, defa
         onPointerMove={handleHeaderPointerMove}
         onPointerUp={handleHeaderPointerUp}
       >
-        <span className="sp-color-picker-title">{title}</span>
-        <button className="sp-color-picker-close" aria-label="Close" onClick={onClose}>
-          ×
-        </button>
+        <Label>{title}</Label>
+        <IconButton size={20} aria-label="Close" onClick={onClose}>
+          <IconClose size={13} />
+        </IconButton>
       </div>
 
       <div className="sp-color-picker-body">
@@ -60,7 +64,7 @@ export function ColorPickerWindow({ title = "Select Color", value, presets, defa
         />
 
         <div className="sp-color-picker-field">
-          <span className="sp-color-picker-label">Lightness</span>
+          <Label>Lightness</Label>
           <input
             type="range"
             className="sp-color-picker-slider"
@@ -73,16 +77,14 @@ export function ColorPickerWindow({ title = "Select Color", value, presets, defa
 
         {presets && presets.length > 0 && (
           <div className="sp-color-picker-field">
-            <span className="sp-color-picker-label">Presets</span>
+            <Label>Presets</Label>
             <div className="sp-color-picker-swatches">
               {presets.map((preset) => (
-                <button
-                  key={hslToCss(preset)}
-                  className="sp-color-picker-swatch"
-                  data-active={sameColor(preset, value)}
-                  style={{ background: hslToCss(preset) }}
+                <Swatch
+                  key={`${preset.h}-${preset.s}-${preset.l}`}
+                  color={preset}
+                  active={sameColor(preset, value)}
                   onClick={() => onChange(preset)}
-                  aria-label={hslToCss(preset)}
                 />
               ))}
             </div>

@@ -1,0 +1,21 @@
+.sp-swatch {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--sp-border-strong);
+  cursor: pointer;
+  transition: transform var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-swatch:hover {
+  transform: scale(1.12);
+}
+
+.sp-swatch:focus-visible {
+  box-shadow: 0 0 0 2px var(--sp-accent-soft);
+}
+
+.sp-swatch[data-active="true"] {
+  box-shadow: 0 0 0 2px var(--sp-surface-glass), 0 0 0 3px var(--sp-accent);
+}
