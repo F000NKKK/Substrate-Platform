@@ -78,6 +78,8 @@
 .sp-tab--horizontal-dock[data-active="true"] {
   background: var(--sp-surface-2);
   color: var(--sp-text);
+  border: 1px solid var(--sp-accent);
+  border-top: none;
   border-radius: 0 0 var(--sp-radius-sm) var(--sp-radius-sm);
 }
 
@@ -116,10 +118,14 @@
 }
 
 .sp-tab--vertical-left[data-active="true"] {
+  border: 1px solid var(--sp-accent);
+  border-right: none;
   border-radius: var(--sp-radius-sm) 0 0 var(--sp-radius-sm);
 }
 
 .sp-tab--vertical-right[data-active="true"] {
+  border: 1px solid var(--sp-accent);
+  border-left: none;
   border-radius: 0 var(--sp-radius-sm) var(--sp-radius-sm) 0;
 }
 

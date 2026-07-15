@@ -128,19 +128,34 @@
   overflow: hidden;
 }
 
+/*
+ * Together with Tab.css's matching active-tab border, this traces one
+ * continuous thin accent outline around the tab + its panel as a unit —
+ * suppressed on the shared seam so it reads as one shape, not two boxes.
+ */
 .sp-dock--left > .sp-panel-surface {
   width: var(--sp-toolwindow-size);
+  border: 1px solid var(--sp-accent);
+  border-left: none;
   border-radius: 0 var(--sp-radius-md) var(--sp-radius-md) 0;
 }
 
 .sp-dock--right > .sp-panel-surface {
   width: var(--sp-toolwindow-size);
+  border: 1px solid var(--sp-accent);
+  border-right: none;
   border-radius: var(--sp-radius-md) 0 0 var(--sp-radius-md);
 }
 
 .sp-dock--bottom > .sp-panel-surface {
   height: var(--sp-toolwindow-bottom-size);
+  border: 1px solid var(--sp-accent);
+  border-bottom: none;
   border-radius: var(--sp-radius-md) var(--sp-radius-md) 0 0;
+}
+
+.sp-panel-surface:focus-within {
+  box-shadow: 0 0 0 1px var(--sp-accent);
 }
 
 /* Blends with the panel body on purpose — it's a drag handle + actions row, not a separate bar. */
