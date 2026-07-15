@@ -11,12 +11,6 @@
 
 .sp-shell-menu {
   flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  height: 34px;
-  padding: 0 var(--sp-space-sm);
-  background: var(--sp-surface-1);
-  border-bottom: 1px solid var(--sp-border);
 }
 
 .sp-shell-body {

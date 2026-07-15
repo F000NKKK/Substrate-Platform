@@ -31,7 +31,6 @@ export interface ShellLayout {
   close: (id: string) => void;
   dockTo: (id: string, anchor: ToolWindowAnchor) => void;
   floatAt: (id: string, x: number, y: number) => void;
-  moveFloat: (id: string, x: number, y: number) => void;
 }
 
 /**

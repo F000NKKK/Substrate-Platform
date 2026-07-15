@@ -1,0 +1,54 @@
+.sp-menubar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-md);
+  height: var(--sp-menubar-height);
+  padding: 0 var(--sp-space-md);
+  background: var(--sp-surface-1);
+  border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-menubar-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sp-text-muted);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.sp-menubar-items {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.sp-menubar-item {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--sp-text-muted);
+  font-size: var(--sp-font-size);
+  padding: var(--sp-space-xs) var(--sp-space-sm);
+  border-radius: var(--sp-radius-sm);
+  cursor: pointer;
+  transition: background var(--sp-duration-fast) var(--sp-easing), color var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-menubar-item:hover {
+  background: var(--sp-surface-2);
+  color: var(--sp-text);
+}
+
+.sp-menubar-item:focus-visible {
+  box-shadow: 0 0 0 2px var(--sp-accent-soft);
+}
+
+.sp-menubar-spacer {
+  flex: 1;
+}
+
+.sp-menubar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-sm);
+}
