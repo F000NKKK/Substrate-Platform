@@ -1,0 +1,103 @@
+.sp-tab {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-space-xs);
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--sp-text-muted);
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+  cursor: pointer;
+  transition: background var(--sp-duration-fast) var(--sp-easing), color var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-tab:hover {
+  color: var(--sp-text);
+}
+
+.sp-tab:focus-visible {
+  box-shadow: 0 0 0 2px var(--sp-accent-soft);
+}
+
+.sp-tab-label {
+  white-space: nowrap;
+}
+
+.sp-tab-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--sp-radius-sm);
+  color: var(--sp-text-faint);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.sp-tab-close:hover {
+  background: var(--sp-surface-3);
+  color: var(--sp-text);
+}
+
+/* horizontal — the CenterDock's document tabs */
+
+.sp-tab--horizontal {
+  padding: var(--sp-space-xs) var(--sp-space-md);
+  border-radius: var(--sp-radius-sm) var(--sp-radius-sm) 0 0;
+}
+
+.sp-tab--horizontal:hover {
+  background: var(--sp-surface-2);
+}
+
+.sp-tab--horizontal[data-active="true"] {
+  background: var(--sp-surface-0);
+  color: var(--sp-text);
+  box-shadow: inset 0 -2px 0 var(--sp-accent);
+}
+
+/* vertical — the DockStrip's rotated edge tabs, no icon, just text */
+
+.sp-tab--vertical-left,
+.sp-tab--vertical-right {
+  padding: var(--sp-space-sm) var(--sp-space-xs);
+  border-radius: var(--sp-radius-sm);
+}
+
+.sp-tab--vertical-left:hover,
+.sp-tab--vertical-right:hover {
+  background: var(--sp-surface-2);
+}
+
+.sp-tab--vertical-left .sp-tab-label,
+.sp-tab--vertical-right .sp-tab-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.sp-tab--vertical-right .sp-tab-label {
+  transform: rotate(180deg);
+}
+
+/*
+ * An active vertical tab always belongs to an open flyout (a pinned
+ * panel's tab is hidden from the strip entirely) — style it as an
+ * extension of that flyout's own header, flush with no seam.
+ */
+.sp-tab--vertical-left[data-active="true"],
+.sp-tab--vertical-right[data-active="true"] {
+  background: var(--sp-surface-2);
+  color: var(--sp-text);
+}
+
+.sp-tab--vertical-left[data-active="true"] {
+  border-radius: var(--sp-radius-sm) 0 0 var(--sp-radius-sm);
+}
+
+.sp-tab--vertical-right[data-active="true"] {
+  border-radius: 0 var(--sp-radius-sm) var(--sp-radius-sm) 0;
+}
