@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { IconButton } from "../widgets";
 import { IconPin, IconPinOff, IconClose, IconFloat } from "../icons";
 import { startPanelDrag, endPanelDrag } from "./dnd";
 
@@ -30,17 +31,17 @@ export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onF
       >
         <span className="sp-panel-surface-title">{title}</span>
         <div className="sp-panel-surface-actions">
-          <button className="sp-panel-surface-btn" title={pinned ? "Auto-hide" : "Pin"} onClick={onTogglePin}>
+          <IconButton size={20} title={pinned ? "Auto-hide" : "Pin"} onClick={onTogglePin}>
             {pinned ? <IconPinOff size={13} /> : <IconPin size={13} />}
-          </button>
+          </IconButton>
           {onFloat && (
-            <button className="sp-panel-surface-btn" title="Float" onClick={onFloat}>
+            <IconButton size={20} title="Float" onClick={onFloat}>
               <IconFloat size={13} />
-            </button>
+            </IconButton>
           )}
-          <button className="sp-panel-surface-btn" title="Close" onClick={onClose}>
+          <IconButton size={20} title="Close" onClick={onClose}>
             <IconClose size={13} />
-          </button>
+          </IconButton>
         </div>
       </div>
       <div className="sp-panel-surface-body">{children}</div>
