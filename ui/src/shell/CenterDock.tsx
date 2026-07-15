@@ -1,6 +1,6 @@
-import { useState, type DragEvent } from "react";
 import { Tab } from "../widgets";
-import { startPanelDrag, endPanelDrag, readPanelDrag } from "./dnd";
+import { startPanelDrag, endPanelDrag } from "./dnd";
+import { useDropTarget } from "./useDropTarget";
 import type { ShellLayout } from "./useShellLayout";
 
 export interface CenterDockProps {
@@ -14,37 +14,13 @@ export interface CenterDockProps {
  * join it as another tab.
  */
 export function CenterDock({ layout }: CenterDockProps) {
-  const [dragOver, setDragOver] = useState(false);
   const active = layout.panelsById[layout.centerActiveId];
   const ActiveComponent = active?.component;
-
-  function handleDragEnter(e: DragEvent) {
-    e.preventDefault();
-    setDragOver(true);
-  }
-
-  function handleDragOver(e: DragEvent) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  }
-
-  function handleDrop(e: DragEvent) {
-    e.preventDefault();
-    setDragOver(false);
-    const id = readPanelDrag(e);
-    if (id) layout.dockTo(id, "center");
-  }
+  const { dragOver, handlers } = useDropTarget((id) => layout.dockTo(id, "center"));
 
   return (
     <div className="sp-center-dock">
-      <div
-        className="sp-center-tabs"
-        data-drag-over={dragOver}
-        onDragEnter={handleDragEnter}
-        onDragOver={handleDragOver}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={handleDrop}
-      >
+      <div className="sp-center-tabs" data-drag-over={dragOver} {...handlers}>
         {layout.centerIds.map((id) => {
           const panel = layout.panelsById[id];
           if (!panel) return null;
@@ -64,7 +40,7 @@ export function CenterDock({ layout }: CenterDockProps) {
           );
         })}
       </div>
-      <div className="sp-center-body" onDragEnter={handleDragEnter} onDragOver={handleDragOver} onDragLeave={() => setDragOver(false)} onDrop={handleDrop}>
+      <div className="sp-center-body" {...handlers}>
         {ActiveComponent && <ActiveComponent />}
       </div>
     </div>

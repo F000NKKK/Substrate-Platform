@@ -57,52 +57,6 @@
   background: var(--sp-accent-soft);
 }
 
-.sp-center-tab {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-space-xs);
-  border: none;
-  outline: none;
-  background: transparent;
-  color: var(--sp-text-muted);
-  font-size: var(--sp-font-size);
-  padding: var(--sp-space-xs) var(--sp-space-md);
-  border-radius: var(--sp-radius-sm) var(--sp-radius-sm) 0 0;
-  cursor: pointer;
-  transition: background var(--sp-duration-fast) var(--sp-easing), color var(--sp-duration-fast) var(--sp-easing);
-}
-
-.sp-center-tab:hover {
-  color: var(--sp-text);
-}
-
-.sp-center-tab:focus-visible {
-  box-shadow: 0 0 0 2px var(--sp-accent-soft);
-}
-
-.sp-center-tab[data-active="true"] {
-  background: var(--sp-surface-0);
-  color: var(--sp-text);
-  box-shadow: inset 0 -2px 0 var(--sp-accent);
-}
-
-.sp-center-tab-close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  border-radius: var(--sp-radius-sm);
-  color: var(--sp-text-faint);
-  font-size: 13px;
-  line-height: 1;
-}
-
-.sp-center-tab-close:hover {
-  background: var(--sp-surface-3);
-  color: var(--sp-text);
-}
-
 .sp-center-body {
   position: relative;
   flex: 1;
@@ -151,78 +105,6 @@
   flex-direction: row;
   height: var(--sp-toolwindow-strip);
   border-block: 1px solid var(--sp-border);
-}
-
-.sp-dock-tab {
-  appearance: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  outline: none;
-  border-radius: var(--sp-radius-sm);
-  background: transparent;
-  color: var(--sp-text-muted);
-  cursor: pointer;
-  padding: var(--sp-space-sm) var(--sp-space-xs);
-  transition: background var(--sp-duration-fast) var(--sp-easing), color var(--sp-duration-fast) var(--sp-easing);
-}
-
-.sp-dock-tab:hover {
-  background: var(--sp-surface-2);
-  color: var(--sp-text);
-}
-
-.sp-dock-tab:focus-visible {
-  box-shadow: 0 0 0 2px var(--sp-accent-soft);
-}
-
-/*
- * An active tab always belongs to an open flyout (a pinned panel's tab is
- * hidden from the strip entirely) — style it as an extension of that
- * flyout's own header, flush against it with no seam, rather than a
- * separate colored square floating next to the panel.
- */
-.sp-dock-tab[data-active="true"] {
-  background: var(--sp-surface-2);
-  color: var(--sp-text);
-}
-
-.sp-dock-strip--left .sp-dock-tab[data-active="true"] {
-  border-radius: var(--sp-radius-sm) 0 0 var(--sp-radius-sm);
-}
-
-.sp-dock-strip--right .sp-dock-tab[data-active="true"] {
-  border-radius: 0 var(--sp-radius-sm) var(--sp-radius-sm) 0;
-}
-
-.sp-dock-strip--bottom .sp-dock-tab[data-active="true"] {
-  border-radius: var(--sp-radius-sm) var(--sp-radius-sm) 0 0;
-}
-
-/*
- * Real Visual Studio tool-window tabs are just rotated text, no icon.
- * Left-edge labels read bottom-to-top (plain vertical-rl); right-edge
- * labels mirror that — an extra 180° turn on top of vertical-rl doesn't
- * flip the glyphs upside down, it rotates them the other way (net -90°
- * instead of +90° from horizontal), which is exactly the "leans toward
- * its own edge" look both sides should have.
- */
-.sp-dock-strip--left .sp-dock-tab,
-.sp-dock-strip--right .sp-dock-tab,
-.sp-dock-strip--left .sp-dock-tab-title,
-.sp-dock-strip--right .sp-dock-tab-title {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-}
-
-.sp-dock-strip--right .sp-dock-tab-title {
-  transform: rotate(180deg);
-}
-
-.sp-dock-tab-title {
-  font-size: 11px;
-  white-space: nowrap;
 }
 
 /* pinned (docked, takes layout space) */

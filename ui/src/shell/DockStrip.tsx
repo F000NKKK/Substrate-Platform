@@ -1,6 +1,6 @@
-import { useState, type DragEvent } from "react";
 import { Tab, type TabOrientation } from "../widgets";
-import { startPanelDrag, endPanelDrag, readPanelDrag } from "./dnd";
+import { startPanelDrag, endPanelDrag } from "./dnd";
+import { useDropTarget } from "./useDropTarget";
 import type { PanelDef, ToolWindowAnchor } from "./types";
 
 export interface DockStripProps {
@@ -24,34 +24,10 @@ const ORIENTATION: Record<ToolWindowAnchor, TabOrientation> = {
  * redocks it to this anchor.
  */
 export function DockStrip({ anchor, panelIds, panelsById, activeId, onSelect, onDropPanel }: DockStripProps) {
-  const [dragOver, setDragOver] = useState(false);
-
-  function handleDragEnter(e: DragEvent) {
-    e.preventDefault();
-    setDragOver(true);
-  }
-
-  function handleDragOver(e: DragEvent) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  }
-
-  function handleDrop(e: DragEvent) {
-    e.preventDefault();
-    setDragOver(false);
-    const id = readPanelDrag(e);
-    if (id) onDropPanel(id, anchor);
-  }
+  const { dragOver, handlers } = useDropTarget((id) => onDropPanel(id, anchor));
 
   return (
-    <div
-      className={`sp-dock-strip sp-dock-strip--${anchor}`}
-      data-drag-over={dragOver}
-      onDragEnter={handleDragEnter}
-      onDragOver={handleDragOver}
-      onDragLeave={() => setDragOver(false)}
-      onDrop={handleDrop}
-    >
+    <div className={`sp-dock-strip sp-dock-strip--${anchor}`} data-drag-over={dragOver} {...handlers}>
       {panelIds.map((id) => {
         const panel = panelsById[id];
         if (!panel) return null;
