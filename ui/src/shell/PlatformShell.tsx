@@ -27,16 +27,14 @@ export function PlatformShell({ main, toolWindows, defaultPinned, menu }: Platfo
   // bottom's own open flyout, which floats above the strip without taking
   // layout space — so this is how far up they need to stop instead, with a
   // small gap between the two open flyouts when both are showing.
-  const bottomActiveId = toolWindows.bottom ? layout.activeInAnchor("bottom") : null;
-  const bottomPlacement = bottomActiveId ? layout.placements[bottomActiveId] : null;
-  const bottomMode = bottomPlacement && bottomPlacement.anchor !== "float" ? bottomPlacement.mode : "hidden";
-  const bottomOccupied = !toolWindows.bottom
+  const bottomPinnedIds = toolWindows.bottom ? layout.pinnedInAnchor("bottom") : [];
+  const bottomFlyoutId = toolWindows.bottom ? layout.flyoutInAnchor("bottom") : null;
+  const bottomBase = !toolWindows.bottom
     ? "0px"
-    : bottomMode === "pinned"
-    ? "var(--sp-toolwindow-bottom-size)"
-    : bottomMode === "flyout"
-    ? "calc(var(--sp-toolwindow-strip) + var(--sp-toolwindow-bottom-size) + 4px)"
+    : bottomPinnedIds.length > 0
+    ? `calc(${bottomPinnedIds.length} * (var(--sp-toolwindow-bottom-size) + var(--sp-space-xs)))`
     : "var(--sp-toolwindow-strip)";
+  const bottomOccupied = bottomFlyoutId ? `calc(${bottomBase} + var(--sp-toolwindow-bottom-size) + 4px)` : bottomBase;
   const shellBodyStyle = { "--sp-bottom-occupied": bottomOccupied } as CSSProperties;
 
   function handleMainDragOver(e: DragEvent) {
