@@ -38,7 +38,7 @@ export function SettingsWindow({ sections, initialSectionId, onClose }: Settings
         <IconSettings size={14} />
         <span className="sp-settings-title">Options</span>
         <IconButton size={20} aria-label="Close" onClick={onClose}>
-          <IconClose size={13} />
+          <IconClose size={16} />
         </IconButton>
       </div>
 

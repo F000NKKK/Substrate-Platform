@@ -30,7 +30,7 @@ export function ColorPickerWindow({ title = "Select Color", value, presets, defa
       <div className="sp-color-picker-header" {...handlers}>
         <Label>{title}</Label>
         <IconButton size={20} aria-label="Close" onClick={onClose}>
-          <IconClose size={13} />
+          <IconClose size={16} />
         </IconButton>
       </div>
 

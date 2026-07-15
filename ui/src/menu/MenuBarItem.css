@@ -17,6 +17,6 @@
   backdrop-filter: blur(var(--sp-blur));
   -webkit-backdrop-filter: blur(var(--sp-blur));
   border: 1px solid var(--sp-border-strong);
-  border-radius: var(--sp-radius-sm);
+  border-radius: var(--sp-radius-xs);
   box-shadow: var(--sp-shadow-md);
 }

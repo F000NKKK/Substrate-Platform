@@ -44,6 +44,7 @@
   --sp-blur: 18px;
 
   /* shape */
+  --sp-radius-xs: 6px;
   --sp-radius-sm: 8px;
   --sp-radius-md: 14px;
   --sp-radius-lg: 20px;
