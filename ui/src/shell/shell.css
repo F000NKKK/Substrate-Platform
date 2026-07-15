@@ -143,15 +143,15 @@
   border-radius: var(--sp-radius-md) var(--sp-radius-md) 0 0;
 }
 
+/* Blends with the panel body on purpose — it's a drag handle + actions row, not a separate bar. */
 .sp-panel-surface-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex: 0 0 auto;
-  height: 28px;
+  height: 34px;
   padding: 0 var(--sp-space-sm);
-  background: var(--sp-surface-2);
-  border-bottom: 1px solid var(--sp-border);
+  background: transparent;
   cursor: grab;
   user-select: none;
 }
@@ -194,14 +194,14 @@
 
 .sp-dock-flyout--left {
   top: 0;
-  bottom: 0;
+  bottom: var(--sp-bottom-occupied, 0px);
   left: 100%;
   width: var(--sp-toolwindow-size);
 }
 
 .sp-dock-flyout--right {
   top: 0;
-  bottom: 0;
+  bottom: var(--sp-bottom-occupied, 0px);
   right: 100%;
   width: var(--sp-toolwindow-size);
   border-radius: var(--sp-radius-md) 0 0 var(--sp-radius-md);

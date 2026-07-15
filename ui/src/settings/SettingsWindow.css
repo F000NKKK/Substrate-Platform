@@ -20,7 +20,7 @@
   align-items: center;
   gap: var(--sp-space-sm);
   flex: 0 0 auto;
-  height: 32px;
+  height: 36px;
   padding: 0 var(--sp-space-sm) 0 var(--sp-space-md);
   background: var(--sp-surface-2);
   border-bottom: 1px solid var(--sp-border);

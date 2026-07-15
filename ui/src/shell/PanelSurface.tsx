@@ -31,16 +31,16 @@ export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onF
       >
         <span className="sp-panel-surface-title">{title}</span>
         <div className="sp-panel-surface-actions">
-          <IconButton size={20} title={pinned ? "Auto-hide" : "Pin"} onClick={onTogglePin}>
-            {pinned ? <IconPinOff size={16} /> : <IconPin size={16} />}
+          <IconButton size={24} title={pinned ? "Auto-hide" : "Pin"} onClick={onTogglePin}>
+            {pinned ? <IconPinOff size={20} /> : <IconPin size={20} />}
           </IconButton>
           {onFloat && (
-            <IconButton size={20} title="Float" onClick={onFloat}>
-              <IconFloat size={16} />
+            <IconButton size={24} title="Float" onClick={onFloat}>
+              <IconFloat size={20} />
             </IconButton>
           )}
-          <IconButton size={20} title="Close" onClick={onClose}>
-            <IconClose size={16} />
+          <IconButton size={24} title="Close" onClick={onClose}>
+            <IconClose size={20} />
           </IconButton>
         </div>
       </div>

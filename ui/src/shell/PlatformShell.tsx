@@ -1,4 +1,4 @@
-import type { DragEvent } from "react";
+import type { CSSProperties, DragEvent } from "react";
 import { useState } from "react";
 import { ToolWindowDock } from "./ToolWindowDock";
 import { CenterDock } from "./CenterDock";
@@ -19,6 +19,17 @@ import "./shell.css";
 export function PlatformShell({ main, toolWindows, defaultPinned, menu }: PlatformShellProps) {
   const layout = useShellLayout(main, toolWindows, defaultPinned);
   const [dropZone, setDropZone] = useState<DropZone | null>(null);
+
+  // A pinned bottom dock pushes the whole center column up (it's a real
+  // flex sibling, so left/right pinned panels already can't overlap it).
+  // But left/right *flyouts* are absolutely positioned and would otherwise
+  // stretch the full shell height, overlapping the bottom strip/panel —
+  // this is how far up they need to stop instead.
+  const bottomActiveId = toolWindows.bottom ? layout.activeInAnchor("bottom") : null;
+  const bottomPlacement = bottomActiveId ? layout.placements[bottomActiveId] : null;
+  const bottomPinned = !!bottomPlacement && bottomPlacement.anchor !== "float" && bottomPlacement.mode === "pinned";
+  const bottomOccupied = !toolWindows.bottom ? "0px" : bottomPinned ? "var(--sp-toolwindow-bottom-size)" : "var(--sp-toolwindow-strip)";
+  const shellBodyStyle = { "--sp-bottom-occupied": bottomOccupied } as CSSProperties;
 
   function handleMainDragOver(e: DragEvent) {
     e.preventDefault();
@@ -42,7 +53,7 @@ export function PlatformShell({ main, toolWindows, defaultPinned, menu }: Platfo
   return (
     <div className="sp-shell">
       {menu && <div className="sp-shell-menu">{menu}</div>}
-      <div className="sp-shell-body">
+      <div className="sp-shell-body" style={shellBodyStyle}>
         {toolWindows.left && <ToolWindowDock anchor="left" layout={layout} />}
 
         <div className="sp-shell-center">
