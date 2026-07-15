@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from "react";
 import "./Tab.css";
 
-export type TabOrientation = "horizontal" | "vertical-left" | "vertical-right" | "list";
+export type TabOrientation = "horizontal" | "horizontal-dock" | "vertical-left" | "vertical-right" | "list";
 
 export interface TabProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   active?: boolean;

@@ -18,7 +18,7 @@
   color: var(--sp-text);
 }
 
-.sp-tab:focus-visible {
+.sp-tab:focus {
   box-shadow: 0 0 0 2px var(--sp-accent-soft);
 }
 
@@ -58,6 +58,27 @@
   background: var(--sp-surface-0);
   color: var(--sp-text);
   box-shadow: inset 0 -2px 0 var(--sp-accent);
+}
+
+/*
+ * horizontal-dock — the DockStrip's bottom-edge tabs: plain horizontal
+ * text (unlike left/right, no rotation needed), but the *same* auto-hide
+ * strip semantics as left/right, so it gets the same "flush blend into an
+ * open flyout" treatment as those, not CenterDock's permanent underline.
+ */
+.sp-tab--horizontal-dock {
+  padding: var(--sp-space-xs) var(--sp-space-sm);
+  border-radius: var(--sp-radius-sm);
+}
+
+.sp-tab--horizontal-dock:hover {
+  background: var(--sp-surface-2);
+}
+
+.sp-tab--horizontal-dock[data-active="true"] {
+  background: var(--sp-surface-2);
+  color: var(--sp-text);
+  border-radius: 0 0 var(--sp-radius-sm) var(--sp-radius-sm);
 }
 
 /* vertical — the DockStrip's rotated edge tabs, no icon, just text */

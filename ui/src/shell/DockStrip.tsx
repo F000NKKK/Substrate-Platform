@@ -15,7 +15,7 @@ export interface DockStripProps {
 const ORIENTATION: Record<ToolWindowAnchor, TabOrientation> = {
   left: "vertical-left",
   right: "vertical-right",
-  bottom: "horizontal",
+  bottom: "horizontal-dock",
 };
 
 /**

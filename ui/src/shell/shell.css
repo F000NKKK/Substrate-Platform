@@ -102,21 +102,18 @@
 .sp-dock-strip--left {
   flex-direction: column;
   width: var(--sp-toolwindow-strip);
-  border-inline: 1px solid var(--sp-border);
   padding-right: 0;
 }
 
 .sp-dock-strip--right {
   flex-direction: column;
   width: var(--sp-toolwindow-strip);
-  border-inline: 1px solid var(--sp-border);
   padding-left: 0;
 }
 
 .sp-dock-strip--bottom {
   flex-direction: row;
   height: var(--sp-toolwindow-strip);
-  border-block: 1px solid var(--sp-border);
   padding-top: 0;
 }
 
