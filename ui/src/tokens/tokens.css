@@ -1,0 +1,63 @@
+/*
+ * Design tokens — the only place raw values (colors, spacing, radii,
+ * durations) are allowed to appear. Every component reads these via
+ * var(--sp-*); none may hardcode a color or a magic number of its own.
+ *
+ * Accent is expressed as separate H/S/L channels (not a single hex) so a
+ * palette picker can rewrite one channel at a time and every token that
+ * derives from --sp-accent-h/s/l updates together.
+ */
+:root {
+  /* accent — default approximates Visual Studio's community purple */
+  --sp-accent-h: 291;
+  --sp-accent-s: 55%;
+  --sp-accent-l: 52%;
+
+  --sp-accent: hsl(var(--sp-accent-h) var(--sp-accent-s) var(--sp-accent-l));
+  --sp-accent-soft: hsl(var(--sp-accent-h) var(--sp-accent-s) var(--sp-accent-l) / 0.16);
+  --sp-accent-strong: hsl(var(--sp-accent-h) var(--sp-accent-s) calc(var(--sp-accent-l) + 12%));
+  --sp-accent-contrast: #ffffff;
+
+  /* surfaces — "ghost" glass stack, darkest to lightest */
+  --sp-surface-0: #17151c;
+  --sp-surface-1: #1e1b24;
+  --sp-surface-2: #26222d;
+  --sp-surface-3: #2f2a38;
+  --sp-surface-glass: hsl(260 20% 14% / 0.55);
+  --sp-border: hsl(260 15% 100% / 0.08);
+  --sp-border-strong: hsl(260 15% 100% / 0.16);
+
+  --sp-text: #e6e1ec;
+  --sp-text-muted: #a39cae;
+  --sp-text-faint: #726c7c;
+
+  /* elevation */
+  --sp-shadow-sm: 0 1px 2px hsl(260 40% 2% / 0.35);
+  --sp-shadow-md: 0 8px 24px hsl(260 40% 2% / 0.45);
+  --sp-shadow-glow: 0 0 0 1px var(--sp-accent-soft), 0 4px 16px hsl(260 40% 2% / 0.5);
+  --sp-blur: 18px;
+
+  /* shape */
+  --sp-radius-sm: 6px;
+  --sp-radius-md: 10px;
+  --sp-radius-lg: 14px;
+
+  /* motion */
+  --sp-duration-fast: 120ms;
+  --sp-duration-base: 200ms;
+  --sp-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* type */
+  --sp-font-ui: "Segoe UI", Inter, Avenir, Helvetica, Arial, sans-serif;
+  --sp-font-mono: "Cascadia Code", Consolas, monospace;
+  --sp-font-size: 13px;
+
+  /* layout */
+  --sp-space-xs: 4px;
+  --sp-space-sm: 8px;
+  --sp-space-md: 12px;
+  --sp-space-lg: 20px;
+  --sp-toolwindow-strip: 32px;
+  --sp-toolwindow-size: 260px;
+  --sp-toolwindow-bottom-size: 220px;
+}

@@ -1,0 +1,19 @@
+{
+  "name": "substrate-platform-ui",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Brand-neutral IDE shell UI (theme tokens, docking shell, generic panels) — the frontend counterpart to the substrate-platform Rust core.",
+  "license": "AGPL-3.0-only",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "peerDependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0"
+  }
+}

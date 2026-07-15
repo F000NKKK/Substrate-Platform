@@ -1,0 +1,236 @@
+.sp-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+  color: var(--sp-text);
+  background: var(--sp-surface-0);
+}
+
+.sp-shell-menu {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 var(--sp-space-sm);
+  background: var(--sp-surface-1);
+  border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-shell-body {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.sp-shell-center {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.sp-shell-main {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background: var(--sp-surface-0);
+}
+
+/* --- docks --- */
+
+.sp-dock {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.sp-dock--left,
+.sp-dock--right {
+  flex-direction: row;
+}
+
+.sp-dock--bottom {
+  flex-direction: column;
+}
+
+.sp-dock-strip {
+  display: flex;
+  flex: 0 0 auto;
+  background: var(--sp-surface-1);
+  gap: 2px;
+  padding: var(--sp-space-xs);
+}
+
+.sp-dock-strip--left,
+.sp-dock-strip--right {
+  flex-direction: column;
+  width: var(--sp-toolwindow-strip);
+  border-inline: 1px solid var(--sp-border);
+}
+
+.sp-dock-strip--bottom {
+  flex-direction: row;
+  height: var(--sp-toolwindow-strip);
+  border-block: 1px solid var(--sp-border);
+}
+
+.sp-dock-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-space-xs);
+  border: none;
+  border-radius: var(--sp-radius-sm);
+  background: transparent;
+  color: var(--sp-text-muted);
+  cursor: pointer;
+  padding: var(--sp-space-xs);
+  transition: background var(--sp-duration-fast) var(--sp-easing), color var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-dock-tab:hover {
+  background: var(--sp-surface-2);
+  color: var(--sp-text);
+}
+
+.sp-dock-tab[data-active="true"] {
+  background: var(--sp-accent-soft);
+  color: var(--sp-text);
+  box-shadow: inset 0 0 0 1px var(--sp-accent-soft);
+}
+
+.sp-dock-strip--left .sp-dock-tab,
+.sp-dock-strip--right .sp-dock-tab {
+  flex-direction: column;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.sp-dock-tab-title {
+  font-size: 11px;
+}
+
+/* pinned (docked, takes layout space) */
+
+.sp-panel-surface {
+  display: flex;
+  flex-direction: column;
+  background: var(--sp-surface-1);
+  min-width: 0;
+  min-height: 0;
+}
+
+.sp-dock--left > .sp-panel-surface,
+.sp-dock--right > .sp-panel-surface {
+  width: var(--sp-toolwindow-size);
+  border-inline: 1px solid var(--sp-border);
+}
+
+.sp-dock--bottom > .sp-panel-surface {
+  height: var(--sp-toolwindow-bottom-size);
+  border-block: 1px solid var(--sp-border);
+}
+
+.sp-panel-surface-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  height: 28px;
+  padding: 0 var(--sp-space-sm);
+  background: var(--sp-surface-2);
+  border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-panel-surface-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sp-text-muted);
+}
+
+.sp-panel-surface-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.sp-panel-surface-btn {
+  border: none;
+  background: transparent;
+  color: var(--sp-text-muted);
+  cursor: pointer;
+  border-radius: var(--sp-radius-sm);
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  transition: background var(--sp-duration-fast) var(--sp-easing), color var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-panel-surface-btn:hover {
+  background: var(--sp-surface-3);
+  color: var(--sp-text);
+}
+
+.sp-panel-surface-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* auto-hide flyout — floats over the main area, does not reflow layout */
+
+.sp-dock-flyout {
+  position: absolute;
+  z-index: 40;
+  box-shadow: var(--sp-shadow-md);
+  border-radius: 0 var(--sp-radius-md) var(--sp-radius-md) 0;
+  overflow: hidden;
+  background: var(--sp-surface-glass);
+  backdrop-filter: blur(var(--sp-blur));
+  -webkit-backdrop-filter: blur(var(--sp-blur));
+  animation: sp-flyout-in var(--sp-duration-base) var(--sp-easing);
+}
+
+.sp-dock-flyout--left {
+  top: 0;
+  bottom: 0;
+  left: 100%;
+  width: var(--sp-toolwindow-size);
+}
+
+.sp-dock-flyout--right {
+  top: 0;
+  bottom: 0;
+  right: 100%;
+  width: var(--sp-toolwindow-size);
+  border-radius: var(--sp-radius-md) 0 0 var(--sp-radius-md);
+}
+
+.sp-dock-flyout--bottom {
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: var(--sp-toolwindow-bottom-size);
+  border-radius: var(--sp-radius-md) var(--sp-radius-md) 0 0;
+}
+
+.sp-dock-flyout .sp-panel-surface {
+  height: 100%;
+  background: transparent;
+}
+
+@keyframes sp-flyout-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
