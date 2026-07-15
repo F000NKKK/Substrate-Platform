@@ -1,4 +1,5 @@
 import { useState, type DragEvent } from "react";
+import { Tab, type TabOrientation } from "../widgets";
 import { startPanelDrag, endPanelDrag, readPanelDrag } from "./dnd";
 import type { PanelDef, ToolWindowAnchor } from "./types";
 
@@ -11,11 +12,16 @@ export interface DockStripProps {
   onDropPanel: (panelId: string, anchor: ToolWindowAnchor) => void;
 }
 
+const ORIENTATION: Record<ToolWindowAnchor, TabOrientation> = {
+  left: "vertical-left",
+  right: "vertical-right",
+  bottom: "horizontal",
+};
+
 /**
  * The always-visible strip of collapsed tool-window tabs along one edge of
- * the shell — plain rotated text, no icons, same as Visual Studio's own
- * tool-window tabs. Also a drop target: dragging any panel's tab/header
- * here redocks it to this anchor.
+ * the shell. Also a drop target: dragging any panel's tab/header here
+ * redocks it to this anchor.
  */
 export function DockStrip({ anchor, panelIds, panelsById, activeId, onSelect, onDropPanel }: DockStripProps) {
   const [dragOver, setDragOver] = useState(false);
@@ -50,18 +56,18 @@ export function DockStrip({ anchor, panelIds, panelsById, activeId, onSelect, on
         const panel = panelsById[id];
         if (!panel) return null;
         return (
-          <button
+          <Tab
             key={id}
-            className="sp-dock-tab"
-            data-active={id === activeId}
+            orientation={ORIENTATION[anchor]}
+            active={id === activeId}
             draggable
             onDragStart={(e) => startPanelDrag(e, id)}
             onDragEnd={endPanelDrag}
             onClick={() => onSelect(id)}
             title={panel.title}
           >
-            <span className="sp-dock-tab-title">{panel.title}</span>
-          </button>
+            {panel.title}
+          </Tab>
         );
       })}
     </div>

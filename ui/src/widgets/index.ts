@@ -1,5 +1,13 @@
 export { Button } from "./Button";
 export type { ButtonProps, ButtonVariant } from "./Button";
+export { IconButton } from "./IconButton";
+export type { IconButtonProps } from "./IconButton";
+export { Label } from "./Label";
+export type { LabelProps } from "./Label";
+export { TextField } from "./TextField";
+export type { TextFieldProps } from "./TextField";
+export { Tab } from "./Tab";
+export type { TabProps, TabOrientation } from "./Tab";
 export { ColorWheel } from "./ColorWheel";
 export type { ColorWheelProps } from "./ColorWheel";
 export { ColorPickerWindow } from "./ColorPickerWindow";
