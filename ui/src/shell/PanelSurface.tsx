@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { IconPin, IconPinOff, IconClose } from "../icons";
-import { startPanelDrag } from "./dnd";
+import { startPanelDrag, endPanelDrag } from "./dnd";
 
 export interface PanelSurfaceProps {
   panelId: string;
@@ -19,7 +19,12 @@ export interface PanelSurfaceProps {
 export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, children }: PanelSurfaceProps) {
   return (
     <div className="sp-panel-surface">
-      <div className="sp-panel-surface-header" draggable onDragStart={(e) => startPanelDrag(e, panelId)}>
+      <div
+        className="sp-panel-surface-header"
+        draggable
+        onDragStart={(e) => startPanelDrag(e, panelId)}
+        onDragEnd={endPanelDrag}
+      >
         <span className="sp-panel-surface-title">{title}</span>
         <div className="sp-panel-surface-actions">
           <button className="sp-panel-surface-btn" title={pinned ? "Auto-hide" : "Pin"} onClick={onTogglePin}>

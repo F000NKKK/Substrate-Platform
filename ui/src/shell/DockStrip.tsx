@@ -1,5 +1,5 @@
-import type { DragEvent } from "react";
-import { startPanelDrag, readPanelDrag } from "./dnd";
+import { useState, type DragEvent } from "react";
+import { startPanelDrag, endPanelDrag, readPanelDrag } from "./dnd";
 import type { PanelDef, ToolWindowAnchor } from "./types";
 
 export interface DockStripProps {
@@ -18,6 +18,13 @@ export interface DockStripProps {
  * here redocks it to this anchor.
  */
 export function DockStrip({ anchor, panelIds, panelsById, activeId, onSelect, onDropPanel }: DockStripProps) {
+  const [dragOver, setDragOver] = useState(false);
+
+  function handleDragEnter(e: DragEvent) {
+    e.preventDefault();
+    setDragOver(true);
+  }
+
   function handleDragOver(e: DragEvent) {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
@@ -25,12 +32,20 @@ export function DockStrip({ anchor, panelIds, panelsById, activeId, onSelect, on
 
   function handleDrop(e: DragEvent) {
     e.preventDefault();
+    setDragOver(false);
     const id = readPanelDrag(e);
     if (id) onDropPanel(id, anchor);
   }
 
   return (
-    <div className={`sp-dock-strip sp-dock-strip--${anchor}`} onDragOver={handleDragOver} onDrop={handleDrop}>
+    <div
+      className={`sp-dock-strip sp-dock-strip--${anchor}`}
+      data-drag-over={dragOver}
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={handleDrop}
+    >
       {panelIds.map((id) => {
         const panel = panelsById[id];
         if (!panel) return null;
@@ -41,6 +56,7 @@ export function DockStrip({ anchor, panelIds, panelsById, activeId, onSelect, on
             data-active={id === activeId}
             draggable
             onDragStart={(e) => startPanelDrag(e, id)}
+            onDragEnd={endPanelDrag}
             onClick={() => onSelect(id)}
             title={panel.title}
           >

@@ -1,9 +1,9 @@
 import type { DragEvent } from "react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { ToolWindowDock } from "./ToolWindowDock";
 import { FloatingPanel } from "./FloatingPanel";
 import { useShellLayout } from "./useShellLayout";
-import { readPanelDrag } from "./dnd";
+import { readPanelDrag, zoneFromPoint, type DropZone } from "./dnd";
 import type { PlatformShellProps } from "./types";
 import "./shell.css";
 
@@ -19,19 +19,32 @@ export function PlatformShell({ main, toolWindows, defaultPinned, menu }: Platfo
   const MainComponent = main.component;
   const layout = useShellLayout(toolWindows, defaultPinned);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const [dropZone, setDropZone] = useState<DropZone | null>(null);
 
   function handleMainDragOver(e: DragEvent) {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
+    setDropZone(zoneFromPoint(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect()));
+  }
+
+  function handleMainDragLeave() {
+    setDropZone(null);
   }
 
   function handleMainDrop(e: DragEvent) {
     e.preventDefault();
     const id = readPanelDrag(e);
     const body = bodyRef.current;
+    setDropZone(null);
     if (!id || !body) return;
-    const rect = body.getBoundingClientRect();
-    layout.floatAt(id, e.clientX - rect.left, e.clientY - rect.top);
+    const rect = e.currentTarget.getBoundingClientRect();
+    const zone = zoneFromPoint(e.clientX, e.clientY, rect);
+    if (zone === "center") {
+      const bodyRect = body.getBoundingClientRect();
+      layout.floatAt(id, e.clientX - bodyRect.left, e.clientY - bodyRect.top);
+    } else {
+      layout.dockTo(id, zone);
+    }
   }
 
   return (
@@ -41,8 +54,14 @@ export function PlatformShell({ main, toolWindows, defaultPinned, menu }: Platfo
         {toolWindows.left && <ToolWindowDock anchor="left" layout={layout} />}
 
         <div className="sp-shell-center">
-          <div className="sp-shell-main" onDragOver={handleMainDragOver} onDrop={handleMainDrop}>
+          <div
+            className="sp-shell-main"
+            onDragOver={handleMainDragOver}
+            onDragLeave={handleMainDragLeave}
+            onDrop={handleMainDrop}
+          >
             <MainComponent />
+            {dropZone && <div className={`sp-dock-guide sp-dock-guide--${dropZone}`} />}
           </div>
           {toolWindows.bottom && <ToolWindowDock anchor="bottom" layout={layout} />}
         </div>
