@@ -60,10 +60,10 @@ export function ColorPickerWindow({ title = "Select Color", value, presets, defa
         />
 
         <div className="sp-color-picker-field">
-          <span className="sp-palette-label">Lightness</span>
+          <span className="sp-color-picker-label">Lightness</span>
           <input
             type="range"
-            className="sp-palette-slider"
+            className="sp-color-picker-slider"
             min={0}
             max={100}
             value={value.l}
