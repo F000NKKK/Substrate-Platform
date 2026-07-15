@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { DockStrip } from "./DockStrip";
 import { useDock } from "./useDock";
+import { IconPin, IconPinOff, IconClose } from "../icons";
 import type { PanelDef, ToolWindowAnchor } from "./types";
 
 export interface ToolWindowDockProps {
@@ -76,10 +77,10 @@ function PanelSurface({ title, pinned, onTogglePin, onClose, children }: PanelSu
         <span className="sp-panel-surface-title">{title}</span>
         <div className="sp-panel-surface-actions">
           <button className="sp-panel-surface-btn" title={pinned ? "Auto-hide" : "Pin"} onClick={onTogglePin}>
-            {pinned ? "\u{1F4CC}" : "\u{1F4CD}"}
+            {pinned ? <IconPinOff size={13} /> : <IconPin size={13} />}
           </button>
           <button className="sp-panel-surface-btn" title="Close" onClick={onClose}>
-            {"✕"}
+            <IconClose size={13} />
           </button>
         </div>
       </div>

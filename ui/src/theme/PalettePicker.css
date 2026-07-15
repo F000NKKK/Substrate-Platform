@@ -2,25 +2,29 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--sp-radius-sm);
-  border: 1px solid var(--sp-border);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--sp-border-strong);
   background: var(--sp-accent);
   cursor: pointer;
-  transition: box-shadow var(--sp-duration-fast) var(--sp-easing);
+  transition: box-shadow var(--sp-duration-fast) var(--sp-easing), transform var(--sp-duration-fast) var(--sp-easing);
 }
 
 .sp-palette-trigger:hover {
+  transform: scale(1.08);
   box-shadow: var(--sp-shadow-glow);
 }
 
 .sp-palette-popover {
   position: absolute;
+  top: 100%;
+  right: 0;
   z-index: 50;
   margin-top: var(--sp-space-sm);
   padding: var(--sp-space-md);
-  min-width: 220px;
+  width: 220px;
+  box-sizing: border-box;
   background: var(--sp-surface-glass);
   backdrop-filter: blur(var(--sp-blur));
   -webkit-backdrop-filter: blur(var(--sp-blur));
@@ -40,7 +44,7 @@
 .sp-palette-swatch {
   width: 22px;
   height: 22px;
-  border-radius: var(--sp-radius-sm);
+  border-radius: 50%;
   border: 1px solid var(--sp-border-strong);
   cursor: pointer;
   transition: transform var(--sp-duration-fast) var(--sp-easing);

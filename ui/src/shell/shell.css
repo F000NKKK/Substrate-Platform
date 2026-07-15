@@ -111,6 +111,11 @@
   text-orientation: mixed;
 }
 
+.sp-dock-tab-icon {
+  display: inline-flex;
+  writing-mode: horizontal-tb;
+}
+
 .sp-dock-tab-title {
   font-size: 11px;
 }
@@ -160,6 +165,9 @@
 }
 
 .sp-panel-surface-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   background: transparent;
   color: var(--sp-text-muted);
@@ -167,7 +175,6 @@
   border-radius: var(--sp-radius-sm);
   width: 20px;
   height: 20px;
-  font-size: 11px;
   transition: background var(--sp-duration-fast) var(--sp-easing), color var(--sp-duration-fast) var(--sp-easing);
 }
 

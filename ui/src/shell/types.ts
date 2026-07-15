@@ -5,8 +5,8 @@ export type ToolWindowAnchor = "left" | "right" | "bottom";
 export interface PanelDef {
   id: string;
   title: string;
-  /** Short glyph shown in the collapsed edge strip (e.g. a single emoji or letter). */
-  icon: string;
+  /** Rendered in the collapsed edge strip — typically one of the platform's default icons (see `../icons`). */
+  icon: ReactNode;
   component: ComponentType;
 }
 

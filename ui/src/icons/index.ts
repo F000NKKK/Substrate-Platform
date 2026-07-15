@@ -1,0 +1,14 @@
+export type { IconProps } from "./Icon";
+export { createIcon } from "./Icon";
+export {
+  IconWindow,
+  IconGrid,
+  IconFolder,
+  IconSliders,
+  IconList,
+  IconTerminal,
+  IconPin,
+  IconPinOff,
+  IconClose,
+  IconPalette,
+} from "./icons";
