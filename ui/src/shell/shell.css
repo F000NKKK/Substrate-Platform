@@ -133,25 +133,30 @@
  * continuous thin accent outline around the tab + its panel as a unit —
  * suppressed on the shared seam so it reads as one shape, not two boxes.
  */
+/*
+ * A pinned panel's tab is hidden from its strip entirely (see Tab.css),
+ * so there's nothing for it to "blend into" — it always gets a full
+ * 4-side border, same as any of its pinned neighbors sitting beside it.
+ */
 .sp-dock--left > .sp-panel-surface {
   width: var(--sp-toolwindow-size);
+  flex: 0 0 auto;
   border: 1px solid var(--sp-accent);
-  border-left: none;
-  border-radius: 0 var(--sp-radius-md) var(--sp-radius-md) 0;
+  border-radius: var(--sp-radius-md);
 }
 
 .sp-dock--right > .sp-panel-surface {
   width: var(--sp-toolwindow-size);
+  flex: 0 0 auto;
   border: 1px solid var(--sp-accent);
-  border-right: none;
-  border-radius: var(--sp-radius-md) 0 0 var(--sp-radius-md);
+  border-radius: var(--sp-radius-md);
 }
 
 .sp-dock--bottom > .sp-panel-surface {
   height: var(--sp-toolwindow-bottom-size);
+  flex: 0 0 auto;
   border: 1px solid var(--sp-accent);
-  border-bottom: none;
-  border-radius: var(--sp-radius-md) var(--sp-radius-md) 0 0;
+  border-radius: var(--sp-radius-md);
 }
 
 .sp-panel-surface:focus-within {
