@@ -25,6 +25,10 @@ export function useDraggable(initial: { x: number; y: number }): Draggable {
     pos,
     handlers: {
       onPointerDown: (e) => {
+        // Don't start a drag (or steal pointer capture) for clicks that
+        // land on an interactive control inside the header, e.g. a close
+        // button — otherwise it never gets its own click.
+        if ((e.target as HTMLElement).closest("button, input, [role='button']")) return;
         e.currentTarget.setPointerCapture(e.pointerId);
         origin.current = { x: e.clientX, y: e.clientY, startX: pos.x, startY: pos.y };
       },
