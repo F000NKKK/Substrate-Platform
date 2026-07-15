@@ -1,5 +1,10 @@
 export { PlatformShell } from "./PlatformShell";
 export { ToolWindowDock } from "./ToolWindowDock";
 export { DockStrip } from "./DockStrip";
-export { useDock } from "./useDock";
-export type { PanelDef, PlatformShellProps, ToolWindowAnchor, DockMode, DockState } from "./types";
+export { PanelSurface } from "./PanelSurface";
+export { FloatingPanel } from "./FloatingPanel";
+export { useShellLayout } from "./useShellLayout";
+export type { ShellLayout } from "./useShellLayout";
+export { startPanelDrag, readPanelDrag, PANEL_DRAG_MIME } from "./dnd";
+export type { PanelDef, PlatformShellProps, ToolWindowAnchor, DockMode, PanelPlacement } from "./types";
+export { isFloating } from "./types";

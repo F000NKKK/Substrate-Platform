@@ -19,7 +19,11 @@ export interface PlatformShellProps {
 
 export type DockMode = "hidden" | "flyout" | "pinned";
 
-export interface DockState {
-  activeId: string | null;
-  mode: DockMode;
+/** Where a tool window currently lives — dragged freely between any dock or out into a floating panel. */
+export type PanelPlacement =
+  | { anchor: ToolWindowAnchor; mode: DockMode }
+  | { anchor: "float"; x: number; y: number; w: number; h: number };
+
+export function isFloating(p: PanelPlacement): p is Extract<PanelPlacement, { anchor: "float" }> {
+  return p.anchor === "float";
 }
