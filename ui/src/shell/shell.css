@@ -31,8 +31,83 @@
   position: relative;
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden;
   background: var(--sp-surface-0);
+}
+
+/* --- center dock (the tabbed document/main area) --- */
+
+.sp-center-dock {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sp-center-tabs {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 2px;
+  padding: var(--sp-space-xs) var(--sp-space-xs) 0;
+  background: var(--sp-surface-1);
+  border-bottom: 1px solid var(--sp-border);
+  transition: background var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-center-tabs[data-drag-over="true"] {
+  background: var(--sp-accent-soft);
+}
+
+.sp-center-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-xs);
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--sp-text-muted);
+  font-size: var(--sp-font-size);
+  padding: var(--sp-space-xs) var(--sp-space-md);
+  border-radius: var(--sp-radius-sm) var(--sp-radius-sm) 0 0;
+  cursor: pointer;
+  transition: background var(--sp-duration-fast) var(--sp-easing), color var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-center-tab:hover {
+  color: var(--sp-text);
+}
+
+.sp-center-tab:focus-visible {
+  box-shadow: 0 0 0 2px var(--sp-accent-soft);
+}
+
+.sp-center-tab[data-active="true"] {
+  background: var(--sp-surface-0);
+  color: var(--sp-text);
+  box-shadow: inset 0 -2px 0 var(--sp-accent);
+}
+
+.sp-center-tab-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--sp-radius-sm);
+  color: var(--sp-text-faint);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.sp-center-tab-close:hover {
+  background: var(--sp-surface-3);
+  color: var(--sp-text);
+}
+
+.sp-center-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
 
 /* --- docks --- */

@@ -2,6 +2,9 @@ import type { ComponentType, ReactNode } from "react";
 
 export type ToolWindowAnchor = "left" | "right" | "bottom";
 
+/** Every place a panel can be docked — the three tool-window edges, or the tabbed center document zone. */
+export type DockAnchor = ToolWindowAnchor | "center";
+
 export interface PanelDef {
   id: string;
   title: string;
@@ -9,7 +12,7 @@ export interface PanelDef {
 }
 
 export interface PlatformShellProps {
-  /** The one always-visible, non-collapsible content area (e.g. a designer/editor canvas). */
+  /** The center zone's first tab (e.g. a designer/editor canvas) — the center zone itself is a normal tabbed dock, so more panels can join it later by being dragged in. */
   main: PanelDef;
   toolWindows: Partial<Record<ToolWindowAnchor, PanelDef[]>>;
   /** Panel ids that start pinned (docked, taking layout space) rather than auto-hidden. */
@@ -19,9 +22,9 @@ export interface PlatformShellProps {
 
 export type DockMode = "hidden" | "flyout" | "pinned";
 
-/** Where a tool window currently lives — dragged freely between any dock or out into a floating panel. */
+/** Where a panel currently lives — dragged freely between any dock, the center tab group, or out into a floating panel. */
 export type PanelPlacement =
-  | { anchor: ToolWindowAnchor; mode: DockMode }
+  | { anchor: DockAnchor; mode: DockMode }
   | { anchor: "float"; x: number; y: number; w: number; h: number };
 
 export function isFloating(p: PanelPlacement): p is Extract<PanelPlacement, { anchor: "float" }> {

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { IconPin, IconPinOff, IconClose } from "../icons";
+import { IconPin, IconPinOff, IconClose, IconFloat } from "../icons";
 import { startPanelDrag, endPanelDrag } from "./dnd";
 
 export interface PanelSurfaceProps {
@@ -8,15 +8,18 @@ export interface PanelSurfaceProps {
   pinned: boolean;
   onTogglePin: () => void;
   onClose: () => void;
+  /** Omit to hide the pop-out action (e.g. a panel that's already floating). */
+  onFloat?: () => void;
   children: ReactNode;
 }
 
 /**
  * Chrome shared by every tool window regardless of where it currently
  * lives (docked, flyout, or floating): a draggable title bar — drag it onto
- * any dock strip to redock, or it's already floating — plus pin/close.
+ * any dock strip to redock, or onto the center to join its tabs — plus
+ * pin/float/close actions.
  */
-export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, children }: PanelSurfaceProps) {
+export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onFloat, children }: PanelSurfaceProps) {
   return (
     <div className="sp-panel-surface">
       <div
@@ -30,6 +33,11 @@ export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, chi
           <button className="sp-panel-surface-btn" title={pinned ? "Auto-hide" : "Pin"} onClick={onTogglePin}>
             {pinned ? <IconPinOff size={13} /> : <IconPin size={13} />}
           </button>
+          {onFloat && (
+            <button className="sp-panel-surface-btn" title="Float" onClick={onFloat}>
+              <IconFloat size={13} />
+            </button>
+          )}
           <button className="sp-panel-surface-btn" title="Close" onClick={onClose}>
             <IconClose size={13} />
           </button>

@@ -7,6 +7,7 @@ export {
   IconSliders,
   IconList,
   IconTerminal,
+  IconFloat,
   IconPin,
   IconPinOff,
   IconClose,

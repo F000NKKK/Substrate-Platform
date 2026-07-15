@@ -9,21 +9,23 @@ export interface ToolWindowDockProps {
   layout: ShellLayout;
 }
 
+const DEFAULT_FLOAT_POS = { x: 160, y: 120 };
+
 /**
- * One edge's worth of VS-style tool windows: a strip of tabs that's always
- * visible, plus at most one open panel at a time — either "pinned" (docked
- * inline, takes layout space) or a "flyout" (floats over the main area and
- * auto-closes on outside click, i.e. real auto-hide). Any tab or panel
- * header can be dragged to another dock's strip to redock there, or out
- * onto the main area to pop it into a floating panel.
+ * One edge's worth of VS-style tool windows. The collapsed tab strip always
+ * sits at the true window edge, with the docked panel (when pinned or open
+ * as a flyout) between it and the main area — never the other way round.
+ * Any tab or panel header can be dragged to another dock to redock, onto
+ * the center to join its tabs, or floated out via its header's pop-out
+ * button.
  */
 export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
   const panelIds = layout.idsByAnchor(anchor);
   const activeId = layout.activeInAnchor(anchor);
   const active = activeId ? layout.panelsById[activeId] : null;
   const placement = activeId ? layout.placements[activeId] : null;
-  const pinned = placement && placement.anchor !== "float" && placement.mode === "pinned";
-  const flyout = placement && placement.anchor !== "float" && placement.mode === "flyout";
+  const pinned = !!placement && placement.anchor !== "float" && placement.mode === "pinned";
+  const flyout = !!placement && placement.anchor !== "float" && placement.mode === "flyout";
 
   const flyoutRef = useRef<HTMLDivElement>(null);
 
@@ -40,32 +42,39 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
 
   const ActiveComponent = active?.component ?? null;
 
+  // A pinned panel's own header already shows its title, so it doesn't also
+  // need a redundant tab sitting in the collapsed strip.
+  const stripIds = panelIds.filter((id) => !(id === activeId && pinned));
+
   const dockedPanel = active && ActiveComponent && (pinned || flyout) && (
     <PanelSurface
       panelId={activeId!}
       title={active.title}
-      pinned={!!pinned}
+      pinned={pinned}
       onTogglePin={() => (pinned ? layout.unpin(activeId!) : layout.pin(activeId!))}
+      onFloat={() => layout.floatAt(activeId!, DEFAULT_FLOAT_POS.x, DEFAULT_FLOAT_POS.y)}
       onClose={() => layout.close(activeId!)}
     >
       <ActiveComponent />
     </PanelSurface>
   );
 
+  const strip = (
+    <DockStrip
+      anchor={anchor}
+      panelIds={stripIds}
+      panelsById={layout.panelsById}
+      activeId={flyout ? activeId : null}
+      onSelect={layout.toggle}
+      onDropPanel={layout.dockTo}
+    />
+  );
+
   return (
     <div className={`sp-dock sp-dock--${anchor}`}>
-      {anchor !== "right" && pinned && dockedPanel}
-
-      <DockStrip
-        anchor={anchor}
-        panelIds={panelIds}
-        panelsById={layout.panelsById}
-        activeId={flyout || pinned ? activeId : null}
-        onSelect={layout.toggle}
-        onDropPanel={layout.dockTo}
-      />
-
-      {anchor === "right" && pinned && dockedPanel}
+      {anchor === "left" && strip}
+      {pinned && dockedPanel}
+      {anchor !== "left" && strip}
 
       {flyout && (
         <div ref={flyoutRef} className={`sp-dock-flyout sp-dock-flyout--${anchor}`}>
