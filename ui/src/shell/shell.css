@@ -75,9 +75,19 @@
   gap: var(--sp-space-xs);
 }
 
+/*
+ * Flex siblings stretch to fill the row's height by default, which would
+ * let the left/right dock (strip + any pinned panels) run the full shell
+ * height — behind/past whatever's currently occupying the bottom dock
+ * (its strip, a pinned panel, or an open flyout). Capping the height here
+ * to stop exactly where that starts is what makes "tabs may never
+ * intersect" actually hold in every combination of pinned/flyout state.
+ */
 .sp-dock--left,
 .sp-dock--right {
   flex-direction: row;
+  align-self: flex-start;
+  height: calc(100% - var(--sp-bottom-occupied, 0px));
 }
 
 .sp-dock--bottom {
@@ -203,11 +213,20 @@
 
 /* auto-hide flyout — floats over the main area, does not reflow layout */
 
+/*
+ * Unlike a pinned panel (whose tab is hidden from the strip entirely, so
+ * it always gets its own full 4-side border), a flyout's tab is still
+ * sitting right there in the strip — the flyout's border must pick up
+ * exactly where the tab's own (already 3-sided) border leaves off, so
+ * together they trace ONE continuous line around both, open only on the
+ * shared seam where they touch.
+ */
 .sp-dock-flyout {
   position: absolute;
   z-index: 40;
+  border: 1px solid var(--sp-accent);
   box-shadow: var(--sp-shadow-md);
-  border-radius: 0 var(--sp-radius-md) var(--sp-radius-md) 0;
+  border-radius: var(--sp-radius-md);
   overflow: hidden;
   background: var(--sp-surface-glass);
   backdrop-filter: blur(var(--sp-blur));
@@ -215,18 +234,27 @@
   animation: sp-flyout-in var(--sp-duration-base) var(--sp-easing);
 }
 
+/*
+ * bottom:0 here, not --sp-bottom-occupied again — the dock *container*
+ * itself already stops that far short (see .sp-dock--left/--right's own
+ * height rule below), so subtracting it a second time here would leave an
+ * oversized gap under the flyout.
+ */
 .sp-dock-flyout--left {
   top: 0;
-  bottom: var(--sp-bottom-occupied, 0px);
+  bottom: 0;
   left: 100%;
   width: var(--sp-toolwindow-size);
+  border-left: none;
+  border-radius: 0 var(--sp-radius-md) var(--sp-radius-md) 0;
 }
 
 .sp-dock-flyout--right {
   top: 0;
-  bottom: var(--sp-bottom-occupied, 0px);
+  bottom: 0;
   right: 100%;
   width: var(--sp-toolwindow-size);
+  border-right: none;
   border-radius: var(--sp-radius-md) 0 0 var(--sp-radius-md);
 }
 
@@ -235,6 +263,7 @@
   right: 0;
   bottom: 100%;
   height: var(--sp-toolwindow-bottom-size);
+  border-bottom: none;
   border-radius: var(--sp-radius-md) var(--sp-radius-md) 0 0;
 }
 
