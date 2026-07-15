@@ -1,0 +1,69 @@
+.sp-settings-window {
+  position: fixed;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  width: 640px;
+  height: 440px;
+  resize: both;
+  overflow: hidden;
+  background: var(--sp-surface-1);
+  border: 1px solid var(--sp-border-strong);
+  border-radius: var(--sp-radius-md);
+  box-shadow: var(--sp-shadow-md);
+}
+
+.sp-settings-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-sm);
+  flex: 0 0 auto;
+  height: 32px;
+  padding: 0 var(--sp-space-sm) 0 var(--sp-space-md);
+  background: var(--sp-surface-2);
+  border-bottom: 1px solid var(--sp-border);
+  color: var(--sp-text-muted);
+  cursor: grab;
+  user-select: none;
+}
+
+.sp-settings-header:active {
+  cursor: grabbing;
+}
+
+.sp-settings-title {
+  flex: 1;
+  font-size: var(--sp-font-size);
+  color: var(--sp-text);
+}
+
+.sp-settings-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.sp-settings-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-sm);
+  width: 200px;
+  flex: 0 0 auto;
+  padding: var(--sp-space-md);
+  background: var(--sp-surface-1);
+  border-right: 1px solid var(--sp-border);
+  overflow: auto;
+}
+
+.sp-settings-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sp-settings-detail {
+  flex: 1;
+  min-width: 0;
+  padding: var(--sp-space-lg);
+  overflow: auto;
+}
