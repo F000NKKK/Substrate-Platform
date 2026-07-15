@@ -130,19 +130,16 @@
 
 .sp-dock--left > .sp-panel-surface {
   width: var(--sp-toolwindow-size);
-  border-inline: 1px solid var(--sp-border);
   border-radius: 0 var(--sp-radius-md) var(--sp-radius-md) 0;
 }
 
 .sp-dock--right > .sp-panel-surface {
   width: var(--sp-toolwindow-size);
-  border-inline: 1px solid var(--sp-border);
   border-radius: var(--sp-radius-md) 0 0 var(--sp-radius-md);
 }
 
 .sp-dock--bottom > .sp-panel-surface {
   height: var(--sp-toolwindow-bottom-size);
-  border-block: 1px solid var(--sp-border);
   border-radius: var(--sp-radius-md) var(--sp-radius-md) 0 0;
 }
 

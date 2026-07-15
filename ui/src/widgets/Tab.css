@@ -18,7 +18,7 @@
   color: var(--sp-text);
 }
 
-.sp-tab:focus {
+.sp-tab:focus-visible {
   box-shadow: 0 0 0 2px var(--sp-accent-soft);
 }
 
