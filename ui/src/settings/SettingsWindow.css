@@ -5,6 +5,8 @@
   flex-direction: column;
   width: 640px;
   height: 440px;
+  min-width: 420px;
+  min-height: 280px;
   resize: both;
   overflow: hidden;
   background: var(--sp-surface-1);
