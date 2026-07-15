@@ -1,5 +1,5 @@
 export { ThemeProvider } from "./ThemeProvider";
 export { useTheme } from "./useTheme";
-export { PalettePicker } from "./PalettePicker";
+export { AccentColorField } from "./AccentColorField";
 export { accentPresets, defaultAccent } from "./presets";
 export type { AccentColor, ThemeContextValue } from "./types";
