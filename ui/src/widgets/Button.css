@@ -1,0 +1,48 @@
+.sp-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-space-xs);
+  border: none;
+  outline: none;
+  border-radius: var(--sp-radius-sm);
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+  padding: var(--sp-space-xs) var(--sp-space-md);
+  cursor: pointer;
+  transition: background var(--sp-duration-fast) var(--sp-easing), color var(--sp-duration-fast) var(--sp-easing),
+    box-shadow var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--sp-accent-soft);
+}
+
+.sp-btn--primary {
+  background: var(--sp-accent);
+  color: var(--sp-accent-contrast);
+}
+
+.sp-btn--primary:hover {
+  background: var(--sp-accent-strong);
+}
+
+.sp-btn--subtle {
+  background: var(--sp-surface-2);
+  color: var(--sp-text);
+}
+
+.sp-btn--subtle:hover {
+  background: var(--sp-surface-3);
+}
+
+.sp-btn--ghost {
+  background: transparent;
+  color: var(--sp-text-muted);
+}
+
+.sp-btn--ghost:hover {
+  background: var(--sp-surface-2);
+  color: var(--sp-text);
+}

@@ -73,12 +73,12 @@ export function ColorPickerWindow({ title = "Select Color", value, presets, defa
 
         {presets && presets.length > 0 && (
           <div className="sp-color-picker-field">
-            <span className="sp-palette-label">Presets</span>
-            <div className="sp-palette-swatches">
+            <span className="sp-color-picker-label">Presets</span>
+            <div className="sp-color-picker-swatches">
               {presets.map((preset) => (
                 <button
                   key={hslToCss(preset)}
-                  className="sp-palette-swatch"
+                  className="sp-color-picker-swatch"
                   data-active={sameColor(preset, value)}
                   style={{ background: hslToCss(preset) }}
                   onClick={() => onChange(preset)}

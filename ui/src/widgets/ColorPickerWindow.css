@@ -69,3 +69,37 @@
   flex-direction: column;
   gap: var(--sp-space-xs);
 }
+
+.sp-color-picker-label {
+  font-size: 11px;
+  color: var(--sp-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sp-color-picker-slider {
+  width: 100%;
+  accent-color: var(--sp-accent);
+}
+
+.sp-color-picker-swatches {
+  display: flex;
+  gap: var(--sp-space-sm);
+}
+
+.sp-color-picker-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--sp-border-strong);
+  cursor: pointer;
+  transition: transform var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-color-picker-swatch:hover {
+  transform: scale(1.12);
+}
+
+.sp-color-picker-swatch[data-active="true"] {
+  box-shadow: 0 0 0 2px var(--sp-surface-glass), 0 0 0 3px var(--sp-accent);
+}
