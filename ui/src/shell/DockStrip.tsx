@@ -19,7 +19,6 @@ export function DockStrip({ anchor, panels, activeId, onSelect }: DockStripProps
           onClick={() => onSelect(panel.id)}
           title={panel.title}
         >
-          <span className="sp-dock-tab-icon">{panel.icon}</span>
           <span className="sp-dock-tab-title">{panel.title}</span>
         </button>
       ))}

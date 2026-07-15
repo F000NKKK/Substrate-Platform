@@ -83,13 +83,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--sp-space-xs);
   border: none;
+  outline: none;
   border-radius: var(--sp-radius-sm);
   background: transparent;
   color: var(--sp-text-muted);
   cursor: pointer;
-  padding: var(--sp-space-xs);
+  padding: var(--sp-space-sm) var(--sp-space-xs);
   transition: background var(--sp-duration-fast) var(--sp-easing), color var(--sp-duration-fast) var(--sp-easing);
 }
 
@@ -98,26 +98,25 @@
   color: var(--sp-text);
 }
 
+.sp-dock-tab:focus-visible {
+  box-shadow: 0 0 0 2px var(--sp-accent-soft);
+}
+
 .sp-dock-tab[data-active="true"] {
   background: var(--sp-accent-soft);
   color: var(--sp-text);
-  box-shadow: inset 0 0 0 1px var(--sp-accent-soft);
 }
 
+/* Real Visual Studio tool-window tabs are just rotated text, no icon. */
 .sp-dock-strip--left .sp-dock-tab,
 .sp-dock-strip--right .sp-dock-tab {
-  flex-direction: column;
   writing-mode: vertical-rl;
   text-orientation: mixed;
 }
 
-.sp-dock-tab-icon {
-  display: inline-flex;
-  writing-mode: horizontal-tb;
-}
-
 .sp-dock-tab-title {
   font-size: 11px;
+  white-space: nowrap;
 }
 
 /* pinned (docked, takes layout space) */
