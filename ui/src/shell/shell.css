@@ -154,6 +154,7 @@
 }
 
 .sp-dock-tab {
+  appearance: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -183,7 +184,9 @@
 
 /* Real Visual Studio tool-window tabs are just rotated text, no icon. */
 .sp-dock-strip--left .sp-dock-tab,
-.sp-dock-strip--right .sp-dock-tab {
+.sp-dock-strip--right .sp-dock-tab,
+.sp-dock-strip--left .sp-dock-tab-title,
+.sp-dock-strip--right .sp-dock-tab-title {
   writing-mode: vertical-rl;
   text-orientation: mixed;
 }
