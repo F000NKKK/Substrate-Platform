@@ -1,9 +1,9 @@
-import { useRef, useState } from "react";
 import { ColorWheel } from "./ColorWheel";
 import { Button } from "./Button";
 import { IconButton } from "./IconButton";
 import { Label } from "./Label";
 import { Swatch } from "./Swatch";
+import { useDraggable } from "./useDraggable";
 import { sameColor, type HslColor } from "./color";
 import { IconClose } from "../icons";
 import "./ColorPickerWindow.css";
@@ -23,32 +23,11 @@ export interface ColorPickerWindowProps {
  * the user pick a color should open this rather than rolling its own.
  */
 export function ColorPickerWindow({ title = "Select Color", value, presets, defaultValue, onChange, onClose }: ColorPickerWindowProps) {
-  const [pos, setPos] = useState({ x: 200, y: 140 });
-  const dragOrigin = useRef<{ x: number; y: number; startX: number; startY: number } | null>(null);
-
-  function handleHeaderPointerDown(e: React.PointerEvent) {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    dragOrigin.current = { x: e.clientX, y: e.clientY, startX: pos.x, startY: pos.y };
-  }
-
-  function handleHeaderPointerMove(e: React.PointerEvent) {
-    const origin = dragOrigin.current;
-    if (!origin || e.buttons !== 1) return;
-    setPos({ x: origin.startX + (e.clientX - origin.x), y: origin.startY + (e.clientY - origin.y) });
-  }
-
-  function handleHeaderPointerUp() {
-    dragOrigin.current = null;
-  }
+  const { pos, handlers } = useDraggable({ x: 200, y: 140 });
 
   return (
     <div className="sp-color-picker" style={{ left: pos.x, top: pos.y }}>
-      <div
-        className="sp-color-picker-header"
-        onPointerDown={handleHeaderPointerDown}
-        onPointerMove={handleHeaderPointerMove}
-        onPointerUp={handleHeaderPointerUp}
-      >
+      <div className="sp-color-picker-header" {...handlers}>
         <Label>{title}</Label>
         <IconButton size={20} aria-label="Close" onClick={onClose}>
           <IconClose size={13} />
