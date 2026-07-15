@@ -1,7 +1,7 @@
 [package]
 name = "substrate-platform"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 authors = ["F000NK"]
 description = "Brand-neutral IDE platform core (docking, project model, generic canvas) — the shared foundation for future IDE-style tools."
 license = "AGPL-3.0-only"
