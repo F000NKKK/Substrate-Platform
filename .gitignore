@@ -25,4 +25,3 @@ dist-ssr
 
 # Rust
 /target
-/ui/node_modules
