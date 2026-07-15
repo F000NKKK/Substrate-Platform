@@ -101,3 +101,22 @@
 .sp-tab--vertical-right[data-active="true"] {
   border-radius: 0 var(--sp-radius-sm) var(--sp-radius-sm) 0;
 }
+
+/* list — a Settings window's category sidebar entry: full-width, solid highlight instead of an underline */
+
+.sp-tab--list {
+  width: 100%;
+  justify-content: flex-start;
+  padding: var(--sp-space-xs) var(--sp-space-sm);
+  border-radius: var(--sp-radius-sm);
+  text-align: left;
+}
+
+.sp-tab--list:hover {
+  background: var(--sp-surface-2);
+}
+
+.sp-tab--list[data-active="true"] {
+  background: var(--sp-accent-soft);
+  color: var(--sp-text);
+}

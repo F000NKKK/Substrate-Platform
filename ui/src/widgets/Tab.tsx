@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from "react";
 import "./Tab.css";
 
-export type TabOrientation = "horizontal" | "vertical-left" | "vertical-right";
+export type TabOrientation = "horizontal" | "vertical-left" | "vertical-right" | "list";
 
 export interface TabProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   active?: boolean;
@@ -12,8 +12,9 @@ export interface TabProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 /**
- * The one tab implementation in the platform — the rotated edge-strip tabs
- * (DockStrip) and the horizontal document tabs (CenterDock) both render
+ * The one tab/list-item implementation in the platform — the rotated
+ * edge-strip tabs (DockStrip), the horizontal document tabs (CenterDock),
+ * and a Settings window's category list (`orientation="list"`) all render
  * through this rather than each hand-rolling their own button/label markup.
  */
 export function Tab({ active, orientation = "horizontal", onRequestClose, className, children, ...props }: TabProps) {
