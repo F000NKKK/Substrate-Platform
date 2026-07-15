@@ -38,9 +38,9 @@
   --sp-blur: 18px;
 
   /* shape */
-  --sp-radius-sm: 6px;
-  --sp-radius-md: 10px;
-  --sp-radius-lg: 14px;
+  --sp-radius-sm: 8px;
+  --sp-radius-md: 14px;
+  --sp-radius-lg: 20px;
 
   /* motion */
   --sp-duration-fast: 120ms;

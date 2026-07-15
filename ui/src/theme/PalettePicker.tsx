@@ -8,7 +8,7 @@ export function PalettePicker() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div style={{ position: "relative" }}>
+    <div className="sp-palette-root">
       <button
         className="sp-palette-trigger"
         aria-label="Accent color"
