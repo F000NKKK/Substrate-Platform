@@ -1,0 +1,17 @@
+[package]
+name = "substrate-platform"
+version = "0.1.0"
+edition = "2021"
+authors = ["F000NK"]
+description = "Brand-neutral IDE platform core (docking, project model, generic canvas) — the shared foundation for future IDE-style tools."
+license = "AGPL-3.0-only"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[dependencies]
+eframe = "0.35.0"
+egui = "0.35.0"
+egui_dock = "0.20.1"
+
+[[example]]
+name = "hello_shell"
+path = "examples/hello_shell.rs"
