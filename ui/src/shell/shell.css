@@ -58,6 +58,11 @@
   background: var(--sp-surface-1);
   gap: 2px;
   padding: var(--sp-space-xs);
+  transition: background var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-dock-strip[data-drag-over="true"] {
+  background: var(--sp-accent-soft);
 }
 
 .sp-dock-strip--left,
@@ -275,4 +280,53 @@
   height: 100%;
   background: transparent;
   border-radius: inherit;
+}
+
+/* drop-zone guide — shown over the main area while dragging any panel, follows the cursor */
+
+.sp-dock-guide {
+  position: absolute;
+  z-index: 80;
+  pointer-events: none;
+  background: var(--sp-accent-soft);
+  border: 2px dashed var(--sp-accent);
+  border-radius: var(--sp-radius-sm);
+  animation: sp-guide-in var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-dock-guide--left {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 22%;
+}
+
+.sp-dock-guide--right {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 22%;
+}
+
+.sp-dock-guide--bottom {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 22%;
+}
+
+.sp-dock-guide--center {
+  top: 10%;
+  left: 22%;
+  right: 22%;
+  bottom: 22%;
+}
+
+@keyframes sp-guide-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
