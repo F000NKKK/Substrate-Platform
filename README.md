@@ -24,4 +24,7 @@ Yog Minecraft mods with a live preview into a running game client.
 
 ## License
 
-AGPL-3.0-only — see [LICENSE](LICENSE).
+Dual-licensed: **AGPL-3.0-only** (see [LICENSE](LICENSE)) — free for any
+use, provided you comply with the AGPL — or a **Commercial License** for
+closed-source use, free below $1,000/mo net profit and a sliding royalty
+above that. See [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md) for details.
