@@ -4,14 +4,15 @@ import type { DockAnchor, PanelDef, PanelPlacement, ToolWindowAnchor } from "./t
 const ANCHORS: readonly ToolWindowAnchor[] = ["left", "right", "bottom"];
 const DEFAULT_FLOAT_SIZE = { w: 340, h: 280 };
 
-function closeOthersOnAnchor(
+/** Only one flyout may peek open per anchor at a time — pinned panels are untouched by this (several can be pinned side by side). */
+function closeOtherFlyouts(
   placements: Record<string, PanelPlacement>,
   anchor: ToolWindowAnchor,
   exceptId: string
 ): Record<string, PanelPlacement> {
   const next = { ...placements };
   for (const [id, p] of Object.entries(placements)) {
-    if (id !== exceptId && p.anchor === anchor && p.mode !== "hidden") {
+    if (id !== exceptId && p.anchor === anchor && p.mode === "flyout") {
       next[id] = { anchor, mode: "hidden" };
     }
   }
@@ -23,7 +24,10 @@ export interface ShellLayout {
   mainId: string;
   homeAnchor: Record<string, DockAnchor>;
   idsByAnchor: (anchor: ToolWindowAnchor) => string[];
-  activeInAnchor: (anchor: ToolWindowAnchor) => string | null;
+  /** All simultaneously pinned panels on this anchor, in the order they were pinned — each gets its own grid slot, side by side. */
+  pinnedInAnchor: (anchor: ToolWindowAnchor) => string[];
+  /** The one panel currently peeking open as a flyout on this anchor, if any. */
+  flyoutInAnchor: (anchor: ToolWindowAnchor) => string | null;
   centerIds: string[];
   centerActiveId: string;
   setCenterActive: (id: string) => void;
@@ -42,6 +46,11 @@ export interface ShellLayout {
  * the center is a normal tabbed dock (more than one panel can sit there at
  * once), and anything can be pulled out into a floating panel. Centralized
  * here rather than split per-anchor since panels move between all of these.
+ *
+ * Several panels can be pinned to the same anchor at once (they sit side by
+ * side, like Visual Studio's own tool-window groups) — only the single
+ * auto-hide flyout per anchor is exclusive, since only one can sensibly
+ * peek open over the main area at a time.
  */
 export function useShellLayout(
   main: PanelDef,
@@ -86,9 +95,15 @@ export function useShellLayout(
     [placements]
   );
 
-  const activeInAnchor = useCallback(
+  const pinnedInAnchor = useCallback(
+    (anchor: ToolWindowAnchor) =>
+      Object.entries(placements).filter(([, p]) => p.anchor === anchor && p.mode === "pinned").map(([id]) => id),
+    [placements]
+  );
+
+  const flyoutInAnchor = useCallback(
     (anchor: ToolWindowAnchor) => {
-      const entry = Object.entries(placements).find(([, p]) => p.anchor === anchor && p.mode !== "hidden");
+      const entry = Object.entries(placements).find(([, p]) => p.anchor === anchor && p.mode === "flyout");
       return entry?.[0] ?? null;
     },
     [placements]
@@ -101,7 +116,7 @@ export function useShellLayout(
       const cur = prev[id];
       if (!cur || cur.anchor === "float" || cur.anchor === "center") return prev;
       if (cur.mode !== "hidden") return { ...prev, [id]: { anchor: cur.anchor, mode: "hidden" } };
-      const next = closeOthersOnAnchor(prev, cur.anchor, id);
+      const next = closeOtherFlyouts(prev, cur.anchor, id);
       next[id] = { anchor: cur.anchor, mode: "flyout" };
       return next;
     });
@@ -132,21 +147,16 @@ export function useShellLayout(
     [homeAnchor, main.id]
   );
 
-  const dockTo = useCallback(
-    (id: string, anchor: DockAnchor) => {
-      if (anchor === "center") {
-        setPlacements((prev) => ({ ...prev, [id]: { anchor: "center", mode: "pinned" } }));
-        setCenterActive(id);
-        return;
-      }
-      setPlacements((prev) => {
-        const next = closeOthersOnAnchor(prev, anchor, id);
-        next[id] = { anchor, mode: "pinned" };
-        return next;
-      });
-    },
-    []
-  );
+  const dockTo = useCallback((id: string, anchor: DockAnchor) => {
+    if (anchor === "center") {
+      setPlacements((prev) => ({ ...prev, [id]: { anchor: "center", mode: "pinned" } }));
+      setCenterActive(id);
+      return;
+    }
+    // Redocking joins whatever's already pinned there side by side — it
+    // doesn't evict them, same as pin() above.
+    setPlacements((prev) => ({ ...prev, [id]: { anchor, mode: "pinned" } }));
+  }, []);
 
   const floatAt = useCallback(
     (id: string, x: number, y: number) => {
@@ -165,7 +175,8 @@ export function useShellLayout(
     mainId: main.id,
     homeAnchor,
     idsByAnchor,
-    activeInAnchor,
+    pinnedInAnchor,
+    flyoutInAnchor,
     centerIds,
     centerActiveId,
     setCenterActive,
