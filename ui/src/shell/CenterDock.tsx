@@ -1,4 +1,5 @@
 import { useState, type DragEvent } from "react";
+import { Tab } from "../widgets";
 import { startPanelDrag, endPanelDrag, readPanelDrag } from "./dnd";
 import type { ShellLayout } from "./useShellLayout";
 
@@ -36,35 +37,30 @@ export function CenterDock({ layout }: CenterDockProps) {
 
   return (
     <div className="sp-center-dock">
-      <div className="sp-center-tabs" data-drag-over={dragOver} onDragEnter={handleDragEnter} onDragOver={handleDragOver} onDragLeave={() => setDragOver(false)} onDrop={handleDrop}>
+      <div
+        className="sp-center-tabs"
+        data-drag-over={dragOver}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={handleDrop}
+      >
         {layout.centerIds.map((id) => {
           const panel = layout.panelsById[id];
           if (!panel) return null;
           return (
-            <button
+            <Tab
               key={id}
-              className="sp-center-tab"
-              data-active={id === layout.centerActiveId}
+              orientation="horizontal"
+              active={id === layout.centerActiveId}
               draggable
               onDragStart={(e) => startPanelDrag(e, id)}
               onDragEnd={endPanelDrag}
               onClick={() => layout.setCenterActive(id)}
+              onRequestClose={id === layout.mainId ? undefined : () => layout.close(id)}
             >
               {panel.title}
-              {id !== layout.mainId && (
-                <span
-                  className="sp-center-tab-close"
-                  role="button"
-                  aria-label={`Close ${panel.title}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    layout.close(id);
-                  }}
-                >
-                  ×
-                </span>
-              )}
-            </button>
+            </Tab>
           );
         })}
       </div>
