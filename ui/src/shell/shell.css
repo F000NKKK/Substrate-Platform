@@ -165,30 +165,6 @@
   gap: 2px;
 }
 
-.sp-panel-surface-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  outline: none;
-  background: transparent;
-  color: var(--sp-text-muted);
-  cursor: pointer;
-  border-radius: var(--sp-radius-sm);
-  width: 20px;
-  height: 20px;
-  transition: background var(--sp-duration-fast) var(--sp-easing), color var(--sp-duration-fast) var(--sp-easing);
-}
-
-.sp-panel-surface-btn:hover {
-  background: var(--sp-surface-3);
-  color: var(--sp-text);
-}
-
-.sp-panel-surface-btn:focus-visible {
-  box-shadow: 0 0 0 2px var(--sp-accent-soft);
-}
-
 .sp-panel-surface-body {
   flex: 1;
   min-height: 0;

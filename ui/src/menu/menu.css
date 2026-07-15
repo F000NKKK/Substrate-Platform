@@ -22,27 +22,6 @@
   gap: 2px;
 }
 
-.sp-menubar-item {
-  border: none;
-  outline: none;
-  background: transparent;
-  color: var(--sp-text-muted);
-  font-size: var(--sp-font-size);
-  padding: var(--sp-space-xs) var(--sp-space-sm);
-  border-radius: var(--sp-radius-sm);
-  cursor: pointer;
-  transition: background var(--sp-duration-fast) var(--sp-easing), color var(--sp-duration-fast) var(--sp-easing);
-}
-
-.sp-menubar-item:hover {
-  background: var(--sp-surface-2);
-  color: var(--sp-text);
-}
-
-.sp-menubar-item:focus-visible {
-  box-shadow: 0 0 0 2px var(--sp-accent-soft);
-}
-
 .sp-menubar-spacer {
   flex: 1;
 }
