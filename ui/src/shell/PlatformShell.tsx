@@ -23,12 +23,20 @@ export function PlatformShell({ main, toolWindows, defaultPinned, menu }: Platfo
   // A pinned bottom dock pushes the whole center column up (it's a real
   // flex sibling, so left/right pinned panels already can't overlap it).
   // But left/right *flyouts* are absolutely positioned and would otherwise
-  // stretch the full shell height, overlapping the bottom strip/panel —
-  // this is how far up they need to stop instead.
+  // stretch the full shell height, overlapping the bottom strip — or the
+  // bottom's own open flyout, which floats above the strip without taking
+  // layout space — so this is how far up they need to stop instead, with a
+  // small gap between the two open flyouts when both are showing.
   const bottomActiveId = toolWindows.bottom ? layout.activeInAnchor("bottom") : null;
   const bottomPlacement = bottomActiveId ? layout.placements[bottomActiveId] : null;
-  const bottomPinned = !!bottomPlacement && bottomPlacement.anchor !== "float" && bottomPlacement.mode === "pinned";
-  const bottomOccupied = !toolWindows.bottom ? "0px" : bottomPinned ? "var(--sp-toolwindow-bottom-size)" : "var(--sp-toolwindow-strip)";
+  const bottomMode = bottomPlacement && bottomPlacement.anchor !== "float" ? bottomPlacement.mode : "hidden";
+  const bottomOccupied = !toolWindows.bottom
+    ? "0px"
+    : bottomMode === "pinned"
+    ? "var(--sp-toolwindow-bottom-size)"
+    : bottomMode === "flyout"
+    ? "calc(var(--sp-toolwindow-strip) + var(--sp-toolwindow-bottom-size) + 4px)"
+    : "var(--sp-toolwindow-strip)";
   const shellBodyStyle = { "--sp-bottom-occupied": bottomOccupied } as CSSProperties;
 
   function handleMainDragOver(e: DragEvent) {
