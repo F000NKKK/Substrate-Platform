@@ -18,23 +18,29 @@
   --sp-accent-strong: hsl(var(--sp-accent-h) var(--sp-accent-s) calc(var(--sp-accent-l) + 12%));
   --sp-accent-contrast: #ffffff;
 
-  /* surfaces — "ghost" glass stack, darkest to lightest */
-  --sp-surface-0: #17151c;
-  --sp-surface-1: #1e1b24;
-  --sp-surface-2: #26222d;
-  --sp-surface-3: #2f2a38;
-  --sp-surface-glass: hsl(260 20% 14% / 0.55);
-  --sp-border: hsl(260 15% 100% / 0.08);
-  --sp-border-strong: hsl(260 15% 100% / 0.16);
+  /*
+   * Surfaces — real Visual Studio chrome is neutral gray regardless of
+   * accent color (the accent only ever shows up in focus rings, the
+   * active-tab underline, checked controls, and links) — a "ghost" glass
+   * stack, darkest to lightest, tinted just enough to feel warm, not tied
+   * to whatever hue the accent picker is currently set to.
+   */
+  --sp-surface-0: #1b1b1e;
+  --sp-surface-1: #202023;
+  --sp-surface-2: #28282b;
+  --sp-surface-3: #323235;
+  --sp-surface-glass: hsl(240 4% 12% / 0.6);
+  --sp-border: hsl(0 0% 100% / 0.07);
+  --sp-border-strong: hsl(0 0% 100% / 0.14);
 
-  --sp-text: #e6e1ec;
-  --sp-text-muted: #a39cae;
-  --sp-text-faint: #726c7c;
+  --sp-text: #e4e4e6;
+  --sp-text-muted: #9b9b9e;
+  --sp-text-faint: #6c6c6f;
 
   /* elevation */
-  --sp-shadow-sm: 0 1px 2px hsl(260 40% 2% / 0.35);
-  --sp-shadow-md: 0 8px 24px hsl(260 40% 2% / 0.45);
-  --sp-shadow-glow: 0 0 0 1px var(--sp-accent-soft), 0 4px 16px hsl(260 40% 2% / 0.5);
+  --sp-shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.35);
+  --sp-shadow-md: 0 8px 24px hsl(0 0% 0% / 0.45);
+  --sp-shadow-glow: 0 0 0 1px var(--sp-accent-soft), 0 4px 16px hsl(0 0% 0% / 0.5);
   --sp-blur: 18px;
 
   /* shape */

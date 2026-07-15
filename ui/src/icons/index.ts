@@ -12,4 +12,5 @@ export {
   IconPinOff,
   IconClose,
   IconPalette,
+  IconSettings,
 } from "./icons";
