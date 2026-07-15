@@ -76,7 +76,6 @@
 }
 
 .sp-tab--horizontal-dock[data-active="true"] {
-  background: var(--sp-surface-2);
   color: var(--sp-text);
   border: 1px solid var(--sp-accent);
   border-top: none;
@@ -108,12 +107,12 @@
 
 /*
  * An active vertical tab always belongs to an open flyout (a pinned
- * panel's tab is hidden from the strip entirely) — style it as an
- * extension of that flyout's own header, flush with no seam.
+ * panel's tab is hidden from the strip entirely) — the ghost hover fill
+ * doesn't linger once it's the active tab; the accent border (matching
+ * the flyout's own border below) is what indicates that state instead.
  */
 .sp-tab--vertical-left[data-active="true"],
 .sp-tab--vertical-right[data-active="true"] {
-  background: var(--sp-surface-2);
   color: var(--sp-text);
 }
 
