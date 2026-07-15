@@ -3,21 +3,16 @@
   border-radius: 50%;
   cursor: crosshair;
   touch-action: none;
-  background:
-    radial-gradient(circle at center, #fff 0%, rgba(255, 255, 255, 0) 62%),
-    conic-gradient(
-      from 90deg,
-      hsl(0 100% 50%),
-      hsl(60 100% 50%),
-      hsl(120 100% 50%),
-      hsl(180 100% 50%),
-      hsl(240 100% 50%),
-      hsl(300 100% 50%),
-      hsl(360 100% 50%)
-    );
-  background-blend-mode: overlay;
   border: 1px solid var(--sp-border-strong);
   box-shadow: var(--sp-shadow-sm);
+}
+
+.sp-color-wheel-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .sp-color-wheel-cursor {

@@ -94,17 +94,30 @@
   background: var(--sp-accent-soft);
 }
 
-.sp-dock-strip--left,
+/*
+ * The panel-facing side gets zero padding so an open flyout's active tab
+ * (see Tab.css's data-active styling) touches the panel with no seam —
+ * only the outer, window-facing sides keep the usual inset.
+ */
+.sp-dock-strip--left {
+  flex-direction: column;
+  width: var(--sp-toolwindow-strip);
+  border-inline: 1px solid var(--sp-border);
+  padding-right: 0;
+}
+
 .sp-dock-strip--right {
   flex-direction: column;
   width: var(--sp-toolwindow-strip);
   border-inline: 1px solid var(--sp-border);
+  padding-left: 0;
 }
 
 .sp-dock-strip--bottom {
   flex-direction: row;
   height: var(--sp-toolwindow-strip);
   border-block: 1px solid var(--sp-border);
+  padding-top: 0;
 }
 
 /* pinned (docked, takes layout space) */

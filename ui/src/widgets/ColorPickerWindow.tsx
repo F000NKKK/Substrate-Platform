@@ -4,7 +4,7 @@ import { IconButton } from "./IconButton";
 import { Label } from "./Label";
 import { Swatch } from "./Swatch";
 import { useDraggable } from "./useDraggable";
-import { sameColor, type HslColor } from "./color";
+import { sameColor, type HslColor } from "./Color";
 import { IconClose } from "../icons";
 import "./ColorPickerWindow.css";
 

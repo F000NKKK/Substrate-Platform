@@ -16,5 +16,5 @@ export { ColorPickerWindow } from "./ColorPickerWindow";
 export type { ColorPickerWindowProps } from "./ColorPickerWindow";
 export { useDraggable } from "./useDraggable";
 export type { Draggable, DraggableHandlers } from "./useDraggable";
-export { hslToCss, sameColor } from "./color";
-export type { HslColor } from "./color";
+export { hslToCss, sameColor, hslToRgb } from "./Color";
+export type { HslColor } from "./Color";

@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes } from "react";
-import { hslToCss, type HslColor } from "./color";
+import { hslToCss, type HslColor } from "./Color";
 import "./Swatch.css";
 
 export interface SwatchProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color"> {
