@@ -102,7 +102,7 @@ function nextSortState(current: DataGridSortState[], key: string, additive: bool
   return current.filter((s) => s.key !== key);
 }
 
-function formatAggregate(column: DataGridColumn<unknown>, value: number): string {
+function formatAggregate<T>(column: DataGridColumn<T>, value: number): string {
   if (column.formatSummary) return column.formatSummary(value);
   if (column.summary === "avg") return value.toFixed(1);
   return value.toLocaleString();
