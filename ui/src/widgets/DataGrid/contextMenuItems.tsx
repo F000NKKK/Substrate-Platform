@@ -7,10 +7,27 @@ interface MenuGrid<T> {
   activeHiddenColumns: Set<string>;
   activeGroupBy: string[];
   activeSort: DataGridSortState[];
+  groupPanelVisible: boolean;
   toggleColumnHidden: (key: string) => void;
+  toggleGroupPanelVisible: () => void;
   commitGroupBy: (next: string[]) => void;
   commitSort: (next: DataGridSortState[]) => void;
   resetToDefaults: () => void;
+}
+
+function hiddenColumnsSubmenu<T>(grid: MenuGrid<T>, separatorBefore = false): ContextMenuItem {
+  const hidden = grid.orderedColumns.filter((c) => grid.activeHiddenColumns.has(c.key));
+  return {
+    label: "Show hidden columns",
+    separatorBefore,
+    submenu:
+      hidden.length === 0
+        ? [{ label: "No hidden columns", disabled: true }]
+        : hidden.map((column) => ({
+            label: column.header,
+            onSelect: () => grid.toggleColumnHidden(column.key),
+          })),
+  };
 }
 
 export function buildDataGridMenuItems<T>(
@@ -28,14 +45,10 @@ export function buildDataGridMenuItems<T>(
         onSelect: () => grid.commitGroupBy([]),
       },
       {
-        label: "Manage columns",
-        submenu: grid.orderedColumns.map((column) => ({
-          label: column.header,
-          checked: !grid.activeHiddenColumns.has(column.key),
-          disabled: column.hideable === false,
-          onSelect: () => grid.toggleColumnHidden(column.key),
-        })),
+        label: grid.groupPanelVisible ? "Hide group panel" : "Show group panel",
+        onSelect: grid.toggleGroupPanelVisible,
       },
+      hiddenColumnsSubmenu(grid, true),
     ];
   }
 
@@ -73,5 +86,11 @@ export function buildDataGridMenuItems<T>(
       disabled: (!column.sortable || column.lockSort) && sortIndex === -1,
       onSelect: () => grid.commitSort(grid.activeSort.filter((s) => s.key !== column.key)),
     },
+    {
+      label: grid.groupPanelVisible ? "Hide group panel" : "Show group panel",
+      separatorBefore: true,
+      onSelect: grid.toggleGroupPanelVisible,
+    },
+    hiddenColumnsSubmenu(grid, false),
   ];
 }

@@ -1,0 +1,29 @@
+.sp-windowcontrols {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
+.sp-windowcontrols-btn {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  border: none;
+  background: transparent;
+  color: var(--sp-text-muted);
+  cursor: pointer;
+  transition: background var(--sp-duration-fast) var(--sp-easing), color var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-windowcontrols-btn:hover {
+  background: var(--sp-surface-2);
+  color: var(--sp-text);
+}
+
+.sp-windowcontrols-btn--close:hover {
+  background: #c4392f;
+  color: #fff;
+}

@@ -12,6 +12,8 @@ export interface ContextMenuItem {
   checked?: boolean;
   /** Renders a nested panel instead of firing `onSelect` directly. */
   submenu?: ContextMenuItem[];
+  /** Draws a divider line above this item — for grouping unrelated actions within one menu. */
+  separatorBefore?: boolean;
 }
 
 export type ContextMenuPlacement = { mode: "viewport"; x: number; y: number } | { mode: "anchor" };
@@ -27,6 +29,7 @@ function ContextMenuList({ items, onClose }: { items: ContextMenuItem[]; onClose
     <div className="sp-contextmenu-list">
       {items.map((item, i) => (
         <div className="sp-contextmenu-itemwrap" key={i}>
+          {item.separatorBefore && <div className="sp-contextmenu-separator" />}
           <Tab
             orientation="list"
             disabled={item.disabled}

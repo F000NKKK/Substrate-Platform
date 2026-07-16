@@ -31,3 +31,9 @@
   align-items: center;
   gap: var(--sp-space-sm);
 }
+
+/* Flush to the window's edge, like every other title bar's controls — pulled past the bar's own padding, stretched to its full height. */
+.sp-menubar-windowcontrols {
+  align-self: stretch;
+  margin: 0 calc(var(--sp-space-md) * -1) 0 0;
+}

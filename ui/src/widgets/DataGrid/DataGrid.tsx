@@ -119,7 +119,14 @@ export function DataGrid<T>(props: DataGridProps<T>) {
         </div>
       )}
 
-      <div className="sp-datagrid-header" role="row" style={{ gridTemplateColumns: grid.gridTemplate }}>
+      <div
+        className="sp-datagrid-header"
+        role="row"
+        style={{ gridTemplateColumns: grid.gridTemplate }}
+        onContextMenu={(e) => {
+          if (e.target === e.currentTarget) grid.gridMenu.openAtPoint({ kind: "grid" }, e);
+        }}
+      >
         {selectable && (
           <div className="sp-datagrid-headercell sp-datagrid-headercell--select">
             <input

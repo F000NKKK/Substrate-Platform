@@ -13,3 +13,6 @@ export { IconPin } from "./IconPin";
 export { IconPinOff } from "./IconPinOff";
 export { IconClose } from "./IconClose";
 export { IconPalette } from "./IconPalette";
+export { IconMinimize } from "./IconMinimize";
+export { IconMaximize } from "./IconMaximize";
+export { IconRestore } from "./IconRestore";

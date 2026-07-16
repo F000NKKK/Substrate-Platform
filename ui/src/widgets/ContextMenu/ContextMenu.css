@@ -33,6 +33,12 @@
   color: #e5877e;
 }
 
+.sp-contextmenu-separator {
+  height: 1px;
+  margin: var(--sp-space-xs) 2px;
+  background: var(--sp-border);
+}
+
 .sp-contextmenu-check {
   display: inline-flex;
   width: 1em;

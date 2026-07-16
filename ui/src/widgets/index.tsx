@@ -26,6 +26,7 @@ export { MenuBar } from "./MenuBar";
 export type { MenuBarProps } from "./MenuBar";
 export { MenuBarItem } from "./MenuBarItem";
 export type { MenuBarItemProps, MenuBarDropdownEntry } from "./MenuBarItem";
+export { WindowControls } from "./WindowControls";
 export { AccentColorField } from "./AccentColorField";
 export { OutputPanel } from "./OutputPanel";
 export type { OutputPanelProps } from "./OutputPanel";
