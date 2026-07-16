@@ -149,6 +149,7 @@ export function DataGrid<T>(props: DataGridProps<T>) {
               onDragOver={(e) => grid.handleHeaderDragOver(e, column)}
               onDrop={(e) => grid.handleHeaderDrop(e, column)}
               onDragEnd={grid.handleHeaderDragEnd}
+              onContextMenu={(e) => grid.gridMenu.openAtPoint({ kind: "header", column }, e)}
             >
               <span className="sp-datagrid-headercell-label">{column.header}</span>
               {column.sortable && (
@@ -202,11 +203,20 @@ export function DataGrid<T>(props: DataGridProps<T>) {
         role="rowgroup"
         data-flash={grid.flash || undefined}
         onScroll={(e) => grid.setScrollTop(e.currentTarget.scrollTop)}
+        onContextMenu={(e) => {
+          if (e.target === e.currentTarget) grid.gridMenu.openAtPoint({ kind: "grid" }, e);
+        }}
       >
         {grid.displayItems.length === 0 ? (
           <div className="sp-datagrid-empty">{emptyState ?? "No rows"}</div>
         ) : (
-          <div className="sp-datagrid-spacer" style={{ height: grid.totalHeight }}>
+          <div
+            className="sp-datagrid-spacer"
+            style={{ height: grid.totalHeight }}
+            onContextMenu={(e) => {
+              if (e.target === e.currentTarget) grid.gridMenu.openAtPoint({ kind: "grid" }, e);
+            }}
+          >
             {grid.visibleItems.map((item, i) => {
               const index = grid.startIndex + i;
 
@@ -340,6 +350,12 @@ export function DataGrid<T>(props: DataGridProps<T>) {
           ))}
         </div>
       )}
+
+      <ContextMenu
+        target={grid.gridMenu.target && grid.gridMenu.target.mode === "viewport" ? { mode: "viewport", x: grid.gridMenu.target.x, y: grid.gridMenu.target.y } : null}
+        onClose={grid.gridMenu.close}
+        items={buildDataGridMenuItems(grid.gridMenu.target?.node ?? null, grid)}
+      />
     </div>
   );
 }
