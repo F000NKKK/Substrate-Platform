@@ -40,4 +40,9 @@ Repo-specific gotchas for future syncs. One bullet per gotcha.
 - **IconButton Default** — a single small ghost icon button reads sparse in a large card; the `Sizes`/`Toolbar` cells carry the component.
 
 ## Re-sync risks
-- (to be filled in before finishing)
+- **React + @types/react are `--no-save` installs into `ui/node_modules`** (not in package.json). A fresh clone / clean `npm ci` will drop them → build fails with "react not found" / `[DTS_REACT]`. Re-run: `cd ui && npm i --no-save react@^19 react-dom@^19 @types/react@^19 @types/react-dom@^19`.
+- **No dist / no build script**: the converter bundles TS source directly (`--entry ./ui/src/index.tsx`). If the package later gains a real build, switch `--entry` to the built output.
+- **Previews reference two non-existent tokens** (`--sp-text-success`, `--sp-text-accent`) in a couple of shell/panel code snippets (leftover from Haiku authoring). They fall back harmlessly (render in default text color, not green). Cosmetic only; fix if a green "success" line is wanted.
+- **TerminalPanel is excluded** (`componentSrcMap: {TerminalPanel: null}`) — it needs Tauri (`invoke`) and can't render statically. Still importable from the bundle; just has no card. Revisit if a mock is wanted.
+- **Overlay cards graded from the `.html` card, not the per-story capture** (see Known render warns). If a future capture frame changes, re-check the shipped card.
+- Grades live in `.design-sync/.cache/review/` (gitignored) — cross-machine carry-forward comes from the uploaded `_ds_sync.json`. A fresh clone re-verifies from the project anchor, which is expected.
