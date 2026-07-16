@@ -1,5 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
+import { ContextMenu } from "../ContextMenu";
 import { useDataGrid, formatAggregate } from "./useDataGrid";
+import { buildDataGridMenuItems } from "./contextMenuItems";
 import "./DataGrid.css";
 
 export type SortDirection = "asc" | "desc";
@@ -260,6 +262,7 @@ export function DataGrid<T>(props: DataGridProps<T>) {
                   onFocus={() => grid.setActiveIndex(index)}
                   onKeyDown={(e) => grid.handleItemKeyDown(e, index)}
                   onDoubleClick={() => onRowActivate?.(row)}
+                  onContextMenu={(e) => e.stopPropagation()}
                   onClick={(e) => {
                     grid.setActiveIndex(index);
                     if (!selectable) return;
@@ -276,11 +279,50 @@ export function DataGrid<T>(props: DataGridProps<T>) {
                       />
                     </div>
                   )}
-                  {grid.visibleColumns.map((column) => (
-                    <div key={column.key} className="sp-datagrid-cell" data-align={column.align ?? "left"}>
-                      {column.render ? column.render(row) : (row as Record<string, ReactNode>)[column.key]}
-                    </div>
-                  ))}
+                  {grid.visibleColumns.map((column) => {
+                    const editing = grid.editingCell?.rowId === id && grid.editingCell.columnKey === column.key;
+                    return (
+                      <div
+                        key={column.key}
+                        className="sp-datagrid-cell"
+                        data-align={column.align ?? "left"}
+                        data-editing={editing || undefined}
+                        onClick={() => grid.setActiveColumnKey(column.key)}
+                        onDoubleClick={(e) => {
+                          if (!column.editable) return;
+                          e.stopPropagation();
+                          grid.startEdit(id, column.key);
+                        }}
+                      >
+                        {editing ? (
+                          column.renderEdit ? (
+                            column.renderEdit(
+                              row,
+                              (value) => grid.commitEdit(row, column.key, value),
+                              grid.cancelEdit
+                            )
+                          ) : (
+                            <input
+                              className="sp-datagrid-cell-editor"
+                              autoFocus
+                              defaultValue={column.editValue?.(row) ?? String((row as Record<string, unknown>)[column.key] ?? "")}
+                              onClick={(e) => e.stopPropagation()}
+                              onBlur={(e) => grid.commitEdit(row, column.key, e.target.value)}
+                              onKeyDown={(e) => {
+                                e.stopPropagation();
+                                if (e.key === "Enter") grid.commitEdit(row, column.key, (e.target as HTMLInputElement).value);
+                                if (e.key === "Escape") grid.cancelEdit();
+                              }}
+                            />
+                          )
+                        ) : column.render ? (
+                          column.render(row)
+                        ) : (
+                          (row as Record<string, ReactNode>)[column.key]
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               );
             })}

@@ -472,6 +472,7 @@ export function useDataGrid<T>({
 
   return {
     columnByKey,
+    orderedColumns,
     visibleColumns,
     summaryColumns,
     gridTemplate,
@@ -496,6 +497,7 @@ export function useDataGrid<T>({
     footerAggregates,
     allSelected,
     commitSelection,
+    commitSort,
     commitGroupBy,
     handleHeaderClick,
     handleResizeStart,
