@@ -1,7 +1,7 @@
-import { Tab, type TabOrientation } from "../widgets";
-import { startPanelDrag, endPanelDrag } from "./dnd";
-import { useDropTarget } from "./useDropTarget";
-import type { PanelDef, ToolWindowAnchor } from "./types";
+import { Tab, type TabOrientation } from "../../widgets/Tab";
+import { startPanelDrag, endPanelDrag } from "../dnd";
+import { useDropTarget } from "../useDropTarget";
+import type { PanelDef, ToolWindowAnchor } from "../types";
 
 export interface DockStripProps {
   anchor: ToolWindowAnchor;

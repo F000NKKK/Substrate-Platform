@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import type { DockAnchor, PanelDef, PanelPlacement, ToolWindowAnchor } from "./types";
+import type { DockAnchor, PanelDef, PanelPlacement, ToolWindowAnchor } from "../types";
 
 const ANCHORS: readonly ToolWindowAnchor[] = ["left", "right", "bottom"];
 const DEFAULT_FLOAT_SIZE = { w: 340, h: 280 };

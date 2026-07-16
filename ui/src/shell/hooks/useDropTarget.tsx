@@ -1,5 +1,5 @@
 import { useState, type DragEventHandler } from "react";
-import { readPanelDrag } from "./dnd";
+import { readPanelDrag } from "../dnd";
 
 export interface DropTargetHandlers {
   onDragEnter: DragEventHandler;
