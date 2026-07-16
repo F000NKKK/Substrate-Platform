@@ -24,8 +24,17 @@ Repo-specific gotchas for future syncs. One bullet per gotcha.
 - **Dark theme only.** Preview cards render on a white product background, but every component is designed for a dark IDE surface (`--sp-surface-*`, light text `--sp-text`). Authored previews MUST wrap content in a dark surface panel using DS tokens, or light/muted components render invisible.
 - Icons render at 16px in the card corner by default → author a labeled size row (16/24/32) with `color: var(--sp-text)` on a dark surface.
 
+## Component API facts (from preview authoring)
+- **Icons** (`createIcon` factory): props `IconProps` = `size?: number` (default 16) + `SVGProps<SVGSVGElement>`. Color via `currentColor` (set CSS `color`), no dedicated color prop. Default 16px is too small for a specimen — previews render 16/24/32 rows + an accent-tinted specimen.
+- **HslColor scale mismatch**: `ColorPickerWindow.value` uses `s`/`l` as **0–100**; `ColorWheel` props expect `saturation`/`lightness` as **0–1**. ColorPickerWindow converts internally. Keep preview values on the right scale for each.
+- **Shell**: `PanelDef = {id, title, component: ComponentType /* no props */}`. `PlatformShellProps = {main, toolWindows: Partial<Record<"left"|"right"|"bottom", PanelDef[]>>, defaultPinned?, menu?}`. `CenterDock`/`ToolWindowDock` take a `layout: ShellLayout` from the `useShellLayout(main, toolWindows, defaultPinned?)` hook — previews call the hook inside the story. `DockStrip` takes explicit `{anchor, panelIds, panelsById, activeId, onSelect, onDropPanel}`.
+- **SettingsSection** = `{id, label, content: ReactNode}`. **MenuBarDropdownEntry** = `{label, onClick?}`.
+
+## Overlay / sizing overrides (in config)
+- `ColorPickerWindow`, `SettingsWindow`, `FloatingPanel`, `PlatformShell` are absolutely-positioned or full-shell → each has `cfg.overrides.<Name>: {cardMode:"single", viewport:"WxH"}` so the open/large state renders inside the card instead of clipping.
+
 ## Known render warns (triaged legitimate)
-- (fill in as authored: e.g. single-look components, genuinely-small ones)
+- (fill in after grading: e.g. single-look components, genuinely-small ones)
 
 ## Re-sync risks
 - (to be filled in before finishing)
