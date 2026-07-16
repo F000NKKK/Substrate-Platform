@@ -1,7 +1,7 @@
 import { Tab } from "../../widgets/Tab";
 import { startPanelDrag, endPanelDrag } from "../dnd";
-import { useDropTarget } from "../useDropTarget";
-import type { ShellLayout } from "../useShellLayout";
+import { useDropTarget } from "../hooks/useDropTarget";
+import type { ShellLayout } from "../hooks/useShellLayout";
 
 export interface CenterDockProps {
   layout: ShellLayout;

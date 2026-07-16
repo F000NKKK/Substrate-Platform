@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { IconButton } from "../widgets";
-import { IconPin, IconPinOff, IconClose, IconFloat } from "../icons";
-import { startPanelDrag, endPanelDrag } from "./dnd";
+import { IconButton } from "../../widgets/IconButton";
+import { IconPin, IconPinOff, IconClose, IconFloat } from "../../infra/icons";
+import { startPanelDrag, endPanelDrag } from "../dnd";
 
 export interface PanelSurfaceProps {
   panelId: string;

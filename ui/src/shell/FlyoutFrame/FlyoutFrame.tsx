@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
-import type { ToolWindowAnchor } from "./types";
+import type { ToolWindowAnchor } from "../types";
 
 interface Pt {
   x: number;

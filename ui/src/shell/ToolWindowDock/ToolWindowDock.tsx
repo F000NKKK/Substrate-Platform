@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { DockStrip } from "../DockStrip/DockStrip";
 import { PanelSurface } from "../PanelSurface/PanelSurface";
 import { FlyoutFrame } from "../FlyoutFrame/FlyoutFrame";
-import type { ShellLayout } from "../useShellLayout";
+import type { ShellLayout } from "../hooks/useShellLayout";
 import type { ToolWindowAnchor } from "../types";
 
 export interface ToolWindowDockProps {

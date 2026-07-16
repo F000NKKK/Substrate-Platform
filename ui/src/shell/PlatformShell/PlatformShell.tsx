@@ -3,7 +3,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { ToolWindowDock } from "../ToolWindowDock/ToolWindowDock";
 import { CenterDock } from "../CenterDock/CenterDock";
 import { FloatingPanel } from "../FloatingPanel/FloatingPanel";
-import { useShellLayout } from "../useShellLayout";
+import { useShellLayout } from "../hooks/useShellLayout";
 import { readPanelDrag, zoneFromPoint, type DropZone } from "../dnd";
 import type { PlatformShellProps } from "../types";
 import "../shell.css";

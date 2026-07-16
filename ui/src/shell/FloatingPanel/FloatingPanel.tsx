@@ -1,5 +1,5 @@
-import { PanelSurface } from "./PanelSurface";
-import type { PanelDef } from "./types";
+import { PanelSurface } from "../PanelSurface/PanelSurface";
+import type { PanelDef } from "../types";
 
 export interface FloatingPanelProps {
   panel: PanelDef;
