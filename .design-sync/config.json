@@ -9,6 +9,7 @@
     "component": "ThemeProvider"
   },
   "runtimeFontPrefixes": ["Inter", "Avenir", "Cascadia Code"],
+  "readmeHeader": ".design-sync/conventions.md",
   "componentSrcMap": {
     "TerminalPanel": null
   },
