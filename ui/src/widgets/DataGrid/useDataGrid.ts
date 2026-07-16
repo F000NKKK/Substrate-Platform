@@ -510,6 +510,16 @@ export function useDataGrid<T>({
     handleItemKeyDown,
     attachScrollRef,
     setScrollTop,
+    activeHiddenColumns,
+    toggleColumnHidden,
+    resetToDefaults,
+    editingCell,
+    startEdit,
+    commitEdit,
+    cancelEdit,
+    activeColumnKey,
+    setActiveColumnKey,
+    gridMenu,
   };
 }
 
