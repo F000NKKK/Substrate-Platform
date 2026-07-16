@@ -20,25 +20,20 @@ function Surface({ children, style }: { children: React.ReactNode; style?: React
   );
 }
 
+const MAIN_RS = `fn main() {
+    println!("Hello, IDE!");
+}`;
+
 function Editor() {
   return (
-    <div style={{
+    <pre style={{
+      margin: 0,
       padding: "var(--sp-space-md)",
       fontFamily: "var(--sp-font-mono)",
       fontSize: "13px",
       lineHeight: "1.6",
       color: "var(--sp-text)",
-    }}>
-      <span style={{ color: "var(--sp-text-muted)" }}>1</span>
-      {" "}<span style={{ color: "var(--sp-accent)" }}>fn</span>{" main() {"{"}"}
-      <br />
-      <span style={{ color: "var(--sp-text-muted)" }}>2</span>
-      {" "}&nbsp;&nbsp;&nbsp;&nbsp;<span style={{ color: "var(--sp-accent)" }}>println!</span>
-      <span style={{ color: "var(--sp-text-accent)" }}>("Hello, IDE!")</span>;
-      <br />
-      <span style={{ color: "var(--sp-text-muted)" }}>3</span>
-      {" "}{"}"}{"}"}
-    </div>
+    }}>{MAIN_RS}</pre>
   );
 }
 

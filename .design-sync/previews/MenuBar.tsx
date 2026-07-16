@@ -1,6 +1,5 @@
 import React from "react";
-import { MenuBar, MenuBarItem, IconButton } from "substrate-platform-ui";
-import { IconSettings } from "substrate-platform-ui/icons";
+import { MenuBar, MenuBarItem, IconButton, IconSettings } from "substrate-platform-ui";
 
 function Surface({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (

@@ -9,8 +9,10 @@
     "component": "ThemeProvider"
   },
   "runtimeFontPrefixes": ["Inter", "Avenir", "Cascadia Code"],
+  "componentSrcMap": {
+    "TerminalPanel": null
+  },
   "overrides": {
-    "TerminalPanel": { "skip": true },
     "ColorPickerWindow": { "cardMode": "single", "viewport": "360x420" },
     "SettingsWindow": { "cardMode": "single", "viewport": "600x460" },
     "FloatingPanel": { "cardMode": "single", "viewport": "440x320" },

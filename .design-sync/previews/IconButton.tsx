@@ -1,6 +1,5 @@
 import React from "react";
-import { IconButton } from "substrate-platform-ui";
-import { IconClose, IconSettings } from "substrate-platform-ui/icons";
+import { IconButton, IconClose, IconSettings } from "substrate-platform-ui";
 
 function Surface({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
