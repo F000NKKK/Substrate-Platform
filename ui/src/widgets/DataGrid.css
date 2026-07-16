@@ -168,6 +168,60 @@
   opacity: 0.5;
 }
 
+.sp-datagrid-sortbadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 13px;
+  height: 13px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--sp-accent);
+  color: var(--sp-accent-contrast);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Filter row */
+
+.sp-datagrid-filterrow {
+  display: grid;
+  flex: 0 0 auto;
+  background: var(--sp-surface-1);
+  border-bottom: 1px solid var(--sp-border);
+  scrollbar-gutter: stable;
+}
+
+.sp-datagrid-filtercell {
+  display: flex;
+  align-items: center;
+  padding: 3px var(--sp-space-xs);
+}
+
+.sp-datagrid-filterinput {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--sp-font-ui);
+  font-size: 11px;
+  color: var(--sp-text);
+  background: var(--sp-surface-2);
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius-xs);
+  padding: 3px var(--sp-space-xs);
+  outline: none;
+  transition: border-color var(--sp-duration-fast) var(--sp-easing), box-shadow var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-datagrid-filterinput::placeholder {
+  color: var(--sp-text-faint);
+}
+
+.sp-datagrid-filterinput:focus {
+  border-color: var(--sp-accent);
+  box-shadow: 0 0 0 2px var(--sp-accent-soft);
+}
+
 /* Body */
 
 .sp-datagrid-body {
@@ -212,6 +266,69 @@
   box-shadow: inset 0 0 0 1px var(--sp-accent), inset 2px 0 0 var(--sp-accent);
 }
 
+.sp-datagrid-grouprow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-sm);
+  padding: 0 var(--sp-space-sm);
+  background: var(--sp-surface-2);
+  border-bottom: 1px solid var(--sp-border-strong);
+  outline: none;
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-datagrid-grouprow:hover {
+  background: var(--sp-surface-3);
+}
+
+.sp-datagrid-grouprow:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--sp-accent);
+}
+
+.sp-datagrid-groupchevron {
+  font-size: 10px;
+  color: var(--sp-text-muted);
+  flex: 0 0 auto;
+  transition: transform var(--sp-duration-base) var(--sp-easing);
+}
+
+.sp-datagrid-groupchevron[data-collapsed] {
+  transform: rotate(-90deg);
+}
+
+.sp-datagrid-grouplabel {
+  color: var(--sp-text-muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sp-datagrid-grouplabel strong {
+  color: var(--sp-text);
+  font-weight: 600;
+}
+
+.sp-datagrid-groupcount {
+  color: var(--sp-text-faint);
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+
+.sp-datagrid-groupaggregate {
+  margin-left: auto;
+  padding-left: var(--sp-space-md);
+  color: var(--sp-text-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+
 .sp-datagrid-cell {
   display: flex;
   align-items: center;
@@ -231,6 +348,36 @@
 }
 
 .sp-datagrid-cell--select {
+  justify-content: center;
+}
+
+/* Footer */
+
+.sp-datagrid-footer {
+  display: grid;
+  flex: 0 0 auto;
+  background: var(--sp-surface-2);
+  border-top: 1px solid var(--sp-border-strong);
+}
+
+.sp-datagrid-footercell {
+  display: flex;
+  align-items: center;
+  padding: var(--sp-space-xs) var(--sp-space-sm);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sp-text);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sp-datagrid-footercell[data-align="right"] {
+  justify-content: flex-end;
+}
+
+.sp-datagrid-footercell[data-align="center"] {
   justify-content: center;
 }
 
