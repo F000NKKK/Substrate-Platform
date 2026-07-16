@@ -26,6 +26,22 @@ export const IconFolder = createIcon(
   <path d="M3 6.5a1.5 1.5 0 0 1 1.5-1.5h4l2 2h9A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z" />
 );
 
+export const IconFolderOpen = createIcon(
+  <>
+    <path d="M3 6.5a1.5 1.5 0 0 1 1.5-1.5h4l2 2h9A1.5 1.5 0 0 1 21 8.5V9H7.5a1.5 1.5 0 0 0-1.44 1.09L3 19.5z" />
+    <path d="M3 6.5v11A1.5 1.5 0 0 0 4.5 19h15l2.94-8.41a1 1 0 0 0-.94-1.34H7.5a1.5 1.5 0 0 0-1.44 1.09L3 19.5" />
+  </>
+);
+
+export const IconFile = createIcon(
+  <>
+    <path d="M6.5 3.5h7l4 4v12a1.5 1.5 0 0 1-1.5 1.5h-9.5A1.5 1.5 0 0 1 5 19.5v-14a1.5 1.5 0 0 1 1.5-1.5Z" />
+    <polyline points="13.5,3.5 13.5,7.5 17.5,7.5" />
+  </>
+);
+
+export const IconChevronRight = createIcon(<polyline points="9,5 16,12 9,19" />);
+
 export const IconSliders = createIcon(
   <>
     <line x1="5" y1="4" x2="5" y2="20" />

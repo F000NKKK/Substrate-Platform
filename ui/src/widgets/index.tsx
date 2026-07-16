@@ -8,6 +8,8 @@ export { TextField } from "./TextField";
 export type { TextFieldProps } from "./TextField";
 export { Tab } from "./Tab";
 export type { TabProps, TabOrientation } from "./Tab";
+export { DataGrid } from "./DataGrid";
+export type { DataGridProps, DataGridColumn, DataGridSortState } from "./DataGrid";
 export { Swatch } from "./Swatch";
 export type { SwatchProps } from "./Swatch";
 export { ColorWheel } from "./ColorWheel";
