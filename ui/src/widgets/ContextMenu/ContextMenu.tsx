@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Tab } from "../Tab";
 import "./ContextMenu.css";
 
@@ -56,19 +57,30 @@ function ContextMenuList({ items, onClose }: { items: ContextMenuItem[]; onClose
  * The one context-menu/dropdown implementation in the platform — backs
  * `Tree`'s right-click node menu, `MenuBarItem`'s dropdown, and `DataGrid`'s
  * grid/header menus. Pair with `useContextMenu` for the open/close state;
- * this component only renders. `mode: "viewport"` positions at the click
- * coordinates (fixed); `mode: "anchor"` positions via CSS relative to
- * whatever already-positioned ancestor the consumer renders it inside.
+ * this component only renders. `mode: "viewport"` portals to `document.body`
+ * and positions at the click coordinates (fixed) — a right-click popup can
+ * be triggered from inside a panel with `overflow: hidden` or `backdrop-filter`
+ * (both of which trap `position: fixed` to that ancestor instead of the
+ * viewport), so escaping via portal is what keeps it from being clipped or
+ * mispositioned. `mode: "anchor"` renders inline, positioned via CSS relative
+ * to whatever already-positioned ancestor the consumer renders it inside —
+ * that ancestor is the point, so it isn't portaled.
  */
 export function ContextMenu({ target, items, onClose }: ContextMenuProps) {
   if (!target) return null;
 
-  const style = target.mode === "viewport" ? { left: target.x, top: target.y } : undefined;
-  const className = ["sp-contextmenu", target.mode === "anchor" && "sp-contextmenu--anchor"].filter(Boolean).join(" ");
+  if (target.mode === "anchor") {
+    return (
+      <div className="sp-contextmenu sp-contextmenu--anchor" onPointerDown={(e) => e.stopPropagation()}>
+        <ContextMenuList items={items} onClose={onClose} />
+      </div>
+    );
+  }
 
-  return (
-    <div className={className} style={style} onPointerDown={(e) => e.stopPropagation()}>
+  return createPortal(
+    <div className="sp-contextmenu" style={{ left: target.x, top: target.y }} onPointerDown={(e) => e.stopPropagation()}>
       <ContextMenuList items={items} onClose={onClose} />
-    </div>
+    </div>,
+    document.body
   );
 }

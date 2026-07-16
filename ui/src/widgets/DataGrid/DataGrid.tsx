@@ -149,10 +149,7 @@ export function DataGrid<T>(props: DataGridProps<T>) {
               onDragOver={(e) => grid.handleHeaderDragOver(e, column)}
               onDrop={(e) => grid.handleHeaderDrop(e, column)}
               onDragEnd={grid.handleHeaderDragEnd}
-              onContextMenu={(e) => {
-                console.error("[DEBUG] header onContextMenu fired", column.key);
-                grid.gridMenu.openAtPoint({ kind: "header", column }, e);
-              }}
+              onContextMenu={(e) => grid.gridMenu.openAtPoint({ kind: "header", column }, e)}
             >
               <span className="sp-datagrid-headercell-label">{column.header}</span>
               {column.sortable && (
