@@ -76,18 +76,15 @@
 }
 
 /*
- * Flex siblings stretch to fill the row's height by default, which would
- * let the left/right dock (strip + any pinned panels) run the full shell
- * height — behind/past whatever's currently occupying the bottom dock
- * (its strip, a pinned panel, or an open flyout). Capping the height here
- * to stop exactly where that starts is what makes "tabs may never
- * intersect" actually hold in every combination of pinned/flyout state.
+ * Left/right docks run the FULL shell height, down to the very bottom edge —
+ * the bottom dock is nested inside the center column (a flex sibling between
+ * these two), so it only ever spans the center's width and can't collide with
+ * them. A side panel therefore reaches the bottom panel's own bottom border
+ * (the window's bottom), exactly as in Visual Studio, with no height math.
  */
 .sp-dock--left,
 .sp-dock--right {
   flex-direction: row;
-  align-self: flex-start;
-  height: calc(100% - var(--sp-bottom-occupied, 0px));
 }
 
 .sp-dock--bottom {
@@ -211,22 +208,18 @@
   overflow: auto;
 }
 
-/* auto-hide flyout — floats over the main area, does not reflow layout */
-
 /*
- * Unlike a pinned panel (whose tab is hidden from the strip entirely, so
- * it always gets its own full 4-side border), a flyout's tab is still
- * sitting right there in the strip — the flyout's border must pick up
- * exactly where the tab's own (already 3-sided) border leaves off, so
- * together they trace ONE continuous line around both, open only on the
- * shared seam where they touch.
+ * auto-hide flyout — floats OVER everything (its own size, never joining the
+ * pinned row), anchored right next to the strip so its still-visible strip tab
+ * and the panel read as one shape. It carries no CSS border of its own: the
+ * continuous accent outline wrapping [tab + panel] is drawn as a single SVG
+ * path in .sp-flyout-border (see FlyoutFrame.tsx), which is the only way to get
+ * the 8-corner notched line instead of two disconnected boxes.
  */
 .sp-dock-flyout {
   position: absolute;
   z-index: 40;
-  border: 1px solid var(--sp-accent);
   box-shadow: var(--sp-shadow-md);
-  border-radius: var(--sp-radius-md);
   overflow: hidden;
   background: var(--sp-surface-glass);
   backdrop-filter: blur(var(--sp-blur));
@@ -234,42 +227,51 @@
   animation: sp-flyout-in var(--sp-duration-base) var(--sp-easing);
 }
 
-/*
- * bottom:0 here, not --sp-bottom-occupied again — the dock *container*
- * itself already stops that far short (see .sp-dock--left/--right's own
- * height rule below), so subtracting it a second time here would leave an
- * oversized gap under the flyout.
- */
+/* Positioned against the strip's inner edge (strip width from the region edge), not 100% of the pinned-widened region. */
+/* Corner radius matches FlyoutFrame's CORNER_RADIUS (8px) so the glass fill lines up under the SVG stroke. */
 .sp-dock-flyout--left {
   top: 0;
   bottom: 0;
-  left: 100%;
+  left: var(--sp-toolwindow-strip);
   width: var(--sp-toolwindow-size);
-  border-left: none;
-  border-radius: 0 var(--sp-radius-md) var(--sp-radius-md) 0;
+  border-radius: 0 var(--sp-radius-sm) var(--sp-radius-sm) 0;
 }
 
 .sp-dock-flyout--right {
   top: 0;
   bottom: 0;
-  right: 100%;
+  right: var(--sp-toolwindow-strip);
   width: var(--sp-toolwindow-size);
-  border-right: none;
-  border-radius: var(--sp-radius-md) 0 0 var(--sp-radius-md);
+  border-radius: var(--sp-radius-sm) 0 0 var(--sp-radius-sm);
 }
 
 .sp-dock-flyout--bottom {
   left: 0;
   right: 0;
-  bottom: 100%;
+  bottom: var(--sp-toolwindow-strip);
   height: var(--sp-toolwindow-bottom-size);
-  border-bottom: none;
-  border-radius: var(--sp-radius-md) var(--sp-radius-md) 0 0;
+  border-radius: var(--sp-radius-sm) var(--sp-radius-sm) 0 0;
 }
 
 .sp-dock-flyout .sp-panel-surface {
   height: 100%;
   background: transparent;
+}
+
+/*
+ * The hand-drawn accent outline around a flyout + its strip tab. Covers the
+ * whole dock region as a coordinate canvas; overflow is visible so the panel
+ * part (which extends past the narrow strip region, out over the main area)
+ * isn't clipped. Purely decorative — clicks pass straight through to the panel.
+ */
+.sp-flyout-border {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  z-index: 41;
+  pointer-events: none;
 }
 
 @keyframes sp-flyout-in {

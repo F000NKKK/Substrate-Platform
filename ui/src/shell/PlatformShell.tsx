@@ -1,4 +1,4 @@
-import type { CSSProperties, DragEvent } from "react";
+import type { DragEvent } from "react";
 import { useState } from "react";
 import { ToolWindowDock } from "./ToolWindowDock";
 import { CenterDock } from "./CenterDock";
@@ -19,23 +19,6 @@ import "./shell.css";
 export function PlatformShell({ main, toolWindows, defaultPinned, menu }: PlatformShellProps) {
   const layout = useShellLayout(main, toolWindows, defaultPinned);
   const [dropZone, setDropZone] = useState<DropZone | null>(null);
-
-  // A pinned bottom dock pushes the whole center column up (it's a real
-  // flex sibling, so left/right pinned panels already can't overlap it).
-  // But left/right *flyouts* are absolutely positioned and would otherwise
-  // stretch the full shell height, overlapping the bottom strip — or the
-  // bottom's own open flyout, which floats above the strip without taking
-  // layout space — so this is how far up they need to stop instead, with a
-  // small gap between the two open flyouts when both are showing.
-  const bottomPinnedIds = toolWindows.bottom ? layout.pinnedInAnchor("bottom") : [];
-  const bottomFlyoutId = toolWindows.bottom ? layout.flyoutInAnchor("bottom") : null;
-  const bottomBase = !toolWindows.bottom
-    ? "0px"
-    : bottomPinnedIds.length > 0
-    ? `calc(${bottomPinnedIds.length} * (var(--sp-toolwindow-bottom-size) + var(--sp-space-xs)))`
-    : "var(--sp-toolwindow-strip)";
-  const bottomOccupied = bottomFlyoutId ? `calc(${bottomBase} + var(--sp-toolwindow-bottom-size) + 4px)` : bottomBase;
-  const shellBodyStyle = { "--sp-bottom-occupied": bottomOccupied } as CSSProperties;
 
   function handleMainDragOver(e: DragEvent) {
     e.preventDefault();
@@ -59,7 +42,7 @@ export function PlatformShell({ main, toolWindows, defaultPinned, menu }: Platfo
   return (
     <div className="sp-shell">
       {menu && <div className="sp-shell-menu">{menu}</div>}
-      <div className="sp-shell-body" style={shellBodyStyle}>
+      <div className="sp-shell-body">
         {toolWindows.left && <ToolWindowDock anchor="left" layout={layout} />}
 
         <div className="sp-shell-center">

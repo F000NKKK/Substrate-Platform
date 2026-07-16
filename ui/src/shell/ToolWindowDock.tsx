@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { DockStrip } from "./DockStrip";
 import { PanelSurface } from "./PanelSurface";
+import { FlyoutFrame } from "./FlyoutFrame";
 import type { ShellLayout } from "./useShellLayout";
 import type { ToolWindowAnchor } from "./types";
 
@@ -13,13 +14,13 @@ const DEFAULT_FLOAT_POS = { x: 160, y: 120 };
 
 /**
  * One edge's worth of VS-style tool windows. The collapsed tab strip always
- * sits at the true window edge; any panels pinned to this anchor sit
- * between it and the main area as their own grid slots, side by side —
- * pinning a second one does not evict the first. At most one more panel
- * can also be peeking open as a flyout, layered over the main area.
- * Any tab or panel header can be dragged to another dock to redock, onto
- * the center to join its tabs, or floated out via its header's pop-out
- * button.
+ * sits at the true window edge; any panels pinned to this anchor sit between
+ * it and the main area as their own slots, side by side — pinning a second one
+ * does not evict the first. At most one more panel can be peeking open as a
+ * flyout, which floats OVER everything (its own size, never joining the pinned
+ * row) right next to the strip, wrapped together with its still-visible strip
+ * tab by a single continuous accent outline. Any tab or header can be dragged
+ * to another dock to redock, onto the center to join its tabs, or floated out.
  */
 export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
   const panelIds = layout.idsByAnchor(anchor);
@@ -27,12 +28,12 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
   const flyoutId = layout.flyoutInAnchor(anchor);
   const flyoutPanel = flyoutId ? layout.panelsById[flyoutId] : null;
 
-  const flyoutRef = useRef<HTMLDivElement>(null);
+  const regionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!flyoutId) return;
     const onPointerDown = (e: PointerEvent) => {
-      if (!flyoutRef.current?.contains(e.target as Node)) layout.close(flyoutId);
+      if (!regionRef.current?.contains(e.target as Node)) layout.close(flyoutId);
     };
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
@@ -41,7 +42,8 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
   if (panelIds.length === 0) return null;
 
   // A pinned panel's own header already shows its title, so it doesn't also
-  // need a redundant tab sitting in the collapsed strip.
+  // need a redundant tab in the strip. A flyout's tab, on the other hand,
+  // stays in the strip — it's the notched part of the continuous outline.
   const stripIds = panelIds.filter((id) => !pinnedIds.includes(id));
 
   const pinnedPanels = pinnedIds.map((id) => {
@@ -75,13 +77,13 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
   );
 
   return (
-    <div className={`sp-dock sp-dock--${anchor}`}>
+    <div className={`sp-dock sp-dock--${anchor}`} ref={regionRef}>
       {anchor === "left" && strip}
       {pinnedPanels}
       {anchor !== "left" && strip}
 
       {flyoutPanel && (
-        <div ref={flyoutRef} className={`sp-dock-flyout sp-dock-flyout--${anchor}`}>
+        <FlyoutFrame anchor={anchor} regionRef={regionRef}>
           <PanelSurface
             panelId={flyoutId!}
             title={flyoutPanel.title}
@@ -95,7 +97,7 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
               return <Component />;
             })()}
           </PanelSurface>
-        </div>
+        </FlyoutFrame>
       )}
     </div>
   );
