@@ -84,25 +84,3 @@
   overflow: hidden;
   min-height: 0;
 }
-
-/* Context menu */
-
-.sp-tree-contextmenu {
-  position: fixed;
-  z-index: 200;
-  min-width: 160px;
-  padding: var(--sp-space-xs);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  background: var(--sp-surface-glass);
-  backdrop-filter: blur(var(--sp-blur));
-  -webkit-backdrop-filter: blur(var(--sp-blur));
-  border: 1px solid var(--sp-border-strong);
-  border-radius: var(--sp-radius-xs);
-  box-shadow: var(--sp-shadow-md);
-}
-
-.sp-tree-menuitem--destructive {
-  color: #e5877e;
-}

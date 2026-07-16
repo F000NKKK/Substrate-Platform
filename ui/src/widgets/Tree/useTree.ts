@@ -45,7 +45,7 @@ export function useTree<T>({
   const [internalExpanded, setInternalExpanded] = useState<Set<string>>(defaultExpandedIds ?? new Set());
   const [internalSelected, setInternalSelected] = useState<Set<string>>(defaultSelectedIds ?? new Set());
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [contextMenu, setContextMenu] = useState<{ node: TreeNode<T>; x: number; y: number } | null>(null);
+  const menu = useContextMenu<TreeNode<T>>();
   const lastAnchorRef = useRef<string | null>(null);
 
   const activeExpanded = expandedIds ?? internalExpanded;
@@ -61,24 +61,6 @@ export function useTree<T>({
   useEffect(() => {
     if (activeId === null && flat.length > 0) setActiveId(flat[0].node.id);
   }, [activeId, flat]);
-
-  useEffect(() => {
-    if (!contextMenu) return;
-    function close(e: Event) {
-      if (e instanceof KeyboardEvent && e.key !== "Escape") return;
-      setContextMenu(null);
-    }
-    window.addEventListener("pointerdown", close);
-    window.addEventListener("keydown", close);
-    window.addEventListener("scroll", close, true);
-    window.addEventListener("resize", close);
-    return () => {
-      window.removeEventListener("pointerdown", close);
-      window.removeEventListener("keydown", close);
-      window.removeEventListener("scroll", close, true);
-      window.removeEventListener("resize", close);
-    };
-  }, [contextMenu]);
 
   function commitExpanded(next: Set<string>) {
     if (expandedIds === undefined) setInternalExpanded(next);
@@ -167,8 +149,7 @@ export function useTree<T>({
 
   function openContextMenu(node: TreeNode<T>, e: ReactMouseEvent) {
     if (!getMenuItems) return;
-    e.preventDefault();
-    setContextMenu({ node, x: e.clientX, y: e.clientY });
+    menu.openAtPoint(node, e);
   }
 
   return {
@@ -180,8 +161,8 @@ export function useTree<T>({
     toggleExpanded,
     handleRowClick,
     handleKeyDown,
-    contextMenu,
+    contextMenu: menu.target,
     openContextMenu,
-    closeContextMenu: () => setContextMenu(null),
+    closeContextMenu: menu.close,
   };
 }

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { Tab } from "../Tab";
 import { Icon } from "../../infra/icons";
+import { ContextMenu } from "../ContextMenu";
 import { useTree } from "./useTree";
 import type { FlatEntry } from "./useTree";
 import "./Tree.css";
@@ -99,27 +99,19 @@ export function Tree<T>({ nodes, renderIcon, getMenuItems, className, ...rest }:
   return (
     <div className={["sp-tree", className].filter(Boolean).join(" ")} role="tree">
       {renderNodes(nodes, 0, null)}
-      {tree.contextMenu && (
-        <div
-          className="sp-tree-contextmenu"
-          style={{ left: tree.contextMenu.x, top: tree.contextMenu.y }}
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          {getMenuItems!(tree.contextMenu.node).map((item) => (
-            <Tab
-              key={item.label}
-              orientation="list"
-              className={item.destructive ? "sp-tree-menuitem--destructive" : undefined}
-              onClick={() => {
-                item.onSelect(tree.contextMenu!.node);
-                tree.closeContextMenu();
-              }}
-            >
-              {item.label}
-            </Tab>
-          ))}
-        </div>
-      )}
+      <ContextMenu
+        target={tree.contextMenu && tree.contextMenu.mode === "viewport" ? { mode: "viewport", x: tree.contextMenu.x, y: tree.contextMenu.y } : null}
+        onClose={tree.closeContextMenu}
+        items={
+          tree.contextMenu
+            ? getMenuItems!(tree.contextMenu.node).map((item) => ({
+                label: item.label,
+                destructive: item.destructive,
+                onSelect: () => item.onSelect(tree.contextMenu!.node),
+              }))
+            : []
+        }
+      />
     </div>
   );
 }
