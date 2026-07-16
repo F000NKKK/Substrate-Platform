@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from "react";
 import { Button } from "../Button";
-import { Tab } from "../Tab";
+import { ContextMenu, useContextMenu } from "../ContextMenu";
 import "./MenuBarItem.css";
 
 export interface MenuBarDropdownEntry {
@@ -17,44 +16,25 @@ export interface MenuBarItemProps {
 
 /** One top-level entry in a MenuBar (File, Edit, View, ...), optionally opening a dropdown — the menu bar itself is not a DnD surface. */
 export function MenuBarItem({ label, onClick, items }: MenuBarItemProps) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (e: PointerEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [open]);
+  const menu = useContextMenu<void>();
 
   function handleClick() {
-    if (items && items.length > 0) setOpen((v) => !v);
-    else onClick?.();
+    if (items && items.length > 0) {
+      if (menu.target) menu.close();
+      else menu.openAtAnchor(undefined);
+    } else onClick?.();
   }
 
   return (
-    <div className="sp-menubar-item-root" ref={rootRef}>
+    <div className="sp-menubar-item-root">
       <Button variant="ghost" onClick={handleClick}>
         {label}
       </Button>
-      {open && items && (
-        <div className="sp-menubar-dropdown">
-          {items.map((entry) => (
-            <Tab
-              key={entry.label}
-              orientation="list"
-              onClick={() => {
-                setOpen(false);
-                entry.onClick?.();
-              }}
-            >
-              {entry.label}
-            </Tab>
-          ))}
-        </div>
-      )}
+      <ContextMenu
+        target={menu.target ? { mode: "anchor" } : null}
+        onClose={menu.close}
+        items={(items ?? []).map((entry) => ({ label: entry.label, onSelect: entry.onClick }))}
+      />
     </div>
   );
 }

@@ -1,22 +1,3 @@
 .sp-menubar-item-root {
   position: relative;
 }
-
-.sp-menubar-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 100;
-  min-width: 160px;
-  margin-top: 2px;
-  padding: var(--sp-space-xs);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  background: var(--sp-surface-glass);
-  backdrop-filter: blur(var(--sp-blur));
-  -webkit-backdrop-filter: blur(var(--sp-blur));
-  border: 1px solid var(--sp-border-strong);
-  border-radius: var(--sp-radius-xs);
-  box-shadow: var(--sp-shadow-md);
-}

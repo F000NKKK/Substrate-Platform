@@ -29,6 +29,20 @@ export interface DataGridColumn<T> {
   summaryValue?: (row: T) => number;
   formatSummary?: (value: number) => string;
   render?: (row: T) => ReactNode;
+  /** Set false to force this column permanently visible — the context menu's hide/manage-columns actions no-op on it. Default true. */
+  hideable?: boolean;
+  /** Disables the sort interaction (header click and the context menu's sort actions) without touching `sortable`, which still gates whether the column can ever be sorted at all. */
+  lockSort?: boolean;
+  /** Column can't be dragged or menu'd into the group panel. Column reordering is unaffected. */
+  lockGroup?: boolean;
+  /** Enables double-click/Enter inline editing on this column's cells. */
+  editable?: boolean;
+  /** Read value the default editor pre-fills with; falls back to the raw cell value. Distinct from `sortValue`, which can be numeric and serves a comparator, not display/edit text. */
+  editValue?: (row: T) => string;
+  /** Called with the row, this column's key, and the committed string value when an edit commits. */
+  onCellEdit?: (row: T, key: string, newValue: string) => void;
+  /** Custom editor overriding the default text `<input>`; call `commit(value)` or `cancel()` to end editing. */
+  renderEdit?: (row: T, commit: (value: string) => void, cancel: () => void) => ReactNode;
 }
 
 export interface DataGridProps<T> {
@@ -47,9 +61,14 @@ export interface DataGridProps<T> {
   groupBy?: string[];
   defaultGroupBy?: string[];
   onGroupByChange?: (groupBy: string[]) => void;
+  hiddenColumns?: Set<string>;
+  defaultHiddenColumns?: Set<string>;
+  onHiddenColumnsChange?: (hidden: Set<string>) => void;
   /** Shows a per-column text filter beneath the header. Default true. */
   filterRow?: boolean;
   onRowActivate?: (row: T) => void;
+  /** Grid-level catch-all fired alongside any column's own `onCellEdit` when an edit commits. */
+  onCellEditCommit?: (row: T, key: string, newValue: string) => void;
   emptyState?: ReactNode;
   className?: string;
   style?: CSSProperties;

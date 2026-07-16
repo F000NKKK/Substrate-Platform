@@ -9,6 +9,9 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import type { DataGridColumn, DataGridProps, DataGridSortState } from "./DataGrid";
+import { useContextMenu } from "../ContextMenu";
+
+export type DataGridMenuTarget<T> = { kind: "grid" } | { kind: "header"; column: DataGridColumn<T> };
 
 type DisplayItem<T> =
   | { kind: "group"; key: string; level: number; columnKey: string; label: string; count: number; aggregates: Record<string, number>; rows: T[] }
@@ -138,11 +141,16 @@ export function useDataGrid<T>({
   groupBy,
   defaultGroupBy = [],
   onGroupByChange,
+  hiddenColumns,
+  defaultHiddenColumns = new Set(),
+  onHiddenColumnsChange,
   onRowActivate,
+  onCellEditCommit,
 }: DataGridProps<T>) {
   const [internalSelection, setInternalSelection] = useState<Set<string>>(defaultSelectedIds ?? new Set());
   const [internalSort, setInternalSort] = useState<DataGridSortState[]>(defaultSort);
   const [internalGroupBy, setInternalGroupBy] = useState<string[]>(defaultGroupBy);
+  const [internalHiddenColumns, setInternalHiddenColumns] = useState<Set<string>>(defaultHiddenColumns);
   const [columnOrder, setColumnOrder] = useState<string[]>(() => columns.map((c) => c.key));
   const [widths, setWidths] = useState<Record<string, number>>(() =>
     Object.fromEntries(columns.map((c) => [c.key, c.width ?? DEFAULT_COLUMN_WIDTH]))
@@ -152,10 +160,13 @@ export function useDataGrid<T>({
   const [scrollTop, setScrollTop] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(480);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [activeColumnKey, setActiveColumnKey] = useState<string | null>(null);
+  const [editingCell, setEditingCell] = useState<{ rowId: string; columnKey: string } | null>(null);
   const [flash, setFlash] = useState(false);
   const [dragColumnKey, setDragColumnKey] = useState<string | null>(null);
   const [dropIndicator, setDropIndicator] = useState<{ key: string; side: "before" | "after" } | null>(null);
   const [groupPanelHover, setGroupPanelHover] = useState(false);
+  const gridMenu = useContextMenu<DataGridMenuTarget<T>>();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastAnchorRef = useRef<number | null>(null);
@@ -164,6 +175,7 @@ export function useDataGrid<T>({
   const activeSort = sort ?? internalSort;
   const activeGroupBy = groupBy ?? internalGroupBy;
   const activeSelection = selectedIds ?? internalSelection;
+  const activeHiddenColumns = hiddenColumns ?? internalHiddenColumns;
 
   const columnByKey = useMemo(() => new Map(columns.map((c) => [c.key, c])), [columns]);
 
@@ -172,8 +184,8 @@ export function useDataGrid<T>({
     [columnOrder, columnByKey]
   );
   const visibleColumns = useMemo(
-    () => orderedColumns.filter((c) => !activeGroupBy.includes(c.key)),
-    [orderedColumns, activeGroupBy]
+    () => orderedColumns.filter((c) => !activeGroupBy.includes(c.key) && !activeHiddenColumns.has(c.key)),
+    [orderedColumns, activeGroupBy, activeHiddenColumns]
   );
   const summaryColumns = useMemo(() => orderedColumns.filter((c) => c.summary && c.summaryValue), [orderedColumns]);
 
@@ -232,6 +244,46 @@ export function useDataGrid<T>({
     onGroupByChange?.(next);
   }
 
+  function commitHiddenColumns(next: Set<string>) {
+    if (hiddenColumns === undefined) setInternalHiddenColumns(next);
+    onHiddenColumnsChange?.(next);
+  }
+
+  function toggleColumnHidden(key: string) {
+    const column = columnByKey.get(key);
+    if (column?.hideable === false) return;
+    const next = new Set(activeHiddenColumns);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    commitHiddenColumns(next);
+  }
+
+  function resetToDefaults() {
+    setColumnOrder(columns.map((c) => c.key));
+    setWidths(Object.fromEntries(columns.map((c) => [c.key, c.width ?? DEFAULT_COLUMN_WIDTH])));
+    commitHiddenColumns(new Set());
+    commitSort(defaultSort);
+    commitGroupBy(defaultGroupBy);
+    setCollapsedGroups(new Set());
+  }
+
+  function startEdit(rowId: string, columnKey: string) {
+    const column = columnByKey.get(columnKey);
+    if (!column?.editable) return;
+    setEditingCell({ rowId, columnKey });
+  }
+
+  function commitEdit(row: T, columnKey: string, value: string) {
+    const column = columnByKey.get(columnKey);
+    column?.onCellEdit?.(row, columnKey, value);
+    onCellEditCommit?.(row, columnKey, value);
+    setEditingCell(null);
+  }
+
+  function cancelEdit() {
+    setEditingCell(null);
+  }
+
   function toggleGroupCollapsed(key: string) {
     setCollapsedGroups((prev) => {
       const next = new Set(prev);
@@ -242,7 +294,7 @@ export function useDataGrid<T>({
   }
 
   function handleHeaderClick(e: ReactMouseEvent, column: DataGridColumn<T>) {
-    if (!column.sortable || dragColumnKey) return;
+    if (!column.sortable || column.lockSort || dragColumnKey) return;
     commitSort(nextSortState(activeSort, column.key, e.metaKey || e.ctrlKey));
   }
 
@@ -312,7 +364,8 @@ export function useDataGrid<T>({
   function handleGroupPanelDrop(e: ReactDragEvent) {
     e.preventDefault();
     const key = e.dataTransfer.getData(COLUMN_DRAG_MIME);
-    if (key && !activeGroupBy.includes(key)) commitGroupBy([...activeGroupBy, key]);
+    const column = key ? columnByKey.get(key) : undefined;
+    if (key && column && !column.lockGroup && !activeGroupBy.includes(key)) commitGroupBy([...activeGroupBy, key]);
     setGroupPanelHover(false);
     setDragColumnKey(null);
   }
@@ -391,10 +444,16 @@ export function useDataGrid<T>({
         if (item.kind === "group") toggleGroupCollapsed(item.key);
         else if (selectable) selectRow(sortedRows.indexOf(item.row), { toggle: true });
         break;
-      case "Enter":
-        if (item.kind === "group") toggleGroupCollapsed(item.key);
+      case "Enter": {
+        if (item.kind === "group") {
+          toggleGroupCollapsed(item.key);
+          break;
+        }
+        const column = activeColumnKey ? columnByKey.get(activeColumnKey) : undefined;
+        if (column?.editable) startEdit(getRowId(item.row), column.key);
         else onRowActivate?.(item.row);
         break;
+      }
     }
   }
 
