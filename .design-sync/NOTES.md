@@ -34,7 +34,10 @@ Repo-specific gotchas for future syncs. One bullet per gotcha.
 - `ColorPickerWindow`, `SettingsWindow`, `FloatingPanel`, `PlatformShell` are absolutely-positioned or full-shell → each has `cfg.overrides.<Name>: {cardMode:"single", viewport:"WxH"}` so the open/large state renders inside the card instead of clipping.
 
 ## Known render warns (triaged legitimate)
-- (fill in after grading: e.g. single-look components, genuinely-small ones)
+- **MenuBarItem** — `variants render identically`: the dropdown opens on click only, so `Simple` and `WithDropdown` both render the closed item. Cannot show the open dropdown statically. Benign.
+- **DockStrip** / **ToolWindowDock RightDock** — genuinely narrow / collapsed-strip states render sparse. Correct, not broken.
+- **ColorPickerWindow** / **SettingsWindow** — the per-story `?story=` capture frame clips the absolutely-positioned window, but the shipped `.html` card (cardMode:single + viewport) renders the full window. Grade from the card, not the tight per-story frame.
+- **IconButton Default** — a single small ghost icon button reads sparse in a large card; the `Sizes`/`Toolbar` cells carry the component.
 
 ## Re-sync risks
 - (to be filled in before finishing)
