@@ -1,4 +1,4 @@
-.sp-filetree {
+.sp-tree {
   display: flex;
   flex-direction: column;
   font-family: var(--sp-font-ui);
@@ -7,7 +7,7 @@
   user-select: none;
 }
 
-.sp-filetree-row {
+.sp-tree-row {
   position: relative;
   display: flex;
   align-items: center;
@@ -19,21 +19,21 @@
   transition: background var(--sp-duration-fast) var(--sp-easing), box-shadow var(--sp-duration-fast) var(--sp-easing);
 }
 
-.sp-filetree-row:hover {
+.sp-tree-row:hover {
   background: var(--sp-surface-2);
 }
 
-.sp-filetree-row[data-selected] {
+.sp-tree-row[data-selected] {
   background: var(--sp-accent-soft);
   box-shadow: inset 2px 0 0 var(--sp-accent);
 }
 
-.sp-filetree-row:focus-visible {
+.sp-tree-row:focus-visible {
   box-shadow: inset 0 0 0 1px var(--sp-accent), inset 2px 0 0 var(--sp-accent);
 }
 
-.sp-filetree-chevron,
-.sp-filetree-chevron-spacer {
+.sp-tree-chevron,
+.sp-tree-chevron-spacer {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
@@ -42,27 +42,27 @@
   color: var(--sp-text-faint);
 }
 
-.sp-filetree-chevron {
+.sp-tree-chevron {
   transform: rotate(0deg);
   transition: transform var(--sp-duration-base) var(--sp-easing);
 }
 
-.sp-filetree-chevron[data-expanded] {
+.sp-tree-chevron[data-expanded] {
   transform: rotate(90deg);
 }
 
-.sp-filetree-icon {
+.sp-tree-icon {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   color: var(--sp-text-faint);
 }
 
-.sp-filetree-row[data-selected] .sp-filetree-icon {
+.sp-tree-row[data-selected] .sp-tree-icon {
   color: var(--sp-accent);
 }
 
-.sp-filetree-label {
+.sp-tree-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -70,24 +70,24 @@
 
 /* Expand/collapse animation — children stay mounted, only their height animates. */
 
-.sp-filetree-children {
+.sp-tree-children {
   display: grid;
   grid-template-rows: 0fr;
   transition: grid-template-rows var(--sp-duration-base) var(--sp-easing);
 }
 
-.sp-filetree-children[data-expanded] {
+.sp-tree-children[data-expanded] {
   grid-template-rows: 1fr;
 }
 
-.sp-filetree-children-inner {
+.sp-tree-children-inner {
   overflow: hidden;
   min-height: 0;
 }
 
 /* Context menu */
 
-.sp-filetree-contextmenu {
+.sp-tree-contextmenu {
   position: fixed;
   z-index: 200;
   min-width: 160px;
@@ -103,6 +103,6 @@
   box-shadow: var(--sp-shadow-md);
 }
 
-.sp-filetree-menuitem--destructive {
+.sp-tree-menuitem--destructive {
   color: #e5877e;
 }
