@@ -12,6 +12,56 @@
   overflow: hidden;
 }
 
+/* Group panel */
+
+.sp-datagrid-grouppanel {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-space-xs);
+  min-height: 30px;
+  flex: 0 0 auto;
+  padding: var(--sp-space-xs) var(--sp-space-sm);
+  background: var(--sp-surface-1);
+  border-bottom: 1px dashed var(--sp-border-strong);
+  transition: background var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-datagrid-grouppanel[data-hover] {
+  background: var(--sp-accent-soft);
+}
+
+.sp-datagrid-grouppanel-placeholder {
+  color: var(--sp-text-faint);
+  font-size: 11px;
+}
+
+.sp-datagrid-groupchip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-space-xs);
+  padding: 2px var(--sp-space-xs) 2px var(--sp-space-sm);
+  background: var(--sp-surface-3);
+  border: 1px solid var(--sp-border-strong);
+  border-radius: var(--sp-radius-xs);
+  font-size: 11px;
+  color: var(--sp-text);
+}
+
+.sp-datagrid-groupchip-remove {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--sp-text-faint);
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px;
+}
+
+.sp-datagrid-groupchip-remove:hover {
+  color: var(--sp-text);
+}
+
 /* Header */
 
 .sp-datagrid-header {
@@ -44,6 +94,28 @@
 .sp-datagrid-headercell[data-sortable]:hover {
   color: var(--sp-text);
   background: var(--sp-surface-3);
+}
+
+.sp-datagrid-headercell[data-dragging] {
+  opacity: 0.4;
+}
+
+.sp-datagrid-headercell[data-drop="before"]::before,
+.sp-datagrid-headercell[data-drop="after"]::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  width: 2px;
+  background: var(--sp-accent);
+}
+
+.sp-datagrid-headercell[data-drop="before"]::before {
+  left: 0;
+}
+
+.sp-datagrid-headercell[data-drop="after"]::after {
+  right: 0;
 }
 
 .sp-datagrid-headercell[data-align="right"] {
