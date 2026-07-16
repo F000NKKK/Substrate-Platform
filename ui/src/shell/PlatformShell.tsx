@@ -20,28 +20,40 @@ export function PlatformShell({ main, toolWindows, defaultPinned, menu }: Platfo
   const layout = useShellLayout(main, toolWindows, defaultPinned);
   const [dropZone, setDropZone] = useState<DropZone | null>(null);
 
-  // A left/right *flyout* is absolutely positioned and would otherwise span
-  // the full shell height, covering the bottom dock's strip. Pinned side
-  // panels don't have this problem (they're flex siblings, laid out beside the
-  // center column that holds the bottom dock), but the flyout overlays the
-  // main area, so it must stop exactly at the top of whatever the bottom dock
-  // currently occupies. We measure that live rather than re-deriving it from
-  // pinned/flyout counts, so every combination is exact by construction.
+  // The bottom dock drives two independent measurements of the space it takes,
+  // both measured live so every pinned/flyout combination is exact:
+  //   • bottomOccupied — the WHOLE dock height (panels + strip). A left/right
+  //     *flyout* overlays the main area, so it must stop above all of this.
+  //   • bottomBelow — the space BELOW the last pinned bottom panel (the strip
+  //     + the gap under it). Pinned side panels are capped by this so their
+  //     bottom edge lines up flush with the bottom panel's bottom edge, rather
+  //     than running past it down to the window's very bottom.
   const bottomSlotRef = useRef<HTMLDivElement>(null);
   const [bottomOccupied, setBottomOccupied] = useState(0);
+  const [bottomBelow, setBottomBelow] = useState(0);
   useLayoutEffect(() => {
     const el = bottomSlotRef.current;
     if (!el) {
       setBottomOccupied(0);
+      setBottomBelow(0);
       return;
     }
-    const measure = () => setBottomOccupied(el.offsetHeight);
+    const measure = () => {
+      const slot = el.getBoundingClientRect();
+      setBottomOccupied(slot.height);
+      const panels = el.querySelectorAll<HTMLElement>(".sp-dock--bottom > .sp-panel-surface");
+      const last = panels[panels.length - 1];
+      setBottomBelow(last ? Math.max(0, slot.bottom - last.getBoundingClientRect().bottom) : slot.height);
+    };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
   }, [layout.placements, toolWindows.bottom]);
-  const shellBodyStyle = { "--sp-bottom-occupied": `${bottomOccupied}px` } as CSSProperties;
+  const shellBodyStyle = {
+    "--sp-bottom-occupied": `${bottomOccupied}px`,
+    "--sp-bottom-below": `${bottomBelow}px`,
+  } as CSSProperties;
 
   function handleMainDragOver(e: DragEvent) {
     e.preventDefault();

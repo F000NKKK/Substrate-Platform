@@ -18,7 +18,7 @@
   display: flex;
   flex: 1;
   min-height: 0;
-  gap: var(--sp-space-xs);
+  gap: var(--sp-space-sm);
 }
 
 .sp-shell-center {
@@ -26,7 +26,7 @@
   flex-direction: column;
   flex: 1;
   min-width: 0;
-  gap: var(--sp-space-xs);
+  gap: var(--sp-space-sm);
 }
 
 .sp-shell-main {
@@ -88,15 +88,17 @@
 }
 
 /*
- * Left/right docks run the FULL shell height, down to the very bottom edge —
- * the bottom dock is nested inside the center column (a flex sibling between
- * these two), so it only ever spans the center's width and can't collide with
- * them. A side panel therefore reaches the bottom panel's own bottom border
- * (the window's bottom), exactly as in Visual Studio, with no height math.
+ * Left/right docks stop flush with the bottom PANEL's bottom edge, not the
+ * window's — capped by the space below that panel (strip + gap), measured live
+ * into --sp-bottom-below. With no bottom dock this is 0 and they run full
+ * height; with a bottom panel pinned, a pinned side panel's bottom lines up
+ * exactly with it, as in Visual Studio.
  */
 .sp-dock--left,
 .sp-dock--right {
   flex-direction: row;
+  align-self: flex-start;
+  height: calc(100% - var(--sp-bottom-below, 0px));
 }
 
 .sp-dock--bottom {
@@ -246,9 +248,14 @@
  * bottom dock occupies (measured live into --sp-bottom-occupied) so the
  * flyout never covers the bottom strip.
  */
+/*
+ * The region is already capped at the bottom panel's bottom (--sp-bottom-below
+ * above), so to clear the WHOLE bottom dock the flyout only needs to rise the
+ * remaining (occupied − below) plus a gap above it — never covering the strip.
+ */
 .sp-dock-flyout--left {
   top: 0;
-  bottom: var(--sp-bottom-occupied, 0px);
+  bottom: calc(var(--sp-bottom-occupied, 0px) - var(--sp-bottom-below, 0px) + var(--sp-space-sm));
   left: var(--sp-toolwindow-strip);
   width: var(--sp-toolwindow-size);
   border-radius: 0 var(--sp-radius-sm) var(--sp-radius-sm) 0;
@@ -256,7 +263,7 @@
 
 .sp-dock-flyout--right {
   top: 0;
-  bottom: var(--sp-bottom-occupied, 0px);
+  bottom: calc(var(--sp-bottom-occupied, 0px) - var(--sp-bottom-below, 0px) + var(--sp-space-sm));
   right: var(--sp-toolwindow-strip);
   width: var(--sp-toolwindow-size);
   border-radius: var(--sp-radius-sm) 0 0 var(--sp-radius-sm);

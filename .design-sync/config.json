@@ -1,0 +1,17 @@
+{
+  "pkg": "substrate-platform-ui",
+  "globalName": "SubstratePlatformUI",
+  "projectId": "5eb7591b-2af7-40ae-9ede-d71038975a96",
+  "shape": "package",
+  "srcDir": "src",
+  "tsconfig": "tsconfig.json",
+  "provider": {
+    "component": "ThemeProvider"
+  },
+  "runtimeFontPrefixes": ["Inter", "Avenir", "Cascadia Code"],
+  "overrides": {
+    "TerminalPanel": { "skip": true },
+    "ColorPickerWindow": { "cardMode": "single", "viewport": "360x420" },
+    "SettingsWindow": { "cardMode": "single", "viewport": "600x460" }
+  }
+}
