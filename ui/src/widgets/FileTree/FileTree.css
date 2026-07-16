@@ -1,0 +1,108 @@
+.sp-filetree {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+  color: var(--sp-text);
+  user-select: none;
+}
+
+.sp-filetree-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: var(--sp-space-sm);
+  outline: none;
+  cursor: default;
+  border-radius: var(--sp-radius-xs);
+  transition: background var(--sp-duration-fast) var(--sp-easing), box-shadow var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-filetree-row:hover {
+  background: var(--sp-surface-2);
+}
+
+.sp-filetree-row[data-selected] {
+  background: var(--sp-accent-soft);
+  box-shadow: inset 2px 0 0 var(--sp-accent);
+}
+
+.sp-filetree-row:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--sp-accent), inset 2px 0 0 var(--sp-accent);
+}
+
+.sp-filetree-chevron,
+.sp-filetree-chevron-spacer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  color: var(--sp-text-faint);
+}
+
+.sp-filetree-chevron {
+  transform: rotate(0deg);
+  transition: transform var(--sp-duration-base) var(--sp-easing);
+}
+
+.sp-filetree-chevron[data-expanded] {
+  transform: rotate(90deg);
+}
+
+.sp-filetree-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  color: var(--sp-text-faint);
+}
+
+.sp-filetree-row[data-selected] .sp-filetree-icon {
+  color: var(--sp-accent);
+}
+
+.sp-filetree-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Expand/collapse animation — children stay mounted, only their height animates. */
+
+.sp-filetree-children {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--sp-duration-base) var(--sp-easing);
+}
+
+.sp-filetree-children[data-expanded] {
+  grid-template-rows: 1fr;
+}
+
+.sp-filetree-children-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Context menu */
+
+.sp-filetree-contextmenu {
+  position: fixed;
+  z-index: 200;
+  min-width: 160px;
+  padding: var(--sp-space-xs);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--sp-surface-glass);
+  backdrop-filter: blur(var(--sp-blur));
+  -webkit-backdrop-filter: blur(var(--sp-blur));
+  border: 1px solid var(--sp-border-strong);
+  border-radius: var(--sp-radius-xs);
+  box-shadow: var(--sp-shadow-md);
+}
+
+.sp-filetree-menuitem--destructive {
+  color: #e5877e;
+}
