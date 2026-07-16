@@ -24,39 +24,122 @@ export interface ContextMenuProps {
   onClose: () => void;
 }
 
-function ContextMenuList({ items, onClose }: { items: ContextMenuItem[]; onClose: () => void }) {
+const VIEWPORT_MARGIN = 4;
+const SUBMENU_CLOSE_DELAY = 150;
+
+function clampToViewport(x: number, y: number, width: number, height: number) {
+  const maxLeft = Math.max(VIEWPORT_MARGIN, window.innerWidth - width - VIEWPORT_MARGIN);
+  const maxTop = Math.max(VIEWPORT_MARGIN, window.innerHeight - height - VIEWPORT_MARGIN);
+  return { left: Math.min(x, maxLeft), top: Math.min(y, maxTop) };
+}
+
+/** A submenu, portaled and positioned from its trigger row's rect — same viewport-clamping `ViewportMenu` gives the root menu, so a deep list can't run off the edge of the screen either. Flips to the trigger's left when there isn't room on the right. */
+function SubmenuPanel({
+  anchorRect,
+  items,
+  onClose,
+  onPointerEnter,
+  onPointerLeave,
+}: {
+  anchorRect: DOMRect;
+  items: ContextMenuItem[];
+  onClose: () => void;
+  onPointerEnter: () => void;
+  onPointerLeave: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ left: anchorRect.right, top: anchorRect.top });
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const fitsRight = anchorRect.right + rect.width + VIEWPORT_MARGIN <= window.innerWidth;
+    const left = fitsRight ? anchorRect.right : Math.max(VIEWPORT_MARGIN, anchorRect.left - rect.width);
+    const clamped = clampToViewport(left, anchorRect.top, rect.width, rect.height);
+    setPos(clamped);
+  }, [anchorRect]);
+
+  return createPortal(
+    <div
+      ref={ref}
+      className="sp-contextmenu-submenu"
+      style={{ left: pos.left, top: pos.top }}
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
+    >
+      <ContextMenuList items={items} onClose={onClose} />
+    </div>,
+    document.body
+  );
+}
+
+function MenuItemRow({ item, onClose }: { item: ContextMenuItem; onClose: () => void }) {
+  const rowRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<number | undefined>(undefined);
+
+  function scheduleClose() {
+    window.clearTimeout(closeTimer.current);
+    closeTimer.current = window.setTimeout(() => setOpen(false), SUBMENU_CLOSE_DELAY);
+  }
+  function cancelClose() {
+    window.clearTimeout(closeTimer.current);
+  }
+
   return (
-    <div className="sp-contextmenu-list">
-      {items.map((item, i) => (
-        <div className="sp-contextmenu-itemwrap" key={i}>
-          {item.separatorBefore && <div className="sp-contextmenu-separator" />}
-          <Tab
-            orientation="list"
-            disabled={item.disabled}
-            className={item.destructive ? "sp-contextmenu-item--destructive" : undefined}
-            onClick={() => {
-              if (item.disabled) return;
-              if (item.submenu) return;
-              item.onSelect?.();
-              onClose();
-            }}
-          >
-            {item.checked && <span className="sp-contextmenu-check">✓</span>}
-            {item.label}
-            {item.submenu && <span className="sp-contextmenu-caret">▸</span>}
-          </Tab>
-          {item.submenu && (
-            <div className="sp-contextmenu-submenu">
-              <ContextMenuList items={item.submenu} onClose={onClose} />
-            </div>
-          )}
-        </div>
-      ))}
+    <div
+      className="sp-contextmenu-itemwrap"
+      ref={rowRef}
+      onPointerEnter={() => {
+        if (!item.submenu) return;
+        cancelClose();
+        setOpen(true);
+      }}
+      onPointerLeave={() => {
+        if (!item.submenu) return;
+        scheduleClose();
+      }}
+    >
+      {item.separatorBefore && <div className="sp-contextmenu-separator" />}
+      <Tab
+        orientation="list"
+        disabled={item.disabled}
+        className={item.destructive ? "sp-contextmenu-item--destructive" : undefined}
+        onClick={() => {
+          if (item.disabled) return;
+          if (item.submenu) return;
+          item.onSelect?.();
+          onClose();
+        }}
+      >
+        {item.checked && <span className="sp-contextmenu-check">✓</span>}
+        {item.label}
+        {item.submenu && <span className="sp-contextmenu-dot" />}
+      </Tab>
+      {item.submenu && open && rowRef.current && (
+        <SubmenuPanel
+          anchorRect={rowRef.current.getBoundingClientRect()}
+          items={item.submenu}
+          onClose={onClose}
+          onPointerEnter={cancelClose}
+          onPointerLeave={scheduleClose}
+        />
+      )}
     </div>
   );
 }
 
-const VIEWPORT_MARGIN = 4;
+function ContextMenuList({ items, onClose }: { items: ContextMenuItem[]; onClose: () => void }) {
+  return (
+    <div className="sp-contextmenu-list">
+      {items.map((item, i) => (
+        <MenuItemRow item={item} onClose={onClose} key={i} />
+      ))}
+    </div>
+  );
+}
 
 /** Portaled viewport-fixed popup, clamped to stay fully on-screen regardless of where the triggering click landed. */
 function ViewportMenu({ x, y, items, onClose }: { x: number; y: number; items: ContextMenuItem[]; onClose: () => void }) {
@@ -67,9 +150,7 @@ function ViewportMenu({ x, y, items, onClose }: { x: number; y: number; items: C
     const el = ref.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    const maxLeft = Math.max(VIEWPORT_MARGIN, window.innerWidth - rect.width - VIEWPORT_MARGIN);
-    const maxTop = Math.max(VIEWPORT_MARGIN, window.innerHeight - rect.height - VIEWPORT_MARGIN);
-    setPos({ left: Math.min(x, maxLeft), top: Math.min(y, maxTop) });
+    setPos(clampToViewport(x, y, rect.width, rect.height));
   }, [x, y]);
 
   return createPortal(
@@ -91,9 +172,10 @@ function ViewportMenu({ x, y, items, onClose }: { x: number; y: number; items: C
  * with `overflow: hidden` or `backdrop-filter` (both of which trap
  * `position: fixed` to that ancestor instead of the viewport), so escaping
  * via portal is what keeps it from being clipped or mispositioned there too.
- * `mode: "anchor"` renders inline, positioned via CSS relative to whatever
- * already-positioned ancestor the consumer renders it inside — that ancestor
- * is the point, so it isn't portaled.
+ * Submenus get the same portal + clamp treatment, anchored to their trigger
+ * row instead of a click point. `mode: "anchor"` renders inline, positioned
+ * via CSS relative to whatever already-positioned ancestor the consumer
+ * renders it inside — that ancestor is the point, so it isn't portaled.
  */
 export function ContextMenu({ target, items, onClose }: ContextMenuProps) {
   if (!target) return null;
