@@ -91,31 +91,33 @@ export function DataGrid<T>(props: DataGridProps<T>) {
 
   return (
     <div className={["sp-datagrid", className].filter(Boolean).join(" ")} style={style}>
-      <div
-        className="sp-datagrid-grouppanel"
-        data-hover={grid.groupPanelHover || undefined}
-        onDragOver={grid.handleGroupPanelDragOver}
-        onDragLeave={() => grid.setGroupPanelHover(false)}
-        onDrop={grid.handleGroupPanelDrop}
-      >
-        {grid.activeGroupBy.length === 0 ? (
-          <span className="sp-datagrid-grouppanel-placeholder">Drag a column header here to group by that column</span>
-        ) : (
-          grid.activeGroupBy.map((key) => (
-            <span className="sp-datagrid-groupchip" key={key}>
-              {grid.columnByKey.get(key)?.header ?? key}
-              <button
-                type="button"
-                className="sp-datagrid-groupchip-remove"
-                aria-label={`Stop grouping by ${key}`}
-                onClick={() => grid.commitGroupBy(grid.activeGroupBy.filter((k) => k !== key))}
-              >
-                ×
-              </button>
-            </span>
-          ))
-        )}
-      </div>
+      {grid.groupPanelVisible && (
+        <div
+          className="sp-datagrid-grouppanel"
+          data-hover={grid.groupPanelHover || undefined}
+          onDragOver={grid.handleGroupPanelDragOver}
+          onDragLeave={() => grid.setGroupPanelHover(false)}
+          onDrop={grid.handleGroupPanelDrop}
+        >
+          {grid.activeGroupBy.length === 0 ? (
+            <span className="sp-datagrid-grouppanel-placeholder">Drag a column header here to group by that column</span>
+          ) : (
+            grid.activeGroupBy.map((key) => (
+              <span className="sp-datagrid-groupchip" key={key}>
+                {grid.columnByKey.get(key)?.header ?? key}
+                <button
+                  type="button"
+                  className="sp-datagrid-groupchip-remove"
+                  aria-label={`Stop grouping by ${key}`}
+                  onClick={() => grid.commitGroupBy(grid.activeGroupBy.filter((k) => k !== key))}
+                >
+                  ×
+                </button>
+              </span>
+            ))
+          )}
+        </div>
+      )}
 
       <div className="sp-datagrid-header" role="row" style={{ gridTemplateColumns: grid.gridTemplate }}>
         {selectable && (

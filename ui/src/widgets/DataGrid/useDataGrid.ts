@@ -166,6 +166,7 @@ export function useDataGrid<T>({
   const [dragColumnKey, setDragColumnKey] = useState<string | null>(null);
   const [dropIndicator, setDropIndicator] = useState<{ key: string; side: "before" | "after" } | null>(null);
   const [groupPanelHover, setGroupPanelHover] = useState(false);
+  const [groupPanelVisible, setGroupPanelVisible] = useState(true);
   const gridMenu = useContextMenu<DataGridMenuTarget<T>>();
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -265,6 +266,11 @@ export function useDataGrid<T>({
     commitSort(defaultSort);
     commitGroupBy(defaultGroupBy);
     setCollapsedGroups(new Set());
+    setGroupPanelVisible(true);
+  }
+
+  function toggleGroupPanelVisible() {
+    setGroupPanelVisible((v) => !v);
   }
 
   function startEdit(rowId: string, columnKey: string) {
@@ -483,6 +489,8 @@ export function useDataGrid<T>({
     dropIndicator,
     groupPanelHover,
     setGroupPanelHover,
+    groupPanelVisible,
+    toggleGroupPanelVisible,
     filters,
     setFilters,
     sortedRows,
