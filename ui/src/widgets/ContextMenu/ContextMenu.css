@@ -1,0 +1,67 @@
+.sp-contextmenu {
+  position: fixed;
+  z-index: 200;
+  min-width: 160px;
+  padding: var(--sp-space-xs);
+  background: var(--sp-surface-glass);
+  backdrop-filter: blur(var(--sp-blur));
+  -webkit-backdrop-filter: blur(var(--sp-blur));
+  border: 1px solid var(--sp-border-strong);
+  border-radius: var(--sp-radius-xs);
+  box-shadow: var(--sp-shadow-md);
+}
+
+.sp-contextmenu--anchor {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 2px;
+  z-index: 100;
+}
+
+.sp-contextmenu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sp-contextmenu-itemwrap {
+  position: relative;
+}
+
+.sp-contextmenu-item--destructive {
+  color: #e5877e;
+}
+
+.sp-contextmenu-check {
+  display: inline-flex;
+  width: 1em;
+  color: var(--sp-accent);
+}
+
+.sp-contextmenu-caret {
+  margin-left: auto;
+  color: var(--sp-text-faint);
+}
+
+.sp-contextmenu-submenu {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: 0;
+  min-width: 160px;
+  padding: var(--sp-space-xs);
+  background: var(--sp-surface-glass);
+  backdrop-filter: blur(var(--sp-blur));
+  -webkit-backdrop-filter: blur(var(--sp-blur));
+  border: 1px solid var(--sp-border-strong);
+  border-radius: var(--sp-radius-xs);
+  box-shadow: var(--sp-shadow-md);
+}
+
+.sp-contextmenu-itemwrap:hover > .sp-contextmenu-submenu,
+.sp-contextmenu-itemwrap:focus-within > .sp-contextmenu-submenu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

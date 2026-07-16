@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent as ReactMouseEvent } from "react";
 import type { TreeNode, TreeProps } from "./Tree";
+import { useContextMenu } from "../ContextMenu";
 
 export interface FlatEntry<T> {
   node: TreeNode<T>;
