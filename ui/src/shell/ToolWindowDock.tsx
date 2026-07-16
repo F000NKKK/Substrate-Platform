@@ -83,7 +83,7 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
       {anchor !== "left" && strip}
 
       {flyoutPanel && (
-        <FlyoutFrame anchor={anchor} regionRef={regionRef}>
+        <FlyoutFrame key={flyoutId} anchor={anchor} regionRef={regionRef}>
           <PanelSurface
             panelId={flyoutId!}
             title={flyoutPanel.title}

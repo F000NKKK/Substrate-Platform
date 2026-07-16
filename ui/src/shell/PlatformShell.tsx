@@ -1,5 +1,5 @@
-import type { DragEvent } from "react";
-import { useState } from "react";
+import type { CSSProperties, DragEvent } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { ToolWindowDock } from "./ToolWindowDock";
 import { CenterDock } from "./CenterDock";
 import { FloatingPanel } from "./FloatingPanel";
@@ -19,6 +19,29 @@ import "./shell.css";
 export function PlatformShell({ main, toolWindows, defaultPinned, menu }: PlatformShellProps) {
   const layout = useShellLayout(main, toolWindows, defaultPinned);
   const [dropZone, setDropZone] = useState<DropZone | null>(null);
+
+  // A left/right *flyout* is absolutely positioned and would otherwise span
+  // the full shell height, covering the bottom dock's strip. Pinned side
+  // panels don't have this problem (they're flex siblings, laid out beside the
+  // center column that holds the bottom dock), but the flyout overlays the
+  // main area, so it must stop exactly at the top of whatever the bottom dock
+  // currently occupies. We measure that live rather than re-deriving it from
+  // pinned/flyout counts, so every combination is exact by construction.
+  const bottomSlotRef = useRef<HTMLDivElement>(null);
+  const [bottomOccupied, setBottomOccupied] = useState(0);
+  useLayoutEffect(() => {
+    const el = bottomSlotRef.current;
+    if (!el) {
+      setBottomOccupied(0);
+      return;
+    }
+    const measure = () => setBottomOccupied(el.offsetHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [layout.placements, toolWindows.bottom]);
+  const shellBodyStyle = { "--sp-bottom-occupied": `${bottomOccupied}px` } as CSSProperties;
 
   function handleMainDragOver(e: DragEvent) {
     e.preventDefault();
@@ -42,7 +65,7 @@ export function PlatformShell({ main, toolWindows, defaultPinned, menu }: Platfo
   return (
     <div className="sp-shell">
       {menu && <div className="sp-shell-menu">{menu}</div>}
-      <div className="sp-shell-body">
+      <div className="sp-shell-body" style={shellBodyStyle}>
         {toolWindows.left && <ToolWindowDock anchor="left" layout={layout} />}
 
         <div className="sp-shell-center">
@@ -55,7 +78,11 @@ export function PlatformShell({ main, toolWindows, defaultPinned, menu }: Platfo
             <CenterDock layout={layout} />
             {dropZone && <div className={`sp-dock-guide sp-dock-guide--${dropZone}`} />}
           </div>
-          {toolWindows.bottom && <ToolWindowDock anchor="bottom" layout={layout} />}
+          {toolWindows.bottom && (
+            <div className="sp-bottom-slot" ref={bottomSlotRef}>
+              <ToolWindowDock anchor="bottom" layout={layout} />
+            </div>
+          )}
         </div>
 
         {toolWindows.right && <ToolWindowDock anchor="right" layout={layout} />}

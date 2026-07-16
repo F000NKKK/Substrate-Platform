@@ -37,6 +37,18 @@
   background: var(--sp-surface-0);
 }
 
+/*
+ * Wraps the bottom dock only so its live height can be measured (see
+ * PlatformShell). Kept a plain block flex-item — as a column-flex child of
+ * .sp-shell-center it stretches to full width and sizes its height to the
+ * dock, so the bottom dock spans the whole center width exactly as it did
+ * when it was a direct child here.
+ */
+.sp-bottom-slot {
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
 /* --- center dock (the tabbed document/main area) --- */
 
 .sp-center-dock {
@@ -228,10 +240,15 @@
 }
 
 /* Positioned against the strip's inner edge (strip width from the region edge), not 100% of the pinned-widened region. */
-/* Corner radius matches FlyoutFrame's CORNER_RADIUS (8px) so the glass fill lines up under the SVG stroke. */
+/*
+ * Corner radius matches FlyoutFrame's CORNER_RADIUS (8px) so the glass fill
+ * lines up under the SVG stroke. `bottom` stops at the top of whatever the
+ * bottom dock occupies (measured live into --sp-bottom-occupied) so the
+ * flyout never covers the bottom strip.
+ */
 .sp-dock-flyout--left {
   top: 0;
-  bottom: 0;
+  bottom: var(--sp-bottom-occupied, 0px);
   left: var(--sp-toolwindow-strip);
   width: var(--sp-toolwindow-size);
   border-radius: 0 var(--sp-radius-sm) var(--sp-radius-sm) 0;
@@ -239,7 +256,7 @@
 
 .sp-dock-flyout--right {
   top: 0;
-  bottom: 0;
+  bottom: var(--sp-bottom-occupied, 0px);
   right: var(--sp-toolwindow-strip);
   width: var(--sp-toolwindow-size);
   border-radius: var(--sp-radius-sm) 0 0 var(--sp-radius-sm);
