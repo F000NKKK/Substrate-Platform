@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode, Ref } from "react";
 import { IconButton } from "../../widgets/IconButton";
 import { IconPin, IconPinOff, IconClose, IconFloat } from "../../infra/icons";
+import { Outline } from "../../infra/outline";
 import { startPanelDrag, endPanelDrag } from "../dnd";
 
 export interface PanelSurfaceProps {
@@ -13,16 +14,21 @@ export interface PanelSurfaceProps {
   onFloat?: () => void;
   /** Sizing override for the root — e.g. a dock's own remembered width/height for this specific panel. */
   style?: CSSProperties;
-  /** The root element — e.g. so a dock can trace an `Outline` around this specific panel. */
+  /** The root element. */
   ref?: Ref<HTMLDivElement>;
   children: ReactNode;
 }
 
 /**
- * Chrome shared by every tool window regardless of where it currently
- * lives (docked, flyout, or floating): a draggable title bar — drag it onto
- * any dock strip to redock, or onto the center to join its tabs — plus
- * pin/float/close actions.
+ * Chrome shared by every tool window regardless of where it currently lives
+ * (docked, flyout, or floating): a draggable title bar — drag it onto any
+ * dock strip to redock, or onto the center to join its tabs — plus
+ * pin/float/close actions, and its own accent `Outline`.
+ *
+ * The outline lives INSIDE the panel (see `Outline`), so a pinned panel, its
+ * flyout state, and a floating panel all render one identical accent border
+ * that can never drift from the panel it belongs to — the whole class of
+ * "the outline lagged behind the panel" bugs is structurally impossible.
  */
 export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onFloat, style, ref, children }: PanelSurfaceProps) {
   return (
@@ -49,6 +55,7 @@ export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onF
         </div>
       </div>
       <div className="sp-panel-surface-body">{children}</div>
+      <Outline />
     </div>
   );
 }
