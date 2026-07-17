@@ -12,7 +12,10 @@
   justify-content: flex-end;
   flex: 0 0 auto;
   gap: 2px;
-  padding: var(--sp-space-xs);
+  /* Extra right clearance, same reasoning as the sidebar below — keeps these
+     buttons clear of a panel-level scrollbar track instead of sitting flush
+     against the edge it can appear in. */
+  padding: var(--sp-space-xs) 10px var(--sp-space-xs) var(--sp-space-xs);
   border-bottom: 1px solid var(--sp-border);
 }
 

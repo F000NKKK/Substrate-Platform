@@ -40,6 +40,18 @@ export interface TerminalPanelProps {
 const DEFAULT_COMMANDS = { spawn: "pty_spawn", write: "pty_write", resize: "pty_resize", kill: "pty_kill" };
 const FALLBACK_SHELL: TerminalShellKind = { id: "default", label: "Terminal" };
 
+/**
+ * Terminal ids are unique per real session (Date.now()-suffixed, never
+ * reused), but React.StrictMode double-invokes effects in dev — mount,
+ * cleanup, mount again — for the *same* id. Each invocation owns its own
+ * `cleared`/`clearTimer` closure, so without this, both the orphaned first
+ * mount's delayed clear and the second mount's legitimate one can end up
+ * firing against whichever session is actually live, writing the clear
+ * command twice. Tracking "already auto-cleared" here, keyed by id and
+ * shared across every mount, makes that a no-op past the first one to land.
+ */
+const autoClearedIds = new Set<string>();
+
 function defaultClearCommand(id: string): string {
   // `\r`, not `\n` — see shell.rs's `clear_command_for` for why (PSReadLine
   // only submits on `\r`, unlike bash's readline which accepts either).
@@ -339,10 +351,15 @@ function TerminalInstance({ id, shell, clearCommand, active, commands, outputEve
     let cleared = false;
     let clearTimer: number | undefined;
     function scheduleClear() {
-      if (cleared) return;
+      if (cleared || autoClearedIds.has(id)) return;
       window.clearTimeout(clearTimer);
       clearTimer = window.setTimeout(() => {
         cleared = true;
+        // Re-check at fire time, not just at schedule time — a sibling mount
+        // for this same id (StrictMode's double-invoke) could have won the
+        // race and already fired in between.
+        if (autoClearedIds.has(id)) return;
+        autoClearedIds.add(id);
         runClear();
       }, CLEAR_QUIET_MS);
     }
@@ -363,8 +380,10 @@ function TerminalInstance({ id, shell, clearCommand, active, commands, outputEve
 
     const onData = term.onData((data) => {
       // The user is already typing — running the auto-clear out from under
-      // them now would erase what they can see, so cancel it for good.
+      // them now would erase what they can see, so cancel it for good (and
+      // for any sibling mount of this same id still holding a pending timer).
       cleared = true;
+      autoClearedIds.add(id);
       window.clearTimeout(clearTimer);
       invoke(commands.write, { id, data }).catch(() => {});
     });
