@@ -216,7 +216,7 @@ export function DataGrid<T>(props: DataGridProps<T>) {
           if (e.target === e.currentTarget) grid.gridMenu.openAtPoint({ kind: "grid" }, e);
         }}
       >
-        {grid.displayItems.length === 0 ? (
+        {grid.visibleColumns.length === 0 || grid.displayItems.length === 0 ? (
           <div className="sp-datagrid-empty">{emptyState ?? "No rows"}</div>
         ) : (
           <div

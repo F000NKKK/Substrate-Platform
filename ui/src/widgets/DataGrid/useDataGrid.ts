@@ -257,6 +257,10 @@ export function useDataGrid<T>({
     if (next.has(key)) next.delete(key);
     else next.add(key);
     commitHiddenColumns(next);
+    // Hiding the last visible column leaves nothing to group by — clear it
+    // rather than keep a grouping the grid can no longer show any column for.
+    const anyStillVisible = columns.some((c) => !next.has(c.key) && !activeGroupBy.includes(c.key));
+    if (!anyStillVisible && activeGroupBy.length > 0) commitGroupBy([]);
   }
 
   function resetToDefaults() {
