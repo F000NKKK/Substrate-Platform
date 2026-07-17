@@ -43,11 +43,12 @@
 /*
  * Insets the bottom dock so its own left/right edges land exactly where the
  * left/right dock's PANEL edge sits (not the strip, not the window edge) —
- * `--sp-toolwindow-strip` is the same physical offset whether that panel is
- * currently pinned (laid out after the strip) or a flyout (`left/right:
- * var(--sp-toolwindow-strip)` in dock.css), so one fixed inset lines up with
- * either state with no live measurement needed. Applied only on the sides
- * that actually have a dock, via PlatformShell's inline style.
+ * `strip size + the dock's own gap` is the same physical offset a pinned
+ * panel sits at, and dock.css's flyout positioning now matches that same
+ * offset (rather than sitting flush against the strip) specifically so nothing
+ * shifts between the two states — one fixed inset here lines up with either
+ * with no live measurement needed. Applied only on the sides that actually
+ * have a dock, via PlatformShell's inline style.
  */
 .sp-shell-bottom-inset {
   min-width: 0;

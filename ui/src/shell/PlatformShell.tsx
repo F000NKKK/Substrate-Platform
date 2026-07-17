@@ -29,8 +29,8 @@ export function PlatformShell({ main, toolWindows, defaultPinned, menu }: Platfo
   const [dropZone, setDropZone] = useState<DropZone | null>(null);
 
   const bottomInsetStyle: CSSProperties = {
-    marginLeft: toolWindows.left ? "var(--sp-toolwindow-strip)" : undefined,
-    marginRight: toolWindows.right ? "var(--sp-toolwindow-strip)" : undefined,
+    marginLeft: toolWindows.left ? "calc(var(--sp-toolwindow-strip) + var(--sp-space-xs))" : undefined,
+    marginRight: toolWindows.right ? "calc(var(--sp-toolwindow-strip) + var(--sp-space-xs))" : undefined,
   };
 
   function handleMainDragOver(e: DragEvent) {
