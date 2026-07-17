@@ -103,6 +103,11 @@ export function TerminalPanel({
 
   const shells = shellsProp ?? detectedShells;
   const activeGroupId = tabs.find((t) => t.id === activeId)?.groupId;
+  // Groups in first-appearance order, each group's members in insertion order
+  // — keeps split siblings adjacent in the sidebar even if unrelated tabs
+  // were created in between them.
+  const groupIds = [...new Set(tabs.map((t) => t.groupId))];
+  const orderedTabs = groupIds.flatMap((gid) => tabs.filter((t) => t.groupId === gid));
 
   useEffect(() => {
     if (shellsProp) return;
@@ -209,7 +214,7 @@ export function TerminalPanel({
       </div>
       <div className="sp-terminal-body">
         <div className="sp-terminal-views">
-          {[...new Set(tabs.map((t) => t.groupId))].map((groupId) => (
+          {groupIds.map((groupId) => (
             <div key={groupId} className="sp-terminal-group" data-active={groupId === activeGroupId || undefined}>
               {tabs
                 .filter((t) => t.groupId === groupId)
@@ -243,11 +248,12 @@ export function TerminalPanel({
           ))}
         </div>
         <div className="sp-terminal-sidebar">
-          {tabs.map((t) => (
+          {orderedTabs.map((t, i) => (
             <div
               key={t.id}
               className="sp-terminal-sidebar-item"
               data-active={t.id === activeId || undefined}
+              data-split={(i > 0 && orderedTabs[i - 1].groupId === t.groupId) || undefined}
               onClick={() => setActiveId(t.id)}
             >
               <Icon name="terminal" size={14} />
