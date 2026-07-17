@@ -5,7 +5,7 @@ import { CenterDock } from "../dock/CenterDock/CenterDock";
 import { FloatingPanel } from "../dock/FloatingPanel/FloatingPanel";
 import { useShellLayout } from "../dock/hooks/useShellLayout";
 import { readPanelDrag, zoneFromPoint, type DropZone } from "../dock/dnd";
-import type { PlatformShellProps } from "../dock/types";
+import type { PlatformShellProps } from "./types";
 import "../dock/dock.css";
 import "./shell.css";
 

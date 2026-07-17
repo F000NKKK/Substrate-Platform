@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from "react";
+import type { ComponentType } from "react";
 
 export type ToolWindowAnchor = "left" | "right" | "bottom";
 
@@ -9,15 +9,6 @@ export interface PanelDef {
   id: string;
   title: string;
   component: ComponentType;
-}
-
-export interface PlatformShellProps {
-  /** The center zone's first tab (e.g. a designer/editor canvas) — the center zone itself is a normal tabbed dock, so more panels can join it later by being dragged in. */
-  main: PanelDef;
-  toolWindows: Partial<Record<ToolWindowAnchor, PanelDef[]>>;
-  /** Panel ids that start pinned (docked, taking layout space) rather than auto-hidden. */
-  defaultPinned?: Partial<Record<ToolWindowAnchor, string>>;
-  menu?: ReactNode;
 }
 
 export type DockMode = "hidden" | "flyout" | "pinned";

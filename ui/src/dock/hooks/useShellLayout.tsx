@@ -9,6 +9,13 @@ const DEFAULT_ANCHOR_SIZE: Record<ToolWindowAnchor, number> = { left: 260, right
 const MIN_ANCHOR_SIZE = 120;
 const MAX_ANCHOR_SIZE = 900;
 
+/** Pinned and flyout are sized independently — a pinned panel holds permanent layout space so it's often sized differently than the same panel peeking open as a temporary overlay. */
+type SizeMode = "pinned" | "flyout";
+
+function sizeKey(panelId: string, anchor: ToolWindowAnchor, mode: SizeMode): string {
+  return `${panelId}:${anchor}:${mode}`;
+}
+
 /** Only one flyout may peek open per anchor at a time — pinned panels are untouched by this (several can be pinned side by side). */
 function closeOtherFlyouts(
   placements: Record<string, PanelPlacement>,
@@ -44,9 +51,15 @@ export interface ShellLayout {
   close: (id: string) => void;
   dockTo: (id: string, anchor: DockAnchor) => void;
   floatAt: (id: string, x: number, y: number) => void;
-  /** Current pinned width (left/right) or height (bottom) for an anchor — shared by every panel pinned there, same as the CSS token it overrides. */
-  anchorSize: (anchor: ToolWindowAnchor) => number;
-  setAnchorSize: (anchor: ToolWindowAnchor, size: number) => void;
+  /**
+   * A panel's own remembered width (left/right) or height (bottom) — tracked
+   * per panel, per anchor, AND per pinned/flyout mode (6 independent slots
+   * total across the 3 anchors, since a panel keeps a separate size for each
+   * one it's visited, in each mode). Falls back to the anchor's default until
+   * that specific combination has been resized at least once.
+   */
+  anchorSize: (panelId: string, anchor: ToolWindowAnchor, mode: SizeMode) => number;
+  setAnchorSize: (panelId: string, anchor: ToolWindowAnchor, mode: SizeMode, size: number) => void;
 }
 
 /**
