@@ -14,6 +14,8 @@ export interface TerminalShellKind {
   label: string;
   /** Passed as-is to the backend's `pty_spawn`; omit to use its own OS default shell. */
   shell?: string;
+  /** What to type into this shell to clear its screen — defaults are inferred from `id` (`Clear-Host` for pwsh/powershell, `cls` for cmd, `clear` otherwise). Must be an actual shell command, not a client-side terminal clear: the shell's own line-editor tracks cursor position itself and only resyncs when it's the one that ran the clear. */
+  clearCommand?: string;
 }
 
 export interface TerminalPanelProps {
@@ -31,17 +33,29 @@ export interface TerminalPanelProps {
    * assuming e.g. zsh/pwsh exist).
    */
   shells?: TerminalShellKind[];
-  /** Tauri command returning `{ id, label, command }[]` for every shell actually available. Ignored if `shells` is given. */
+  /** Tauri command returning `{ id, label, command, clearCommand }[]` for every shell actually available. Ignored if `shells` is given. */
   listShellsCommand?: string;
 }
 
 const DEFAULT_COMMANDS = { spawn: "pty_spawn", write: "pty_write", resize: "pty_resize", kill: "pty_kill" };
 const FALLBACK_SHELL: TerminalShellKind = { id: "default", label: "Terminal" };
 
+function defaultClearCommand(id: string): string {
+  if (id === "pwsh" || id === "powershell") return "Clear-Host\n";
+  if (id === "cmd") return "cls\n";
+  return "clear\n";
+}
+
 interface TerminalTab {
   id: string;
-  label: string;
   shellId: string;
+  /** This shell kind's instance number (Bash, Bash 2, Bash 3, ...) — reused from whatever's currently free, not a monotonic counter, so closing "Bash 2" means the next new Bash becomes "Bash 2" again instead of "Bash 4". */
+  n: number;
+}
+
+function labelFor(kind: TerminalShellKind | undefined, tab: TerminalTab): string {
+  const base = kind?.label ?? tab.shellId;
+  return tab.n > 1 ? `${base} ${tab.n}` : base;
 }
 
 /**
@@ -63,7 +77,6 @@ export function TerminalPanel({
   const [detectedShells, setDetectedShells] = useState<TerminalShellKind[] | null>(shellsProp ?? null);
   const [tabs, setTabs] = useState<TerminalTab[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const countersRef = useRef<Record<string, number>>({});
   const clearHandlesRef = useRef<Record<string, () => void>>({});
   const addMenu = useContextMenu<void>();
   const moreMenu = useContextMenu<void>();
@@ -72,20 +85,26 @@ export function TerminalPanel({
 
   useEffect(() => {
     if (shellsProp) return;
-    invoke<{ id: string; label: string; command: string }[]>(listShellsCommand)
+    invoke<{ id: string; label: string; command: string; clearCommand: string }[]>(listShellsCommand)
       .then((detected) =>
-        setDetectedShells(detected.length > 0 ? detected.map((s) => ({ id: s.id, label: s.label, shell: s.command })) : [FALLBACK_SHELL])
+        setDetectedShells(
+          detected.length > 0
+            ? detected.map((s) => ({ id: s.id, label: s.label, shell: s.command, clearCommand: s.clearCommand }))
+            : [FALLBACK_SHELL]
+        )
       )
       .catch(() => setDetectedShells([FALLBACK_SHELL]));
   }, [shellsProp, listShellsCommand]);
 
   function addTerminal(kind: TerminalShellKind) {
-    const n = (countersRef.current[kind.id] ?? 0) + 1;
-    countersRef.current[kind.id] = n;
-    const id = `term-${kind.id}-${n}-${Date.now()}`;
-    const label = n > 1 ? `${kind.label} ${n}` : kind.label;
-    setTabs((prev) => [...prev, { id, label, shellId: kind.id }]);
-    setActiveId(id);
+    setTabs((prev) => {
+      const used = new Set(prev.filter((t) => t.shellId === kind.id).map((t) => t.n));
+      let n = 1;
+      while (used.has(n)) n++;
+      const id = `term-${kind.id}-${n}-${Date.now()}`;
+      setActiveId(id);
+      return [...prev, { id, shellId: kind.id, n }];
+    });
   }
 
   function closeTerminal(id: string) {
@@ -152,6 +171,7 @@ export function TerminalPanel({
                 key={t.id}
                 id={t.id}
                 shell={kind?.shell}
+                clearCommand={kind?.clearCommand ?? defaultClearCommand(t.shellId)}
                 active={t.id === activeId}
                 commands={commands}
                 outputEvent={outputEvent}
@@ -174,7 +194,7 @@ export function TerminalPanel({
               onClick={() => setActiveId(t.id)}
             >
               <Icon name="terminal" size={14} />
-              <span className="sp-terminal-sidebar-item-label">{t.label}</span>
+              <span className="sp-terminal-sidebar-item-label">{labelFor(shells?.find((s) => s.id === t.shellId), t)}</span>
               <IconButton
                 size={22}
                 title="Close terminal"
@@ -197,6 +217,7 @@ export function TerminalPanel({
 interface TerminalInstanceProps {
   id: string;
   shell?: string;
+  clearCommand: string;
   active: boolean;
   commands: { spawn: string; write: string; resize: string; kill: string };
   outputEvent: string;
@@ -206,13 +227,15 @@ interface TerminalInstanceProps {
   onReady: (clear: (() => void) | null) => void;
 }
 
-function TerminalInstance({ id, shell, active, commands, outputEvent, exitEvent, onExit, onReady }: TerminalInstanceProps) {
+function TerminalInstance({ id, shell, clearCommand, active, commands, outputEvent, exitEvent, onExit, onReady }: TerminalInstanceProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const fitRef = useRef<(() => void) | null>(null);
+  const termRef = useRef<XTerm | null>(null);
   const onExitRef = useRef(onExit);
   onExitRef.current = onExit;
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
+  const menu = useContextMenu<void>();
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -223,9 +246,31 @@ function TerminalInstance({ id, shell, active, commands, outputEvent, exitEvent,
       theme: { background: "transparent" },
       cursorBlink: true,
     });
+    termRef.current = term;
     const fitAddon = new FitAddon();
     term.loadAddon(fitAddon);
     term.open(containerRef.current);
+
+    // Ctrl+Shift+C/V for copy/paste — xterm's own defaults for these
+    // (Ctrl+C/V) are reserved for SIGINT and shell-native paste, so the
+    // clipboard shortcuts live one modifier over, same as VS Code's terminal.
+    term.attachCustomKeyEventHandler((e) => {
+      if (e.type !== "keydown" || !e.ctrlKey || !e.shiftKey) return true;
+      const key = e.key.toLowerCase();
+      if (key === "c") {
+        const selection = term.getSelection();
+        if (selection) navigator.clipboard.writeText(selection).catch(() => {});
+        return false;
+      }
+      if (key === "v") {
+        navigator.clipboard
+          .readText()
+          .then((text) => invoke(commands.write, { id, data: text }))
+          .catch(() => {});
+        return false;
+      }
+      return true;
+    });
     const fit = () => {
       try {
         fitAddon.fit();
@@ -235,15 +280,24 @@ function TerminalInstance({ id, shell, active, commands, outputEvent, exitEvent,
     };
     fitRef.current = fit;
     fit();
-    onReadyRef.current(() => term.clear());
 
-    // Clearing by typing a shell command (`clear`/`Clear-Host`/`cls`) races
-    // that shell's own startup (profile scripts, MOTD, etc.) — a slow-loading
-    // profile (pwsh especially) prints its banner *after* the command already
-    // ran, leaving it on screen. Instead, clear the xterm buffer itself (no
-    // shell involvement, so it's identical across every shell) once output
-    // has gone quiet for a beat — that beat absorbs however long the shell's
-    // startup output takes, regardless of shell kind or profile speed.
+    // A client-side-only clear (xterm's own `term.clear()`) desyncs from the
+    // shell's own line-editor: readline/PSReadLine track the cursor position
+    // themselves, and only resync that tracking when *they're* the one that
+    // ran the clear. Clearing just the display leaves that tracking stale, so
+    // the shell's next redraw computes cursor moves from the old position and
+    // everything typed afterward renders rows-below/columns-right of where it
+    // should. So "clear" here always means "make the shell run its own clear
+    // command" — never touch the xterm buffer directly.
+    const runClear = () => invoke(commands.write, { id, data: clearCommand }).catch(() => {});
+    onReadyRef.current(runClear);
+
+    // Firing that clear command immediately after spawn races the shell's own
+    // startup (profile scripts, MOTD, etc.) — a slow-loading profile (pwsh
+    // especially) prints its banner *after* the command already ran, leaving
+    // it on screen. Waiting for a quiet beat in the output stream absorbs
+    // however long that startup takes, regardless of shell kind or profile
+    // speed, before the clear actually runs.
     const CLEAR_QUIET_MS = 200;
     let cleared = false;
     let clearTimer: number | undefined;
@@ -252,7 +306,7 @@ function TerminalInstance({ id, shell, active, commands, outputEvent, exitEvent,
       window.clearTimeout(clearTimer);
       clearTimer = window.setTimeout(() => {
         cleared = true;
-        term.clear();
+        runClear();
       }, CLEAR_QUIET_MS);
     }
 
@@ -271,8 +325,8 @@ function TerminalInstance({ id, shell, active, commands, outputEvent, exitEvent,
       .catch((err) => term.writeln(`\r\n[failed to start shell: ${err}]`));
 
     const onData = term.onData((data) => {
-      // The user is already typing — clearing out from under them now would
-      // erase what they can see, so cancel the pending auto-clear for good.
+      // The user is already typing — running the auto-clear out from under
+      // them now would erase what they can see, so cancel it for good.
       cleared = true;
       window.clearTimeout(clearTimer);
       invoke(commands.write, { id, data }).catch(() => {});
