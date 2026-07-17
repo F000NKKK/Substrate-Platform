@@ -9,6 +9,14 @@ pub struct ShellInfo {
     pub id: String,
     pub label: String,
     pub command: String,
+    /// What to type into this shell to clear its screen. Must be an actual
+    /// command the shell executes (not a client-side terminal clear) — the
+    /// shell's own line-editor (readline/PSReadLine) tracks the cursor
+    /// position itself, and only resyncs that tracking when it's the one
+    /// that ran the clear. A client-side-only clear leaves the shell's
+    /// tracking stale, so its next redraw computes cursor moves from the old
+    /// position and everything typed afterward renders offset.
+    pub clear_command: String,
 }
 
 fn exists_in_path(name: &str) -> bool {
@@ -16,6 +24,14 @@ fn exists_in_path(name: &str) -> bool {
     std::env::split_paths(&path).any(|dir| {
         dir.join(name).is_file() || (cfg!(target_os = "windows") && dir.join(format!("{name}.exe")).is_file())
     })
+}
+
+fn clear_command_for(id: &str) -> &'static str {
+    match id {
+        "pwsh" | "powershell" => "Clear-Host\n",
+        "cmd" => "cls\n",
+        _ => "clear\n",
+    }
 }
 
 /// Every shell worth offering, filtered down to the ones actually resolvable
@@ -31,6 +47,11 @@ pub fn detect_shells() -> Vec<ShellInfo> {
     candidates
         .iter()
         .filter(|(bin, _)| exists_in_path(bin))
-        .map(|(bin, label)| ShellInfo { id: bin.to_string(), label: label.to_string(), command: bin.to_string() })
+        .map(|(bin, label)| ShellInfo {
+            id: bin.to_string(),
+            label: label.to_string(),
+            command: bin.to_string(),
+            clear_command: clear_command_for(bin).to_string(),
+        })
         .collect()
 }
