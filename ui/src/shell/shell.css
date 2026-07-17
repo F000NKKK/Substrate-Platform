@@ -13,40 +13,33 @@
   flex: 0 0 auto;
 }
 
+/* Column: the upper row (left dock / main / right dock) above the bottom
+   dock, which spans the full width below all three — so its left edge
+   always lines up with the left dock's outer edge instead of only the
+   center column's. */
 .sp-shell-body {
   position: relative;
   display: flex;
+  flex-direction: column;
   flex: 1;
   min-height: 0;
   gap: var(--sp-space-sm);
 }
 
-.sp-shell-center {
+.sp-shell-upper {
   display: flex;
-  flex-direction: column;
   flex: 1;
-  min-width: 0;
+  min-height: 0;
   gap: var(--sp-space-sm);
 }
 
 .sp-shell-main {
   position: relative;
   flex: 1;
+  min-width: 0;
   min-height: 0;
   overflow: hidden;
   background: var(--sp-surface-0);
-}
-
-/*
- * Wraps the bottom dock only so its live height can be measured (see
- * PlatformShell). Kept a plain block flex-item — as a column-flex child of
- * .sp-shell-center it stretches to full width and sizes its height to the
- * dock, so the bottom dock spans the whole center width exactly as it did
- * when it was a direct child here.
- */
-.sp-bottom-slot {
-  flex: 0 0 auto;
-  min-height: 0;
 }
 
 /* --- center dock (the tabbed document/main area) --- */

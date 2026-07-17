@@ -48,10 +48,10 @@ export function PlatformShell({ main, toolWindows, defaultPinned, menu }: Platfo
   return (
     <div className="sp-shell">
       {menu && <div className="sp-shell-menu">{menu}</div>}
-      <div className="sp-shell-body" style={shellBodyStyle}>
-        {toolWindows.left && <ToolWindowDock anchor="left" layout={layout} />}
+      <div className="sp-shell-body">
+        <div className="sp-shell-upper">
+          {toolWindows.left && <ToolWindowDock anchor="left" layout={layout} />}
 
-        <div className="sp-shell-center">
           <div
             className="sp-shell-main"
             onDragOver={handleMainDragOver}
@@ -61,14 +61,11 @@ export function PlatformShell({ main, toolWindows, defaultPinned, menu }: Platfo
             <CenterDock layout={layout} />
             {dropZone && <div className={`sp-dock-guide sp-dock-guide--${dropZone}`} />}
           </div>
-          {toolWindows.bottom && (
-            <div className="sp-bottom-slot" ref={bottomSlotRef}>
-              <ToolWindowDock anchor="bottom" layout={layout} />
-            </div>
-          )}
+
+          {toolWindows.right && <ToolWindowDock anchor="right" layout={layout} />}
         </div>
 
-        {toolWindows.right && <ToolWindowDock anchor="right" layout={layout} />}
+        {toolWindows.bottom && <ToolWindowDock anchor="bottom" layout={layout} />}
 
         {layout.floatingIds.map((id) => {
           const panel = layout.panelsById[id];
