@@ -68,6 +68,10 @@
 .sp-datagrid-header {
   display: grid;
   flex: 0 0 auto;
+  /* Stays a fixed, clickable strip even with zero visible columns (e.g. every
+     column hidden) — otherwise it collapses to its border and there's nothing
+     left to right-click to bring a column back via "Show hidden columns". */
+  min-height: 28px;
   background: var(--sp-surface-2);
   border-bottom: 1px solid var(--sp-border-strong);
   scrollbar-gutter: stable;
