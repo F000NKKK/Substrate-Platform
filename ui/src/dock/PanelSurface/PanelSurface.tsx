@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { IconButton } from "../../widgets/IconButton";
 import { IconPin, IconPinOff, IconClose, IconFloat } from "../../infra/icons";
 import { startPanelDrag, endPanelDrag } from "../dnd";
@@ -11,6 +11,8 @@ export interface PanelSurfaceProps {
   onClose: () => void;
   /** Omit to hide the pop-out action (e.g. a panel that's already floating). */
   onFloat?: () => void;
+  /** Sizing override for the root — e.g. a dock's own remembered width/height for this specific panel. */
+  style?: CSSProperties;
   children: ReactNode;
 }
 
@@ -20,9 +22,9 @@ export interface PanelSurfaceProps {
  * any dock strip to redock, or onto the center to join its tabs — plus
  * pin/float/close actions.
  */
-export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onFloat, children }: PanelSurfaceProps) {
+export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onFloat, style, children }: PanelSurfaceProps) {
   return (
-    <div className="sp-panel-surface">
+    <div className="sp-panel-surface" style={style}>
       <div
         className="sp-panel-surface-header"
         draggable
