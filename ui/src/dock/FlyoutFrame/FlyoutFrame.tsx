@@ -32,17 +32,17 @@ export interface FlyoutFrameProps {
  */
 export function FlyoutFrame({ anchor, regionRef, size, resizeHandle, onOutsideClick, children }: FlyoutFrameProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const handleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as Node;
       const tabEl = regionRef.current?.querySelector<HTMLElement>('.sp-dock-strip [data-active="true"]');
-      // The resize handle is rendered as a sibling of the panel (not inside
-      // it — see the `resizeHandle` prop doc), specifically to escape the
-      // panel's own `overflow: hidden`. Grabbing it is still "interacting
-      // with this flyout", not a click that should close it.
-      const onResizeHandle = target instanceof Element && target.closest(".sp-dock-resize");
-      if (panelRef.current?.contains(target) || tabEl?.contains(target) || onResizeHandle) return;
+      // Only THIS flyout's own resize handle counts as "still interacting
+      // with it" — a different panel's handle (e.g. Properties pinned next
+      // to this Solution Explorer flyout) is unrelated and should close it
+      // like any other outside click, same as clicking that panel itself.
+      if (panelRef.current?.contains(target) || tabEl?.contains(target) || handleRef.current?.contains(target)) return;
       onOutsideClick();
     };
     document.addEventListener("pointerdown", onPointerDown);
@@ -56,7 +56,9 @@ export function FlyoutFrame({ anchor, regionRef, size, resizeHandle, onOutsideCl
       <div ref={panelRef} className={`sp-dock-flyout sp-dock-flyout--${anchor}`} style={sizeStyle}>
         {children}
       </div>
-      {resizeHandle}
+      <div ref={handleRef} style={{ display: "contents" }}>
+        {resizeHandle}
+      </div>
       <Outline
         regionRef={regionRef}
         targets={[panelRef, () => regionRef.current?.querySelector<HTMLElement>('.sp-dock-strip [data-active="true"]') ?? null]}
