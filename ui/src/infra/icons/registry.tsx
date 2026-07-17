@@ -25,6 +25,8 @@ const defaultIcons: Record<string, IconComponent> = {
   maximize: glyphs.IconMaximize,
   restore: glyphs.IconRestore,
   plus: glyphs.IconPlus,
+  trash: glyphs.IconTrash,
+  more: glyphs.IconMore,
 };
 
 const globalOverrides: Record<string, IconComponent> = {};

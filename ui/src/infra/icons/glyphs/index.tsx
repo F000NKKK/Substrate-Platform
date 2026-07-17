@@ -17,3 +17,5 @@ export { IconMinimize } from "./IconMinimize";
 export { IconMaximize } from "./IconMaximize";
 export { IconRestore } from "./IconRestore";
 export { IconPlus } from "./IconPlus";
+export { IconTrash } from "./IconTrash";
+export { IconMore } from "./IconMore";
