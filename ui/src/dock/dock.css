@@ -336,20 +336,9 @@
   background: transparent;
 }
 
-/*
- * The hand-drawn accent outline around a flyout + its strip tab. Covers the
- * whole dock region as a coordinate canvas; overflow is visible so the panel
- * part (which extends past the narrow strip region, out over the main area)
- * isn't clipped. Purely decorative — clicks pass straight through to the panel.
- */
+/* Base positioning/overflow for this comes from the shared `.sp-outline` (see infra/outline) — just the stacking order on top of the flyout panel itself. */
 .sp-flyout-border {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
   z-index: 41;
-  pointer-events: none;
 }
 
 @keyframes sp-flyout-in {

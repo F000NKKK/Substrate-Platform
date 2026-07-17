@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, type CSSProperties, type PointerEvent as R
 import { DockStrip } from "../DockStrip/DockStrip";
 import { PanelSurface } from "../PanelSurface/PanelSurface";
 import { FlyoutFrame } from "../FlyoutFrame/FlyoutFrame";
+import { Outline } from "../../infra/outline";
 import type { ShellLayout } from "../hooks/useShellLayout";
 import type { ToolWindowAnchor } from "../types";
 
@@ -91,6 +92,7 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
   const flyoutPanel = flyoutId ? layout.panelsById[flyoutId] : null;
 
   const regionRef = useRef<HTMLDivElement>(null);
+  const panelRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     if (!flyoutId) return;
@@ -121,6 +123,9 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
     const panelEl = (
       <PanelSurface
         key="panel"
+        ref={(el) => {
+          panelRefs.current[id] = el;
+        }}
         panelId={id}
         title={panel.title}
         pinned
@@ -136,6 +141,7 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
     return (
       <div key={id} className={`sp-dock-pinned-slot sp-dock-pinned-slot--${anchor}`}>
         {handleFirst ? [handleEl, panelEl] : [panelEl, handleEl]}
+        <Outline key="outline" regionRef={regionRef} targets={[() => panelRefs.current[id] ?? null]} className="sp-pinned-outline" />
       </div>
     );
   });
