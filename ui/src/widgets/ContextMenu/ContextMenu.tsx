@@ -109,7 +109,11 @@ function MenuItemRow({ item, onClose }: { item: ContextMenuItem; onClose: () => 
         className={item.destructive ? "sp-contextmenu-item--destructive" : undefined}
         onClick={() => {
           if (item.disabled) return;
-          if (item.submenu) return;
+          if (item.submenu) {
+            cancelClose();
+            setOpen((v) => !v);
+            return;
+          }
           item.onSelect?.();
           onClose();
         }}

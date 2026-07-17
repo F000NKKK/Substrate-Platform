@@ -45,16 +45,25 @@
   color: var(--sp-accent);
 }
 
-.sp-contextmenu-caret {
+.sp-contextmenu-dot {
   margin-left: auto;
-  color: var(--sp-text-faint);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sp-accent);
+  flex: 0 0 auto;
 }
 
+/* Portaled to `document.body` and mounted/unmounted by React (hover or click on
+   the trigger row) — no `:hover`/`:focus-within` CSS visibility toggle here,
+   since a portaled node is no longer a DOM descendant of its trigger and those
+   selectors could never match it. */
 .sp-contextmenu-submenu {
-  display: none;
-  position: absolute;
-  left: 100%;
-  top: 0;
+  position: fixed;
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   min-width: 160px;
   padding: var(--sp-space-xs);
   background: var(--sp-surface-glass);
@@ -63,11 +72,4 @@
   border: 1px solid var(--sp-border-strong);
   border-radius: var(--sp-radius-xs);
   box-shadow: var(--sp-shadow-md);
-}
-
-.sp-contextmenu-itemwrap:hover > .sp-contextmenu-submenu,
-.sp-contextmenu-itemwrap:focus-within > .sp-contextmenu-submenu {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
 }
