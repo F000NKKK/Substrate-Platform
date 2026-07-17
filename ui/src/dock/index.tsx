@@ -1,0 +1,12 @@
+export { ToolWindowDock } from "./ToolWindowDock";
+export { CenterDock } from "./CenterDock";
+export { DockStrip } from "./DockStrip";
+export { PanelSurface } from "./PanelSurface";
+export type { PanelSurfaceProps } from "./PanelSurface";
+export { FloatingPanel } from "./FloatingPanel";
+export { useShellLayout } from "./hooks/useShellLayout";
+export type { ShellLayout } from "./hooks/useShellLayout";
+export { startPanelDrag, endPanelDrag, readPanelDrag, zoneFromPoint, PANEL_DRAG_MIME } from "./dnd";
+export type { DropZone } from "./dnd";
+export type { PanelDef, PlatformShellProps, ToolWindowAnchor, DockAnchor, DockMode, PanelPlacement } from "./types";
+export { isFloating } from "./types";

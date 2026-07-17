@@ -1,13 +1,5 @@
 export { PlatformShell } from "./PlatformShell";
-export { ToolWindowDock } from "./ToolWindowDock";
-export { CenterDock } from "./CenterDock";
-export { DockStrip } from "./DockStrip";
-export { PanelSurface } from "./PanelSurface";
-export type { PanelSurfaceProps } from "./PanelSurface";
-export { FloatingPanel } from "./FloatingPanel";
-export { useShellLayout } from "./hooks/useShellLayout";
-export type { ShellLayout } from "./hooks/useShellLayout";
-export { startPanelDrag, endPanelDrag, readPanelDrag, zoneFromPoint, PANEL_DRAG_MIME } from "./dnd";
-export type { DropZone } from "./dnd";
-export type { PanelDef, PlatformShellProps, ToolWindowAnchor, DockAnchor, DockMode, PanelPlacement } from "./types";
-export { isFloating } from "./types";
+// The dock/panel/DnD engine itself lives in "../dock" — re-exported here so
+// the package's public API is unchanged; import directly from "../dock" for
+// engine-level work that isn't about composing the top-level shell.
+export * from "../dock";

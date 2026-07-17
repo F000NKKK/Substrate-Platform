@@ -1,12 +1,13 @@
-import type { DragEvent } from "react";
+import type { CSSProperties, DragEvent } from "react";
 import { useState } from "react";
-import { ToolWindowDock } from "../ToolWindowDock/ToolWindowDock";
-import { CenterDock } from "../CenterDock/CenterDock";
-import { FloatingPanel } from "../FloatingPanel/FloatingPanel";
-import { useShellLayout } from "../hooks/useShellLayout";
-import { readPanelDrag, zoneFromPoint, type DropZone } from "../dnd";
-import type { PlatformShellProps } from "../types";
-import "../shell.css";
+import { ToolWindowDock } from "../dock/ToolWindowDock/ToolWindowDock";
+import { CenterDock } from "../dock/CenterDock/CenterDock";
+import { FloatingPanel } from "../dock/FloatingPanel/FloatingPanel";
+import { useShellLayout } from "../dock/hooks/useShellLayout";
+import { readPanelDrag, zoneFromPoint, type DropZone } from "../dock/dnd";
+import type { PlatformShellProps } from "../dock/types";
+import "../dock/dock.css";
+import "./shell.css";
 
 /**
  * The whole product-agnostic IDE chrome: an optional menu bar, a tabbed
@@ -17,14 +18,20 @@ import "../shell.css";
  * docked panels.
  *
  * The bottom dock is a full-width row below the left/main/right row (not
- * nested inside the center column) so its left edge always lines up with
- * the left dock's outer edge, exactly like the left/right docks' own edges
- * line up with the window — no separate "how tall is the bottom dock"
- * measurement is needed since the two rows no longer overlap.
+ * nested inside the center column), inset on each side by
+ * `--sp-toolwindow-strip` wherever that side has a dock — the same physical
+ * offset a pinned OR flyout panel's own outer edge sits at (see dock.css),
+ * so the bottom dock's edges line up with the side panel's edges in either
+ * state without a live measurement.
  */
 export function PlatformShell({ main, toolWindows, defaultPinned, menu }: PlatformShellProps) {
   const layout = useShellLayout(main, toolWindows, defaultPinned);
   const [dropZone, setDropZone] = useState<DropZone | null>(null);
+
+  const bottomInsetStyle: CSSProperties = {
+    marginLeft: toolWindows.left ? "var(--sp-toolwindow-strip)" : undefined,
+    marginRight: toolWindows.right ? "var(--sp-toolwindow-strip)" : undefined,
+  };
 
   function handleMainDragOver(e: DragEvent) {
     e.preventDefault();
@@ -65,7 +72,11 @@ export function PlatformShell({ main, toolWindows, defaultPinned, menu }: Platfo
           {toolWindows.right && <ToolWindowDock anchor="right" layout={layout} />}
         </div>
 
-        {toolWindows.bottom && <ToolWindowDock anchor="bottom" layout={layout} />}
+        {toolWindows.bottom && (
+          <div className="sp-shell-bottom-inset" style={bottomInsetStyle}>
+            <ToolWindowDock anchor="bottom" layout={layout} />
+          </div>
+        )}
 
         {layout.floatingIds.map((id) => {
           const panel = layout.panelsById[id];
