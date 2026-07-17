@@ -1,6 +1,6 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { createPortal } from "react-dom";
+import { useRef, useState, type ReactNode } from "react";
 import { Tab } from "../Tab";
+import { useViewportPosition, ViewportPortal } from "../../infra/portal";
 import "./ContextMenu.css";
 
 export interface ContextMenuItem {
@@ -24,14 +24,7 @@ export interface ContextMenuProps {
   onClose: () => void;
 }
 
-const VIEWPORT_MARGIN = 4;
 const SUBMENU_CLOSE_DELAY = 150;
-
-function clampToViewport(x: number, y: number, width: number, height: number) {
-  const maxLeft = Math.max(VIEWPORT_MARGIN, window.innerWidth - width - VIEWPORT_MARGIN);
-  const maxTop = Math.max(VIEWPORT_MARGIN, window.innerHeight - height - VIEWPORT_MARGIN);
-  return { left: Math.min(x, maxLeft), top: Math.min(y, maxTop) };
-}
 
 /** A submenu, portaled and positioned from its trigger row's rect — same viewport-clamping `ViewportMenu` gives the root menu, so a deep list can't run off the edge of the screen either. Flips to the trigger's left when there isn't room on the right. */
 function SubmenuPanel({
@@ -47,31 +40,21 @@ function SubmenuPanel({
   onPointerEnter: () => void;
   onPointerLeave: () => void;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState({ left: anchorRect.right, top: anchorRect.top });
+  const { ref, style } = useViewportPosition(anchorRect, { flip: true });
 
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const fitsRight = anchorRect.right + rect.width + VIEWPORT_MARGIN <= window.innerWidth;
-    const left = fitsRight ? anchorRect.right : Math.max(VIEWPORT_MARGIN, anchorRect.left - rect.width);
-    const clamped = clampToViewport(left, anchorRect.top, rect.width, rect.height);
-    setPos(clamped);
-  }, [anchorRect]);
-
-  return createPortal(
-    <div
-      ref={ref}
-      className="sp-contextmenu-submenu"
-      style={{ left: pos.left, top: pos.top }}
-      onPointerDown={(e) => e.stopPropagation()}
-      onPointerEnter={onPointerEnter}
-      onPointerLeave={onPointerLeave}
-    >
-      <ContextMenuList items={items} onClose={onClose} />
-    </div>,
-    document.body
+  return (
+    <ViewportPortal>
+      <div
+        ref={ref}
+        className="sp-contextmenu-submenu"
+        style={style}
+        onPointerDown={(e) => e.stopPropagation()}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
+      >
+        <ContextMenuList items={items} onClose={onClose} />
+      </div>
+    </ViewportPortal>
   );
 }
 
@@ -147,21 +130,14 @@ function ContextMenuList({ items, onClose }: { items: ContextMenuItem[]; onClose
 
 /** Portaled viewport-fixed popup, clamped to stay fully on-screen regardless of where the triggering click landed. */
 function ViewportMenu({ x, y, items, onClose }: { x: number; y: number; items: ContextMenuItem[]; onClose: () => void }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState({ left: x, top: y });
+  const { ref, style } = useViewportPosition({ x, y });
 
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    setPos(clampToViewport(x, y, rect.width, rect.height));
-  }, [x, y]);
-
-  return createPortal(
-    <div ref={ref} className="sp-contextmenu" style={{ left: pos.left, top: pos.top }} onPointerDown={(e) => e.stopPropagation()}>
-      <ContextMenuList items={items} onClose={onClose} />
-    </div>,
-    document.body
+  return (
+    <ViewportPortal>
+      <div ref={ref} className="sp-contextmenu" style={style} onPointerDown={(e) => e.stopPropagation()}>
+        <ContextMenuList items={items} onClose={onClose} />
+      </div>
+    </ViewportPortal>
   );
 }
 
