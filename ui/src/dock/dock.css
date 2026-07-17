@@ -258,14 +258,19 @@
  * path in .sp-flyout-border (see FlyoutFrame.tsx), which is the only way to get
  * the 8-corner notched line instead of two disconnected boxes.
  */
+/*
+ * Solid, not glass — a pinned panel can sit at this exact same position
+ * (e.g. Properties pinned right where Solution Explorer peeks open on the
+ * same anchor), and a translucent+blurred background still let its accent
+ * border bleed through underneath, reading as a stray line on top of this
+ * panel. Opaque like every pinned panel's own background removes that.
+ */
 .sp-dock-flyout {
   position: absolute;
   z-index: 40;
   box-shadow: var(--sp-shadow-md);
   overflow: hidden;
-  background: var(--sp-surface-glass);
-  backdrop-filter: blur(var(--sp-blur));
-  -webkit-backdrop-filter: blur(var(--sp-blur));
+  background: var(--sp-surface-1);
   animation: sp-flyout-in var(--sp-duration-base) var(--sp-easing);
 }
 

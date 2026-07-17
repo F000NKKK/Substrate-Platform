@@ -1,4 +1,4 @@
-import { useRef, type ReactNode, type RefObject } from "react";
+import { useEffect, useRef, type ReactNode, type RefObject } from "react";
 import { Outline } from "../../infra/outline";
 import type { ToolWindowAnchor } from "../types";
 
@@ -10,6 +10,15 @@ export interface FlyoutFrameProps {
   size: number;
   /** Rendered as a sibling of the flyout box, not inside it — the box clips its content (rounded corners), which would cut off a resize handle meant to poke out past its edge. */
   resizeHandle?: ReactNode;
+  /**
+   * Fires on any pointerdown outside this flyout's own panel + its strip
+   * tab. Deliberately scoped to just those two elements rather than the
+   * whole dock region: a pinned panel sharing the same anchor (e.g. Properties
+   * pinned next to Solution Explorer peeking open) lives in that same region
+   * too, and clicking it isn't "still interacting with the flyout" — it
+   * should close it like clicking anywhere else outside would.
+   */
+  onOutsideClick: () => void;
   children: ReactNode;
 }
 
@@ -21,8 +30,24 @@ export interface FlyoutFrameProps {
  * goes through (see ToolWindowDock.tsx), so a panel never visibly changes
  * shape between the two states.
  */
-export function FlyoutFrame({ anchor, regionRef, size, resizeHandle, children }: FlyoutFrameProps) {
+export function FlyoutFrame({ anchor, regionRef, size, resizeHandle, onOutsideClick, children }: FlyoutFrameProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as Node;
+      const tabEl = regionRef.current?.querySelector<HTMLElement>('.sp-dock-strip [data-active="true"]');
+      // The resize handle is rendered as a sibling of the panel (not inside
+      // it — see the `resizeHandle` prop doc), specifically to escape the
+      // panel's own `overflow: hidden`. Grabbing it is still "interacting
+      // with this flyout", not a click that should close it.
+      const onResizeHandle = target instanceof Element && target.closest(".sp-dock-resize");
+      if (panelRef.current?.contains(target) || tabEl?.contains(target) || onResizeHandle) return;
+      onOutsideClick();
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [regionRef, onOutsideClick]);
 
   const sizeStyle = anchor === "bottom" ? { height: size } : { width: size };
 

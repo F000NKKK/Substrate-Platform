@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { DockStrip } from "../DockStrip/DockStrip";
 import { PanelSurface } from "../PanelSurface/PanelSurface";
 import { FlyoutFrame } from "../FlyoutFrame/FlyoutFrame";
@@ -128,15 +128,6 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
   const regionRef = useRef<HTMLDivElement>(null);
   const panelRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  useEffect(() => {
-    if (!flyoutId) return;
-    const onPointerDown = (e: PointerEvent) => {
-      if (!regionRef.current?.contains(e.target as Node)) layout.close(flyoutId);
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [flyoutId, layout]);
-
   if (panelIds.length === 0) return null;
 
   // A pinned panel's own header already shows its title, so it doesn't also
@@ -207,6 +198,7 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
           anchor={anchor}
           regionRef={regionRef}
           size={layout.anchorSize(flyoutId!, anchor, "flyout")}
+          onOutsideClick={() => layout.close(flyoutId!)}
           resizeHandle={
             <ResizeHandle
               anchor={anchor}
