@@ -120,6 +120,7 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
     const panel = layout.panelsById[id];
     const Component = panel?.component;
     if (!panel || !Component) return null;
+    const size = layout.anchorSize(id, anchor, "pinned");
     const panelEl = (
       <PanelSurface
         key="panel"
@@ -129,7 +130,7 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
         panelId={id}
         title={panel.title}
         pinned
-        style={sizeStyle(anchor, layout.anchorSize(id, anchor, "pinned"))}
+        style={sizeStyle(anchor, size)}
         onTogglePin={() => layout.unpin(id)}
         onFloat={() => layout.floatAt(id, DEFAULT_FLOAT_POS.x, DEFAULT_FLOAT_POS.y)}
         onClose={() => layout.close(id)}
@@ -141,7 +142,13 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
     return (
       <div key={id} className={`sp-dock-pinned-slot sp-dock-pinned-slot--${anchor}`}>
         {handleFirst ? [handleEl, panelEl] : [panelEl, handleEl]}
-        <Outline key="outline" regionRef={regionRef} targets={[() => panelRefs.current[id] ?? null]} className="sp-pinned-outline" />
+        <Outline
+          key="outline"
+          regionRef={regionRef}
+          targets={[() => panelRefs.current[id] ?? null]}
+          className="sp-pinned-outline"
+          syncWith={size}
+        />
       </div>
     );
   });

@@ -136,6 +136,16 @@ export interface OutlineProps {
   color?: string;
   strokeWidth?: number;
   className?: string;
+  /**
+   * Pass whatever value the target's own live size is derived from (e.g. the
+   * pinned width a drag handle is actively changing) so the outline
+   * recomputes synchronously in the same commit as that resize, instead of
+   * waiting for ResizeObserver's own callback — which fires a frame later
+   * and reads as a visible lag/jitter during a live drag. ResizeObserver
+   * stays wired up too, as a fallback for size changes this component isn't
+   * driving itself (e.g. a window resize).
+   */
+  syncWith?: unknown;
 }
 
 const DEFAULT_RADIUS = 8;
@@ -150,26 +160,44 @@ const DEFAULT_RADIUS = 8;
  * silently drifting apart the way a CSS border and a hand-rolled SVG outline
  * always eventually do.
  */
-export function Outline({ regionRef, targets, notchSide, radius = DEFAULT_RADIUS, color = "var(--sp-accent)", strokeWidth = 1.5, className }: OutlineProps) {
+export function Outline({
+  regionRef,
+  targets,
+  notchSide,
+  radius = DEFAULT_RADIUS,
+  color = "var(--sp-accent)",
+  strokeWidth = 1.5,
+  className,
+  syncWith,
+}: OutlineProps) {
   const [path, setPath] = useState<string | null>(null);
   const targetsKey = targets.length;
+
+  function compute() {
+    const region = regionRef.current;
+    if (!region) return;
+    const origin = region.getBoundingClientRect();
+    const primaryEl = resolve(targets[0]);
+    if (!primaryEl) {
+      setPath(null);
+      return;
+    }
+    const primary = rectOf(primaryEl, origin);
+    const secondaryEl = targets[1] ? resolve(targets[1]) : null;
+    const ring = secondaryEl && notchSide ? notchedRing(primary, rectOf(secondaryEl, origin), notchSide) : boxRing(primary);
+    setPath(roundedPath(ring, radius));
+  }
+
+  // Runs synchronously (before paint) whenever `syncWith` changes — the fast
+  // path for a resize this component itself drives.
+  useLayoutEffect(() => {
+    compute();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [syncWith]);
 
   useLayoutEffect(() => {
     const region = regionRef.current;
     if (!region) return;
-
-    const compute = () => {
-      const origin = region.getBoundingClientRect();
-      const primaryEl = resolve(targets[0]);
-      if (!primaryEl) {
-        setPath(null);
-        return;
-      }
-      const primary = rectOf(primaryEl, origin);
-      const secondaryEl = targets[1] ? resolve(targets[1]) : null;
-      const ring = secondaryEl && notchSide ? notchedRing(primary, rectOf(secondaryEl, origin), notchSide) : boxRing(primary);
-      setPath(roundedPath(ring, radius));
-    };
 
     compute();
     const ro = new ResizeObserver(compute);
