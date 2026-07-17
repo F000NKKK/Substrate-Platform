@@ -97,6 +97,19 @@
   font-size: 12px;
 }
 
+.sp-terminal-sidebar-item-rename {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--sp-text);
+  background: var(--sp-surface-0);
+  border: 1px solid var(--sp-border-strong);
+  border-radius: var(--sp-radius-xs);
+  padding: 0 2px;
+  outline: none;
+}
+
 .sp-terminal-sidebar-item-close {
   flex: 0 0 auto;
   visibility: hidden;

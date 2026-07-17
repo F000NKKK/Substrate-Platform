@@ -111,6 +111,11 @@ export function TerminalPanel({
     });
   }
 
+  function renameTerminal(id: string, label: string) {
+    const trimmed = label.trim();
+    setTabs((prev) => prev.map((t) => (t.id === id ? { ...t, customLabel: trimmed || undefined } : t)));
+  }
+
   function closeTerminal(id: string) {
     setTabs((prev) => {
       const idx = prev.findIndex((t) => t.id === id);
@@ -198,7 +203,33 @@ export function TerminalPanel({
               onClick={() => setActiveId(t.id)}
             >
               <Icon name="terminal" size={14} />
-              <span className="sp-terminal-sidebar-item-label">{labelFor(shells?.find((s) => s.id === t.shellId), t)}</span>
+              {renamingId === t.id ? (
+                <input
+                  className="sp-terminal-sidebar-item-rename"
+                  autoFocus
+                  defaultValue={labelFor(shells?.find((s) => s.id === t.shellId), t)}
+                  onClick={(e) => e.stopPropagation()}
+                  onBlur={(e) => {
+                    renameTerminal(t.id, e.currentTarget.value);
+                    setRenamingId(null);
+                  }}
+                  onKeyDown={(e) => {
+                    e.stopPropagation();
+                    if (e.key === "Enter") e.currentTarget.blur();
+                    else if (e.key === "Escape") setRenamingId(null);
+                  }}
+                />
+              ) : (
+                <span
+                  className="sp-terminal-sidebar-item-label"
+                  onDoubleClick={(e) => {
+                    e.stopPropagation();
+                    setRenamingId(t.id);
+                  }}
+                >
+                  {labelFor(shells?.find((s) => s.id === t.shellId), t)}
+                </span>
+              )}
               <IconButton
                 size={22}
                 title="Close terminal"
