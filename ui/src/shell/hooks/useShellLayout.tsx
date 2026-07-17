@@ -4,6 +4,11 @@ import type { DockAnchor, PanelDef, PanelPlacement, ToolWindowAnchor } from "../
 const ANCHORS: readonly ToolWindowAnchor[] = ["left", "right", "bottom"];
 const DEFAULT_FLOAT_SIZE = { w: 340, h: 280 };
 
+/** Matches the `--sp-toolwindow-size`/`--sp-toolwindow-bottom-size` token defaults — the starting size before a user drags a dock's resize handle. */
+const DEFAULT_ANCHOR_SIZE: Record<ToolWindowAnchor, number> = { left: 260, right: 260, bottom: 220 };
+const MIN_ANCHOR_SIZE = 120;
+const MAX_ANCHOR_SIZE = 900;
+
 /** Only one flyout may peek open per anchor at a time — pinned panels are untouched by this (several can be pinned side by side). */
 function closeOtherFlyouts(
   placements: Record<string, PanelPlacement>,
@@ -39,6 +44,9 @@ export interface ShellLayout {
   close: (id: string) => void;
   dockTo: (id: string, anchor: DockAnchor) => void;
   floatAt: (id: string, x: number, y: number) => void;
+  /** Current pinned width (left/right) or height (bottom) for an anchor — shared by every panel pinned there, same as the CSS token it overrides. */
+  anchorSize: (anchor: ToolWindowAnchor) => number;
+  setAnchorSize: (anchor: ToolWindowAnchor, size: number) => void;
 }
 
 /**
@@ -84,6 +92,15 @@ export function useShellLayout(
   });
 
   const [centerActiveId, setCenterActive] = useState(main.id);
+
+  const [sizes, setSizes] = useState<Record<ToolWindowAnchor, number>>({ ...DEFAULT_ANCHOR_SIZE });
+
+  const anchorSize = useCallback((anchor: ToolWindowAnchor) => sizes[anchor], [sizes]);
+
+  const setAnchorSize = useCallback((anchor: ToolWindowAnchor, size: number) => {
+    const clamped = Math.min(MAX_ANCHOR_SIZE, Math.max(MIN_ANCHOR_SIZE, size));
+    setSizes((prev) => (prev[anchor] === clamped ? prev : { ...prev, [anchor]: clamped }));
+  }, []);
 
   const idsByAnchor = useCallback(
     (anchor: ToolWindowAnchor) => Object.entries(placements).filter(([, p]) => p.anchor === anchor).map(([id]) => id),
@@ -188,5 +205,7 @@ export function useShellLayout(
     close,
     dockTo,
     floatAt,
+    anchorSize,
+    setAnchorSize,
   };
 }

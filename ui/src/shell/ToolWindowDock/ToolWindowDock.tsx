@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { DockStrip } from "../DockStrip/DockStrip";
 import { PanelSurface } from "../PanelSurface/PanelSurface";
 import { FlyoutFrame } from "../FlyoutFrame/FlyoutFrame";
@@ -11,6 +11,36 @@ export interface ToolWindowDockProps {
 }
 
 const DEFAULT_FLOAT_POS = { x: 160, y: 120 };
+
+/**
+ * Drag handle on a pinned dock's edge facing the main area — resizes the
+ * whole anchor (every panel pinned there shares one size, same as the CSS
+ * token it overrides). Left/right drag horizontally; bottom drags its top
+ * edge upward to grow, matching how every other docking IDE resizes a
+ * bottom panel.
+ */
+function ResizeHandle({ anchor, layout }: { anchor: ToolWindowAnchor; layout: ShellLayout }) {
+  function handlePointerDown(e: ReactPointerEvent) {
+    e.preventDefault();
+    const startSize = layout.anchorSize(anchor);
+    const startX = e.clientX;
+    const startY = e.clientY;
+
+    function onMove(ev: PointerEvent) {
+      if (anchor === "left") layout.setAnchorSize(anchor, startSize + (ev.clientX - startX));
+      else if (anchor === "right") layout.setAnchorSize(anchor, startSize - (ev.clientX - startX));
+      else layout.setAnchorSize(anchor, startSize - (ev.clientY - startY));
+    }
+    function onUp() {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    }
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  }
+
+  return <div className={`sp-dock-resize sp-dock-resize--${anchor}`} onPointerDown={handlePointerDown} />;
+}
 
 /**
  * One edge's worth of VS-style tool windows. The collapsed tab strip always
