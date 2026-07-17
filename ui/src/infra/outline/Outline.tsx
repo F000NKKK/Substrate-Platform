@@ -99,42 +99,56 @@ export interface OutlineProps {
 }
 
 /**
- * The platform's one accent-outline renderer, with two modes:
+ * The platform's one accent-outline renderer. Both modes compute their path
+ * the same way — measure some rects, hand them to a `shape` (default
+ * `boxShape`) — they differ only in WHAT they measure:
  *
  * • **Self mode** (default — no `regionRef`/`targets`): renders as a CHILD of
- *   the element it outlines and draws a rounded box filling it, measurement-
- *   free (an SVG `<rect>` sized `100%`). Because it's the element's own child,
- *   it inherits every move and resize for free — a neighbour's resize that
- *   merely SHIFTS this element can never desync the outline. Pinned dock
- *   panels use this.
+ *   the element it outlines and measures that element's own box (in its local
+ *   coordinates). Being the element's own child, it inherits every move for
+ *   free — a neighbour's resize that merely SHIFTS this element can never
+ *   desync the outline, since the local box is unchanged and the child rides
+ *   along. Pinned/floating dock panels use this, with `boxShape`.
  *
- * • **Region mode** (`regionRef` + `targets` + `shape`): renders over a
- *   positioned region and outlines the merged rects of several elements via a
- *   consumer-supplied `shape` — the only way to trace a contour spanning more
- *   than one box. The engine has no idea what the shape means; the consumer
- *   builds it from the exported primitives.
+ * • **Region mode** (`regionRef` + `targets`): renders over a positioned
+ *   region and measures several targets in that region's coordinates — the
+ *   only way to trace a contour spanning more than one box (e.g. a flyout
+ *   panel + its detached strip tab). The engine has no idea what the shape
+ *   means; the consumer builds it from the exported primitives.
  */
 export function Outline(props: OutlineProps) {
   if (props.regionRef && props.targets) return <RegionOutline {...props} regionRef={props.regionRef} targets={props.targets} />;
-  return <SelfOutline radius={props.radius} color={props.color} strokeWidth={props.strokeWidth} className={props.className} />;
+  return <SelfOutline {...props} />;
 }
 
-function SelfOutline({ radius = DEFAULT_RADIUS, color = "var(--sp-accent)", strokeWidth = 1.5, className }: OutlineProps) {
-  const inset = strokeWidth / 2;
-  const insetStyle: CSSProperties = { inset };
+function SelfOutline({ shape = boxShape, radius = DEFAULT_RADIUS, color = "var(--sp-accent)", strokeWidth = 1.5, className }: OutlineProps) {
+  const ref = useRef<SVGSVGElement>(null);
+  const [path, setPath] = useState("");
+  const shapeRef = useRef(shape);
+  shapeRef.current = shape;
+
+  useLayoutEffect(() => {
+    const parent = ref.current?.parentElement;
+    if (!parent) return;
+    const inset = strokeWidth / 2;
+    const compute = () => {
+      const w = parent.clientWidth;
+      const h = parent.clientHeight;
+      // Inset by half the stroke so the stroke's outer edge lands on the
+      // parent's own edge and isn't trimmed by the parent's overflow clip.
+      const box: OutlineRect = { l: inset, t: inset, r: w - inset, b: h - inset };
+      setPath(w > 0 && h > 0 ? shapeRef.current([box], radius, strokeWidth) : "");
+    };
+    compute();
+    const ro = new ResizeObserver(compute);
+    ro.observe(parent);
+    return () => ro.disconnect();
+  }, [radius, strokeWidth]);
+
+  const insetStyle: CSSProperties = { inset: 0 };
   return (
-    <svg className={["sp-outline", className].filter(Boolean).join(" ")} style={insetStyle} aria-hidden>
-      <rect
-        x={0}
-        y={0}
-        width="100%"
-        height="100%"
-        rx={Math.max(0, radius - inset)}
-        ry={Math.max(0, radius - inset)}
-        fill="none"
-        stroke={color}
-        strokeWidth={strokeWidth}
-      />
+    <svg ref={ref} className={["sp-outline", className].filter(Boolean).join(" ")} style={insetStyle} aria-hidden>
+      {path && <path d={path} fill="none" stroke={color} strokeWidth={strokeWidth} vectorEffect="non-scaling-stroke" />}
     </svg>
   );
 }

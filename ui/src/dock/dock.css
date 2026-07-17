@@ -290,14 +290,19 @@
   z-index: 41;
 }
 
+/*
+ * Opacity only — deliberately no `transform`. A transform shifts the box's
+ * getBoundingClientRect, so the region outline, measured once on open (mid-
+ * animation), would settle a few px off and not correct until the next resize
+ * (a transform-end fires no ResizeObserver). Fading alone keeps the measured
+ * geometry correct from the first frame.
+ */
 @keyframes sp-flyout-in {
   from {
     opacity: 0;
-    transform: translateY(2px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
