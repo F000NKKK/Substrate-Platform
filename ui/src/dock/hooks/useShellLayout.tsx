@@ -1,5 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DockAnchor, PanelDef, PanelPlacement, ToolWindowAnchor } from "../types";
+import { loadShellLayoutState, saveShellLayoutState } from "./shellLayoutPersistence";
 
 const ANCHORS: readonly ToolWindowAnchor[] = ["left", "right", "bottom"];
 const DEFAULT_FLOAT_SIZE = { w: 340, h: 280 };
@@ -82,7 +83,9 @@ export interface ShellLayout {
 export function useShellLayout(
   main: PanelDef,
   toolWindows: Partial<Record<ToolWindowAnchor, PanelDef[]>>,
-  defaultPinned?: Partial<Record<ToolWindowAnchor, string>>
+  defaultPinned?: Partial<Record<ToolWindowAnchor, string>>,
+  /** When set, panel placements/sizes/the active center tab survive a reload via `localStorage`, keyed by this string (make it unique per app). */
+  persistKey?: string
 ): ShellLayout {
   const panelsById = useMemo(() => {
     const map: Record<string, PanelDef> = { [main.id]: main };
@@ -100,6 +103,8 @@ export function useShellLayout(
     return map;
   }, [main, toolWindows]);
 
+  const persisted = useMemo(() => (persistKey ? loadShellLayoutState(persistKey) : undefined), [persistKey]);
+
   const [placements, setPlacements] = useState<Record<string, PanelPlacement>>(() => {
     const initial: Record<string, PanelPlacement> = { [main.id]: { anchor: "center", mode: "pinned" } };
     for (const anchor of ANCHORS) {
@@ -107,12 +112,22 @@ export function useShellLayout(
         initial[panel.id] = { anchor, mode: defaultPinned?.[anchor] === panel.id ? "pinned" : "hidden" };
       }
     }
+    // The center's original tab is always center/pinned (see `close` above) —
+    // every other panel's placement can be restored from last session.
+    if (persisted?.placements) {
+      for (const id of Object.keys(initial)) {
+        if (id !== main.id && persisted.placements[id]) initial[id] = persisted.placements[id];
+      }
+    }
     return initial;
   });
 
-  const [centerActiveId, setCenterActive] = useState(main.id);
+  const [centerActiveId, setCenterActive] = useState(() => {
+    const restored = persisted?.centerActiveId;
+    return restored && (restored === main.id || panelsById[restored]) ? restored : main.id;
+  });
 
-  const [sizes, setSizes] = useState<Record<string, number>>({});
+  const [sizes, setSizes] = useState<Record<string, number>>(() => persisted?.sizes ?? {});
 
   const anchorSize = useCallback(
     (panelId: string, anchor: ToolWindowAnchor, mode: SizeMode) => sizes[sizeKey(panelId, anchor, mode)] ?? DEFAULT_ANCHOR_SIZE[anchor],
@@ -209,6 +224,11 @@ export function useShellLayout(
     },
     [main.id]
   );
+
+  useEffect(() => {
+    if (!persistKey) return;
+    saveShellLayoutState(persistKey, { placements, sizes, centerActiveId });
+  }, [persistKey, placements, sizes, centerActiveId]);
 
   return {
     panelsById,
