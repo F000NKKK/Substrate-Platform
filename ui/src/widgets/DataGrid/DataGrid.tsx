@@ -71,6 +71,8 @@ export interface DataGridProps<T> {
   onRowActivate?: (row: T) => void;
   /** Grid-level catch-all fired alongside any column's own `onCellEdit` when an edit commits. */
   onCellEditCommit?: (row: T, key: string, newValue: string) => void;
+  /** When set, column order/widths/sort/groupBy/hidden-columns/group-panel-visibility survive a reload via `localStorage`, keyed by this string (make it unique per grid instance in the app). Only affects state left uncontrolled by its matching prop (`sort`, `groupBy`, `hiddenColumns`). */
+  persistKey?: string;
   emptyState?: ReactNode;
   className?: string;
   style?: CSSProperties;

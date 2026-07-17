@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -10,6 +11,7 @@ import {
 } from "react";
 import type { DataGridColumn, DataGridProps, DataGridSortState } from "./DataGrid";
 import { useContextMenu } from "../ContextMenu";
+import { loadDataGridState, saveDataGridState } from "./dataGridPersistence";
 
 export type DataGridMenuTarget<T> = { kind: "grid" } | { kind: "header"; column: DataGridColumn<T> };
 
@@ -146,14 +148,26 @@ export function useDataGrid<T>({
   onHiddenColumnsChange,
   onRowActivate,
   onCellEditCommit,
+  persistKey,
 }: DataGridProps<T>) {
+  const persisted = useMemo(() => (persistKey ? loadDataGridState(persistKey) : undefined), [persistKey]);
+
   const [internalSelection, setInternalSelection] = useState<Set<string>>(defaultSelectedIds ?? new Set());
-  const [internalSort, setInternalSort] = useState<DataGridSortState[]>(defaultSort);
-  const [internalGroupBy, setInternalGroupBy] = useState<string[]>(defaultGroupBy);
-  const [internalHiddenColumns, setInternalHiddenColumns] = useState<Set<string>>(defaultHiddenColumns);
-  const [columnOrder, setColumnOrder] = useState<string[]>(() => columns.map((c) => c.key));
+  const [internalSort, setInternalSort] = useState<DataGridSortState[]>(persisted?.sort ?? defaultSort);
+  const [internalGroupBy, setInternalGroupBy] = useState<string[]>(persisted?.groupBy ?? defaultGroupBy);
+  const [internalHiddenColumns, setInternalHiddenColumns] = useState<Set<string>>(
+    persisted?.hiddenColumns ? new Set(persisted.hiddenColumns) : defaultHiddenColumns
+  );
+  const [columnOrder, setColumnOrder] = useState<string[]>(() => {
+    const keys = columns.map((c) => c.key);
+    const restored = persisted?.columnOrder?.filter((k) => keys.includes(k));
+    if (!restored) return keys;
+    // Any column added to `columns` since this was saved (new field on the
+    // consumer's config) still needs to appear — append it at the end.
+    return [...restored, ...keys.filter((k) => !restored.includes(k))];
+  });
   const [widths, setWidths] = useState<Record<string, number>>(() =>
-    Object.fromEntries(columns.map((c) => [c.key, c.width ?? DEFAULT_COLUMN_WIDTH]))
+    Object.fromEntries(columns.map((c) => [c.key, persisted?.widths?.[c.key] ?? c.width ?? DEFAULT_COLUMN_WIDTH]))
   );
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
@@ -166,7 +180,7 @@ export function useDataGrid<T>({
   const [dragColumnKey, setDragColumnKey] = useState<string | null>(null);
   const [dropIndicator, setDropIndicator] = useState<{ key: string; side: "before" | "after" } | null>(null);
   const [groupPanelHover, setGroupPanelHover] = useState(false);
-  const [groupPanelVisible, setGroupPanelVisible] = useState(true);
+  const [groupPanelVisible, setGroupPanelVisible] = useState(persisted?.groupPanelVisible ?? true);
   const gridMenu = useContextMenu<DataGridMenuTarget<T>>();
 
   const scrollRef = useRef<HTMLDivElement>(null);
