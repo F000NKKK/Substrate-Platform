@@ -107,24 +107,14 @@
 /*
  * A pinned panel's tab is hidden from its strip entirely (see Tab.css),
  * so there's nothing for it to "blend into" — it always gets a full
- * 4-side border, same as any of its pinned neighbors sitting beside it.
+ * 4-side border, same as any of its pinned neighbors sitting beside it (a
+ * flyout/floating panel intentionally has none of its own — see the flyout's
+ * SVG-outline comment below). Width/height come from each panel's own
+ * remembered size (inline style, set in ToolWindowDock) rather than a shared
+ * token here, since every pinned panel — and its own flyout state — now
+ * sizes independently.
  */
-.sp-dock--left > .sp-panel-surface {
-  width: var(--sp-toolwindow-size);
-  flex: 0 0 auto;
-  border: 1px solid var(--sp-accent);
-  border-radius: var(--sp-radius-md);
-}
-
-.sp-dock--right > .sp-panel-surface {
-  width: var(--sp-toolwindow-size);
-  flex: 0 0 auto;
-  border: 1px solid var(--sp-accent);
-  border-radius: var(--sp-radius-md);
-}
-
-.sp-dock--bottom > .sp-panel-surface {
-  height: var(--sp-toolwindow-bottom-size);
+.sp-dock-pinned-slot > .sp-panel-surface {
   flex: 0 0 auto;
   border: 1px solid var(--sp-accent);
   border-radius: var(--sp-radius-md);
@@ -134,7 +124,25 @@
   box-shadow: 0 0 0 1px var(--sp-accent);
 }
 
-/* Resize handle — sits between the pinned panel(s) and the main area, dragged to grow/shrink the whole anchor's shared size. */
+/*
+ * Groups one pinned panel with its own resize handle as a single flex item —
+ * each pinned panel gets an independent handle on its main-area-facing edge
+ * rather than sharing one for the whole anchor.
+ */
+.sp-dock-pinned-slot {
+  display: flex;
+}
+
+.sp-dock-pinned-slot--left,
+.sp-dock-pinned-slot--right {
+  flex-direction: row;
+}
+
+.sp-dock-pinned-slot--bottom {
+  flex-direction: column;
+}
+
+/* Resize handle — sits on a panel's edge facing the main area (or the next pinned panel), dragged to grow/shrink that specific panel/mode. */
 .sp-dock-resize {
   flex: 0 0 auto;
   position: relative;
@@ -236,35 +244,59 @@
 }
 
 /*
- * Positioned against the strip's inner edge (strip width from the region
- * edge), not 100% of the pinned-widened region. Corner radius matches
- * FlyoutFrame's CORNER_RADIUS (8px) so the glass fill lines up under the SVG
- * stroke. The bottom dock is its own row below the upper row now (see
- * PlatformShell), so this region's own box already stops short of it —
- * `top: 0; bottom: 0` spans the full region with nothing else to clear.
+ * Positioned at the exact same offset from the strip a PINNED panel's own
+ * edge sits at (strip size + the dock's own gap, see .sp-dock's gap) rather
+ * than flush against the strip — so nothing visibly shifts when a panel is
+ * pinned or unpinned; only the gap between the strip tab and the panel
+ * changes. Width/height come from this panel's own remembered flyout size
+ * (inline style, set in ToolWindowDock). Corner radius matches FlyoutFrame's
+ * CORNER_RADIUS (8px) so the glass fill lines up under the SVG stroke. The
+ * bottom dock is its own row below the upper row now (see PlatformShell), so
+ * this region's own box already stops short of it — `top: 0; bottom: 0`
+ * spans the full region with nothing else to clear.
  */
 .sp-dock-flyout--left {
   top: 0;
   bottom: 0;
-  left: var(--sp-toolwindow-strip);
-  width: var(--sp-toolwindow-size);
+  left: calc(var(--sp-toolwindow-strip) + var(--sp-space-xs));
   border-radius: 0 var(--sp-radius-sm) var(--sp-radius-sm) 0;
 }
 
 .sp-dock-flyout--right {
   top: 0;
   bottom: 0;
-  right: var(--sp-toolwindow-strip);
-  width: var(--sp-toolwindow-size);
+  right: calc(var(--sp-toolwindow-strip) + var(--sp-space-xs));
   border-radius: var(--sp-radius-sm) 0 0 var(--sp-radius-sm);
 }
 
 .sp-dock-flyout--bottom {
   left: 0;
   right: 0;
-  bottom: var(--sp-toolwindow-strip);
-  height: var(--sp-toolwindow-bottom-size);
+  bottom: calc(var(--sp-toolwindow-strip) + var(--sp-space-xs));
   border-radius: var(--sp-radius-sm) var(--sp-radius-sm) 0 0;
+}
+
+/* The flyout's own resize handle — positioned at its outer edge (facing the main area), since the flyout box isn't a flex layout like the pinned slot is. */
+.sp-dock-resize--flyout {
+  position: absolute;
+}
+
+.sp-dock-flyout--left .sp-dock-resize--flyout {
+  top: 0;
+  bottom: 0;
+  right: -3px;
+}
+
+.sp-dock-flyout--right .sp-dock-resize--flyout {
+  top: 0;
+  bottom: 0;
+  left: -3px;
+}
+
+.sp-dock-flyout--bottom .sp-dock-resize--flyout {
+  left: 0;
+  right: 0;
+  top: -3px;
 }
 
 .sp-dock-flyout .sp-panel-surface {
