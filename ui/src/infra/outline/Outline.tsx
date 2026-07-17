@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { useLayoutEffect, useState, type RefObject } from "react";
 
 export interface Rect {
   l: number;

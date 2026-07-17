@@ -17,15 +17,8 @@ const DEFAULT_FLOAT_POS = { x: 160, y: 120 };
  * panel) — resizes that specific panel, in its current pinned/flyout mode,
  * independently of every other panel or mode. Left/right drag horizontally;
  * bottom drags its top edge upward to grow, matching how every other docking
- * IDE resizes a bottom panel.
- *
- * The panel itself is NOT resized live on every pointermove — only a thin
- * indicator line follows the cursor (via `transform`, so it's a pure
- * compositor-level move with no layout reflow to lag behind). The real
- * `setAnchorSize` call happens once, on release. Committing continuously
- * during the drag made the highlight visibly outrun the panel's own reflow
- * by a frame or more; deferring to pointerup removes that desync entirely
- * and is also how every mainstream docking IDE's own resize gesture behaves.
+ * IDE resizes a bottom panel. The panel resizes live on every pointermove,
+ * same as dragging any other native window edge.
  */
 function ResizeHandle({
   anchor,
@@ -40,25 +33,22 @@ function ResizeHandle({
   layout: ShellLayout;
   className?: string;
 }) {
-  const [dragOffset, setDragOffset] = useState<number | null>(null);
-  const dragOffsetRef = useRef(0);
+  const [dragging, setDragging] = useState(false);
 
   function handlePointerDown(e: ReactPointerEvent) {
     e.preventDefault();
     const startSize = layout.anchorSize(panelId, anchor, mode);
     const startX = e.clientX;
     const startY = e.clientY;
+    setDragging(true);
 
     function onMove(ev: PointerEvent) {
-      const offset = anchor === "bottom" ? ev.clientY - startY : ev.clientX - startX;
-      dragOffsetRef.current = offset;
-      setDragOffset(offset);
+      if (anchor === "left") layout.setAnchorSize(panelId, anchor, mode, startSize + (ev.clientX - startX));
+      else if (anchor === "right") layout.setAnchorSize(panelId, anchor, mode, startSize - (ev.clientX - startX));
+      else layout.setAnchorSize(panelId, anchor, mode, startSize - (ev.clientY - startY));
     }
     function onUp() {
-      const offset = dragOffsetRef.current;
-      const delta = anchor === "left" ? offset : -offset;
-      layout.setAnchorSize(panelId, anchor, mode, startSize + delta);
-      setDragOffset(null);
+      setDragging(false);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
     }
@@ -66,16 +56,13 @@ function ResizeHandle({
     window.addEventListener("pointerup", onUp);
   }
 
-  const lineStyle: CSSProperties | undefined =
-    dragOffset !== null ? { transform: anchor === "bottom" ? `translateY(${dragOffset}px)` : `translateX(${dragOffset}px)` } : undefined;
-
   return (
     <div
       className={["sp-dock-resize", `sp-dock-resize--${anchor}`, className].filter(Boolean).join(" ")}
-      data-dragging={dragOffset !== null || undefined}
+      data-dragging={dragging || undefined}
       onPointerDown={handlePointerDown}
     >
-      <div className="sp-dock-resize-line" style={lineStyle} />
+      <div className="sp-dock-resize-line" />
     </div>
   );
 }
