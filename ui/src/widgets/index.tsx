@@ -18,6 +18,8 @@ export { Tree } from "./Tree";
 export type { TreeNode, TreeMenuItem, TreeProps } from "./Tree";
 export { FileTree } from "./FileTree";
 export type { FileTreeNode, FileTreeMenuItem, FileTreeProps } from "./FileTree";
+export { useDirectoryTree } from "./FileTree";
+export type { DirEntry, DirectoryTreeCommands } from "./FileTree";
 export { Swatch } from "./Swatch";
 export type { SwatchProps } from "./Swatch";
 export { ColorWheel } from "./ColorWheel";
