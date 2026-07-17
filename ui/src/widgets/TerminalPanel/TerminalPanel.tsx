@@ -102,6 +102,7 @@ export function TerminalPanel({
   const moreMenu = useContextMenu<void>();
 
   const shells = shellsProp ?? detectedShells;
+  const activeGroupId = tabs.find((t) => t.id === activeId)?.groupId;
 
   useEffect(() => {
     if (shellsProp) return;
@@ -208,26 +209,38 @@ export function TerminalPanel({
       </div>
       <div className="sp-terminal-body">
         <div className="sp-terminal-views">
-          {tabs.map((t) => {
-            const kind = shells?.find((s) => s.id === t.shellId);
-            return (
-              <TerminalInstance
-                key={t.id}
-                id={t.id}
-                shell={kind?.shell}
-                clearCommand={kind?.clearCommand ?? defaultClearCommand(t.shellId)}
-                active={t.id === activeId}
-                commands={commands}
-                outputEvent={outputEvent}
-                exitEvent={exitEvent}
-                onExit={() => closeTerminal(t.id)}
-                onReady={(clear) => {
-                  if (clear) clearHandlesRef.current[t.id] = clear;
-                  else delete clearHandlesRef.current[t.id];
-                }}
-              />
-            );
-          })}
+          {[...new Set(tabs.map((t) => t.groupId))].map((groupId) => (
+            <div key={groupId} className="sp-terminal-group" data-active={groupId === activeGroupId || undefined}>
+              {tabs
+                .filter((t) => t.groupId === groupId)
+                .map((t) => {
+                  const kind = shells?.find((s) => s.id === t.shellId);
+                  return (
+                    <div
+                      key={t.id}
+                      className="sp-terminal-pane"
+                      data-focused={t.id === activeId || undefined}
+                      onClick={() => setActiveId(t.id)}
+                    >
+                      <TerminalInstance
+                        id={t.id}
+                        shell={kind?.shell}
+                        clearCommand={kind?.clearCommand ?? defaultClearCommand(t.shellId)}
+                        active={groupId === activeGroupId}
+                        commands={commands}
+                        outputEvent={outputEvent}
+                        exitEvent={exitEvent}
+                        onExit={() => closeTerminal(t.id)}
+                        onReady={(clear) => {
+                          if (clear) clearHandlesRef.current[t.id] = clear;
+                          else delete clearHandlesRef.current[t.id];
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+            </div>
+          ))}
         </div>
         <div className="sp-terminal-sidebar">
           {tabs.map((t) => (
