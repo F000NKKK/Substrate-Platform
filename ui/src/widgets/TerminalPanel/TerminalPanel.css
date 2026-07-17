@@ -118,3 +118,32 @@
 .sp-terminal-sidebar-item:hover .sp-terminal-sidebar-item-close {
   visibility: visible;
 }
+
+/* The row itself is already highlighted on hover/active, so the close
+   button's own default hover background (same surface tone) would be
+   invisible against it — give it a background tint that stays visible
+   regardless of what's already behind it, so only the background lights up
+   on hover, not the glyph. */
+.sp-terminal-sidebar-item-close:hover {
+  background: color-mix(in srgb, var(--sp-text) 18%, transparent);
+}
+
+/* xterm's own scrollbar (browser/GTK native by default) renders thick and
+   jumps to wherever the track is clicked — thin it down and switch it to a
+   plain drag-to-scroll thumb instead. */
+.sp-terminal-view .xterm-viewport::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sp-terminal-view .xterm-viewport::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sp-terminal-view .xterm-viewport::-webkit-scrollbar-thumb {
+  background: var(--sp-border-strong);
+  border-radius: var(--sp-radius-xs);
+}
+
+.sp-terminal-view .xterm-viewport::-webkit-scrollbar-thumb:hover {
+  background: var(--sp-text-faint);
+}
