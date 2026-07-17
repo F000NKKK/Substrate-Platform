@@ -132,7 +132,7 @@ export function TerminalPanel({
               <Icon name="terminal" size={14} />
               <span className="sp-terminal-sidebar-item-label">{t.label}</span>
               <IconButton
-                size={16}
+                size={18}
                 title="Close terminal"
                 className="sp-terminal-sidebar-item-close"
                 onClick={(e) => {
@@ -140,7 +140,7 @@ export function TerminalPanel({
                   closeTerminal(t.id);
                 }}
               >
-                <Icon name="close" size={12} />
+                <Icon name="close" size={14} />
               </IconButton>
             </div>
           ))}
@@ -188,22 +188,44 @@ function TerminalInstance({ id, shell, active, commands, outputEvent, exitEvent,
     fitRef.current = fit;
     fit();
 
+    // Clearing by typing a shell command (`clear`/`Clear-Host`/`cls`) races
+    // that shell's own startup (profile scripts, MOTD, etc.) — a slow-loading
+    // profile (pwsh especially) prints its banner *after* the command already
+    // ran, leaving it on screen. Instead, clear the xterm buffer itself (no
+    // shell involvement, so it's identical across every shell) once output
+    // has gone quiet for a beat — that beat absorbs however long the shell's
+    // startup output takes, regardless of shell kind or profile speed.
+    const CLEAR_QUIET_MS = 200;
+    let cleared = false;
+    let clearTimer: number | undefined;
+    function scheduleClear() {
+      if (cleared) return;
+      window.clearTimeout(clearTimer);
+      clearTimer = window.setTimeout(() => {
+        cleared = true;
+        term.clear();
+      }, CLEAR_QUIET_MS);
+    }
+
     let disposed = false;
     const unlistenOutput = listen<{ id: string; data: string }>(outputEvent, (event) => {
-      if (!disposed && event.payload.id === id) term.write(event.payload.data);
+      if (disposed || event.payload.id !== id) return;
+      term.write(event.payload.data);
+      scheduleClear();
     });
     const unlistenExit = listen<{ id: string }>(exitEvent, (event) => {
       if (!disposed && event.payload.id === id) onExitRef.current();
     });
 
     invoke(commands.spawn, { id, cols: term.cols, rows: term.rows, shell })
-      .then(() => {
-        // Start from a clean screen, VS-Code style.
-        invoke(commands.write, { id, data: "clear\n" }).catch(() => {});
-      })
+      .then(scheduleClear)
       .catch((err) => term.writeln(`\r\n[failed to start shell: ${err}]`));
 
     const onData = term.onData((data) => {
+      // The user is already typing — clearing out from under them now would
+      // erase what they can see, so cancel the pending auto-clear for good.
+      cleared = true;
+      window.clearTimeout(clearTimer);
       invoke(commands.write, { id, data }).catch(() => {});
     });
 
@@ -216,6 +238,7 @@ function TerminalInstance({ id, shell, active, commands, outputEvent, exitEvent,
     return () => {
       disposed = true;
       fitRef.current = null;
+      window.clearTimeout(clearTimer);
       resizeObserver.disconnect();
       onData.dispose();
       unlistenOutput.then((un) => un());
