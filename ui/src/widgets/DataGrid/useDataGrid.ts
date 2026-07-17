@@ -192,6 +192,18 @@ export function useDataGrid<T>({
   const activeSelection = selectedIds ?? internalSelection;
   const activeHiddenColumns = hiddenColumns ?? internalHiddenColumns;
 
+  useEffect(() => {
+    if (!persistKey) return;
+    saveDataGridState(persistKey, {
+      columnOrder,
+      widths,
+      sort: activeSort,
+      groupBy: activeGroupBy,
+      hiddenColumns: [...activeHiddenColumns],
+      groupPanelVisible,
+    });
+  }, [persistKey, columnOrder, widths, activeSort, activeGroupBy, activeHiddenColumns, groupPanelVisible]);
+
   const columnByKey = useMemo(() => new Map(columns.map((c) => [c.key, c])), [columns]);
 
   const orderedColumns = useMemo(

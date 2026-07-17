@@ -39,13 +39,23 @@
 }
 
 .sp-terminal-sidebar-add {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   flex: 0 0 auto;
   padding: var(--sp-space-xs);
   border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-terminal-sidebar-add-anchor {
+  position: relative;
+}
+
+/* The "+" sits at the sidebar's right edge, flush against the panel/window
+   edge — the menu's default left-aligned anchor would run off-screen there. */
+.sp-terminal-sidebar-add-anchor .sp-contextmenu--anchor {
+  left: auto;
+  right: 0;
 }
 
 .sp-terminal-sidebar-list {
