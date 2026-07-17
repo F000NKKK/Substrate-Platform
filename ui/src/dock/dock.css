@@ -90,31 +90,26 @@
 
 /* pinned (docked, takes layout space) */
 
+/*
+ * `position: relative` so the panel's own `Outline` (an absolutely-positioned
+ * child — see PanelSurface) resolves its offset parent to the panel itself
+ * and rides along with it through every move/resize. `overflow: hidden` +
+ * `border-radius` clip content to the rounded shape; the outline is inset by
+ * half its stroke so this clip doesn't trim it.
+ */
 .sp-panel-surface {
+  position: relative;
   display: flex;
   flex-direction: column;
   background: var(--sp-surface-1);
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-}
-
-/*
- * A pinned panel's own outline is drawn by the shared `Outline` engine (see
- * infra/outline, wired up in ToolWindowDock.tsx) — the exact same renderer a
- * flyout's outline goes through — so a panel never visibly changes shape
- * between pinned and unpinned. No CSS border here at all; `.sp-pinned-outline`
- * below just sets the stacking order.
- */
-.sp-dock-pinned-slot > .sp-panel-surface {
-  flex: 1;
-  min-width: 0;
-  min-height: 0;
   border-radius: var(--sp-radius-sm);
 }
 
-.sp-pinned-outline {
-  z-index: 2;
+.sp-dock-pinned-slot > .sp-panel-surface {
+  flex: 1;
 }
 
 .sp-panel-surface:focus-within {
@@ -125,10 +120,7 @@
  * One pinned panel + its own resize handle, sized (inline) to the panel's
  * remembered size. The panel is a flex:1 child filling the slot; the handle
  * overlaps the panel's main-area-facing edge via a negative margin so it adds
- * no layout width. Deliberately NOT `position: relative`: the `Outline` SVG
- * inside is absolutely positioned with region-relative path coordinates, so
- * it must resolve its offset parent to `.sp-dock` (the positioned region),
- * not to this slot.
+ * no layout width.
  */
 .sp-dock-pinned-slot {
   display: flex;
