@@ -1,4 +1,5 @@
 import { useLayoutEffect, useState, type RefObject } from "react";
+import "./outline.css";
 
 export interface Rect {
   l: number;

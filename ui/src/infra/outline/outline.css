@@ -1,0 +1,15 @@
+/*
+ * The one continuous-outline overlay in the platform (see Outline.tsx) —
+ * covers its `regionRef` element as a coordinate canvas; overflow is visible
+ * so a shape extending past the region's own bounds (e.g. a flyout panel
+ * poking out past its narrow strip) isn't clipped. Purely decorative —
+ * clicks pass straight through to whatever it's tracing.
+ */
+.sp-outline {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
