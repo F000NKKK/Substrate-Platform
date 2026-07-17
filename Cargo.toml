@@ -3,10 +3,12 @@ name = "substrate-platform"
 version = "0.2.0"
 edition = "2024"
 authors = ["F000NK"]
-description = "Brand-neutral IDE platform core (task runner, log sink, PTY sessions) — the shared backend foundation for future IDE-style tools."
+description = "Brand-neutral IDE platform core (task/workflow runner, log sink, PTY sessions, directory + project/solution engines) — the shared backend foundation for future IDE-style tools."
 license = "AGPL-3.0-only"
 repository = "https://github.com/F000NKKK/Substrate-Platform"
 
 [dependencies]
 anyhow = "1.0.103"
 portable-pty = "0.9"
+serde = { version = "1", features = ["derive"] }
+toml = "1"

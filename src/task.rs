@@ -4,8 +4,8 @@
 //! this crate has no idea what command it's running.
 
 use std::io::{BufRead, BufReader};
-use std::path::PathBuf;
-use std::process::{Command, Stdio};
+use std::path::{Path, PathBuf};
+use std::process::{Child, Command, ExitStatus, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
@@ -63,24 +63,29 @@ impl TaskHandle {
     }
 }
 
-/// Spawn `task` in the background (non-blocking) — stdout/stderr are
-/// streamed line-by-line into `sink` as they arrive, from dedicated reader
-/// threads, so the UI thread is never blocked waiting on the child process.
-pub fn spawn(task: Task, sink: LogSink) -> std::io::Result<TaskHandle> {
-    let mut cmd = Command::new(&task.program);
-    cmd.args(&task.args)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
-    if let Some(cwd) = &task.cwd {
+/// Builds and spawns `program`, attaching reader threads that stream its
+/// stdout/stderr into `sink` line-by-line as they arrive. Returns immediately
+/// once the child is spawned (or the spawn itself fails) — the caller decides
+/// whether to wait on the returned [`Child`] synchronously ([`run_streamed`])
+/// or hand it off to its own background thread ([`spawn`]).
+fn spawn_streaming(
+    program: &str,
+    args: &[String],
+    cwd: Option<&Path>,
+    envs: &[(String, String)],
+    sink: &LogSink,
+) -> std::io::Result<Child> {
+    let mut cmd = Command::new(program);
+    cmd.args(args).stdout(Stdio::piped()).stderr(Stdio::piped());
+    if let Some(cwd) = cwd {
         cmd.current_dir(cwd);
     }
-    for (k, v) in &task.envs {
+    for (k, v) in envs {
         cmd.env(k, v);
     }
 
-    sink.info(format!("$ {} {}", task.program, task.args.join(" ")));
+    sink.info(format!("$ {} {}", program, args.join(" ")));
     let mut child = cmd.spawn()?;
-    let running = Arc::new(AtomicBool::new(true));
 
     if let Some(stdout) = child.stdout.take() {
         let sink = sink.clone();
@@ -98,6 +103,37 @@ pub fn spawn(task: Task, sink: LogSink) -> std::io::Result<TaskHandle> {
             }
         });
     }
+
+    Ok(child)
+}
+
+/// Blocking: spawn `program`, stream its output into `sink`, and wait for it
+/// to exit before returning — [`crate::workflow`]'s executor uses this to run
+/// a chain of steps strictly one after another instead of firing them all in
+/// parallel like [`spawn`] does. Reports its own "exited with ..." line into
+/// `sink`, same as [`spawn`].
+pub(crate) fn run_streamed(
+    program: &str,
+    args: &[String],
+    cwd: Option<&Path>,
+    envs: &[(String, String)],
+    sink: &LogSink,
+) -> std::io::Result<ExitStatus> {
+    let mut child = spawn_streaming(program, args, cwd, envs, sink)?;
+    let status = child.wait()?;
+    match status {
+        s if s.success() => sink.info("(process exited successfully)"),
+        s => sink.error(format!("(process exited with {s})")),
+    }
+    Ok(status)
+}
+
+/// Spawn `task` in the background (non-blocking) — stdout/stderr are
+/// streamed line-by-line into `sink` as they arrive, from dedicated reader
+/// threads, so the UI thread is never blocked waiting on the child process.
+pub fn spawn(task: Task, sink: LogSink) -> std::io::Result<TaskHandle> {
+    let mut child = spawn_streaming(&task.program, &task.args, task.cwd.as_deref(), &task.envs, &sink)?;
+    let running = Arc::new(AtomicBool::new(true));
 
     let handle_running = running.clone();
     std::thread::spawn(move || {
