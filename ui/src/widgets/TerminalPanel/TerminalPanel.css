@@ -39,9 +39,9 @@
 }
 
 /*
- * Every terminal view is stacked in the same cell (position: absolute) so they
- * all share the manager's size; only the active one is shown. Kept mounted so
- * scrollback and the running shell survive a tab switch.
+ * Every split group is stacked in the same cell (position: absolute) so they
+ * all share the manager's size; only the active group is shown. Kept mounted
+ * so scrollback and every pane's running shell survive switching away.
  */
 .sp-terminal-views {
   position: relative;
@@ -49,16 +49,44 @@
   min-width: 0;
 }
 
-.sp-terminal-view {
+.sp-terminal-group {
   position: absolute;
   inset: 0;
-  padding: var(--sp-space-xs);
-  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  gap: 1px;
+  background: var(--sp-border);
   visibility: hidden;
 }
 
-.sp-terminal-view[data-active] {
+.sp-terminal-group[data-active] {
   visibility: visible;
+}
+
+/* One split pane — all panes in the active group render side by side and
+   simultaneously, unlike groups themselves (only one group shows at a time). */
+.sp-terminal-pane {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  background: var(--sp-surface-0);
+}
+
+/* A thin accent top-border marks which pane last received a click — panes
+   don't otherwise look any different, since every visible one is "live". */
+.sp-terminal-pane[data-focused]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: var(--sp-accent);
+}
+
+.sp-terminal-view {
+  width: 100%;
+  height: 100%;
+  padding: var(--sp-space-xs);
+  box-sizing: border-box;
 }
 
 .sp-terminal-sidebar {
@@ -103,6 +131,12 @@
   cursor: pointer;
   color: var(--sp-text-muted);
   border-radius: var(--sp-radius-xs);
+}
+
+/* Indented — this row is a split-terminal sibling of the one above it,
+   rather than a separate top-level terminal. */
+.sp-terminal-sidebar-item[data-split] {
+  padding-left: calc(var(--sp-space-sm) + var(--sp-space-md));
 }
 
 .sp-terminal-sidebar-item:hover {
