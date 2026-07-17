@@ -1,257 +1,105 @@
-import { useLayoutEffect, useState, type RefObject } from "react";
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import "./outline.css";
 
-export interface Rect {
-  l: number;
-  t: number;
-  r: number;
-  b: number;
-}
-
-interface Pt {
-  x: number;
-  y: number;
-}
-
-function rectOf(el: HTMLElement, origin: DOMRect): Rect {
-  const r = el.getBoundingClientRect();
-  return { l: r.left - origin.left, t: r.top - origin.top, r: r.right - origin.left, b: r.bottom - origin.top };
-}
-
-/** A plain rounded rectangle — the ring for the single-target case (e.g. a pinned panel with no notch to trace). */
-function boxRing(r: Rect): Pt[] {
-  return [
-    { x: r.l, y: r.t },
-    { x: r.r, y: r.t },
-    { x: r.r, y: r.b },
-    { x: r.l, y: r.b },
-  ];
-}
-
-/**
- * The union outline of a primary rect (e.g. a flyout panel) plus a second,
- * smaller rect poking out of one of its edges (e.g. its still-visible strip
- * tab), as an ordered ring of vertices — 8 corners: 6 convex (the outer box +
- * the tab's tip) and 2 concave (where the tab's sides meet the panel's edge).
- * `side` is which edge of `primary` the `secondary` rect pokes out of.
- */
-function notchedRing(primary: Rect, secondary: Rect, side: "left" | "right" | "top" | "bottom"): Pt[] {
-  switch (side) {
-    case "left":
-      // secondary pokes out of primary's left edge; seam at x = primary.l (= secondary.r)
-      return [
-        { x: secondary.l, y: secondary.t },
-        { x: primary.l, y: secondary.t }, // concave
-        { x: primary.l, y: primary.t },
-        { x: primary.r, y: primary.t },
-        { x: primary.r, y: primary.b },
-        { x: primary.l, y: primary.b },
-        { x: primary.l, y: secondary.b }, // concave
-        { x: secondary.l, y: secondary.b },
-      ];
-    case "right":
-      return [
-        { x: primary.l, y: primary.t },
-        { x: primary.r, y: primary.t },
-        { x: primary.r, y: secondary.t }, // concave
-        { x: secondary.r, y: secondary.t },
-        { x: secondary.r, y: secondary.b },
-        { x: primary.r, y: secondary.b }, // concave
-        { x: primary.r, y: primary.b },
-        { x: primary.l, y: primary.b },
-      ];
-    case "top":
-      return [
-        { x: secondary.l, y: secondary.t },
-        { x: secondary.r, y: secondary.t },
-        { x: secondary.r, y: primary.t }, // concave
-        { x: primary.r, y: primary.t },
-        { x: primary.r, y: primary.b },
-        { x: primary.l, y: primary.b },
-        { x: primary.l, y: primary.t }, // concave
-        { x: secondary.l, y: primary.t },
-      ];
-    case "bottom":
-      return [
-        { x: primary.l, y: primary.t },
-        { x: primary.r, y: primary.t },
-        { x: primary.r, y: primary.b },
-        { x: secondary.r, y: primary.b }, // concave
-        { x: secondary.r, y: secondary.b },
-        { x: secondary.l, y: secondary.b },
-        { x: secondary.l, y: primary.b }, // concave
-        { x: primary.l, y: primary.b },
-      ];
-  }
-}
-
-function len(a: Pt, b: Pt): number {
-  return Math.hypot(b.x - a.x, b.y - a.y);
-}
-
-const ADJACENCY_TOLERANCE = 1.5;
-
-/**
- * Whether `secondary` actually touches `primary`'s edge on `side` (within a
- * subpixel tolerance) — the notched ring only makes visual sense when they're
- * flush; if a real gap has opened up between them (e.g. a flyout resting a
- * few px off its strip instead of flush against it), tracing the notch would
- * draw a connector line floating across that empty gap.
- */
-function isAdjacent(primary: Rect, secondary: Rect, side: "left" | "right" | "top" | "bottom"): boolean {
-  switch (side) {
-    case "left":
-      return Math.abs(primary.l - secondary.r) <= ADJACENCY_TOLERANCE;
-    case "right":
-      return Math.abs(secondary.l - primary.r) <= ADJACENCY_TOLERANCE;
-    case "top":
-      return Math.abs(primary.t - secondary.b) <= ADJACENCY_TOLERANCE;
-    case "bottom":
-      return Math.abs(secondary.t - primary.b) <= ADJACENCY_TOLERANCE;
-  }
-}
-
-/**
- * A closed SVG path that rounds every corner of `points` by radius `r` — a
- * quadratic Bézier per vertex (control point = the sharp corner), clamped so a
- * corner never eats more than half of its shorter neighbouring edge. Convex
- * and concave corners round identically, so a plain box and a notched union
- * share one rounding routine.
- */
-export function roundedPath(points: Pt[], r: number): string {
-  const n = points.length;
-  let d = "";
-  for (let i = 0; i < n; i++) {
-    const prev = points[(i - 1 + n) % n];
-    const cur = points[i];
-    const next = points[(i + 1) % n];
-    const rIn = Math.min(r, len(prev, cur) / 2);
-    const rOut = Math.min(r, len(next, cur) / 2);
-    const before: Pt = {
-      x: cur.x + ((prev.x - cur.x) / len(prev, cur)) * rIn,
-      y: cur.y + ((prev.y - cur.y) / len(prev, cur)) * rIn,
-    };
-    const after: Pt = {
-      x: cur.x + ((next.x - cur.x) / len(next, cur)) * rOut,
-      y: cur.y + ((next.y - cur.y) / len(next, cur)) * rOut,
-    };
-    d += i === 0 ? `M ${before.x} ${before.y} ` : `L ${before.x} ${before.y} `;
-    d += `Q ${cur.x} ${cur.y} ${after.x} ${after.y} `;
-  }
-  return d + "Z";
-}
-
-export type OutlineTarget = RefObject<HTMLElement | null> | (() => HTMLElement | null);
-
-function resolve(target: OutlineTarget): HTMLElement | null {
-  return typeof target === "function" ? target() : target.current;
-}
+export type OutlineShape = (box: { w: number; h: number }, radius: number, strokeWidth: number) => string;
 
 export interface OutlineProps {
-  /** Positioning + measurement origin — the outline is an absolutely-positioned overlay covering this element, so give it `position: relative`. */
-  regionRef: RefObject<HTMLElement | null>;
-  /** One target draws a plain rounded rectangle around it. Two draw their notched union (e.g. a flyout panel + its strip tab) — the second is treated as the notch poking out of the first. */
-  targets: [OutlineTarget] | [OutlineTarget, OutlineTarget];
-  /** Which edge of the first target the second pokes out of — required (and only meaningful) for the two-target case. */
-  notchSide?: "left" | "right" | "top" | "bottom";
   radius?: number;
   color?: string;
   strokeWidth?: number;
   className?: string;
   /**
-   * Pass whatever value the target's own live size is derived from (e.g. the
-   * pinned width a drag handle is actively changing) so the outline
-   * recomputes synchronously in the same commit as that resize, instead of
-   * waiting for ResizeObserver's own callback — which fires a frame later
-   * and reads as a visible lag/jitter during a live drag. ResizeObserver
-   * stays wired up too, as a fallback for size changes this component isn't
-   * driving itself (e.g. a window resize).
+   * Advanced: a custom contour, as an SVG path in the parent's own local px
+   * coordinates, given the parent's measured size. Omit for the default — a
+   * rounded rectangle filling the parent — which is drawn measurement-free
+   * (a plain SVG `<rect width="100%" height="100%">`) so it can NEVER lag its
+   * parent by even a frame, however the parent is moved or resized. A moved
+   * parent (e.g. a docked panel shifted by a neighbour's resize) carries this
+   * outline along automatically, because the outline is the parent's own
+   * child, not a separate overlay chasing it across a shared coordinate space.
    */
-  syncWith?: unknown;
+  shape?: OutlineShape;
 }
 
 const DEFAULT_RADIUS = 8;
 
-/**
- * The one continuous-outline renderer in the platform — a rounded-corner SVG
- * path traced live around one element (a plain border substitute) or the
- * notched union of two (a panel plus a tab poking out of its edge). Draw
- * every accent outline through this rather than a per-case CSS `border` and
- * a one-off SVG, so a pinned panel and its own flyout state render
- * *identically* — same radius, same stroke, same rounding — instead of
- * silently drifting apart the way a CSS border and a hand-rolled SVG outline
- * always eventually do.
- */
-export function Outline({
-  regionRef,
-  targets,
-  notchSide,
-  radius = DEFAULT_RADIUS,
-  color = "var(--sp-accent)",
-  strokeWidth = 1.5,
-  className,
-  syncWith,
-}: OutlineProps) {
-  const [path, setPath] = useState<string | null>(null);
-  const targetsKey = targets.length;
+/** A rounded-rectangle path for custom-shape authors and the measured path fallback. */
+export function roundedRectPath(w: number, h: number, radius: number, inset = 0): string {
+  const x = inset;
+  const y = inset;
+  const right = w - inset;
+  const bottom = h - inset;
+  const r = Math.max(0, Math.min(radius, (right - x) / 2, (bottom - y) / 2));
+  return [
+    `M ${x + r} ${y}`,
+    `H ${right - r}`,
+    `A ${r} ${r} 0 0 1 ${right} ${y + r}`,
+    `V ${bottom - r}`,
+    `A ${r} ${r} 0 0 1 ${right - r} ${bottom}`,
+    `H ${x + r}`,
+    `A ${r} ${r} 0 0 1 ${x} ${bottom - r}`,
+    `V ${y + r}`,
+    `A ${r} ${r} 0 0 1 ${x + r} ${y}`,
+    "Z",
+  ].join(" ");
+}
 
-  function compute() {
-    const region = regionRef.current;
-    if (!region) return;
-    const origin = region.getBoundingClientRect();
-    const primaryEl = resolve(targets[0]);
-    if (!primaryEl) {
-      setPath(null);
-      return;
-    }
-    const primary = rectOf(primaryEl, origin);
-    const secondaryEl = targets[1] ? resolve(targets[1]) : null;
-    // The notch only makes sense when the secondary rect is flush against the
-    // primary's edge (a tab poking directly out of a panel). If a gap has
-    // opened up between them, tracing the notch would draw a connector line
-    // floating across that empty gap — so fall back to a plain box around the
-    // primary only, leaving the detached secondary to its own styling.
-    if (secondaryEl && notchSide) {
-      const secondary = rectOf(secondaryEl, origin);
-      if (isAdjacent(primary, secondary, notchSide)) {
-        setPath(roundedPath(notchedRing(primary, secondary, notchSide), radius));
-        return;
-      }
-    }
-    setPath(roundedPath(boxRing(primary), radius));
+/**
+ * The platform's one accent-outline renderer — an SVG rendered as a CHILD of
+ * the element it outlines (its parent must be `position: relative`). Because
+ * it lives inside that element, it inherits every move and resize for free:
+ * no measuring the element's position, no chasing it across a region, and so
+ * nothing to fall out of sync when a sibling's resize shifts it. The default
+ * (a rounded rectangle) needs no measurement at all — an SVG `<rect>` sized
+ * `100%` tracks the parent purely in the render/paint layer. Pass `shape` for
+ * a non-rectangular contour; only then is the parent measured, so custom
+ * shapes stay correct across resizes too.
+ */
+export function Outline({ radius = DEFAULT_RADIUS, color = "var(--sp-accent)", strokeWidth = 1.5, className, shape }: OutlineProps) {
+  const ref = useRef<SVGSVGElement>(null);
+  const [box, setBox] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
+
+  useLayoutEffect(() => {
+    if (!shape) return;
+    const parent = ref.current?.parentElement;
+    if (!parent) return;
+    const measure = () => setBox({ w: parent.clientWidth, h: parent.clientHeight });
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(parent);
+    return () => ro.disconnect();
+  }, [shape]);
+
+  const classes = ["sp-outline", className].filter(Boolean).join(" ");
+
+  if (shape) {
+    const d = box.w > 0 && box.h > 0 ? shape(box, radius, strokeWidth) : "";
+    return (
+      <svg ref={ref} className={classes} aria-hidden>
+        {d && <path d={d} fill="none" stroke={color} strokeWidth={strokeWidth} />}
+      </svg>
+    );
   }
 
-  // Runs synchronously (before paint) whenever `syncWith` changes — the fast
-  // path for a resize this component itself drives.
-  useLayoutEffect(() => {
-    compute();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [syncWith]);
-
-  useLayoutEffect(() => {
-    const region = regionRef.current;
-    if (!region) return;
-
-    compute();
-    const ro = new ResizeObserver(compute);
-    ro.observe(region);
-    const primaryEl = resolve(targets[0]);
-    if (primaryEl) ro.observe(primaryEl);
-    const secondaryEl = targets[1] ? resolve(targets[1]) : null;
-    if (secondaryEl) ro.observe(secondaryEl);
-    window.addEventListener("resize", compute);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", compute);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [regionRef, notchSide, radius, targetsKey]);
-
-  if (!path) return null;
-
+  // Default rounded rect: inset the SVG by half the stroke so the stroke's
+  // outer edge lands exactly on the parent's edge (crisp, and not trimmed by
+  // the parent's own overflow clip), and round the corners a hair tighter to
+  // match.
+  const inset = strokeWidth / 2;
+  const insetStyle: CSSProperties = { inset };
   return (
-    <svg className={["sp-outline", className].filter(Boolean).join(" ")} aria-hidden>
-      <path d={path} fill="none" stroke={color} strokeWidth={strokeWidth} vectorEffect="non-scaling-stroke" />
+    <svg ref={ref} className={classes} style={insetStyle} aria-hidden>
+      <rect
+        x={0}
+        y={0}
+        width="100%"
+        height="100%"
+        rx={Math.max(0, radius - inset)}
+        ry={Math.max(0, radius - inset)}
+        fill="none"
+        stroke={color}
+        strokeWidth={strokeWidth}
+      />
     </svg>
   );
 }

@@ -1,2 +1,2 @@
-export { Outline, roundedPath } from "./Outline";
-export type { OutlineProps, OutlineTarget, Rect } from "./Outline";
+export { Outline, roundedRectPath } from "./Outline";
+export type { OutlineProps, OutlineShape } from "./Outline";
