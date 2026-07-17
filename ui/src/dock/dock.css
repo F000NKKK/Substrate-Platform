@@ -102,17 +102,14 @@
 /*
  * A pinned panel's own outline is drawn by the shared `Outline` engine (see
  * infra/outline, wired up in ToolWindowDock.tsx) — the exact same renderer a
- * flyout's tab-notched outline goes through — so a panel never visibly
- * changes shape between pinned and unpinned. No CSS border here at all;
- * `.sp-pinned-outline` below just sets the stacking order.
- *
- * The panel itself is `position: absolute` (see ToolWindowDock.tsx) — sized
- * and positioned exactly like a flyout, rather than as a resizing flex item,
- * so dragging it only repaints this one element instead of reflowing the
- * whole dock row on every pointermove. `.sp-dock-pinned-spacer` is the actual
- * flex participant that reserves its layout space.
+ * flyout's outline goes through — so a panel never visibly changes shape
+ * between pinned and unpinned. No CSS border here at all; `.sp-pinned-outline`
+ * below just sets the stacking order.
  */
 .sp-dock-pinned-slot > .sp-panel-surface {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
   border-radius: var(--sp-radius-sm);
 }
 
@@ -124,19 +121,18 @@
   box-shadow: 0 0 0 1px var(--sp-accent);
 }
 
-.sp-dock-pinned-spacer {
-  flex: 0 0 auto;
-}
-
 /*
- * Groups one pinned panel's resize handle + layout spacer as a single flex
- * item, alongside the panel's own absolutely-positioned overlay and outline
- * (both escape to `.sp-dock`'s positioning context, unaffected by this
- * being `position: static`) — each pinned panel gets an independent handle
- * on its main-area-facing edge rather than sharing one for the whole anchor.
+ * One pinned panel + its own resize handle, sized (inline) to the panel's
+ * remembered size. The panel is a flex:1 child filling the slot; the handle
+ * overlaps the panel's main-area-facing edge via a negative margin so it adds
+ * no layout width. Deliberately NOT `position: relative`: the `Outline` SVG
+ * inside is absolutely positioned with region-relative path coordinates, so
+ * it must resolve its offset parent to `.sp-dock` (the positioned region),
+ * not to this slot.
  */
 .sp-dock-pinned-slot {
   display: flex;
+  flex: 0 0 auto;
 }
 
 .sp-dock-pinned-slot--left,

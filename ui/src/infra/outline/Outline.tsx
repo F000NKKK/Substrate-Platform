@@ -89,6 +89,28 @@ function len(a: Pt, b: Pt): number {
   return Math.hypot(b.x - a.x, b.y - a.y);
 }
 
+const ADJACENCY_TOLERANCE = 1.5;
+
+/**
+ * Whether `secondary` actually touches `primary`'s edge on `side` (within a
+ * subpixel tolerance) — the notched ring only makes visual sense when they're
+ * flush; if a real gap has opened up between them (e.g. a flyout resting a
+ * few px off its strip instead of flush against it), tracing the notch would
+ * draw a connector line floating across that empty gap.
+ */
+function isAdjacent(primary: Rect, secondary: Rect, side: "left" | "right" | "top" | "bottom"): boolean {
+  switch (side) {
+    case "left":
+      return Math.abs(primary.l - secondary.r) <= ADJACENCY_TOLERANCE;
+    case "right":
+      return Math.abs(secondary.l - primary.r) <= ADJACENCY_TOLERANCE;
+    case "top":
+      return Math.abs(primary.t - secondary.b) <= ADJACENCY_TOLERANCE;
+    case "bottom":
+      return Math.abs(secondary.t - primary.b) <= ADJACENCY_TOLERANCE;
+  }
+}
+
 /**
  * A closed SVG path that rounds every corner of `points` by radius `r` — a
  * quadratic Bézier per vertex (control point = the sharp corner), clamped so a
@@ -184,8 +206,19 @@ export function Outline({
     }
     const primary = rectOf(primaryEl, origin);
     const secondaryEl = targets[1] ? resolve(targets[1]) : null;
-    const ring = secondaryEl && notchSide ? notchedRing(primary, rectOf(secondaryEl, origin), notchSide) : boxRing(primary);
-    setPath(roundedPath(ring, radius));
+    // The notch only makes sense when the secondary rect is flush against the
+    // primary's edge (a tab poking directly out of a panel). If a gap has
+    // opened up between them, tracing the notch would draw a connector line
+    // floating across that empty gap — so fall back to a plain box around the
+    // primary only, leaving the detached secondary to its own styling.
+    if (secondaryEl && notchSide) {
+      const secondary = rectOf(secondaryEl, origin);
+      if (isAdjacent(primary, secondary, notchSide)) {
+        setPath(roundedPath(notchedRing(primary, secondary, notchSide), radius));
+        return;
+      }
+    }
+    setPath(roundedPath(boxRing(primary), radius));
   }
 
   // Runs synchronously (before paint) whenever `syncWith` changes — the fast
