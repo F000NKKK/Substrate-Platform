@@ -23,17 +23,20 @@ export interface TerminalPanelProps {
   outputEvent?: string;
   /** Tauri event carrying `{ id }` when a shell exits. */
   exitEvent?: string;
-  /** The shell kinds offered as individual "new terminal" buttons — VS-Code style (bash, pwsh, etc). Defaults cover the common cross-platform shells. */
+  /**
+   * Explicit override for the shell kinds offered by "new terminal" — when
+   * omitted (the common case), the panel asks the backend via
+   * `listShellsCommand` (defaults to substrate-platform's own `list_shells`,
+   * which detects what's actually installed on this machine rather than
+   * assuming e.g. zsh/pwsh exist).
+   */
   shells?: TerminalShellKind[];
+  /** Tauri command returning `{ id, label, command }[]` for every shell actually available. Ignored if `shells` is given. */
+  listShellsCommand?: string;
 }
 
 const DEFAULT_COMMANDS = { spawn: "pty_spawn", write: "pty_write", resize: "pty_resize", kill: "pty_kill" };
-
-const DEFAULT_SHELLS: TerminalShellKind[] = [
-  { id: "bash", label: "Bash", shell: "bash" },
-  { id: "zsh", label: "Zsh", shell: "zsh" },
-  { id: "pwsh", label: "PowerShell", shell: "pwsh" },
-];
+const FALLBACK_SHELL: TerminalShellKind = { id: "default", label: "Terminal" };
 
 interface TerminalTab {
   id: string;
@@ -42,24 +45,39 @@ interface TerminalTab {
 }
 
 /**
- * A VS-Code-style integrated terminal panel: a right-side sidebar listing
- * every open PTY-backed shell session (click to switch, "x" to close), with
- * one button per configured shell kind at the top of the sidebar to spawn a
- * new session of that kind. Inactive terminals stay mounted (scrollback and
- * their shell keep running), so switching is instant. Product-agnostic — any
+ * A VS-Code-style integrated terminal panel: a top toolbar (new terminal,
+ * kill the active one, a "more actions" menu) and a right-side sidebar
+ * listing every open PTY-backed shell session (click to switch, "x" to
+ * close). Inactive terminals stay mounted (scrollback and their shell keep
+ * running), so switching is instant. Product-agnostic — any
  * Substrate-Platform product gets it by dropping it into a PlatformShell tool
- * window and exposing the matching `pty_*` Tauri commands.
+ * window and exposing the matching `pty_*`/`list_shells` Tauri commands.
  */
 export function TerminalPanel({
   commands = DEFAULT_COMMANDS,
   outputEvent = "pty-output",
   exitEvent = "pty-exit",
-  shells = DEFAULT_SHELLS,
+  shells: shellsProp,
+  listShellsCommand = "list_shells",
 }: TerminalPanelProps) {
+  const [detectedShells, setDetectedShells] = useState<TerminalShellKind[] | null>(shellsProp ?? null);
   const [tabs, setTabs] = useState<TerminalTab[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const countersRef = useRef<Record<string, number>>({});
+  const clearHandlesRef = useRef<Record<string, () => void>>({});
   const addMenu = useContextMenu<void>();
+  const moreMenu = useContextMenu<void>();
+
+  const shells = shellsProp ?? detectedShells;
+
+  useEffect(() => {
+    if (shellsProp) return;
+    invoke<{ id: string; label: string; command: string }[]>(listShellsCommand)
+      .then((detected) =>
+        setDetectedShells(detected.length > 0 ? detected.map((s) => ({ id: s.id, label: s.label, shell: s.command })) : [FALLBACK_SHELL])
+      )
+      .catch(() => setDetectedShells([FALLBACK_SHELL]));
+  }, [shellsProp, listShellsCommand]);
 
   function addTerminal(kind: TerminalShellKind) {
     const n = (countersRef.current[kind.id] ?? 0) + 1;
@@ -79,49 +97,75 @@ export function TerminalPanel({
     });
   }
 
-  // Open a first terminal (the first configured shell kind) on mount.
+  // Open a first terminal (the first detected/configured shell kind) as soon
+  // as the shell list is known.
   useEffect(() => {
-    if (shells[0]) addTerminal(shells[0]);
+    if (shells?.[0] && tabs.length === 0) addTerminal(shells[0]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [shells]);
 
   return (
     <div className="sp-terminal-manager">
-      <div className="sp-terminal-views">
-        {tabs.map((t) => {
-          const kind = shells.find((s) => s.id === t.shellId);
-          return (
-            <TerminalInstance
-              key={t.id}
-              id={t.id}
-              shell={kind?.shell}
-              active={t.id === activeId}
-              commands={commands}
-              outputEvent={outputEvent}
-              exitEvent={exitEvent}
-              onExit={() => closeTerminal(t.id)}
-            />
-          );
-        })}
-      </div>
-      <div className="sp-terminal-sidebar">
-        <div className="sp-terminal-sidebar-add">
-          <div className="sp-terminal-sidebar-add-anchor">
-            <IconButton
-              size={22}
-              title="New terminal"
-              onClick={() => (shells.length > 1 ? addMenu.openAtAnchor() : addTerminal(shells[0]))}
-            >
-              <Icon name="plus" size={14} />
-            </IconButton>
-            <ContextMenu
-              target={addMenu.target ? { mode: "anchor" } : null}
-              items={shells.map((kind) => ({ label: kind.label, onSelect: () => addTerminal(kind) }))}
-              onClose={addMenu.close}
-            />
-          </div>
+      <div className="sp-terminal-toolbar">
+        <div className="sp-terminal-toolbar-anchor">
+          <IconButton
+            size={22}
+            title="New terminal"
+            disabled={!shells}
+            onClick={() => (shells && shells.length > 1 ? addMenu.openAtAnchor() : shells?.[0] && addTerminal(shells[0]))}
+          >
+            <Icon name="plus" size={14} />
+          </IconButton>
+          <ContextMenu
+            target={addMenu.target ? { mode: "anchor" } : null}
+            items={(shells ?? []).map((kind) => ({ label: kind.label, onSelect: () => addTerminal(kind) }))}
+            onClose={addMenu.close}
+          />
         </div>
-        <div className="sp-terminal-sidebar-list">
+        <IconButton size={22} title="Kill terminal" disabled={!activeId} onClick={() => activeId && closeTerminal(activeId)}>
+          <Icon name="trash" size={14} />
+        </IconButton>
+        <div className="sp-terminal-toolbar-anchor">
+          <IconButton size={22} title="More actions" onClick={() => moreMenu.openAtAnchor()}>
+            <Icon name="more" size={14} />
+          </IconButton>
+          <ContextMenu
+            target={moreMenu.target ? { mode: "anchor" } : null}
+            items={[
+              {
+                label: "Clear Terminal",
+                shortcut: "Ctrl+L",
+                disabled: !activeId,
+                onSelect: () => activeId && clearHandlesRef.current[activeId]?.(),
+              },
+            ]}
+            onClose={moreMenu.close}
+          />
+        </div>
+      </div>
+      <div className="sp-terminal-body">
+        <div className="sp-terminal-views">
+          {tabs.map((t) => {
+            const kind = shells?.find((s) => s.id === t.shellId);
+            return (
+              <TerminalInstance
+                key={t.id}
+                id={t.id}
+                shell={kind?.shell}
+                active={t.id === activeId}
+                commands={commands}
+                outputEvent={outputEvent}
+                exitEvent={exitEvent}
+                onExit={() => closeTerminal(t.id)}
+                onReady={(clear) => {
+                  if (clear) clearHandlesRef.current[t.id] = clear;
+                  else delete clearHandlesRef.current[t.id];
+                }}
+              />
+            );
+          })}
+        </div>
+        <div className="sp-terminal-sidebar">
           {tabs.map((t) => (
             <div
               key={t.id}
@@ -132,7 +176,7 @@ export function TerminalPanel({
               <Icon name="terminal" size={14} />
               <span className="sp-terminal-sidebar-item-label">{t.label}</span>
               <IconButton
-                size={18}
+                size={22}
                 title="Close terminal"
                 className="sp-terminal-sidebar-item-close"
                 onClick={(e) => {
@@ -158,13 +202,17 @@ interface TerminalInstanceProps {
   outputEvent: string;
   exitEvent: string;
   onExit: () => void;
+  /** Hands the parent a `clear()` for this instance on mount, and `null` on unmount — backs the toolbar's "Clear Terminal" action. */
+  onReady: (clear: (() => void) | null) => void;
 }
 
-function TerminalInstance({ id, shell, active, commands, outputEvent, exitEvent, onExit }: TerminalInstanceProps) {
+function TerminalInstance({ id, shell, active, commands, outputEvent, exitEvent, onExit, onReady }: TerminalInstanceProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const fitRef = useRef<(() => void) | null>(null);
   const onExitRef = useRef(onExit);
   onExitRef.current = onExit;
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -187,6 +235,7 @@ function TerminalInstance({ id, shell, active, commands, outputEvent, exitEvent,
     };
     fitRef.current = fit;
     fit();
+    onReadyRef.current(() => term.clear());
 
     // Clearing by typing a shell command (`clear`/`Clear-Host`/`cls`) races
     // that shell's own startup (profile scripts, MOTD, etc.) — a slow-loading
@@ -238,6 +287,7 @@ function TerminalInstance({ id, shell, active, commands, outputEvent, exitEvent,
     return () => {
       disposed = true;
       fitRef.current = null;
+      onReadyRef.current(null);
       window.clearTimeout(clearTimer);
       resizeObserver.disconnect();
       onData.dispose();

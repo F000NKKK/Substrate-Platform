@@ -1,9 +1,38 @@
 .sp-terminal-manager {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
+}
+
+.sp-terminal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  gap: 2px;
+  padding: var(--sp-space-xs);
+  border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-terminal-toolbar-anchor {
+  position: relative;
+}
+
+/* These anchors sit at the toolbar's right edge, flush against the
+   panel/window edge — the menu's default left-aligned anchor would run
+   off-screen there. */
+.sp-terminal-toolbar-anchor .sp-contextmenu--anchor {
+  left: auto;
+  right: 0;
+}
+
+.sp-terminal-body {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
 }
 
 /*
@@ -34,37 +63,10 @@
   flex-direction: column;
   flex: 0 0 200px;
   min-width: 0;
-  border-left: 1px solid var(--sp-border);
-  box-sizing: border-box;
-}
-
-.sp-terminal-sidebar-add {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex: 0 0 auto;
-  padding: var(--sp-space-xs);
-  border-bottom: 1px solid var(--sp-border);
-}
-
-.sp-terminal-sidebar-add-anchor {
-  position: relative;
-}
-
-/* The "+" sits at the sidebar's right edge, flush against the panel/window
-   edge — the menu's default left-aligned anchor would run off-screen there. */
-.sp-terminal-sidebar-add-anchor .sp-contextmenu--anchor {
-  left: auto;
-  right: 0;
-}
-
-.sp-terminal-sidebar-list {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
   overflow-y: auto;
   padding: var(--sp-space-xs) 0;
+  border-left: 1px solid var(--sp-border);
+  box-sizing: border-box;
 }
 
 .sp-terminal-sidebar-item {

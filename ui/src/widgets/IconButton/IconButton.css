@@ -20,3 +20,9 @@
 .sp-icon-btn:focus-visible {
   box-shadow: 0 0 0 2px var(--sp-accent-soft);
 }
+
+.sp-icon-btn:disabled {
+  color: var(--sp-text-faint);
+  cursor: default;
+  pointer-events: none;
+}
