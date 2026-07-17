@@ -285,6 +285,11 @@
   border-radius: 0;
 }
 
+/* The flyout's notched union outline (region mode) must stack above the flyout box itself. */
+.sp-flyout-outline {
+  z-index: 41;
+}
+
 @keyframes sp-flyout-in {
   from {
     opacity: 0;
