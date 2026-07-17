@@ -67,6 +67,8 @@ interface TerminalTab {
   n: number;
   /** Set by double-clicking the sidebar label to rename — overrides the generated "Bash 2"-style label until the tab closes. */
   customLabel?: string;
+  /** Terminals sharing a groupId render side by side as split panes in the main view — a plain "new terminal" starts its own group (equal to its own id); "Split Terminal" joins the active tab's group instead. */
+  groupId: string;
 }
 
 function labelFor(kind: TerminalShellKind | undefined, tab: TerminalTab): string {
@@ -114,15 +116,24 @@ export function TerminalPanel({
       .catch(() => setDetectedShells([FALLBACK_SHELL]));
   }, [shellsProp, listShellsCommand]);
 
-  function addTerminal(kind: TerminalShellKind) {
+  /** `groupId` omitted starts a new split group of its own; passed, the new terminal joins that group as an additional side-by-side pane. */
+  function addTerminal(kind: TerminalShellKind, groupId?: string) {
     setTabs((prev) => {
       const used = new Set(prev.filter((t) => t.shellId === kind.id).map((t) => t.n));
       let n = 1;
       while (used.has(n)) n++;
       const id = `term-${kind.id}-${n}-${Date.now()}`;
       setActiveId(id);
-      return [...prev, { id, shellId: kind.id, n }];
+      return [...prev, { id, shellId: kind.id, n, groupId: groupId ?? id }];
     });
+  }
+
+  /** Adds a new pane to the active terminal's split group, using the same shell kind — VS Code's "Split Terminal". */
+  function splitTerminal() {
+    const activeTab = tabs.find((t) => t.id === activeId);
+    if (!activeTab) return;
+    const kind = shells?.find((s) => s.id === activeTab.shellId) ?? shells?.[0];
+    if (kind) addTerminal(kind, activeTab.groupId);
   }
 
   function renameTerminal(id: string, label: string) {
@@ -132,9 +143,16 @@ export function TerminalPanel({
 
   function closeTerminal(id: string) {
     setTabs((prev) => {
+      const closing = prev.find((t) => t.id === id);
       const idx = prev.findIndex((t) => t.id === id);
       const next = prev.filter((t) => t.id !== id);
-      setActiveId((cur) => (cur !== id ? cur : next[idx]?.id ?? next[idx - 1]?.id ?? next[0]?.id ?? null));
+      setActiveId((cur) => {
+        if (cur !== id) return cur;
+        // Prefer another pane in the same split group, so closing one pane
+        // keeps you looking at its siblings instead of jumping elsewhere.
+        const sibling = closing && next.find((t) => t.groupId === closing.groupId);
+        return sibling?.id ?? next[idx]?.id ?? next[idx - 1]?.id ?? next[0]?.id ?? null;
+      });
       return next;
     });
   }
@@ -164,6 +182,9 @@ export function TerminalPanel({
             onClose={addMenu.close}
           />
         </div>
+        <IconButton size={22} title="Split terminal" disabled={!activeId} onClick={splitTerminal}>
+          <Icon name="split" size={14} />
+        </IconButton>
         <IconButton size={22} title="Kill terminal" disabled={!activeId} onClick={() => activeId && closeTerminal(activeId)}>
           <Icon name="trash" size={14} />
         </IconButton>
