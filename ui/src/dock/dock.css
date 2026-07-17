@@ -239,78 +239,43 @@
 }
 
 /*
- * auto-hide flyout — floats OVER everything (its own size, never joining the
- * pinned row), anchored right next to the strip so its still-visible strip tab
- * and the panel read as one shape. It carries no CSS border of its own: the
- * continuous accent outline wrapping [tab + panel] is drawn as a single SVG
- * path in .sp-flyout-border (see FlyoutFrame.tsx), which is the only way to get
- * the 8-corner notched line instead of two disconnected boxes.
- */
-/*
- * Solid, not glass — a pinned panel can sit at this exact same position
- * (e.g. Properties pinned right where Solution Explorer peeks open on the
- * same anchor), and a translucent+blurred background still let its accent
- * border bleed through underneath, reading as a stray line on top of this
- * panel. Opaque like every pinned panel's own background removes that.
+ * auto-hide flyout — floats OVER everything at the same offset from the strip
+ * a pinned panel sits at (strip + the dock's own gap), so nothing shifts when
+ * a panel is pinned/unpinned. A transparent positioning wrapper: the `box-
+ * shadow` (rounded to match) is all it draws — the panel's own background,
+ * radius, and accent outline come from `PanelSurface`, so a flyout panel is
+ * pixel-identical to the same panel pinned. `top/bottom: 0` spans the region;
+ * the bottom dock is its own row below, so there's nothing else to clear.
  */
 .sp-dock-flyout {
   position: absolute;
   z-index: 40;
+  border-radius: var(--sp-radius-sm);
   box-shadow: var(--sp-shadow-md);
-  overflow: hidden;
-  background: var(--sp-surface-1);
   animation: sp-flyout-in var(--sp-duration-base) var(--sp-easing);
 }
 
-/*
- * Positioned at the exact same offset from the strip a PINNED panel's own
- * edge sits at (strip size + the dock's own gap, see .sp-dock's gap) rather
- * than flush against the strip — so nothing visibly shifts when a panel is
- * pinned or unpinned; only the gap between the strip tab and the panel
- * changes. Width/height come from this panel's own remembered flyout size
- * (inline style, set in ToolWindowDock). Corner radius matches FlyoutFrame's
- * CORNER_RADIUS (8px) so the glass fill lines up under the SVG stroke. The
- * bottom dock is its own row below the upper row now (see PlatformShell), so
- * this region's own box already stops short of it — `top: 0; bottom: 0`
- * spans the full region with nothing else to clear.
- */
 .sp-dock-flyout--left {
   top: 0;
   bottom: 0;
   left: calc(var(--sp-toolwindow-strip) + var(--sp-space-xs));
-  border-radius: 0 var(--sp-radius-sm) var(--sp-radius-sm) 0;
 }
 
 .sp-dock-flyout--right {
   top: 0;
   bottom: 0;
   right: calc(var(--sp-toolwindow-strip) + var(--sp-space-xs));
-  border-radius: var(--sp-radius-sm) 0 0 var(--sp-radius-sm);
 }
 
 .sp-dock-flyout--bottom {
   left: 0;
   right: 0;
   bottom: calc(var(--sp-toolwindow-strip) + var(--sp-space-xs));
-  border-radius: var(--sp-radius-sm) var(--sp-radius-sm) 0 0;
 }
 
-/*
- * The flyout's own resize handle is rendered as a sibling of `.sp-dock-flyout`
- * (see FlyoutFrame.tsx), not inside it — that box's `overflow: hidden` would
- * otherwise clip a handle whose hit area deliberately pokes out past its
- * edge. Its position is computed inline (flyoutHandlePositionStyle in
- * ToolWindowDock.tsx) rather than via a CSS descendant selector, since it's
- * no longer a descendant of the box it needs to sit next to.
- */
 .sp-dock-flyout .sp-panel-surface {
+  width: 100%;
   height: 100%;
-  background: transparent;
-}
-
-/* Base positioning/overflow for this comes from the shared `.sp-outline` (see infra/outline) — just the stacking order on top of the flyout panel itself. */
-.sp-flyout-border {
-  z-index: 41;
 }
 
 @keyframes sp-flyout-in {
@@ -334,13 +299,13 @@
   resize: both;
   overflow: hidden;
   border-radius: var(--sp-radius-md);
-  border: 1px solid var(--sp-border-strong);
   box-shadow: var(--sp-shadow-md);
   background: var(--sp-surface-glass);
   backdrop-filter: blur(var(--sp-blur));
   -webkit-backdrop-filter: blur(var(--sp-blur));
 }
 
+/* Transparent so the glass wrapper shows through; the accent outline comes from PanelSurface's own `Outline`. */
 .sp-floating-panel .sp-panel-surface {
   height: 100%;
   background: transparent;
