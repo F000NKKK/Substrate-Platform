@@ -29,13 +29,15 @@ impl PtySession {
     /// process directory) at `cols`x`rows`. `on_output` is called from a
     /// dedicated reader thread every time new bytes arrive — keep it fast
     /// (e.g. just forward to a channel/event emitter), it runs for the life
-    /// of the session.
+    /// of the session. `on_exit` fires once, from that same thread, when the
+    /// shell exits (the pty reaches EOF) — so a host can drop/close the tab.
     pub fn spawn(
         shell: Option<String>,
         cwd: Option<PathBuf>,
         cols: u16,
         rows: u16,
         mut on_output: impl FnMut(Vec<u8>) + Send + 'static,
+        on_exit: impl FnOnce() + Send + 'static,
     ) -> anyhow::Result<Self> {
         let pty_system = native_pty_system();
         let pair = pty_system.openpty(PtySize {
@@ -64,6 +66,7 @@ impl PtySession {
                     Err(_) => break,
                 }
             }
+            on_exit();
         });
 
         let writer = pair.master.take_writer()?;
@@ -77,6 +80,11 @@ impl PtySession {
 
     pub fn write(&mut self, data: &[u8]) -> std::io::Result<()> {
         self.writer.write_all(data)
+    }
+
+    /// Terminate the shell process now (e.g. the user closed the tab).
+    pub fn kill(&mut self) -> std::io::Result<()> {
+        self.child.kill()
     }
 
     pub fn resize(&self, cols: u16, rows: u16) -> anyhow::Result<()> {

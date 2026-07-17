@@ -16,3 +16,4 @@ export { IconPalette } from "./IconPalette";
 export { IconMinimize } from "./IconMinimize";
 export { IconMaximize } from "./IconMaximize";
 export { IconRestore } from "./IconRestore";
+export { IconPlus } from "./IconPlus";

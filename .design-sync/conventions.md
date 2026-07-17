@@ -64,4 +64,18 @@ export function ProjectSettings() {
 }
 ```
 
-For a full application frame, use `PlatformShell` (props `main`, `toolWindows: { left | right | bottom: PanelDef[] }`, `menu`) — a docking IDE shell with tabbed center dock, pinnable/floatable tool windows, and an optional `MenuBar`. Each `PanelDef` is `{ id, title, component }` where `component` is a zero-prop React component rendering the panel body.
+For a full application frame, use `PlatformShell` (props `main`, `toolWindows: { left | right | bottom: PanelDef[] }`, `menu`) — a docking IDE shell with tabbed center dock, pinnable/floatable tool windows, and an optional `MenuBar`. Each `PanelDef` is `{ id, title, component }` where `component` is a zero-prop React component rendering the panel body. `MenuBar` also takes a `windowControls` slot (put `<WindowControls />` there for a `decorations: false` Tauri window) and doubles as the window's drag region.
+
+## Data & hierarchy: DataGrid, Tree, FileTree
+
+`DataGrid` (`columns: DataGridColumn<T>[]`, `rows: T[]`, `getRowId`) is a full desktop-grade grid: multi-column sort (`sortable`, ctrl/cmd-click a header for a secondary key), drag-a-header-into-the-group-panel grouping with per-group aggregates (`summary: "sum"|"count"|"avg"` + `summaryValue`), a per-column filter row (default on — `filterRow={false}` to hide), column resize/reorder, column hide (`hiddenColumns`/`onHiddenColumnsChange`), and inline cell editing (`editable`, `onCellEdit`/`onCellEditCommit`). Rows above ~50 should always go through this, not a mapped `<div>` list — it's virtualized.
+
+`Tree` (`nodes: TreeNode<T>[]` where a node is `{id, label, data, children?}` — `children` present, even `[]`, marks a branch) is the generic nested-list primitive: animated expand/collapse, roving-tabindex keyboard nav, optional `renderIcon`, and a `getMenuItems` right-click dropdown. `FileTree` is `Tree` pre-configured for files (`nodes: FileTreeNode[]` with `kind: "folder"|"file"`) — folder/open-folder/file icons for free.
+
+## ContextMenu / useContextMenu
+
+The one dropdown implementation, backing `Tree`'s node menu, `MenuBarItem`'s dropdown, and `DataGrid`'s header/cell menus. Building a new right-click or click-to-open menu: pair `useContextMenu<T>()` (gives `target`, `openAtPoint(node, e)` for right-click, `openAtAnchor(node)` for click-to-open, `close`) with `<ContextMenu target={...} items={...} onClose={...} />`. `ContextMenuItem` is `{label, onSelect?, destructive?, disabled?, checked?, submenu?}`.
+
+## Icon-by-name and IconProvider
+
+Beyond importing `Icon*` components directly, `<Icon name="folder" size={16} />` resolves a glyph from a registry by string name (built-ins: `folder`, `folderOpen`, `file`, `chevronRight`, `pin`, `pinOff`, `close`, `settings`, `minimize`, `maximize`, `restore`, `plus`, and more — see `getDefaultIconNames()`). Override globally with `registerIcon(name, Component)`/`registerIcons({...})`, or scope an override to a subtree with `<IconProvider icons={{ folder: MyIcon }}>` — this is how a product swaps or adds icons without forking the package.
