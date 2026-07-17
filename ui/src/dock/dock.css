@@ -115,6 +115,11 @@
  * sizes independently.
  */
 .sp-dock-pinned-slot > .sp-panel-surface {
+  /* Border-box so the 1px accent border renders INSIDE the panel's own
+     width/height (its inline style) instead of adding 2px on top of it —
+     otherwise a pinned panel's true outer edge silently drifts a couple px
+     from the borderless flyout/bottom-dock edges it's meant to line up with. */
+  box-sizing: border-box;
   flex: 0 0 auto;
   border: 1px solid var(--sp-accent);
   border-radius: var(--sp-radius-md);
@@ -161,10 +166,11 @@
   background: var(--sp-accent);
 }
 
+/* Hit area is much wider than the visible line (::before) so grabbing the seam doesn't take pixel-precise aim. */
 .sp-dock-resize--left,
 .sp-dock-resize--right {
-  width: 6px;
-  margin: 0 -3px;
+  width: 13px;
+  margin: 0 -6px;
   cursor: col-resize;
 }
 
@@ -172,21 +178,21 @@
 .sp-dock-resize--right::before {
   top: 0;
   bottom: 0;
-  left: 2px;
-  width: 2px;
+  left: 5px;
+  width: 3px;
 }
 
 .sp-dock-resize--bottom {
-  height: 6px;
-  margin: -3px 0;
+  height: 13px;
+  margin: -6px 0;
   cursor: row-resize;
 }
 
 .sp-dock-resize--bottom::before {
   left: 0;
   right: 0;
-  top: 2px;
-  height: 2px;
+  top: 5px;
+  height: 3px;
 }
 
 /* Blends with the panel body on purpose — it's a drag handle + actions row, not a separate bar. */
@@ -277,26 +283,28 @@
 }
 
 /* The flyout's own resize handle — positioned at its outer edge (facing the main area), since the flyout box isn't a flex layout like the pinned slot is. */
+/* Positioned manually (top/bottom/left/right) rather than via the anchor variant's flex margin trick, so that margin is cancelled here. */
 .sp-dock-resize--flyout {
   position: absolute;
+  margin: 0;
 }
 
 .sp-dock-flyout--left .sp-dock-resize--flyout {
   top: 0;
   bottom: 0;
-  right: -3px;
+  right: -6px;
 }
 
 .sp-dock-flyout--right .sp-dock-resize--flyout {
   top: 0;
   bottom: 0;
-  left: -3px;
+  left: -6px;
 }
 
 .sp-dock-flyout--bottom .sp-dock-resize--flyout {
   left: 0;
   right: 0;
-  top: -3px;
+  top: -6px;
 }
 
 .sp-dock-flyout .sp-panel-surface {

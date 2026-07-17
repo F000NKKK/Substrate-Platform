@@ -97,24 +97,34 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
   // stays in the strip — it's the notched part of the continuous outline.
   const stripIds = panelIds.filter((id) => !pinnedIds.includes(id));
 
+  // The handle always sits on the panel's main-area-facing edge — for "left"
+  // that's after the panel (strip, then panel, then main area), but "right"
+  // and "bottom" render [pinned panels, strip] so their main area is on the
+  // OPPOSITE side from the strip, putting the handle before the panel instead.
+  const handleFirst = anchor !== "left";
+
   const pinnedSlots = pinnedIds.map((id) => {
     const panel = layout.panelsById[id];
     const Component = panel?.component;
     if (!panel || !Component) return null;
+    const panelEl = (
+      <PanelSurface
+        key="panel"
+        panelId={id}
+        title={panel.title}
+        pinned
+        style={sizeStyle(anchor, layout.anchorSize(id, anchor, "pinned"))}
+        onTogglePin={() => layout.unpin(id)}
+        onFloat={() => layout.floatAt(id, DEFAULT_FLOAT_POS.x, DEFAULT_FLOAT_POS.y)}
+        onClose={() => layout.close(id)}
+      >
+        <Component />
+      </PanelSurface>
+    );
+    const handleEl = <ResizeHandle key="handle" anchor={anchor} panelId={id} mode="pinned" layout={layout} />;
     return (
       <div key={id} className={`sp-dock-pinned-slot sp-dock-pinned-slot--${anchor}`}>
-        <PanelSurface
-          panelId={id}
-          title={panel.title}
-          pinned
-          style={sizeStyle(anchor, layout.anchorSize(id, anchor, "pinned"))}
-          onTogglePin={() => layout.unpin(id)}
-          onFloat={() => layout.floatAt(id, DEFAULT_FLOAT_POS.x, DEFAULT_FLOAT_POS.y)}
-          onClose={() => layout.close(id)}
-        >
-          <Component />
-        </PanelSurface>
-        <ResizeHandle anchor={anchor} panelId={id} mode="pinned" layout={layout} />
+        {handleFirst ? [handleEl, panelEl] : [panelEl, handleEl]}
       </div>
     );
   });
