@@ -100,34 +100,19 @@
 }
 
 /*
- * Together with Tab.css's matching active-tab border, this traces one
- * continuous thin accent outline around the tab + its panel as a unit —
- * suppressed on the shared seam so it reads as one shape, not two boxes.
- */
-/*
- * A pinned panel's tab is hidden from its strip entirely (see Tab.css),
- * so there's nothing for it to "blend into" — it always gets a full
- * 4-side border, same as any of its pinned neighbors sitting beside it (a
- * flyout/floating panel intentionally has none of its own — see the flyout's
- * SVG-outline comment below). Width/height come from each panel's own
- * remembered size (inline style, set in ToolWindowDock) rather than a shared
- * token here, since every pinned panel — and its own flyout state — now
- * sizes independently.
+ * A pinned panel's own outline is drawn by the shared `Outline` engine (see
+ * infra/outline, wired up in ToolWindowDock.tsx) — the exact same renderer a
+ * flyout's tab-notched outline goes through — so a panel never visibly
+ * changes shape between pinned and unpinned. No CSS border/radius here at
+ * all; `.sp-pinned-outline` below just sets the stacking order.
  */
 .sp-dock-pinned-slot > .sp-panel-surface {
-  /* Border-box so the 1px accent border renders INSIDE the panel's own
-     width/height (its inline style) instead of adding 2px on top of it —
-     otherwise a pinned panel's true outer edge silently drifts a couple px
-     from the borderless flyout/bottom-dock edges it's meant to line up with. */
-  box-sizing: border-box;
   flex: 0 0 auto;
-  border: 1px solid var(--sp-accent);
-  /* Same radius as the flyout's outline (dock-flyout + FlyoutFrame's
-     CORNER_RADIUS, both --sp-radius-sm's 8px) so a panel doesn't visibly
-     change shape when pinned vs. unpinned — only its border-drawing method
-     differs (a plain CSS border here vs. an SVG outline there, since a
-     flyout also needs to notch around its strip tab). */
   border-radius: var(--sp-radius-sm);
+}
+
+.sp-pinned-outline {
+  z-index: 2;
 }
 
 .sp-panel-surface:focus-within {
