@@ -106,13 +106,17 @@ export function useShellLayout(
 
   const [centerActiveId, setCenterActive] = useState(main.id);
 
-  const [sizes, setSizes] = useState<Record<ToolWindowAnchor, number>>({ ...DEFAULT_ANCHOR_SIZE });
+  const [sizes, setSizes] = useState<Record<string, number>>({});
 
-  const anchorSize = useCallback((anchor: ToolWindowAnchor) => sizes[anchor], [sizes]);
+  const anchorSize = useCallback(
+    (panelId: string, anchor: ToolWindowAnchor, mode: SizeMode) => sizes[sizeKey(panelId, anchor, mode)] ?? DEFAULT_ANCHOR_SIZE[anchor],
+    [sizes]
+  );
 
-  const setAnchorSize = useCallback((anchor: ToolWindowAnchor, size: number) => {
+  const setAnchorSize = useCallback((panelId: string, anchor: ToolWindowAnchor, mode: SizeMode, size: number) => {
     const clamped = Math.min(MAX_ANCHOR_SIZE, Math.max(MIN_ANCHOR_SIZE, size));
-    setSizes((prev) => (prev[anchor] === clamped ? prev : { ...prev, [anchor]: clamped }));
+    const key = sizeKey(panelId, anchor, mode);
+    setSizes((prev) => (prev[key] === clamped ? prev : { ...prev, [key]: clamped }));
   }, []);
 
   const idsByAnchor = useCallback(
