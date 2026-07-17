@@ -122,7 +122,12 @@
   box-sizing: border-box;
   flex: 0 0 auto;
   border: 1px solid var(--sp-accent);
-  border-radius: var(--sp-radius-md);
+  /* Same radius as the flyout's outline (dock-flyout + FlyoutFrame's
+     CORNER_RADIUS, both --sp-radius-sm's 8px) so a panel doesn't visibly
+     change shape when pinned vs. unpinned — only its border-drawing method
+     differs (a plain CSS border here vs. an SVG outline there, since a
+     flyout also needs to notch around its strip tab). */
+  border-radius: var(--sp-radius-sm);
 }
 
 .sp-panel-surface:focus-within {
@@ -147,52 +152,71 @@
   flex-direction: column;
 }
 
-/* Resize handle — sits on a panel's edge facing the main area (or the next pinned panel), dragged to grow/shrink that specific panel/mode. */
+/*
+ * Resize handle — sits on a panel's edge facing the main area (or the next
+ * pinned panel), dragged to grow/shrink that specific panel/mode. The hit
+ * area (this element) is much wider than the visible line (.sp-dock-resize-line)
+ * so grabbing the seam doesn't take pixel-precise aim; the line itself sits a
+ * couple px off the panel's own border rather than flush against or centered
+ * across the whole hit area — a gap, then a thin line, like a window's own
+ * resize border — so it doesn't read as a second, longer border drawn
+ * directly on the panel's edge.
+ */
 .sp-dock-resize {
   flex: 0 0 auto;
   position: relative;
   z-index: 1;
 }
 
-.sp-dock-resize::before {
-  content: "";
+.sp-dock-resize-line {
   position: absolute;
   background: transparent;
+  border-radius: 1px;
   transition: background var(--sp-duration-fast) var(--sp-easing);
 }
 
-.sp-dock-resize:hover::before,
-.sp-dock-resize:active::before {
+.sp-dock-resize:hover .sp-dock-resize-line,
+.sp-dock-resize[data-dragging] .sp-dock-resize-line {
   background: var(--sp-accent);
 }
 
-/* Hit area is much wider than the visible line (::before) so grabbing the seam doesn't take pixel-precise aim. */
+/* While dragging, the line is translated to track the cursor directly (see ToolWindowDock.tsx) — no layout reflow, so it can never lag behind or run ahead of anything. */
+.sp-dock-resize[data-dragging] .sp-dock-resize-line {
+  z-index: 2;
+}
+
 .sp-dock-resize--left,
 .sp-dock-resize--right {
-  width: 13px;
-  margin: 0 -6px;
+  width: 14px;
+  margin: 0 -7px;
   cursor: col-resize;
 }
 
-.sp-dock-resize--left::before,
-.sp-dock-resize--right::before {
+.sp-dock-resize--left .sp-dock-resize-line {
   top: 0;
   bottom: 0;
-  left: 5px;
-  width: 3px;
+  left: 9px;
+  width: 2px;
+}
+
+.sp-dock-resize--right .sp-dock-resize-line {
+  top: 0;
+  bottom: 0;
+  right: 9px;
+  width: 2px;
 }
 
 .sp-dock-resize--bottom {
-  height: 13px;
-  margin: -6px 0;
+  height: 14px;
+  margin: -7px 0;
   cursor: row-resize;
 }
 
-.sp-dock-resize--bottom::before {
+.sp-dock-resize--bottom .sp-dock-resize-line {
   left: 0;
   right: 0;
   top: 5px;
-  height: 3px;
+  height: 2px;
 }
 
 /* Blends with the panel body on purpose — it's a drag handle + actions row, not a separate bar. */
