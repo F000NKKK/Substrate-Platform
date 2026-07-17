@@ -64,9 +64,32 @@
   flex: 0 0 200px;
   min-width: 0;
   overflow-y: auto;
-  padding: var(--sp-space-xs) 0;
+  overflow-x: hidden;
+  /* Right padding keeps row content (the close button especially) clear of
+     the scrollbar's own track instead of butting right up against it;
+     `scrollbar-gutter` reserves that space up front so nothing reflows when
+     the list grows past a scroll threshold. */
+  padding: var(--sp-space-xs) 6px var(--sp-space-xs) 0;
+  scrollbar-gutter: stable;
   border-left: 1px solid var(--sp-border);
   box-sizing: border-box;
+}
+
+.sp-terminal-sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sp-terminal-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sp-terminal-sidebar::-webkit-scrollbar-thumb {
+  background: var(--sp-border-strong);
+  border-radius: var(--sp-radius-xs);
+}
+
+.sp-terminal-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--sp-text-faint);
 }
 
 .sp-terminal-sidebar-item {
