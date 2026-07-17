@@ -81,17 +81,15 @@
 }
 
 /*
- * Left/right docks stop flush with the bottom PANEL's bottom edge, not the
- * window's — capped by the space below that panel (strip + gap), measured live
- * into --sp-bottom-below. With no bottom dock this is 0 and they run full
- * height; with a bottom panel pinned, a pinned side panel's bottom lines up
- * exactly with it, as in Visual Studio.
+ * The bottom dock is now its own full-width row below .sp-shell-upper (see
+ * PlatformShell), so left/right no longer share vertical space with it —
+ * stretching to the upper row's full height (the flex default) already
+ * lines their bottom edge up with the main area's, with no separate
+ * measurement needed.
  */
 .sp-dock--left,
 .sp-dock--right {
   flex-direction: row;
-  align-self: flex-start;
-  height: calc(100% - var(--sp-bottom-below, 0px));
 }
 
 .sp-dock--bottom {
