@@ -109,6 +109,7 @@ export function FlyoutFrame({ anchor, regionRef, size, resizeHandle, onOutsideCl
         {resizeHandle}
       </div>
       <Outline
+        className="sp-flyout-outline"
         regionRef={regionRef}
         targets={[boxRef, () => regionRef.current?.querySelector<HTMLElement>('.sp-dock-strip [data-active="true"]') ?? null]}
         shape={notchedUnionShape(anchor)}

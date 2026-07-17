@@ -12,7 +12,6 @@ export interface ToolWindowDockProps {
 
 const DEFAULT_FLOAT_POS = { x: 160, y: 120 };
 const STRIP_VAR = "var(--sp-toolwindow-strip)";
-const GAP_VAR = "var(--sp-space-xs)";
 
 /**
  * Drag handle on one panel's main-area-facing edge — resizes that specific
@@ -77,13 +76,13 @@ function sizeStyle(anchor: ToolWindowAnchor, size: number): CSSProperties {
 
 /**
  * Where a flyout's own resize handle sits — its main-area-facing edge, i.e.
- * the strip-side offset plus this panel's own current size. Computed inline
- * rather than via CSS descendant selectors because the handle can't live
- * inside `.sp-dock-flyout` (that box clips anything poking past its own edge,
- * which the handle's hit area deliberately does).
+ * the strip width (the flyout sits flush against the strip) plus this panel's
+ * own current size. Computed inline rather than via CSS descendant selectors
+ * because the handle can't live inside `.sp-dock-flyout` (that box clips
+ * anything poking past its own edge, which the handle's hit area does).
  */
 function flyoutHandlePositionStyle(anchor: ToolWindowAnchor, size: number): CSSProperties {
-  const offsetExpr = `calc(${STRIP_VAR} + ${GAP_VAR} + ${size}px)`;
+  const offsetExpr = `calc(${STRIP_VAR} + ${size}px)`;
   const base: CSSProperties = { position: "absolute", margin: 0 };
   if (anchor === "left") return { ...base, left: offsetExpr, top: 0, bottom: 0 };
   if (anchor === "right") return { ...base, right: offsetExpr, top: 0, bottom: 0 };
@@ -190,6 +189,7 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
             panelId={flyoutId!}
             title={flyoutPanel.title}
             pinned={false}
+            outline={false}
             onTogglePin={() => layout.pin(flyoutId!)}
             onFloat={() => layout.floatAt(flyoutId!, DEFAULT_FLOAT_POS.x, DEFAULT_FLOAT_POS.y)}
             onClose={() => layout.close(flyoutId!)}

@@ -239,18 +239,19 @@
 }
 
 /*
- * auto-hide flyout — floats OVER everything at the same offset from the strip
- * a pinned panel sits at (strip + the dock's own gap), so nothing shifts when
- * a panel is pinned/unpinned. A transparent positioning wrapper: the `box-
- * shadow` (rounded to match) is all it draws — the panel's own background,
- * radius, and accent outline come from `PanelSurface`, so a flyout panel is
- * pixel-identical to the same panel pinned. `top/bottom: 0` spans the region;
- * the bottom dock is its own row below, so there's nothing else to clear.
+ * auto-hide flyout — floats OVER everything, FLUSH against the strip so its
+ * still-visible tab and the panel read as one continuous shape (the notched
+ * union outline is drawn one level up, in FlyoutFrame, spanning panel + tab).
+ * Opaque background here (the panel content sits on it); the strip-facing
+ * corners are square so the panel meets the strip with no rounded gap, the
+ * outer corners rounded to match the union outline. `top/bottom: 0` spans the
+ * region; the bottom dock is its own row below, so there's nothing to clear.
  */
 .sp-dock-flyout {
   position: absolute;
   z-index: 40;
-  border-radius: var(--sp-radius-sm);
+  overflow: hidden;
+  background: var(--sp-surface-1);
   box-shadow: var(--sp-shadow-md);
   animation: sp-flyout-in var(--sp-duration-base) var(--sp-easing);
 }
@@ -258,24 +259,30 @@
 .sp-dock-flyout--left {
   top: 0;
   bottom: 0;
-  left: calc(var(--sp-toolwindow-strip) + var(--sp-space-xs));
+  left: var(--sp-toolwindow-strip);
+  border-radius: 0 var(--sp-radius-sm) var(--sp-radius-sm) 0;
 }
 
 .sp-dock-flyout--right {
   top: 0;
   bottom: 0;
-  right: calc(var(--sp-toolwindow-strip) + var(--sp-space-xs));
+  right: var(--sp-toolwindow-strip);
+  border-radius: var(--sp-radius-sm) 0 0 var(--sp-radius-sm);
 }
 
 .sp-dock-flyout--bottom {
   left: 0;
   right: 0;
-  bottom: calc(var(--sp-toolwindow-strip) + var(--sp-space-xs));
+  bottom: var(--sp-toolwindow-strip);
+  border-radius: var(--sp-radius-sm) var(--sp-radius-sm) 0 0;
 }
 
+/* Transparent + square: the flyout box provides the background and rounded shape; its PanelSurface just fills it. */
 .sp-dock-flyout .sp-panel-surface {
   width: 100%;
   height: 100%;
+  background: transparent;
+  border-radius: 0;
 }
 
 @keyframes sp-flyout-in {
