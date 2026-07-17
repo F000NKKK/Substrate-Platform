@@ -16,6 +16,8 @@ export interface PanelSurfaceProps {
   style?: CSSProperties;
   /** Whether the panel draws its own box `Outline`. Default true. Set false when an ancestor draws a spanning outline instead (e.g. a flyout's notched panel+tab union). */
   outline?: boolean;
+  /** Bump whenever a driven resize changes the panel's size (e.g. the pinned size a drag handle is changing) so the outline recomputes synchronously, with no ResizeObserver-frame lag. */
+  outlineRevision?: unknown;
   children: ReactNode;
 }
 
@@ -31,7 +33,7 @@ export interface PanelSurfaceProps {
  * (`outline={false}`) because its outline must also wrap its detached strip
  * tab, which only a region-mode outline drawn one level up can do.
  */
-export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onFloat, style, outline = true, children }: PanelSurfaceProps) {
+export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onFloat, style, outline = true, outlineRevision, children }: PanelSurfaceProps) {
   return (
     <div className="sp-panel-surface" style={style}>
       <div
@@ -56,7 +58,7 @@ export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onF
         </div>
       </div>
       <div className="sp-panel-surface-body">{children}</div>
-      {outline && <Outline />}
+      {outline && <Outline revision={outlineRevision} />}
     </div>
   );
 }

@@ -121,28 +121,43 @@ export function Outline(props: OutlineProps) {
   return <SelfOutline {...props} />;
 }
 
-function SelfOutline({ shape = boxShape, radius = DEFAULT_RADIUS, color = "var(--sp-accent)", strokeWidth = 1.5, className }: OutlineProps) {
+function SelfOutline({ shape = boxShape, radius = DEFAULT_RADIUS, color = "var(--sp-accent)", strokeWidth = 1.5, className, revision }: OutlineProps) {
   const ref = useRef<SVGSVGElement>(null);
   const [path, setPath] = useState("");
   const shapeRef = useRef(shape);
   shapeRef.current = shape;
 
-  useLayoutEffect(() => {
+  function compute() {
     const parent = ref.current?.parentElement;
     if (!parent) return;
     const inset = strokeWidth / 2;
-    const compute = () => {
-      const w = parent.clientWidth;
-      const h = parent.clientHeight;
-      // Inset by half the stroke so the stroke's outer edge lands on the
-      // parent's own edge and isn't trimmed by the parent's overflow clip.
-      const box: OutlineRect = { l: inset, t: inset, r: w - inset, b: h - inset };
-      setPath(w > 0 && h > 0 ? shapeRef.current([box], radius, strokeWidth) : "");
-    };
+    const w = parent.clientWidth;
+    const h = parent.clientHeight;
+    // Inset by half the stroke so the stroke's outer edge lands on the
+    // parent's own edge and isn't trimmed by the parent's overflow clip.
+    const box: OutlineRect = { l: inset, t: inset, r: w - inset, b: h - inset };
+    setPath(w > 0 && h > 0 ? shapeRef.current([box], radius, strokeWidth) : "");
+  }
+
+  // Synchronous recompute, in the same commit as a driven resize (the parent's
+  // inline size changing) — identical to RegionOutline, so a pinned panel's
+  // outline tracks a live resize with zero lag rather than a frame behind via
+  // ResizeObserver.
+  useLayoutEffect(() => {
+    compute();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revision]);
+
+  // Fallback for size changes this component isn't driving (e.g. the window
+  // resizing the panel's cross axis).
+  useLayoutEffect(() => {
+    const parent = ref.current?.parentElement;
+    if (!parent) return;
     compute();
     const ro = new ResizeObserver(compute);
     ro.observe(parent);
     return () => ro.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [radius, strokeWidth]);
 
   const insetStyle: CSSProperties = { inset: 0 };

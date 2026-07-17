@@ -140,6 +140,7 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
           panelId={id}
           title={panel.title}
           pinned
+          outlineRevision={size}
           onTogglePin={() => layout.unpin(id)}
           onFloat={() => layout.floatAt(id, DEFAULT_FLOAT_POS.x, DEFAULT_FLOAT_POS.y)}
           onClose={() => layout.close(id)}

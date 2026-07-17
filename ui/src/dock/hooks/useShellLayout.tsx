@@ -6,7 +6,13 @@ const DEFAULT_FLOAT_SIZE = { w: 340, h: 280 };
 
 /** Matches the `--sp-toolwindow-size`/`--sp-toolwindow-bottom-size` token defaults — the starting size before a user drags a dock's resize handle. */
 const DEFAULT_ANCHOR_SIZE: Record<ToolWindowAnchor, number> = { left: 260, right: 260, bottom: 220 };
-const MIN_ANCHOR_SIZE = 120;
+/*
+ * Per-anchor floor. Left/right constrain the panel's WIDTH, which must stay
+ * wide enough for the header's title + its three action buttons; bottom
+ * constrains HEIGHT, where the header is always full-width, so a much smaller
+ * floor is fine.
+ */
+const MIN_ANCHOR_SIZE: Record<ToolWindowAnchor, number> = { left: 200, right: 200, bottom: 110 };
 const MAX_ANCHOR_SIZE = 900;
 
 /** Pinned and flyout are sized independently — a pinned panel holds permanent layout space so it's often sized differently than the same panel peeking open as a temporary overlay. */
@@ -114,7 +120,7 @@ export function useShellLayout(
   );
 
   const setAnchorSize = useCallback((panelId: string, anchor: ToolWindowAnchor, mode: SizeMode, size: number) => {
-    const clamped = Math.min(MAX_ANCHOR_SIZE, Math.max(MIN_ANCHOR_SIZE, size));
+    const clamped = Math.min(MAX_ANCHOR_SIZE, Math.max(MIN_ANCHOR_SIZE[anchor], size));
     const key = sizeKey(panelId, anchor, mode);
     setSizes((prev) => (prev[key] === clamped ? prev : { ...prev, [key]: clamped }));
   }, []);
