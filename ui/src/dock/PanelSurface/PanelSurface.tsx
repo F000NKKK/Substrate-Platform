@@ -14,6 +14,8 @@ export interface PanelSurfaceProps {
   onFloat?: () => void;
   /** Sizing override for the root — e.g. a dock's own remembered width/height for this specific panel. */
   style?: CSSProperties;
+  /** Whether the panel draws its own box `Outline`. Default true. Set false when an ancestor draws a spanning outline instead (e.g. a flyout's notched panel+tab union). */
+  outline?: boolean;
   children: ReactNode;
 }
 
@@ -21,14 +23,15 @@ export interface PanelSurfaceProps {
  * Chrome shared by every tool window regardless of where it currently lives
  * (docked, flyout, or floating): a draggable title bar — drag it onto any
  * dock strip to redock, or onto the center to join its tabs — plus
- * pin/float/close actions, and its own accent `Outline`.
+ * pin/float/close actions, and (by default) its own box accent `Outline`.
  *
- * The outline lives INSIDE the panel (see `Outline`), so a pinned panel, its
- * flyout state, and a floating panel all render one identical accent border
- * that can never drift from the panel it belongs to — the whole class of
- * "the outline lagged behind the panel" bugs is structurally impossible.
+ * That default outline lives INSIDE the panel (see `Outline`'s self mode), so
+ * a pinned panel and a floating panel render one identical accent border that
+ * can never drift from the panel it belongs to. A flyout opts out
+ * (`outline={false}`) because its outline must also wrap its detached strip
+ * tab, which only a region-mode outline drawn one level up can do.
  */
-export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onFloat, style, children }: PanelSurfaceProps) {
+export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onFloat, style, outline = true, children }: PanelSurfaceProps) {
   return (
     <div className="sp-panel-surface" style={style}>
       <div
@@ -53,7 +56,7 @@ export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onF
         </div>
       </div>
       <div className="sp-panel-surface-body">{children}</div>
-      <Outline />
+      {outline && <Outline />}
     </div>
   );
 }

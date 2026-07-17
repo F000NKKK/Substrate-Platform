@@ -1,6 +1,11 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import "./outline.css";
 
+export interface OutlinePoint {
+  x: number;
+  y: number;
+}
+
 export interface OutlineRect {
   l: number;
   t: number;
@@ -8,19 +13,16 @@ export interface OutlineRect {
   b: number;
 }
 
-interface Pt {
-  x: number;
-  y: number;
-}
-
 export type OutlineTarget = RefObject<HTMLElement | null> | (() => HTMLElement | null);
 
 /**
  * A contour: given the measured rects of the targets (in the outline's own
  * coordinate space) plus the styling params, return one SVG path string. This
- * is the public "merge" hook — a component describes how its targets combine
- * into an outline (a plain box, a notched union of two, anything) and the
- * engine just strokes the result.
+ * is the public "merge" hook — a component describes how its own targets
+ * combine into a contour, built from the exported primitives (`boxRing`,
+ * `roundedPath`, …) or anything else, and the engine just strokes the result.
+ * Nothing domain-specific (a dock's tab notch, a particular widget's shape)
+ * lives in the engine — only here, in each consumer's own shape function.
  */
 export type OutlineShape = (rects: OutlineRect[], radius: number, strokeWidth: number) => string;
 
@@ -33,12 +35,18 @@ function rectOf(el: HTMLElement, origin: DOMRect): OutlineRect {
   return { l: r.left - origin.left, t: r.top - origin.top, r: r.right - origin.left, b: r.bottom - origin.top };
 }
 
-function len(a: Pt, b: Pt): number {
+function len(a: OutlinePoint, b: OutlinePoint): number {
   return Math.hypot(b.x - a.x, b.y - a.y);
 }
 
-/** Closes `points` into a rounded-corner SVG path — one quadratic Bézier per vertex, clamped so a corner never eats more than half its shorter edge. Convex and concave corners round identically. */
-export function roundedPath(points: Pt[], radius: number): string {
+/**
+ * Primitive: closes an ordered ring of vertices into a rounded-corner SVG path
+ * — one quadratic Bézier per vertex, clamped so a corner never eats more than
+ * half its shorter neighbouring edge. Convex and concave corners round
+ * identically, so any polygon (a plain box, a notched union, an L-shape) rounds
+ * with this one routine. The main building block consumers compose shapes from.
+ */
+export function roundedPath(points: OutlinePoint[], radius: number): string {
   const n = points.length;
   if (n < 3) return "";
   let d = "";
@@ -48,15 +56,16 @@ export function roundedPath(points: Pt[], radius: number): string {
     const next = points[(i + 1) % n];
     const rIn = Math.min(radius, len(prev, cur) / 2);
     const rOut = Math.min(radius, len(next, cur) / 2);
-    const before: Pt = { x: cur.x + ((prev.x - cur.x) / len(prev, cur)) * rIn, y: cur.y + ((prev.y - cur.y) / len(prev, cur)) * rIn };
-    const after: Pt = { x: cur.x + ((next.x - cur.x) / len(next, cur)) * rOut, y: cur.y + ((next.y - cur.y) / len(next, cur)) * rOut };
+    const before: OutlinePoint = { x: cur.x + ((prev.x - cur.x) / len(prev, cur)) * rIn, y: cur.y + ((prev.y - cur.y) / len(prev, cur)) * rIn };
+    const after: OutlinePoint = { x: cur.x + ((next.x - cur.x) / len(next, cur)) * rOut, y: cur.y + ((next.y - cur.y) / len(next, cur)) * rOut };
     d += i === 0 ? `M ${before.x} ${before.y} ` : `L ${before.x} ${before.y} `;
     d += `Q ${cur.x} ${cur.y} ${after.x} ${after.y} `;
   }
   return d + "Z";
 }
 
-function boxRing(r: OutlineRect): Pt[] {
+/** Primitive: the four corners of a rect as a ring, ready for `roundedPath`. */
+export function boxRing(r: OutlineRect): OutlinePoint[] {
   return [
     { x: r.l, y: r.t },
     { x: r.r, y: r.t },
@@ -65,67 +74,8 @@ function boxRing(r: OutlineRect): Pt[] {
   ];
 }
 
-/** The 8-corner ring for a panel (`primary`) plus a tab (`secondary`) poking out of the given edge — 6 convex corners + 2 concave, exactly VS's continuous auto-hide-flyout outline. */
-function notchedRing(primary: OutlineRect, secondary: OutlineRect, side: "left" | "right" | "top" | "bottom"): Pt[] {
-  switch (side) {
-    case "left":
-      return [
-        { x: secondary.l, y: secondary.t },
-        { x: primary.l, y: secondary.t },
-        { x: primary.l, y: primary.t },
-        { x: primary.r, y: primary.t },
-        { x: primary.r, y: primary.b },
-        { x: primary.l, y: primary.b },
-        { x: primary.l, y: secondary.b },
-        { x: secondary.l, y: secondary.b },
-      ];
-    case "right":
-      return [
-        { x: primary.l, y: primary.t },
-        { x: primary.r, y: primary.t },
-        { x: primary.r, y: secondary.t },
-        { x: secondary.r, y: secondary.t },
-        { x: secondary.r, y: secondary.b },
-        { x: primary.r, y: secondary.b },
-        { x: primary.r, y: primary.b },
-        { x: primary.l, y: primary.b },
-      ];
-    case "top":
-      return [
-        { x: secondary.l, y: secondary.t },
-        { x: secondary.r, y: secondary.t },
-        { x: secondary.r, y: primary.t },
-        { x: primary.r, y: primary.t },
-        { x: primary.r, y: primary.b },
-        { x: primary.l, y: primary.b },
-        { x: primary.l, y: primary.t },
-        { x: secondary.l, y: primary.t },
-      ];
-    case "bottom":
-      return [
-        { x: primary.l, y: primary.t },
-        { x: primary.r, y: primary.t },
-        { x: primary.r, y: primary.b },
-        { x: secondary.r, y: primary.b },
-        { x: secondary.r, y: secondary.b },
-        { x: secondary.l, y: secondary.b },
-        { x: secondary.l, y: primary.b },
-        { x: primary.l, y: primary.b },
-      ];
-  }
-}
-
-/** Built-in shape: a plain rounded box around the first target. */
+/** The default shape — a plain rounded box around the first target. */
 export const boxShape: OutlineShape = (rects, radius) => (rects[0] ? roundedPath(boxRing(rects[0]), radius) : "");
-
-/** Built-in shape factory: a panel (target 0) merged with a tab (target 1) poking out of `side` into one continuous notched ring. Falls back to a plain box if the tab is absent. */
-export function notchedUnionShape(side: "left" | "right" | "top" | "bottom"): OutlineShape {
-  return (rects, radius) => {
-    if (!rects[0]) return "";
-    if (!rects[1]) return roundedPath(boxRing(rects[0]), radius);
-    return roundedPath(notchedRing(rects[0], rects[1], side), radius);
-  };
-}
 
 const DEFAULT_RADIUS = 8;
 
@@ -137,13 +87,12 @@ export interface OutlineProps {
   /**
    * Region mode — draw over `regionRef` (a positioned ancestor) and outline
    * the union of `targets`, measured in that region's coordinates and merged
-   * by `shape`. Use for a contour spanning MORE than one element (e.g. a
-   * flyout panel + its separate strip tab). Omit both `regionRef` and
-   * `targets` for the default self mode below.
+   * by `shape`. Use for a contour spanning MORE than one element. Omit both
+   * `regionRef` and `targets` for the default self mode below.
    */
   regionRef?: RefObject<HTMLElement | null>;
   targets?: OutlineTarget[];
-  /** The contour. In region mode defaults to `boxShape`; in self mode ignored (self mode always draws a box filling the parent). */
+  /** The contour (built from the exported primitives). Region mode only; defaults to `boxShape`. Self mode always draws a box filling the parent. */
   shape?: OutlineShape;
   /** Region mode only: bump on every value a driven resize derives from (e.g. the panel's live size) to recompute synchronously in the same commit, instead of a frame later via ResizeObserver. */
   revision?: unknown;
@@ -156,15 +105,14 @@ export interface OutlineProps {
  *   the element it outlines and draws a rounded box filling it, measurement-
  *   free (an SVG `<rect>` sized `100%`). Because it's the element's own child,
  *   it inherits every move and resize for free — a neighbour's resize that
- *   merely SHIFTS this element can never desync the outline, the exact bug the
- *   old chase-it-across-a-region approach had. Pinned dock panels use this.
+ *   merely SHIFTS this element can never desync the outline. Pinned dock
+ *   panels use this.
  *
- * • **Region mode** (`regionRef` + `targets`): renders over a positioned
- *   region and outlines the merged rects of several elements via `shape` — the
- *   only way to trace a contour spanning more than one box, e.g. a flyout
- *   panel plus its detached strip tab as one notched shape. The flyout is
- *   absolutely positioned and so never shifted by a sibling's resize, so
- *   region mode is safe there.
+ * • **Region mode** (`regionRef` + `targets` + `shape`): renders over a
+ *   positioned region and outlines the merged rects of several elements via a
+ *   consumer-supplied `shape` — the only way to trace a contour spanning more
+ *   than one box. The engine has no idea what the shape means; the consumer
+ *   builds it from the exported primitives.
  */
 export function Outline(props: OutlineProps) {
   if (props.regionRef && props.targets) return <RegionOutline {...props} regionRef={props.regionRef} targets={props.targets} />;
@@ -202,6 +150,8 @@ function RegionOutline({
   revision,
 }: OutlineProps & { regionRef: RefObject<HTMLElement | null>; targets: OutlineTarget[] }) {
   const [path, setPath] = useState("");
+  const shapeRef = useRef(shape);
+  shapeRef.current = shape;
 
   function compute() {
     const region = regionRef.current;
@@ -215,7 +165,7 @@ function RegionOutline({
       setPath("");
       return;
     }
-    setPath(shape(rects.filter(Boolean) as OutlineRect[], radius, strokeWidth));
+    setPath(shapeRef.current(rects.filter(Boolean) as OutlineRect[], radius, strokeWidth));
   }
 
   useLayoutEffect(() => {
