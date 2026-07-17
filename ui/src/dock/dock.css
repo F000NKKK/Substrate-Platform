@@ -302,31 +302,14 @@
   border-radius: var(--sp-radius-sm) var(--sp-radius-sm) 0 0;
 }
 
-/* The flyout's own resize handle — positioned at its outer edge (facing the main area), since the flyout box isn't a flex layout like the pinned slot is. */
-/* Positioned manually (top/bottom/left/right) rather than via the anchor variant's flex margin trick, so that margin is cancelled here. */
-.sp-dock-resize--flyout {
-  position: absolute;
-  margin: 0;
-}
-
-.sp-dock-flyout--left .sp-dock-resize--flyout {
-  top: 0;
-  bottom: 0;
-  right: -6px;
-}
-
-.sp-dock-flyout--right .sp-dock-resize--flyout {
-  top: 0;
-  bottom: 0;
-  left: -6px;
-}
-
-.sp-dock-flyout--bottom .sp-dock-resize--flyout {
-  left: 0;
-  right: 0;
-  top: -6px;
-}
-
+/*
+ * The flyout's own resize handle is rendered as a sibling of `.sp-dock-flyout`
+ * (see FlyoutFrame.tsx), not inside it — that box's `overflow: hidden` would
+ * otherwise clip a handle whose hit area deliberately pokes out past its
+ * edge. Its position is computed inline (flyoutHandlePositionStyle in
+ * ToolWindowDock.tsx) rather than via a CSS descendant selector, since it's
+ * no longer a descendant of the box it needs to sit next to.
+ */
 .sp-dock-flyout .sp-panel-surface {
   height: 100%;
   background: transparent;

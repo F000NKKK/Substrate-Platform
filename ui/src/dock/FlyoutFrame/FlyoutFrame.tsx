@@ -8,6 +8,8 @@ export interface FlyoutFrameProps {
   regionRef: RefObject<HTMLElement | null>;
   /** This panel's own remembered flyout width (left/right) or height (bottom). */
   size: number;
+  /** Rendered as a sibling of the flyout box, not inside it — the box clips its content (rounded corners), which would cut off a resize handle meant to poke out past its edge. */
+  resizeHandle?: ReactNode;
   children: ReactNode;
 }
 
@@ -19,7 +21,7 @@ export interface FlyoutFrameProps {
  * goes through (see ToolWindowDock.tsx), so a panel never visibly changes
  * shape between the two states.
  */
-export function FlyoutFrame({ anchor, regionRef, size, children }: FlyoutFrameProps) {
+export function FlyoutFrame({ anchor, regionRef, size, resizeHandle, children }: FlyoutFrameProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   const sizeStyle = anchor === "bottom" ? { height: size } : { width: size };
@@ -29,6 +31,7 @@ export function FlyoutFrame({ anchor, regionRef, size, children }: FlyoutFramePr
       <div ref={panelRef} className={`sp-dock-flyout sp-dock-flyout--${anchor}`} style={sizeStyle}>
         {children}
       </div>
+      {resizeHandle}
       <Outline
         regionRef={regionRef}
         targets={[panelRef, () => regionRef.current?.querySelector<HTMLElement>('.sp-dock-strip [data-active="true"]') ?? null]}

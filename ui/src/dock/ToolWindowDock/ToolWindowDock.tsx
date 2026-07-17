@@ -29,12 +29,14 @@ function ResizeHandle({
   mode,
   layout,
   className,
+  style,
 }: {
   anchor: ToolWindowAnchor;
   panelId: string;
   mode: "pinned" | "flyout";
   layout: ShellLayout;
   className?: string;
+  style?: CSSProperties;
 }) {
   const [dragging, setDragging] = useState(false);
 
@@ -62,6 +64,7 @@ function ResizeHandle({
   return (
     <div
       className={["sp-dock-resize", `sp-dock-resize--${anchor}`, className].filter(Boolean).join(" ")}
+      style={style}
       data-dragging={dragging || undefined}
       onPointerDown={handlePointerDown}
     >
@@ -80,6 +83,21 @@ function pinnedPositionStyle(anchor: ToolWindowAnchor, offsetExpr: string, size:
   if (anchor === "left") return { ...base, left: offsetExpr, width: size, top: 0, bottom: 0 };
   if (anchor === "right") return { ...base, right: offsetExpr, width: size, top: 0, bottom: 0 };
   return { ...base, bottom: offsetExpr, height: size, left: 0, right: 0 };
+}
+
+/**
+ * Where a flyout's own resize handle sits — its main-area-facing edge, i.e.
+ * the strip-side offset plus this panel's own current size. Computed
+ * in-line rather than via CSS descendant selectors because the handle can't
+ * live inside `.sp-dock-flyout` (that box clips anything poking past its own
+ * edge, which the handle's hit area deliberately does).
+ */
+function flyoutHandlePositionStyle(anchor: ToolWindowAnchor, size: number): CSSProperties {
+  const offsetExpr = `calc(${STRIP_VAR} + ${GAP_VAR} + ${size}px)`;
+  const base: CSSProperties = { position: "absolute" };
+  if (anchor === "left") return { ...base, left: offsetExpr, top: 0, bottom: 0 };
+  if (anchor === "right") return { ...base, right: offsetExpr, top: 0, bottom: 0 };
+  return { ...base, bottom: offsetExpr, left: 0, right: 0 };
 }
 
 /**
@@ -184,7 +202,21 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
       {anchor !== "left" && strip}
 
       {flyoutPanel && (
-        <FlyoutFrame key={flyoutId} anchor={anchor} regionRef={regionRef} size={layout.anchorSize(flyoutId!, anchor, "flyout")}>
+        <FlyoutFrame
+          key={flyoutId}
+          anchor={anchor}
+          regionRef={regionRef}
+          size={layout.anchorSize(flyoutId!, anchor, "flyout")}
+          resizeHandle={
+            <ResizeHandle
+              anchor={anchor}
+              panelId={flyoutId!}
+              mode="flyout"
+              layout={layout}
+              style={flyoutHandlePositionStyle(anchor, layout.anchorSize(flyoutId!, anchor, "flyout"))}
+            />
+          }
+        >
           <PanelSurface
             panelId={flyoutId!}
             title={flyoutPanel.title}
@@ -198,7 +230,6 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
               return <Component />;
             })()}
           </PanelSurface>
-          <ResizeHandle anchor={anchor} panelId={flyoutId!} mode="flyout" layout={layout} className="sp-dock-resize--flyout" />
         </FlyoutFrame>
       )}
     </div>
