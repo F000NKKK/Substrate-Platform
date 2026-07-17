@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode, Ref } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { IconButton } from "../../widgets/IconButton";
 import { IconPin, IconPinOff, IconClose, IconFloat } from "../../infra/icons";
 import { Outline } from "../../infra/outline";
@@ -14,8 +14,6 @@ export interface PanelSurfaceProps {
   onFloat?: () => void;
   /** Sizing override for the root — e.g. a dock's own remembered width/height for this specific panel. */
   style?: CSSProperties;
-  /** The root element. */
-  ref?: Ref<HTMLDivElement>;
   children: ReactNode;
 }
 
@@ -30,9 +28,9 @@ export interface PanelSurfaceProps {
  * that can never drift from the panel it belongs to — the whole class of
  * "the outline lagged behind the panel" bugs is structurally impossible.
  */
-export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onFloat, style, ref, children }: PanelSurfaceProps) {
+export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onFloat, style, children }: PanelSurfaceProps) {
   return (
-    <div ref={ref} className="sp-panel-surface" style={style}>
+    <div className="sp-panel-surface" style={style}>
       <div
         className="sp-panel-surface-header"
         draggable
