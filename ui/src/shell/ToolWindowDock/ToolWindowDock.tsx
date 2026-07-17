@@ -106,10 +106,16 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
     />
   );
 
+  const sizeVar = anchor === "bottom" ? "--sp-toolwindow-bottom-size" : "--sp-toolwindow-size";
+  const dockStyle = { [sizeVar]: `${layout.anchorSize(anchor)}px` } as CSSProperties;
+  const resizeHandle = pinnedIds.length > 0 ? <ResizeHandle anchor={anchor} layout={layout} /> : null;
+
   return (
-    <div className={`sp-dock sp-dock--${anchor}`} ref={regionRef}>
+    <div className={`sp-dock sp-dock--${anchor}`} style={dockStyle} ref={regionRef}>
       {anchor === "left" && strip}
+      {anchor !== "left" && resizeHandle}
       {pinnedPanels}
+      {anchor === "left" && resizeHandle}
       {anchor !== "left" && strip}
 
       {flyoutPanel && (

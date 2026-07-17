@@ -1,5 +1,5 @@
-import type { CSSProperties, DragEvent } from "react";
-import { useLayoutEffect, useRef, useState } from "react";
+import type { DragEvent } from "react";
+import { useState } from "react";
 import { ToolWindowDock } from "../ToolWindowDock/ToolWindowDock";
 import { CenterDock } from "../CenterDock/CenterDock";
 import { FloatingPanel } from "../FloatingPanel/FloatingPanel";
@@ -15,45 +15,16 @@ import "../shell.css";
  * edge or into the center's tabs, or floated free — mirrors Visual
  * Studio's editor + tool windows rather than a flat grid of permanently
  * docked panels.
+ *
+ * The bottom dock is a full-width row below the left/main/right row (not
+ * nested inside the center column) so its left edge always lines up with
+ * the left dock's outer edge, exactly like the left/right docks' own edges
+ * line up with the window — no separate "how tall is the bottom dock"
+ * measurement is needed since the two rows no longer overlap.
  */
 export function PlatformShell({ main, toolWindows, defaultPinned, menu }: PlatformShellProps) {
   const layout = useShellLayout(main, toolWindows, defaultPinned);
   const [dropZone, setDropZone] = useState<DropZone | null>(null);
-
-  // The bottom dock drives two independent measurements of the space it takes,
-  // both measured live so every pinned/flyout combination is exact:
-  //   • bottomOccupied — the WHOLE dock height (panels + strip). A left/right
-  //     *flyout* overlays the main area, so it must stop above all of this.
-  //   • bottomBelow — the space BELOW the last pinned bottom panel (the strip
-  //     + the gap under it). Pinned side panels are capped by this so their
-  //     bottom edge lines up flush with the bottom panel's bottom edge, rather
-  //     than running past it down to the window's very bottom.
-  const bottomSlotRef = useRef<HTMLDivElement>(null);
-  const [bottomOccupied, setBottomOccupied] = useState(0);
-  const [bottomBelow, setBottomBelow] = useState(0);
-  useLayoutEffect(() => {
-    const el = bottomSlotRef.current;
-    if (!el) {
-      setBottomOccupied(0);
-      setBottomBelow(0);
-      return;
-    }
-    const measure = () => {
-      const slot = el.getBoundingClientRect();
-      setBottomOccupied(slot.height);
-      const panels = el.querySelectorAll<HTMLElement>(".sp-dock--bottom > .sp-panel-surface");
-      const last = panels[panels.length - 1];
-      setBottomBelow(last ? Math.max(0, slot.bottom - last.getBoundingClientRect().bottom) : slot.height);
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [layout.placements, toolWindows.bottom]);
-  const shellBodyStyle = {
-    "--sp-bottom-occupied": `${bottomOccupied}px`,
-    "--sp-bottom-below": `${bottomBelow}px`,
-  } as CSSProperties;
 
   function handleMainDragOver(e: DragEvent) {
     e.preventDefault();
