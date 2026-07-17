@@ -41,9 +41,11 @@ const DEFAULT_COMMANDS = { spawn: "pty_spawn", write: "pty_write", resize: "pty_
 const FALLBACK_SHELL: TerminalShellKind = { id: "default", label: "Terminal" };
 
 function defaultClearCommand(id: string): string {
-  if (id === "pwsh" || id === "powershell") return "Clear-Host\n";
-  if (id === "cmd") return "cls\n";
-  return "clear\n";
+  // `\r`, not `\n` — see shell.rs's `clear_command_for` for why (PSReadLine
+  // only submits on `\r`, unlike bash's readline which accepts either).
+  if (id === "pwsh" || id === "powershell") return "Clear-Host\r";
+  if (id === "cmd") return "cls\r";
+  return "clear\r";
 }
 
 interface TerminalTab {

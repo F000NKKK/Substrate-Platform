@@ -27,10 +27,15 @@ fn exists_in_path(name: &str) -> bool {
 }
 
 fn clear_command_for(id: &str) -> &'static str {
+    // `\r`, not `\n` — that's the literal byte a physical Enter key sends
+    // over the pty. Bash's readline happens to also bind plain `\n` to
+    // accept-line, which is why that worked, but PSReadLine (pwsh) only
+    // submits on `\r`; without it the command sits typed but unsubmitted
+    // until a real Enter keypress arrives.
     match id {
-        "pwsh" | "powershell" => "Clear-Host\n",
-        "cmd" => "cls\n",
-        _ => "clear\n",
+        "pwsh" | "powershell" => "Clear-Host\r",
+        "cmd" => "cls\r",
+        _ => "clear\r",
     }
 }
 
