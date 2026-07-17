@@ -14,6 +14,8 @@ export interface ContextMenuItem {
   submenu?: ContextMenuItem[];
   /** Draws a divider line above this item — for grouping unrelated actions within one menu. */
   separatorBefore?: boolean;
+  /** A keybinding hint shown right-aligned in the row (e.g. `"Ctrl+Shift+`"`) — display only, doesn't register any actual keybinding. */
+  shortcut?: string;
 }
 
 export type ContextMenuPlacement = { mode: "viewport"; x: number; y: number } | { mode: "anchor" };
@@ -102,7 +104,8 @@ function MenuItemRow({ item, onClose }: { item: ContextMenuItem; onClose: () => 
         }}
       >
         {item.checked && <span className="sp-contextmenu-check">✓</span>}
-        {item.label}
+        <span className="sp-contextmenu-label">{item.label}</span>
+        {item.shortcut && <span className="sp-contextmenu-shortcut">{item.shortcut}</span>}
         {item.submenu && <span className="sp-contextmenu-dot" />}
       </Tab>
       {item.submenu && open && rowRef.current && (

@@ -11,8 +11,10 @@
 
 pub mod log;
 pub mod pty;
+pub mod shell;
 pub mod task;
 
 pub use log::{Level, LogLine, LogSink};
 pub use pty::PtySession;
+pub use shell::{detect_shells, ShellInfo};
 pub use task::{spawn as spawn_task, Task, TaskHandle};
