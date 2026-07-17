@@ -279,21 +279,17 @@
   animation: sp-flyout-in var(--sp-duration-base) var(--sp-easing);
 }
 
-/* Positioned against the strip's inner edge (strip width from the region edge), not 100% of the pinned-widened region. */
 /*
- * Corner radius matches FlyoutFrame's CORNER_RADIUS (8px) so the glass fill
- * lines up under the SVG stroke. `bottom` stops at the top of whatever the
- * bottom dock occupies (measured live into --sp-bottom-occupied) so the
- * flyout never covers the bottom strip.
- */
-/*
- * The region is already capped at the bottom panel's bottom (--sp-bottom-below
- * above), so to clear the WHOLE bottom dock the flyout only needs to rise the
- * remaining (occupied − below) plus a gap above it — never covering the strip.
+ * Positioned against the strip's inner edge (strip width from the region
+ * edge), not 100% of the pinned-widened region. Corner radius matches
+ * FlyoutFrame's CORNER_RADIUS (8px) so the glass fill lines up under the SVG
+ * stroke. The bottom dock is its own row below `.sp-shell-upper` now (see
+ * PlatformShell), so this region's own box already stops short of it —
+ * `top: 0; bottom: 0` spans the full region with nothing else to clear.
  */
 .sp-dock-flyout--left {
   top: 0;
-  bottom: calc(var(--sp-bottom-occupied, 0px) - var(--sp-bottom-below, 0px) + var(--sp-space-sm));
+  bottom: 0;
   left: var(--sp-toolwindow-strip);
   width: var(--sp-toolwindow-size);
   border-radius: 0 var(--sp-radius-sm) var(--sp-radius-sm) 0;
@@ -301,7 +297,7 @@
 
 .sp-dock-flyout--right {
   top: 0;
-  bottom: calc(var(--sp-bottom-occupied, 0px) - var(--sp-bottom-below, 0px) + var(--sp-space-sm));
+  bottom: 0;
   right: var(--sp-toolwindow-strip);
   width: var(--sp-toolwindow-size);
   border-radius: var(--sp-radius-sm) 0 0 var(--sp-radius-sm);
