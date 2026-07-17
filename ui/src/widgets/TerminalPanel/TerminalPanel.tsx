@@ -232,6 +232,7 @@ export function TerminalPanel({
                         shell={kind?.shell}
                         clearCommand={kind?.clearCommand ?? defaultClearCommand(t.shellId)}
                         active={groupId === activeGroupId}
+                        focused={t.id === activeId}
                         commands={commands}
                         outputEvent={outputEvent}
                         exitEvent={exitEvent}
@@ -307,7 +308,10 @@ interface TerminalInstanceProps {
   id: string;
   shell?: string;
   clearCommand: string;
+  /** This pane's split group is the one currently shown (drives `fit()` — xterm can't measure while hidden). Several panes can be `active` at once (every pane in a shown group); at most one is `focused`. */
   active: boolean;
+  /** This exact terminal is the one that should receive keyboard input right now — distinct from `active` since a split group can show several panes at once, only one of which is focused. */
+  focused: boolean;
   commands: { spawn: string; write: string; resize: string; kill: string };
   outputEvent: string;
   exitEvent: string;
@@ -316,7 +320,7 @@ interface TerminalInstanceProps {
   onReady: (clear: (() => void) | null) => void;
 }
 
-function TerminalInstance({ id, shell, clearCommand, active, commands, outputEvent, exitEvent, onExit, onReady }: TerminalInstanceProps) {
+function TerminalInstance({ id, shell, clearCommand, active, focused, commands, outputEvent, exitEvent, onExit, onReady }: TerminalInstanceProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const fitRef = useRef<(() => void) | null>(null);
   const termRef = useRef<XTerm | null>(null);
@@ -450,16 +454,26 @@ function TerminalInstance({ id, shell, clearCommand, active, commands, outputEve
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // xterm can't measure while hidden — refit when this tab becomes active.
+  // xterm can't measure while hidden — refit when this pane's group becomes shown.
   useEffect(() => {
     if (active) fitRef.current?.();
   }, [active]);
+
+  // Switching which terminal/pane is focused (sidebar click, pane click, a
+  // group becoming active) needs to move actual keyboard focus along with
+  // it — otherwise the visible/active terminal changes but typing still
+  // lands wherever focus previously was, looking like the switch "didn't
+  // take".
+  useEffect(() => {
+    if (focused) termRef.current?.focus();
+  }, [focused]);
 
   return (
     <div
       ref={containerRef}
       className="sp-terminal-view"
       data-active={active || undefined}
+      data-focused={focused || undefined}
       onContextMenu={(e) => menu.openAtPoint(undefined, e)}
     >
       <ContextMenu

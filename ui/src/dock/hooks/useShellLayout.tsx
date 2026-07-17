@@ -202,16 +202,25 @@ export function useShellLayout(
     [homeAnchor, main.id]
   );
 
-  const dockTo = useCallback((id: string, anchor: DockAnchor) => {
-    if (anchor === "center") {
-      setPlacements((prev) => ({ ...prev, [id]: { anchor: "center", mode: "pinned" } }));
-      setCenterActive(id);
-      return;
-    }
-    // Redocking joins whatever's already pinned there side by side — it
-    // doesn't evict them, same as pin() above.
-    setPlacements((prev) => ({ ...prev, [id]: { anchor, mode: "pinned" } }));
-  }, []);
+  const dockTo = useCallback(
+    (id: string, anchor: DockAnchor) => {
+      if (anchor === "center") {
+        setPlacements((prev) => ({ ...prev, [id]: { anchor: "center", mode: "pinned" } }));
+        setCenterActive(id);
+        return;
+      }
+      // Redocking joins whatever's already pinned there side by side — it
+      // doesn't evict them, same as pin() above.
+      setPlacements((prev) => ({ ...prev, [id]: { anchor, mode: "pinned" } }));
+      // This panel just left the center dock — if it was the active center
+      // tab, CenterDock would otherwise keep rendering it there (it looks up
+      // `panelsById[centerActiveId]` directly, not filtered by `centerIds`),
+      // showing the same panel both at its new anchor and, stale, in the
+      // center at once.
+      setCenterActive((cur) => (cur === id ? main.id : cur));
+    },
+    [main.id]
+  );
 
   const floatAt = useCallback(
     (id: string, x: number, y: number) => {
