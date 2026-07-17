@@ -1,8 +1,9 @@
 //! Directory browsing/mutation — list one directory level (a host lazily
-//! expands a file tree by calling this per-node), and create/rename/remove
-//! files and folders. Plain `std::fs`; carries no notion of "is this path
-//! allowed" — that security boundary (an IDE should only touch files inside
-//! an opened project) belongs to the host, one layer up.
+//! expands a file tree by calling this per-node), create/rename/remove
+//! files and folders, and read/write a file's text content (for an editor).
+//! Plain `std::fs`; carries no notion of "is this path allowed" — that
+//! security boundary (an IDE should only touch files inside an opened
+//! project) belongs to the host, one layer up.
 
 use std::io;
 use std::path::{Path, PathBuf};
@@ -65,4 +66,14 @@ pub fn remove(path: &Path) -> io::Result<()> {
     } else {
         std::fs::remove_file(path)
     }
+}
+
+/// Reads a file's entire content as text — an editor's "open file".
+pub fn read_file(path: &Path) -> io::Result<String> {
+    std::fs::read_to_string(path)
+}
+
+/// Overwrites a file's entire content — an editor's "save".
+pub fn write_file(path: &Path, contents: &str) -> io::Result<()> {
+    std::fs::write(path, contents)
 }
