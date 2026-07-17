@@ -12,6 +12,8 @@ export interface ToolWindowDockProps {
 }
 
 const DEFAULT_FLOAT_POS = { x: 160, y: 120 };
+const STRIP_VAR = "var(--sp-toolwindow-strip)";
+const GAP_VAR = "var(--sp-space-xs)";
 
 /**
  * Drag handle on one panel's edge facing the main area (or the next pinned
@@ -72,6 +74,14 @@ function sizeStyle(anchor: ToolWindowAnchor, size: number): CSSProperties {
   return anchor === "bottom" ? { height: size } : { width: size };
 }
 
+/** Where a pinned panel sits, expressed the same way a flyout's CSS position is (`left`/`right`/`bottom` — the edge facing its strip) — an offset built from CSS `calc()` (strip size + gap, chained with any earlier pinned panels' own size + gap) rather than a measured rect, so positioning this panel never depends on first laying out anything else. */
+function pinnedPositionStyle(anchor: ToolWindowAnchor, offsetExpr: string, size: number): CSSProperties {
+  const base: CSSProperties = { position: "absolute" };
+  if (anchor === "left") return { ...base, left: offsetExpr, width: size, top: 0, bottom: 0 };
+  if (anchor === "right") return { ...base, right: offsetExpr, width: size, top: 0, bottom: 0 };
+  return { ...base, bottom: offsetExpr, height: size, left: 0, right: 0 };
+}
+
 /**
  * One edge's worth of VS-style tool windows. The collapsed tab strip always
  * sits at the true window edge; any panels pinned to this anchor sit between
@@ -79,11 +89,17 @@ function sizeStyle(anchor: ToolWindowAnchor, size: number): CSSProperties {
  * does not evict the first, and each remembers its own size independently of
  * every other panel and of its own flyout size. At most one more panel can be
  * peeking open as a flyout, which floats OVER everything — at the exact same
- * offset from the strip a pinned panel would sit at, so nothing visibly jumps
- * when a panel is pinned or unpinned — right next to the strip, wrapped
- * together with its still-visible strip tab by a single continuous accent
- * outline. Any tab or header can be dragged to another dock to redock, onto
- * the center to join its tabs, or floated out.
+ * offset from the strip a pinned panel sits at, so nothing visibly jumps when
+ * a panel is pinned or unpinned — right next to the strip, wrapped together
+ * with its still-visible strip tab by a single continuous accent outline.
+ *
+ * A pinned panel is positioned the exact same way a flyout is — `position:
+ * absolute`, an inline size, and an `Outline` traced around it — rather than
+ * being a real flex item whose own resize reflows the whole row. A plain,
+ * invisible flex spacer (sized to match) is what actually reserves the row's
+ * layout space; the visible panel is a sibling overlay pinned to that
+ * spacer's edge, so resizing it only repaints that one element, exactly as
+ * cheap and jitter-free as resizing a flyout already was.
  */
 export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
   const panelIds = layout.idsByAnchor(anchor);
@@ -116,39 +132,36 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
   // OPPOSITE side from the strip, putting the handle before the panel instead.
   const handleFirst = anchor !== "left";
 
+  let offsetExpr = `calc(${STRIP_VAR} + ${GAP_VAR})`;
+
   const pinnedSlots = pinnedIds.map((id) => {
     const panel = layout.panelsById[id];
     const Component = panel?.component;
     if (!panel || !Component) return null;
     const size = layout.anchorSize(id, anchor, "pinned");
-    const panelEl = (
-      <PanelSurface
-        key="panel"
-        ref={(el) => {
-          panelRefs.current[id] = el;
-        }}
-        panelId={id}
-        title={panel.title}
-        pinned
-        style={sizeStyle(anchor, size)}
-        onTogglePin={() => layout.unpin(id)}
-        onFloat={() => layout.floatAt(id, DEFAULT_FLOAT_POS.x, DEFAULT_FLOAT_POS.y)}
-        onClose={() => layout.close(id)}
-      >
-        <Component />
-      </PanelSurface>
-    );
+    const thisOffsetExpr = offsetExpr;
+    offsetExpr = `calc(${offsetExpr} + ${size}px + ${GAP_VAR})`;
+
+    const spacerEl = <div key="spacer" className="sp-dock-pinned-spacer" style={sizeStyle(anchor, size)} />;
     const handleEl = <ResizeHandle key="handle" anchor={anchor} panelId={id} mode="pinned" layout={layout} />;
     return (
       <div key={id} className={`sp-dock-pinned-slot sp-dock-pinned-slot--${anchor}`}>
-        {handleFirst ? [handleEl, panelEl] : [panelEl, handleEl]}
-        <Outline
-          key="outline"
-          regionRef={regionRef}
-          targets={[() => panelRefs.current[id] ?? null]}
-          className="sp-pinned-outline"
-          syncWith={size}
-        />
+        {handleFirst ? [handleEl, spacerEl] : [spacerEl, handleEl]}
+        <PanelSurface
+          ref={(el) => {
+            panelRefs.current[id] = el;
+          }}
+          panelId={id}
+          title={panel.title}
+          pinned
+          style={pinnedPositionStyle(anchor, thisOffsetExpr, size)}
+          onTogglePin={() => layout.unpin(id)}
+          onFloat={() => layout.floatAt(id, DEFAULT_FLOAT_POS.x, DEFAULT_FLOAT_POS.y)}
+          onClose={() => layout.close(id)}
+        >
+          <Component />
+        </PanelSurface>
+        <Outline regionRef={regionRef} targets={[() => panelRefs.current[id] ?? null]} className="sp-pinned-outline" syncWith={size} />
       </div>
     );
   });

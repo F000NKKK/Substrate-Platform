@@ -103,11 +103,16 @@
  * A pinned panel's own outline is drawn by the shared `Outline` engine (see
  * infra/outline, wired up in ToolWindowDock.tsx) — the exact same renderer a
  * flyout's tab-notched outline goes through — so a panel never visibly
- * changes shape between pinned and unpinned. No CSS border/radius here at
- * all; `.sp-pinned-outline` below just sets the stacking order.
+ * changes shape between pinned and unpinned. No CSS border here at all;
+ * `.sp-pinned-outline` below just sets the stacking order.
+ *
+ * The panel itself is `position: absolute` (see ToolWindowDock.tsx) — sized
+ * and positioned exactly like a flyout, rather than as a resizing flex item,
+ * so dragging it only repaints this one element instead of reflowing the
+ * whole dock row on every pointermove. `.sp-dock-pinned-spacer` is the actual
+ * flex participant that reserves its layout space.
  */
 .sp-dock-pinned-slot > .sp-panel-surface {
-  flex: 0 0 auto;
   border-radius: var(--sp-radius-sm);
 }
 
@@ -119,10 +124,16 @@
   box-shadow: 0 0 0 1px var(--sp-accent);
 }
 
+.sp-dock-pinned-spacer {
+  flex: 0 0 auto;
+}
+
 /*
- * Groups one pinned panel with its own resize handle as a single flex item —
- * each pinned panel gets an independent handle on its main-area-facing edge
- * rather than sharing one for the whole anchor.
+ * Groups one pinned panel's resize handle + layout spacer as a single flex
+ * item, alongside the panel's own absolutely-positioned overlay and outline
+ * (both escape to `.sp-dock`'s positioning context, unaffected by this
+ * being `position: static`) — each pinned panel gets an independent handle
+ * on its main-area-facing edge rather than sharing one for the whole anchor.
  */
 .sp-dock-pinned-slot {
   display: flex;
