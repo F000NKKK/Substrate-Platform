@@ -34,6 +34,7 @@ export function FlyoutFrame({ anchor, regionRef, size, children }: FlyoutFramePr
         targets={[panelRef, () => regionRef.current?.querySelector<HTMLElement>('.sp-dock-strip [data-active="true"]') ?? null]}
         notchSide={anchor}
         className="sp-flyout-border"
+        syncWith={size}
       />
     </>
   );
