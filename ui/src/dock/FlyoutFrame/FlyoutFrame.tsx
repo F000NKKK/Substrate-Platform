@@ -99,6 +99,8 @@ export interface FlyoutFrameProps {
   anchor: ToolWindowAnchor;
   /** The dock region the flyout lives in — used as the coordinate origin and to locate the active strip tab. */
   regionRef: RefObject<HTMLElement | null>;
+  /** This panel's own remembered flyout width (left/right) or height (bottom). */
+  size: number;
   children: ReactNode;
 }
 
@@ -109,7 +111,7 @@ export interface FlyoutFrameProps {
  * measured from the live DOM rects of the tab and panel, so it always traces
  * the two as a single notched shape rather than two disconnected boxes.
  */
-export function FlyoutFrame({ anchor, regionRef, children }: FlyoutFrameProps) {
+export function FlyoutFrame({ anchor, regionRef, size, children }: FlyoutFrameProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [path, setPath] = useState<string | null>(null);
 
@@ -161,9 +163,11 @@ export function FlyoutFrame({ anchor, regionRef, children }: FlyoutFrameProps) {
     };
   }, [anchor, regionRef]);
 
+  const sizeStyle = anchor === "bottom" ? { height: size } : { width: size };
+
   return (
     <>
-      <div ref={panelRef} className={`sp-dock-flyout sp-dock-flyout--${anchor}`}>
+      <div ref={panelRef} className={`sp-dock-flyout sp-dock-flyout--${anchor}`} style={sizeStyle}>
         {children}
       </div>
       {path && (

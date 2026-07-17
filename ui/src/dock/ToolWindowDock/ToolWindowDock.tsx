@@ -13,23 +13,35 @@ export interface ToolWindowDockProps {
 const DEFAULT_FLOAT_POS = { x: 160, y: 120 };
 
 /**
- * Drag handle on a pinned dock's edge facing the main area — resizes the
- * whole anchor (every panel pinned there shares one size, same as the CSS
- * token it overrides). Left/right drag horizontally; bottom drags its top
- * edge upward to grow, matching how every other docking IDE resizes a
- * bottom panel.
+ * Drag handle on one panel's edge facing the main area (or the next pinned
+ * panel) — resizes that specific panel, in its current pinned/flyout mode,
+ * independently of every other panel or mode. Left/right drag horizontally;
+ * bottom drags its top edge upward to grow, matching how every other docking
+ * IDE resizes a bottom panel.
  */
-function ResizeHandle({ anchor, layout }: { anchor: ToolWindowAnchor; layout: ShellLayout }) {
+function ResizeHandle({
+  anchor,
+  panelId,
+  mode,
+  layout,
+  className,
+}: {
+  anchor: ToolWindowAnchor;
+  panelId: string;
+  mode: "pinned" | "flyout";
+  layout: ShellLayout;
+  className?: string;
+}) {
   function handlePointerDown(e: ReactPointerEvent) {
     e.preventDefault();
-    const startSize = layout.anchorSize(anchor);
+    const startSize = layout.anchorSize(panelId, anchor, mode);
     const startX = e.clientX;
     const startY = e.clientY;
 
     function onMove(ev: PointerEvent) {
-      if (anchor === "left") layout.setAnchorSize(anchor, startSize + (ev.clientX - startX));
-      else if (anchor === "right") layout.setAnchorSize(anchor, startSize - (ev.clientX - startX));
-      else layout.setAnchorSize(anchor, startSize - (ev.clientY - startY));
+      if (anchor === "left") layout.setAnchorSize(panelId, anchor, mode, startSize + (ev.clientX - startX));
+      else if (anchor === "right") layout.setAnchorSize(panelId, anchor, mode, startSize - (ev.clientX - startX));
+      else layout.setAnchorSize(panelId, anchor, mode, startSize - (ev.clientY - startY));
     }
     function onUp() {
       window.removeEventListener("pointermove", onMove);
@@ -39,18 +51,27 @@ function ResizeHandle({ anchor, layout }: { anchor: ToolWindowAnchor; layout: Sh
     window.addEventListener("pointerup", onUp);
   }
 
-  return <div className={`sp-dock-resize sp-dock-resize--${anchor}`} onPointerDown={handlePointerDown} />;
+  return (
+    <div className={["sp-dock-resize", `sp-dock-resize--${anchor}`, className].filter(Boolean).join(" ")} onPointerDown={handlePointerDown} />
+  );
+}
+
+function sizeStyle(anchor: ToolWindowAnchor, size: number): CSSProperties {
+  return anchor === "bottom" ? { height: size } : { width: size };
 }
 
 /**
  * One edge's worth of VS-style tool windows. The collapsed tab strip always
  * sits at the true window edge; any panels pinned to this anchor sit between
  * it and the main area as their own slots, side by side — pinning a second one
- * does not evict the first. At most one more panel can be peeking open as a
- * flyout, which floats OVER everything (its own size, never joining the pinned
- * row) right next to the strip, wrapped together with its still-visible strip
- * tab by a single continuous accent outline. Any tab or header can be dragged
- * to another dock to redock, onto the center to join its tabs, or floated out.
+ * does not evict the first, and each remembers its own size independently of
+ * every other panel and of its own flyout size. At most one more panel can be
+ * peeking open as a flyout, which floats OVER everything — at the exact same
+ * offset from the strip a pinned panel would sit at, so nothing visibly jumps
+ * when a panel is pinned or unpinned — right next to the strip, wrapped
+ * together with its still-visible strip tab by a single continuous accent
+ * outline. Any tab or header can be dragged to another dock to redock, onto
+ * the center to join its tabs, or floated out.
  */
 export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
   const panelIds = layout.idsByAnchor(anchor);
@@ -76,22 +97,25 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
   // stays in the strip — it's the notched part of the continuous outline.
   const stripIds = panelIds.filter((id) => !pinnedIds.includes(id));
 
-  const pinnedPanels = pinnedIds.map((id) => {
+  const pinnedSlots = pinnedIds.map((id) => {
     const panel = layout.panelsById[id];
     const Component = panel?.component;
     if (!panel || !Component) return null;
     return (
-      <PanelSurface
-        key={id}
-        panelId={id}
-        title={panel.title}
-        pinned
-        onTogglePin={() => layout.unpin(id)}
-        onFloat={() => layout.floatAt(id, DEFAULT_FLOAT_POS.x, DEFAULT_FLOAT_POS.y)}
-        onClose={() => layout.close(id)}
-      >
-        <Component />
-      </PanelSurface>
+      <div key={id} className={`sp-dock-pinned-slot sp-dock-pinned-slot--${anchor}`}>
+        <PanelSurface
+          panelId={id}
+          title={panel.title}
+          pinned
+          style={sizeStyle(anchor, layout.anchorSize(id, anchor, "pinned"))}
+          onTogglePin={() => layout.unpin(id)}
+          onFloat={() => layout.floatAt(id, DEFAULT_FLOAT_POS.x, DEFAULT_FLOAT_POS.y)}
+          onClose={() => layout.close(id)}
+        >
+          <Component />
+        </PanelSurface>
+        <ResizeHandle anchor={anchor} panelId={id} mode="pinned" layout={layout} />
+      </div>
     );
   });
 
@@ -106,20 +130,14 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
     />
   );
 
-  const sizeVar = anchor === "bottom" ? "--sp-toolwindow-bottom-size" : "--sp-toolwindow-size";
-  const dockStyle = { [sizeVar]: `${layout.anchorSize(anchor)}px` } as CSSProperties;
-  const resizeHandle = pinnedIds.length > 0 ? <ResizeHandle anchor={anchor} layout={layout} /> : null;
-
   return (
-    <div className={`sp-dock sp-dock--${anchor}`} style={dockStyle} ref={regionRef}>
+    <div className={`sp-dock sp-dock--${anchor}`} ref={regionRef}>
       {anchor === "left" && strip}
-      {anchor !== "left" && resizeHandle}
-      {pinnedPanels}
-      {anchor === "left" && resizeHandle}
+      {pinnedSlots}
       {anchor !== "left" && strip}
 
       {flyoutPanel && (
-        <FlyoutFrame key={flyoutId} anchor={anchor} regionRef={regionRef}>
+        <FlyoutFrame key={flyoutId} anchor={anchor} regionRef={regionRef} size={layout.anchorSize(flyoutId!, anchor, "flyout")}>
           <PanelSurface
             panelId={flyoutId!}
             title={flyoutPanel.title}
@@ -133,6 +151,7 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
               return <Component />;
             })()}
           </PanelSurface>
+          <ResizeHandle anchor={anchor} panelId={flyoutId!} mode="flyout" layout={layout} className="sp-dock-resize--flyout" />
         </FlyoutFrame>
       )}
     </div>
