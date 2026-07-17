@@ -51,9 +51,12 @@ interface TerminalTab {
   shellId: string;
   /** This shell kind's instance number (Bash, Bash 2, Bash 3, ...) — reused from whatever's currently free, not a monotonic counter, so closing "Bash 2" means the next new Bash becomes "Bash 2" again instead of "Bash 4". */
   n: number;
+  /** Set by double-clicking the sidebar label to rename — overrides the generated "Bash 2"-style label until the tab closes. */
+  customLabel?: string;
 }
 
 function labelFor(kind: TerminalShellKind | undefined, tab: TerminalTab): string {
+  if (tab.customLabel) return tab.customLabel;
   const base = kind?.label ?? tab.shellId;
   return tab.n > 1 ? `${base} ${tab.n}` : base;
 }
@@ -77,6 +80,7 @@ export function TerminalPanel({
   const [detectedShells, setDetectedShells] = useState<TerminalShellKind[] | null>(shellsProp ?? null);
   const [tabs, setTabs] = useState<TerminalTab[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
   const clearHandlesRef = useRef<Record<string, () => void>>({});
   const addMenu = useContextMenu<void>();
   const moreMenu = useContextMenu<void>();
@@ -341,6 +345,7 @@ function TerminalInstance({ id, shell, clearCommand, active, commands, outputEve
     return () => {
       disposed = true;
       fitRef.current = null;
+      termRef.current = null;
       onReadyRef.current(null);
       window.clearTimeout(clearTimer);
       resizeObserver.disconnect();
@@ -358,5 +363,38 @@ function TerminalInstance({ id, shell, clearCommand, active, commands, outputEve
     if (active) fitRef.current?.();
   }, [active]);
 
-  return <div ref={containerRef} className="sp-terminal-view" data-active={active || undefined} />;
+  return (
+    <div
+      ref={containerRef}
+      className="sp-terminal-view"
+      data-active={active || undefined}
+      onContextMenu={(e) => menu.openAtPoint(undefined, e)}
+    >
+      <ContextMenu
+        target={menu.target && menu.target.mode === "viewport" ? { mode: "viewport", x: menu.target.x, y: menu.target.y } : null}
+        items={[
+          {
+            label: "Copy",
+            shortcut: "Ctrl+Shift+C",
+            disabled: !termRef.current?.hasSelection(),
+            onSelect: () => {
+              const selection = termRef.current?.getSelection();
+              if (selection) navigator.clipboard.writeText(selection).catch(() => {});
+            },
+          },
+          {
+            label: "Paste",
+            shortcut: "Ctrl+Shift+V",
+            onSelect: () => {
+              navigator.clipboard
+                .readText()
+                .then((text) => invoke(commands.write, { id, data: text }))
+                .catch(() => {});
+            },
+          },
+        ]}
+        onClose={menu.close}
+      />
+    </div>
+  );
 }
