@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { FileTreeNode } from "./FileTree";
 
 export interface DirEntry {
@@ -41,7 +41,7 @@ function replaceChildren(nodes: FileTreeNode[], id: string, children: FileTreeNo
  */
 export function useDirectoryTree(rootPath: string, rootName: string, commands: DirectoryTreeCommands) {
   const [nodes, setNodes] = useState<FileTreeNode[]>([{ id: rootPath, name: rootName, kind: "folder" }]);
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set([rootPath]));
   const [loadedIds, setLoadedIds] = useState<Set<string>>(new Set());
   const [parentById, setParentById] = useState<Record<string, string>>({});
 
@@ -58,6 +58,14 @@ export function useDirectoryTree(rootPath: string, rootName: string, commands: D
     },
     [commands]
   );
+
+  // The root starts pre-expanded (see initial state above) — load it on
+  // mount instead of waiting for an `onExpandedChange` that will never come
+  // for a node that's already expanded from the start.
+  useEffect(() => {
+    loadFolder(rootPath);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rootPath]);
 
   const onExpandedChange = useCallback(
     (next: Set<string>) => {
