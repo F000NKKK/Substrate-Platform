@@ -39,11 +39,11 @@
 }
 
 .sp-terminal-sidebar-add {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   flex: 0 0 auto;
-  gap: 2px;
   padding: var(--sp-space-xs);
   border-bottom: 1px solid var(--sp-border);
 }

@@ -5,6 +5,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { IconButton } from "../IconButton";
 import { Icon } from "../../infra/icons";
+import { ContextMenu, useContextMenu } from "../ContextMenu";
 import "@xterm/xterm/css/xterm.css";
 import "./TerminalPanel.css";
 
@@ -58,6 +59,7 @@ export function TerminalPanel({
   const [tabs, setTabs] = useState<TerminalTab[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const countersRef = useRef<Record<string, number>>({});
+  const addMenu = useContextMenu<void>();
 
   function addTerminal(kind: TerminalShellKind) {
     const n = (countersRef.current[kind.id] ?? 0) + 1;
@@ -104,11 +106,20 @@ export function TerminalPanel({
       </div>
       <div className="sp-terminal-sidebar">
         <div className="sp-terminal-sidebar-add">
-          {shells.map((kind) => (
-            <IconButton key={kind.id} size={22} title={`New ${kind.label} terminal`} onClick={() => addTerminal(kind)}>
+          <div className="sp-terminal-sidebar-add-anchor">
+            <IconButton
+              size={22}
+              title="New terminal"
+              onClick={() => (shells.length > 1 ? addMenu.openAtAnchor() : addTerminal(shells[0]))}
+            >
               <Icon name="plus" size={14} />
             </IconButton>
-          ))}
+            <ContextMenu
+              target={addMenu.target ? { mode: "anchor" } : null}
+              items={shells.map((kind) => ({ label: kind.label, onSelect: () => addTerminal(kind) }))}
+              onClose={addMenu.close}
+            />
+          </div>
         </div>
         <div className="sp-terminal-sidebar-list">
           {tabs.map((t) => (
