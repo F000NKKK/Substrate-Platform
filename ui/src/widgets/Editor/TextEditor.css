@@ -1,0 +1,17 @@
+.sp-text-editor {
+  height: 100%;
+  overflow: hidden;
+}
+
+.sp-text-editor .cm-editor {
+  height: 100%;
+  font-size: 13px;
+}
+
+.sp-text-editor .cm-editor.cm-focused {
+  outline: none;
+}
+
+.sp-text-editor .cm-scroller {
+  font-family: var(--sp-font-mono);
+}

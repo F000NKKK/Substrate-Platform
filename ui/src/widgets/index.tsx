@@ -20,6 +20,7 @@ export { FileTree } from "./FileTree";
 export type { FileTreeNode, FileTreeMenuItem, FileTreeProps } from "./FileTree";
 export { useDirectoryTree } from "./FileTree";
 export type { DirEntry, DirectoryTreeCommands } from "./FileTree";
+export * from "./Editor";
 export { Swatch } from "./Swatch";
 export type { SwatchProps } from "./Swatch";
 export { ColorWheel } from "./ColorWheel";
