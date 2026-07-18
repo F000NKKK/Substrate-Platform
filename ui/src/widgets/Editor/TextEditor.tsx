@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import { EditorState, type Extension } from "@codemirror/state";
 import { basicSetup, EditorView } from "codemirror";
 import { useTheme } from "../../infra/theme";
-import { breakpointGutter, syncBreakpoints } from "./breakpointGutter";
 import type { EditorProps } from "./EditorBase";
 import { resolveEditorTheme } from "./editorThemes";
 import "./TextEditor.css";
@@ -10,23 +9,10 @@ import "./TextEditor.css";
 export interface TextEditorProps extends EditorProps {
   /** CodeMirror language support for this file kind — omit for plain, unhighlighted text. Every concrete language editor (JsonEditor, RustEditor, ...) is just this component composed with a fixed `language`. */
   language?: Extension;
-}
-
-/**
- * A *code* editor's contract — everything `TextEditorProps` has, plus
- * breakpoint gutter support. Deliberately its own interface, not folded
- * into `TextEditorProps`: most language editors built on `TextEditor`
- * (`JsonEditor`, `YamlEditor`, ...) have no notion of a breakpoint — only
- * ones for genuinely debuggable source (`RustEditor`) declare themselves
- * with this wider contract, so only they can be passed `breakpoints` at
- * all (a `JsonEditor` caller gets a compile error trying to, exactly as it
- * should).
- */
-export interface CodeEditorProps extends TextEditorProps {
-  /** Lines (1-indexed) with a breakpoint set. Omit entirely for no gutter. */
-  breakpoints?: ReadonlySet<number>;
-  /** Called when the user toggles a breakpoint via the gutter — see `breakpoints`. */
-  onToggleBreakpoint?: (line: number) => void;
+  /** Extra CodeMirror extensions layered on top of the base set — the escape hatch a composing component (`CodeEditor`'s breakpoint gutter) uses instead of `TextEditor` knowing anything about what they're for. */
+  extensions?: Extension[];
+  /** Called once with the live `EditorView` right after it's created — lets a composing component (that supplied `extensions`) dispatch its own transactions into it later, without `TextEditor` itself needing to know why. */
+  onViewReady?: (view: EditorView) => void;
 }
 
 /**
@@ -38,18 +24,17 @@ export interface CodeEditorProps extends TextEditorProps {
  * there's never a need to re-point one instance at a different file's
  * content.
  *
- * Typed against `CodeEditorProps` (the wider contract) since this is the
- * one place the gutter mechanism actually lives — plain `TextEditorProps`
- * callers (`JsonEditor`, ...) simply never populate the two extra fields,
- * which is exactly why the gutter never appears for them.
+ * Deliberately knows nothing about breakpoints or any other code-editing
+ * concern beyond plain text + syntax highlighting — see `CodeEditor`, which
+ * composes this via `extensions`/`onViewReady` rather than this component
+ * growing that logic itself.
  */
-export function TextEditor({ content, onChange, language, readOnly, breakpoints, onToggleBreakpoint }: CodeEditorProps) {
+export function TextEditor({ content, onChange, language, readOnly, extensions: extraExtensions, onViewReady }: TextEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
-  const onToggleBreakpointRef = useRef(onToggleBreakpoint);
-  onToggleBreakpointRef.current = onToggleBreakpoint;
-  const viewRef = useRef<EditorView | null>(null);
+  const onViewReadyRef = useRef(onViewReady);
+  onViewReadyRef.current = onViewReady;
   const { editorColors } = useTheme();
 
   useEffect(() => {
@@ -58,7 +43,7 @@ export function TextEditor({ content, onChange, language, readOnly, breakpoints,
     const extensions: Extension[] = [basicSetup, EditorView.lineWrapping, resolveEditorTheme(editorColors)];
     if (language) extensions.push(language);
     if (readOnly) extensions.push(EditorView.editable.of(false));
-    if (onToggleBreakpoint) extensions.push(breakpointGutter((line) => onToggleBreakpointRef.current?.(line)));
+    if (extraExtensions) extensions.push(...extraExtensions);
     extensions.push(
       EditorView.updateListener.of((update) => {
         if (update.docChanged) onChangeRef.current(update.state.doc.toString());
@@ -69,22 +54,11 @@ export function TextEditor({ content, onChange, language, readOnly, breakpoints,
       state: EditorState.create({ doc: content, extensions }),
       parent: containerRef.current,
     });
-    viewRef.current = view;
+    onViewReadyRef.current?.(view);
 
-    return () => {
-      viewRef.current = null;
-      view.destroy();
-    };
+    return () => view.destroy();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [language, readOnly, editorColors, !!onToggleBreakpoint]);
-
-  // Separate from the effect above on purpose: updating which lines have a
-  // breakpoint must not recreate the view (that would drop undo history and
-  // cursor position every time a breakpoint is toggled, including from
-  // outside this editor instance — e.g. a debug panel's own toggle).
-  useEffect(() => {
-    if (viewRef.current && breakpoints) syncBreakpoints(viewRef.current, breakpoints);
-  }, [breakpoints]);
+  }, [language, readOnly, editorColors, extraExtensions]);
 
   return <div ref={containerRef} className="sp-text-editor" />;
 }

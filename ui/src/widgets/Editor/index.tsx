@@ -1,6 +1,8 @@
 export type { EditorProps, EditorComponent } from "./EditorBase";
 export { TextEditor } from "./TextEditor";
-export type { TextEditorProps, CodeEditorProps } from "./TextEditor";
+export type { TextEditorProps } from "./TextEditor";
+export { CodeEditor } from "./CodeEditor";
+export type { CodeEditorProps } from "./CodeEditor";
 export {
   PlainTextEditor,
   JsonEditor,
