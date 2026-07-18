@@ -24,7 +24,21 @@
   position: relative;
   flex: 1;
   min-height: 0;
+}
+
+/* Every center tab's content stays mounted (visibility-toggled), same
+   pattern the terminal/editor's own tab strips use — a center tab can hold
+   expensive-to-recreate state (an editor's undo history and cursor
+   position), which switching away must not destroy. */
+.sp-center-view {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
   overflow: auto;
+}
+
+.sp-center-view[data-active] {
+  visibility: visible;
 }
 
 /* --- docks --- */
