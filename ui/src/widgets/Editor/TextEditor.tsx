@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import { EditorState, type Extension } from "@codemirror/state";
 import { basicSetup, EditorView } from "codemirror";
+import { useTheme } from "../../infra/theme";
 import type { EditorProps } from "./EditorBase";
+import { resolveEditorTheme } from "./editorThemes";
 import "./TextEditor.css";
 
 export interface TextEditorProps extends EditorProps {
@@ -22,11 +24,12 @@ export function TextEditor({ content, onChange, language, readOnly }: TextEditor
   const containerRef = useRef<HTMLDivElement>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  const { editorColors } = useTheme();
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const extensions: Extension[] = [basicSetup, EditorView.lineWrapping];
+    const extensions: Extension[] = [basicSetup, EditorView.lineWrapping, resolveEditorTheme(editorColors)];
     if (language) extensions.push(language);
     if (readOnly) extensions.push(EditorView.editable.of(false));
     extensions.push(
@@ -42,7 +45,7 @@ export function TextEditor({ content, onChange, language, readOnly }: TextEditor
 
     return () => view.destroy();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [language, readOnly]);
+  }, [language, readOnly, editorColors]);
 
   return <div ref={containerRef} className="sp-text-editor" />;
 }
