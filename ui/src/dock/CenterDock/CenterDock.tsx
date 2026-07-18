@@ -14,8 +14,6 @@ export interface CenterDockProps {
  * join it as another tab.
  */
 export function CenterDock({ layout }: CenterDockProps) {
-  const active = layout.panelsById[layout.centerActiveId];
-  const ActiveComponent = active?.component;
   const { dragOver, handlers } = useDropTarget((id) => layout.dockTo(id, "center"));
 
   return (
@@ -41,7 +39,16 @@ export function CenterDock({ layout }: CenterDockProps) {
         })}
       </div>
       <div className="sp-center-body" {...handlers}>
-        {ActiveComponent && <ActiveComponent />}
+        {layout.centerIds.map((id) => {
+          const panel = layout.panelsById[id];
+          if (!panel) return null;
+          const Component = panel.component;
+          return (
+            <div key={id} className="sp-center-view" data-active={id === layout.centerActiveId || undefined}>
+              <Component />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

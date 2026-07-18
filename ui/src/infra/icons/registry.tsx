@@ -29,6 +29,14 @@ const defaultIcons: Record<string, IconComponent> = {
   more: glyphs.IconMore,
   split: glyphs.IconSplit,
   play: glyphs.IconPlay,
+  save: glyphs.IconSave,
+  undo: glyphs.IconUndo,
+  redo: glyphs.IconRedo,
+  comment: glyphs.IconComment,
+  format: glyphs.IconFormat,
+  hotReload: glyphs.IconHotReload,
+  restart: glyphs.IconRestart,
+  stop: glyphs.IconStop,
 };
 
 const globalOverrides: Record<string, IconComponent> = {};
