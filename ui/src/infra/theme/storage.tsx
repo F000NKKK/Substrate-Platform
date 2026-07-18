@@ -5,10 +5,16 @@ import { editorColorKeys } from "./presets";
 const ACCENT_KEY = "substrate-platform:accent";
 const EDITOR_THEME_KEY = "substrate-platform:editor-theme";
 const EDITOR_COLORS_KEY = "substrate-platform:editor-colors";
+const CUSTOM_PROFILES_KEY = "substrate-platform:editor-custom-profiles";
 
 function isHslColor(value: unknown): value is HslColor {
   const v = value as Record<string, unknown> | null;
   return typeof v?.h === "number" && typeof v?.s === "number" && typeof v?.l === "number";
+}
+
+function isEditorColorScheme(value: unknown): value is EditorColorScheme {
+  const v = value as Record<string, unknown> | null;
+  return !!v && editorColorKeys.every((key) => isHslColor(v[key]));
 }
 
 export function loadStoredAccent(): AccentColor | null {
@@ -32,8 +38,7 @@ export function storeAccent(accent: AccentColor): void {
 
 export function loadStoredEditorTheme(): EditorThemeId | null {
   try {
-    const raw = localStorage.getItem(EDITOR_THEME_KEY);
-    return raw === "vs-dark" || raw === "classic" ? raw : null;
+    return localStorage.getItem(EDITOR_THEME_KEY);
   } catch {
     return null;
   }
@@ -53,10 +58,7 @@ export function loadStoredEditorColors(): EditorColorScheme | null {
     const raw = localStorage.getItem(EDITOR_COLORS_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    if (editorColorKeys.every((key) => isHslColor(parsed?.[key]))) {
-      return parsed;
-    }
-    return null;
+    return isEditorColorScheme(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -67,5 +69,34 @@ export function storeEditorColors(colors: EditorColorScheme): void {
     localStorage.setItem(EDITOR_COLORS_KEY, JSON.stringify(colors));
   } catch {
     // storage unavailable — setting just won't persist
+  }
+}
+
+export interface StoredCustomProfile {
+  id: string;
+  name: string;
+  colors: EditorColorScheme;
+}
+
+/** Every user-created/imported profile, in creation order — anything malformed is dropped rather than discarding the whole list. */
+export function loadCustomProfiles(): StoredCustomProfile[] {
+  try {
+    const raw = localStorage.getItem(CUSTOM_PROFILES_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (p): p is StoredCustomProfile => typeof p?.id === "string" && typeof p?.name === "string" && isEditorColorScheme(p?.colors)
+    );
+  } catch {
+    return [];
+  }
+}
+
+export function storeCustomProfiles(profiles: StoredCustomProfile[]): void {
+  try {
+    localStorage.setItem(CUSTOM_PROFILES_KEY, JSON.stringify(profiles));
+  } catch {
+    // storage unavailable — custom profiles just won't persist
   }
 }

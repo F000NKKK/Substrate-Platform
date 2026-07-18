@@ -1,4 +1,4 @@
-import type { AccentColor, EditorColorKey, EditorColorScheme, EditorThemeId } from "./types";
+import type { AccentColor, EditorColorKey, EditorColorProfile, EditorColorScheme, EditorThemeId } from "./types";
 
 /** Named accent swatches offered by the color picker, alongside the free color wheel. */
 export const accentPresets: readonly AccentColor[] = [
@@ -63,6 +63,16 @@ export const classicColorScheme: EditorColorScheme = {
   operator: { h: 187, s: 47, l: 55 },
 };
 
+/** The two profiles that ship as code (not stored anywhere) — every other profile a user sees is a custom one persisted in `localStorage`. */
+export const builtInProfiles: readonly EditorColorProfile[] = [
+  { id: "vs-dark", name: "VS Dark", builtIn: true, colors: vsDarkColorScheme },
+  { id: "classic", name: "Classic (CodeMirror default)", builtIn: true, colors: classicColorScheme },
+];
+
+export function isBuiltInProfile(id: EditorThemeId): boolean {
+  return builtInProfiles.some((p) => p.id === id);
+}
+
 export function colorSchemeFor(id: EditorThemeId): EditorColorScheme {
-  return id === "vs-dark" ? vsDarkColorScheme : classicColorScheme;
+  return builtInProfiles.find((p) => p.id === id)?.colors ?? vsDarkColorScheme;
 }
