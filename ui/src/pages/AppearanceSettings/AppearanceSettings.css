@@ -3,3 +3,32 @@
   flex-direction: column;
   gap: var(--sp-space-sm);
 }
+
+.sp-appearance-settings-divider {
+  height: 1px;
+  margin: var(--sp-space-sm) 0;
+  background: var(--sp-border);
+}
+
+.sp-appearance-settings-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-sm);
+}
+
+.sp-appearance-settings-select {
+  height: 26px;
+  padding: 0 var(--sp-space-sm);
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius-sm);
+  background: var(--sp-surface-1);
+  color: var(--sp-text);
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+}
+
+.sp-appearance-settings-colors {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-xs);
+}
