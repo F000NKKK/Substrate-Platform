@@ -1,0 +1,11 @@
+.sp-editor-color-field {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-sm);
+}
+
+.sp-editor-color-field-label {
+  flex: 0 0 160px;
+  font-size: var(--sp-font-size);
+  color: var(--sp-text);
+}
