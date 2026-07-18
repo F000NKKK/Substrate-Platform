@@ -22,6 +22,8 @@ export { useDirectoryTree } from "./FileTree";
 export type { DirEntry, DirectoryTreeCommands } from "./FileTree";
 export * from "./Editor";
 export { EditorColorField } from "./EditorColorField";
+export { RunBar } from "./RunBar";
+export type { RunBarProps, RunTarget } from "./RunBar";
 export { Swatch } from "./Swatch";
 export type { SwatchProps } from "./Swatch";
 export { ColorWheel } from "./ColorWheel";
