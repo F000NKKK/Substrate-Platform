@@ -16,21 +16,28 @@
   gap: var(--sp-space-sm);
 }
 
-/* Matches `.sp-btn--subtle`'s own look (same padding scale, radius, background/hover) — there's no shared "Select" widget yet, so this stays a plain `<select>`, but it should still read as one of the same family of controls as the `Button`s sitting right next to it, not a foreign native control dropped in beside them. */
+/* Matches `.sp-btn--ghost`'s own look (transparent until hover, same padding
+   scale/radius) — there's no shared "Select" widget yet, so this stays a
+   plain `<select>`, but it should read as the same family of control as the
+   `Button`s next to it. Deliberately no `appearance: none` — that stripped
+   the native control's own text-centering along with its chrome, which is
+   what made the label look vertically misaligned; the dropdown popup itself
+   is native-rendered regardless (see `color-scheme` in tokens.css) and
+   CSS can't reach further into it than that on every platform anyway. */
 .sp-appearance-settings-select {
-  appearance: none;
   padding: var(--sp-space-xs) var(--sp-space-md);
   border: none;
   border-radius: var(--sp-radius-sm);
-  background: var(--sp-surface-2);
-  color: var(--sp-text);
+  background: transparent;
+  color: var(--sp-text-muted);
   font-family: var(--sp-font-ui);
   font-size: var(--sp-font-size);
   cursor: pointer;
 }
 
 .sp-appearance-settings-select:hover {
-  background: var(--sp-surface-3);
+  background: var(--sp-surface-2);
+  color: var(--sp-text);
 }
 
 .sp-appearance-settings-error {
