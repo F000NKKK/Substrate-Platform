@@ -12,7 +12,7 @@ function isHslColor(value: unknown): value is HslColor {
   return typeof v?.h === "number" && typeof v?.s === "number" && typeof v?.l === "number";
 }
 
-function isEditorColorScheme(value: unknown): value is EditorColorScheme {
+export function isEditorColorScheme(value: unknown): value is EditorColorScheme {
   const v = value as Record<string, unknown> | null;
   return !!v && editorColorKeys.every((key) => isHslColor(v[key]));
 }
