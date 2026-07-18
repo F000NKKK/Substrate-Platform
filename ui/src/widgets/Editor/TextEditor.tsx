@@ -25,10 +25,13 @@ export interface TextEditorProps extends EditorProps {
  * there's never a need to re-point one instance at a different file's
  * content.
  */
-export function TextEditor({ content, onChange, language, readOnly }: TextEditorProps) {
+export function TextEditor({ content, onChange, language, readOnly, breakpoints, onToggleBreakpoint }: TextEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  const onToggleBreakpointRef = useRef(onToggleBreakpoint);
+  onToggleBreakpointRef.current = onToggleBreakpoint;
+  const viewRef = useRef<EditorView | null>(null);
   const { editorColors } = useTheme();
 
   useEffect(() => {
@@ -37,6 +40,7 @@ export function TextEditor({ content, onChange, language, readOnly }: TextEditor
     const extensions: Extension[] = [basicSetup, EditorView.lineWrapping, resolveEditorTheme(editorColors)];
     if (language) extensions.push(language);
     if (readOnly) extensions.push(EditorView.editable.of(false));
+    if (onToggleBreakpoint) extensions.push(breakpointGutter((line) => onToggleBreakpointRef.current?.(line)));
     extensions.push(
       EditorView.updateListener.of((update) => {
         if (update.docChanged) onChangeRef.current(update.state.doc.toString());
@@ -47,10 +51,22 @@ export function TextEditor({ content, onChange, language, readOnly }: TextEditor
       state: EditorState.create({ doc: content, extensions }),
       parent: containerRef.current,
     });
+    viewRef.current = view;
 
-    return () => view.destroy();
+    return () => {
+      viewRef.current = null;
+      view.destroy();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [language, readOnly, editorColors]);
+  }, [language, readOnly, editorColors, !!onToggleBreakpoint]);
+
+  // Separate from the effect above on purpose: updating which lines have a
+  // breakpoint must not recreate the view (that would drop undo history and
+  // cursor position every time a breakpoint is toggled, including from
+  // outside this editor instance — e.g. a debug panel's own toggle).
+  useEffect(() => {
+    if (viewRef.current && breakpoints) syncBreakpoints(viewRef.current, breakpoints);
+  }, [breakpoints]);
 
   return <div ref={containerRef} className="sp-text-editor" />;
 }
