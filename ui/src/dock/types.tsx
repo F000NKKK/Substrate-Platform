@@ -9,6 +9,8 @@ export interface PanelDef {
   id: string;
   title: string;
   component: ComponentType;
+  /** Renders no tab button in whatever dock it's active in, while still rendering its content when active — for a permanent "empty state" center panel that shouldn't clutter the tab strip once real content (e.g. dynamically-opened file tabs) exists alongside it. */
+  hidden?: boolean;
 }
 
 export type DockMode = "hidden" | "flyout" | "pinned";
