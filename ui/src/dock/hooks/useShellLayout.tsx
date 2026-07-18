@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DockAnchor, PanelDef, PanelPlacement, ToolWindowAnchor } from "../types";
 import { loadShellLayoutState, saveShellLayoutState } from "./shellLayoutPersistence";
 
@@ -85,15 +85,32 @@ export function useShellLayout(
   toolWindows: Partial<Record<ToolWindowAnchor, PanelDef[]>>,
   defaultPinned?: Partial<Record<ToolWindowAnchor, string>>,
   /** When set, panel placements/sizes/the active center tab survive a reload via `localStorage`, keyed by this string (make it unique per app). */
-  persistKey?: string
+  persistKey?: string,
+  /**
+   * Panels docked to the center beyond `main`, registered dynamically at
+   * runtime (e.g. one per open file in an editor) rather than fixed at
+   * startup — a product owns this array as its own state (adding/removing
+   * from it directly, e.g. as files open/close) and just hands it in; the
+   * shell keeps its own placement/active-tab state in sync with whatever's
+   * currently in it, with no separate "register a panel" call needed.
+   */
+  extraCenterPanels: PanelDef[] = [],
+  /**
+   * Called when the user closes one of `extraCenterPanels`'s tabs — the
+   * shell doesn't own that array, so it can't remove the entry itself; the
+   * product is expected to remove it in response, which this effect then
+   * picks up on the next render.
+   */
+  onCloseDynamicPanel?: (id: string) => void
 ): ShellLayout {
   const panelsById = useMemo(() => {
     const map: Record<string, PanelDef> = { [main.id]: main };
     for (const anchor of ANCHORS) {
       for (const panel of toolWindows[anchor] ?? []) map[panel.id] = panel;
     }
+    for (const panel of extraCenterPanels) map[panel.id] = panel;
     return map;
-  }, [main, toolWindows]);
+  }, [main, toolWindows, extraCenterPanels]);
 
   const homeAnchor = useMemo(() => {
     const map: Record<string, DockAnchor> = { [main.id]: "center" };
@@ -196,11 +213,43 @@ export function useShellLayout(
   const close = useCallback(
     (id: string) => {
       if (id === main.id) return; // the center's original tab is never closable
+      if (!(id in homeAnchor)) {
+        // A dynamically-registered center panel (e.g. an open file tab) has
+        // no toolWindow "home" to hide it to — the product owns removing it
+        // from `extraCenterPanels`, which the sync effect below then reflects.
+        onCloseDynamicPanel?.(id);
+        return;
+      }
       setPlacements((prev) => ({ ...prev, [id]: { anchor: homeAnchor[id] ?? "bottom", mode: "hidden" } }));
       setCenterActive((cur) => (cur === id ? main.id : cur));
     },
-    [homeAnchor, main.id]
+    [homeAnchor, main.id, onCloseDynamicPanel]
   );
+
+  // Keeps placements/the active center tab in sync with `extraCenterPanels`
+  // as the product adds/removes entries — newly-added panels get pinned to
+  // center and become active; removed ones lose their placement entirely
+  // (not just hidden, since they no longer exist to reopen).
+  const prevExtraIdsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const currentIds = new Set(extraCenterPanels.map((p) => p.id));
+    const prevIds = prevExtraIdsRef.current;
+    const added = extraCenterPanels.filter((p) => !prevIds.has(p.id));
+    const removed = [...prevIds].filter((id) => !currentIds.has(id));
+
+    if (added.length > 0 || removed.length > 0) {
+      setPlacements((prev) => {
+        const next = { ...prev };
+        for (const panel of added) next[panel.id] = { anchor: "center", mode: "pinned" };
+        for (const id of removed) delete next[id];
+        return next;
+      });
+    }
+    if (added.length > 0) setCenterActive(added[added.length - 1].id);
+    if (removed.length > 0) setCenterActive((cur) => (removed.includes(cur) ? main.id : cur));
+
+    prevExtraIdsRef.current = currentIds;
+  }, [extraCenterPanels, main.id]);
 
   const dockTo = useCallback(
     (id: string, anchor: DockAnchor) => {

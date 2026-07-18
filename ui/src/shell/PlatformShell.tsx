@@ -24,8 +24,16 @@ import "./shell.css";
  * so the bottom dock's edges line up with the side panel's edges in either
  * state without a live measurement.
  */
-export function PlatformShell({ main, toolWindows, defaultPinned, persistKey, menu }: PlatformShellProps) {
-  const layout = useShellLayout(main, toolWindows, defaultPinned, persistKey);
+export function PlatformShell({
+  main,
+  toolWindows,
+  defaultPinned,
+  persistKey,
+  extraCenterPanels,
+  onCloseDynamicPanel,
+  menu,
+}: PlatformShellProps) {
+  const layout = useShellLayout(main, toolWindows, defaultPinned, persistKey, extraCenterPanels, onCloseDynamicPanel);
   const [dropZone, setDropZone] = useState<DropZone | null>(null);
 
   const bottomInsetStyle: CSSProperties = {
