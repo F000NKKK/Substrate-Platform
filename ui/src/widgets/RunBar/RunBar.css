@@ -27,17 +27,18 @@
   position: relative;
 }
 
+/* Ghost, like every other secondary control in the platform — background
+   only appears on hover, not all the time. */
 .sp-run-bar-target {
   appearance: none;
   display: flex;
   align-items: center;
   gap: 6px;
-  height: 24px;
-  padding: 0 var(--sp-space-sm);
-  border: 1px solid var(--sp-border);
+  padding: var(--sp-space-xs) var(--sp-space-sm);
+  border: none;
   border-radius: var(--sp-radius-sm);
-  background: var(--sp-surface-1);
-  color: var(--sp-text);
+  background: transparent;
+  color: var(--sp-text-muted);
   font-family: var(--sp-font-ui);
   font-size: var(--sp-font-size);
   cursor: pointer;
@@ -45,6 +46,7 @@
 
 .sp-run-bar-target:hover {
   background: var(--sp-surface-2);
+  color: var(--sp-text);
 }
 
 .sp-run-bar-target:disabled {
