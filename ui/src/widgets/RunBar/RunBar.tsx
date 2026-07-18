@@ -6,6 +6,8 @@ import "./RunBar.css";
 
 export interface RunTarget {
   name: string;
+  /** Human-readable label (e.g. a mod's `name = "..."` inside `[run.X]`), preferred over `name`/`description` for display when present. */
+  displayName?: string;
   description?: string;
 }
 
@@ -57,13 +59,13 @@ export function RunBar({ targets, running, onRun, emptyLabel = "No targets" }: R
       </IconButton>
       <div className="sp-run-bar-target-anchor">
         <button type="button" className="sp-run-bar-target" disabled={targets.length === 0} onClick={() => menu.openAtAnchor()}>
-          <span>{selectedTarget?.description ?? selectedTarget?.name ?? emptyLabel}</span>
+          <span>{selectedTarget?.displayName ?? selectedTarget?.description ?? selectedTarget?.name ?? emptyLabel}</span>
           <Icon name="chevronRight" size={11} className="sp-run-bar-chevron" />
         </button>
         <ContextMenu
           target={menu.target ? { mode: "anchor" } : null}
           items={targets.map((t) => ({
-            label: t.description ?? t.name,
+            label: t.displayName ?? t.description ?? t.name,
             checked: t.name === selected,
             onSelect: () => setSelected(t.name),
           }))}
