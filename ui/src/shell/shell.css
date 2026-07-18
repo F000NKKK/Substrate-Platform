@@ -13,6 +13,10 @@
   flex: 0 0 auto;
 }
 
+.sp-shell-status-bar {
+  flex: 0 0 auto;
+}
+
 /* Column: the upper row (left dock / main / right dock) above the bottom
    dock, which spans the full width below all three. */
 .sp-shell-body {

@@ -14,4 +14,6 @@ export interface PlatformShellProps {
   /** Fired when the user closes one of `extraCenterPanels`'s tabs — remove it from that array in response. */
   onCloseDynamicPanel?: (id: string) => void;
   menu?: ReactNode;
+  /** A slim status bar pinned to the shell's bottom edge (below the tool-window docks), VS-style — typically a `StatusBar` from `widgets/StatusBar`. Omit for no status bar at all. */
+  statusBar?: ReactNode;
 }

@@ -11,11 +11,28 @@ export interface RunTarget {
   description?: string;
 }
 
+/** One entry in the optional mode picker — see `RunBarProps.modes`. */
+export interface RunMode {
+  name: string;
+  label?: string;
+}
+
 export interface RunBarProps {
   targets: RunTarget[];
   running: boolean;
   onRun: (name: string) => void;
   emptyLabel?: string;
+  /**
+   * An optional second picker next to the target one — entirely opaque to
+   * `RunBar`: it has no idea what a mode *means* (debug vs. release, a
+   * build configuration, anything else a host product invents), it just
+   * renders named options and reports which one is selected. Omit
+   * entirely for a plain target-only run bar.
+   */
+  modes?: RunMode[];
+  /** Controlled: which `modes[].name` is currently selected. */
+  selectedMode?: string;
+  onModeChange?: (name: string) => void;
 }
 
 /**
@@ -28,9 +45,10 @@ export interface RunBarProps {
  * mirroring VS's startup-item selector + Start button sitting in the same
  * toolbar row as its other actions.
  */
-export function RunBar({ targets, running, onRun, emptyLabel = "No targets" }: RunBarProps) {
+export function RunBar({ targets, running, onRun, emptyLabel = "No targets", modes, selectedMode, onModeChange }: RunBarProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const menu = useContextMenu<void>();
+  const modeMenu = useContextMenu<void>();
 
   useEffect(() => {
     if (targets.length === 0) {
@@ -45,6 +63,7 @@ export function RunBar({ targets, running, onRun, emptyLabel = "No targets" }: R
   }, [targets, selected]);
 
   const selectedTarget = targets.find((t) => t.name === selected);
+  const selectedModeEntry = modes?.find((m) => m.name === selectedMode);
 
   return (
     <div className="sp-run-bar">
@@ -72,6 +91,23 @@ export function RunBar({ targets, running, onRun, emptyLabel = "No targets" }: R
           onClose={menu.close}
         />
       </div>
+      {modes && modes.length > 0 && (
+        <div className="sp-run-bar-target-anchor">
+          <button type="button" className="sp-run-bar-target" onClick={() => modeMenu.openAtAnchor()}>
+            <span>{selectedModeEntry?.label ?? selectedModeEntry?.name ?? modes[0]?.label ?? modes[0]?.name}</span>
+            <Icon name="chevronRight" size={11} className="sp-run-bar-chevron" />
+          </button>
+          <ContextMenu
+            target={modeMenu.target ? { mode: "anchor" } : null}
+            items={modes.map((m) => ({
+              label: m.label ?? m.name,
+              checked: m.name === selectedMode,
+              onSelect: () => onModeChange?.(m.name),
+            }))}
+            onClose={modeMenu.close}
+          />
+        </div>
+      )}
     </div>
   );
 }

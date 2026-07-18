@@ -32,6 +32,7 @@ export function PlatformShell({
   extraCenterPanels,
   onCloseDynamicPanel,
   menu,
+  statusBar,
 }: PlatformShellProps) {
   const layout = useShellLayout(main, toolWindows, defaultPinned, persistKey, extraCenterPanels, onCloseDynamicPanel);
   const [dropZone, setDropZone] = useState<DropZone | null>(null);
@@ -104,6 +105,7 @@ export function PlatformShell({
           );
         })}
       </div>
+      {statusBar && <div className="sp-shell-status-bar">{statusBar}</div>}
     </div>
   );
 }
