@@ -26,13 +26,5 @@
   height: 9px;
   margin: 5px 2.5px;
   border-radius: 50%;
-  background: transparent;
-}
-
-.sp-breakpoint-gutter:hover .sp-breakpoint-dot {
-  background: color-mix(in srgb, #e5484d 35%, transparent);
-}
-
-.cm-gutterElement:has(> .sp-breakpoint-dot:not(:empty)) .sp-breakpoint-dot {
   background: #e5484d;
 }
