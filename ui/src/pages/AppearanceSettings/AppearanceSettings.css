@@ -27,6 +27,11 @@
   font-size: var(--sp-font-size);
 }
 
+.sp-appearance-settings-error {
+  font-size: 0.85em;
+  color: #e5877e;
+}
+
 .sp-appearance-settings-colors {
   display: flex;
   flex-direction: column;
