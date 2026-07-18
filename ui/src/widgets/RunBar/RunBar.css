@@ -1,10 +1,10 @@
+/* No outer padding/border/min-height of its own — this is meant to be
+   composed into a `Toolbar` via its `leading` slot, which already supplies
+   the row's chrome; this only ever contributes its own inner content. */
 .sp-run-bar {
   display: flex;
   align-items: center;
   gap: var(--sp-space-xs);
-  min-height: 30px;
-  padding: 3px var(--sp-space-sm);
-  border-bottom: 1px solid var(--sp-border);
 }
 
 /* Deliberately a hardcoded green, not the theme's accent color — Visual
