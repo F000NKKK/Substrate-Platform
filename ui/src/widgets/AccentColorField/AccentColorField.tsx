@@ -17,7 +17,7 @@ export function AccentColorField() {
   return (
     <div className="sp-accent-field">
       <Swatch color={accent} onClick={() => setPickerOpen(true)} aria-label="Current accent color" />
-      <Button variant="subtle" onClick={() => setPickerOpen(true)}>
+      <Button variant="ghost" onClick={() => setPickerOpen(true)}>
         Choose Color…
       </Button>
 

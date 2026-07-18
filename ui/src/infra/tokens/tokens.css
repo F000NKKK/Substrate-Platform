@@ -8,6 +8,13 @@
  * derives from --sp-accent-h/s/l updates together.
  */
 :root {
+  /* Tells the browser/webview to render anything it won't let us fully
+     custom-style (a <select>'s dropdown popup, scrollbars, etc.) using its
+     own dark-mode palette instead of defaulting to light — without this, a
+     native <select> popup renders with a jarring light/orange-highlight
+     look no amount of our own CSS can reach into and override. */
+  color-scheme: dark;
+
   /* accent — Yog's default brand emerald; user-configurable at runtime */
   --sp-accent-h: 152;
   --sp-accent-s: 45%;
@@ -44,10 +51,10 @@
   --sp-blur: 18px;
 
   /* shape */
-  --sp-radius-xs: 6px;
-  --sp-radius-sm: 8px;
-  --sp-radius-md: 14px;
-  --sp-radius-lg: 20px;
+  --sp-radius-xs: 4px;
+  --sp-radius-sm: 6px;
+  --sp-radius-md: 12px;
+  --sp-radius-lg: 18px;
 
   /* motion */
   --sp-duration-fast: 120ms;

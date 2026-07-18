@@ -36,7 +36,7 @@ export function EditorColorField({ colorKey }: { colorKey: EditorColorKey }) {
     <div className="sp-editor-color-field">
       <span className="sp-editor-color-field-label">{LABELS[colorKey]}</span>
       <Swatch color={color} onClick={() => setPickerOpen(true)} aria-label={`${LABELS[colorKey]} color`} />
-      <Button variant="subtle" onClick={() => setPickerOpen(true)}>
+      <Button variant="ghost" onClick={() => setPickerOpen(true)}>
         Choose Color…
       </Button>
 

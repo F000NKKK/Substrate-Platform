@@ -72,7 +72,7 @@ export function AppearanceSettings() {
             </option>
           ))}
         </select>
-        <Button variant="subtle" onClick={handleNewProfile}>
+        <Button variant="ghost" onClick={handleNewProfile}>
           New Profile…
         </Button>
         {!activeIsBuiltIn && (
