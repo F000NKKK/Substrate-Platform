@@ -5,6 +5,7 @@ import "./MenuBarItem.css";
 export interface MenuBarDropdownEntry {
   label: string;
   onClick?: () => void;
+  disabled?: boolean;
 }
 
 export interface MenuBarItemProps {
@@ -33,7 +34,7 @@ export function MenuBarItem({ label, onClick, items }: MenuBarItemProps) {
       <ContextMenu
         target={menu.target ? { mode: "anchor" } : null}
         onClose={menu.close}
-        items={(items ?? []).map((entry) => ({ label: entry.label, onSelect: entry.onClick }))}
+        items={(items ?? []).map((entry) => ({ label: entry.label, onSelect: entry.onClick, disabled: entry.disabled }))}
       />
     </div>
   );
