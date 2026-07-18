@@ -1,9 +1,10 @@
 import type { HslColor } from "../color";
-import type { AccentColor, EditorThemeId } from "./types";
+import type { AccentColor, EditorColorScheme, EditorThemeId } from "./types";
+import { editorColorKeys } from "./presets";
 
 const ACCENT_KEY = "substrate-platform:accent";
 const EDITOR_THEME_KEY = "substrate-platform:editor-theme";
-const SELECTION_COLOR_KEY = "substrate-platform:selection-color";
+const EDITOR_COLORS_KEY = "substrate-platform:editor-colors";
 
 function isHslColor(value: unknown): value is HslColor {
   const v = value as Record<string, unknown> | null;
@@ -46,20 +47,24 @@ export function storeEditorTheme(id: EditorThemeId): void {
   }
 }
 
-export function loadStoredSelectionColor(): HslColor | null {
+/** A full scheme every one of `editorColorKeys` is present and valid — anything less (a corrupt entry, an older/incompatible shape) is discarded rather than partially trusted. */
+export function loadStoredEditorColors(): EditorColorScheme | null {
   try {
-    const raw = localStorage.getItem(SELECTION_COLOR_KEY);
+    const raw = localStorage.getItem(EDITOR_COLORS_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    return isHslColor(parsed) ? parsed : null;
+    if (editorColorKeys.every((key) => isHslColor(parsed?.[key]))) {
+      return parsed;
+    }
+    return null;
   } catch {
     return null;
   }
 }
 
-export function storeSelectionColor(color: HslColor): void {
+export function storeEditorColors(colors: EditorColorScheme): void {
   try {
-    localStorage.setItem(SELECTION_COLOR_KEY, JSON.stringify(color));
+    localStorage.setItem(EDITOR_COLORS_KEY, JSON.stringify(colors));
   } catch {
     // storage unavailable — setting just won't persist
   }

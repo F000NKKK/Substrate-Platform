@@ -1,16 +1,9 @@
 import { createContext, useCallback, useMemo, useState, type ReactNode } from "react";
 import type { HslColor } from "../color";
 import { tokens } from "../tokens";
-import type { AccentColor, EditorThemeId, ThemeContextValue } from "./types";
-import { accentPresets, defaultAccent, defaultEditorTheme, defaultSelectionColor, editorThemePresets, selectionColorPresets } from "./presets";
-import {
-  loadStoredAccent,
-  loadStoredEditorTheme,
-  loadStoredSelectionColor,
-  storeAccent,
-  storeEditorTheme,
-  storeSelectionColor,
-} from "./storage";
+import type { AccentColor, EditorColorKey, EditorColorScheme, EditorThemeId, ThemeContextValue } from "./types";
+import { accentPresets, colorSchemeFor, defaultAccent, defaultEditorTheme, editorThemePresets } from "./presets";
+import { loadStoredAccent, loadStoredEditorColors, loadStoredEditorTheme, storeAccent, storeEditorColors, storeEditorTheme } from "./storage";
 
 export const ThemeContext = createContext<ThemeContextValue | null>(null);
 
@@ -28,12 +21,14 @@ export interface ThemeProviderProps {
 }
 
 /**
- * Owns every live theming choice — the UI's accent color, the code editor's
- * syntax-highlighting profile, and its selection-highlight color (kept
- * separate from `accent` on purpose: a code editor's palette and a brand
- * accent serve different purposes) — mirrors each onto CSS custom
- * properties or hands it to consumers directly, and persists edits across
- * sessions.
+ * Owns every live theming choice — the UI's accent color, and the code
+ * editor's full per-category color scheme (background/foreground/selection/
+ * cursor plus one entry per syntax token kind) — mirrors the accent onto CSS
+ * custom properties, hands the editor scheme to consumers directly, and
+ * persists edits across sessions. The editor scheme and the UI accent are
+ * deliberately independent: a code editor's palette and a brand accent serve
+ * different purposes, the same way Visual Studio's own "Fonts and Colors"
+ * page has nothing to do with its window-chrome theme.
  */
 export function ThemeProvider({ children, initialAccent }: ThemeProviderProps) {
   const [accent, setAccentState] = useState<AccentColor>(() => {
@@ -43,7 +38,9 @@ export function ThemeProvider({ children, initialAccent }: ThemeProviderProps) {
     return initial;
   });
   const [editorTheme, setEditorThemeState] = useState<EditorThemeId>(() => loadStoredEditorTheme() ?? defaultEditorTheme);
-  const [selectionColor, setSelectionColorState] = useState<HslColor>(() => loadStoredSelectionColor() ?? defaultSelectionColor);
+  const [editorColors, setEditorColorsState] = useState<EditorColorScheme>(
+    () => loadStoredEditorColors() ?? colorSchemeFor(editorTheme)
+  );
 
   const setAccent = useCallback((next: AccentColor) => {
     applyAccent(next);
@@ -54,12 +51,26 @@ export function ThemeProvider({ children, initialAccent }: ThemeProviderProps) {
   const setEditorTheme = useCallback((next: EditorThemeId) => {
     storeEditorTheme(next);
     setEditorThemeState(next);
+    // Switching profiles resets every category to that profile's defaults —
+    // individual keys can still be re-overridden afterward via setEditorColor.
+    const scheme = colorSchemeFor(next);
+    storeEditorColors(scheme);
+    setEditorColorsState(scheme);
   }, []);
 
-  const setSelectionColor = useCallback((next: HslColor) => {
-    storeSelectionColor(next);
-    setSelectionColorState(next);
+  const setEditorColor = useCallback((key: EditorColorKey, color: HslColor) => {
+    setEditorColorsState((prev) => {
+      const next = { ...prev, [key]: color };
+      storeEditorColors(next);
+      return next;
+    });
   }, []);
+
+  const resetEditorColors = useCallback(() => {
+    const scheme = colorSchemeFor(editorTheme);
+    storeEditorColors(scheme);
+    setEditorColorsState(scheme);
+  }, [editorTheme]);
 
   const value = useMemo<ThemeContextValue>(
     () => ({
@@ -69,11 +80,11 @@ export function ThemeProvider({ children, initialAccent }: ThemeProviderProps) {
       editorTheme,
       setEditorTheme,
       editorThemePresets,
-      selectionColor,
-      setSelectionColor,
-      selectionColorPresets,
+      editorColors,
+      setEditorColor,
+      resetEditorColors,
     }),
-    [accent, setAccent, editorTheme, setEditorTheme, selectionColor, setSelectionColor]
+    [accent, setAccent, editorTheme, setEditorTheme, editorColors, setEditorColor, resetEditorColors]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
