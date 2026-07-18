@@ -88,10 +88,10 @@ export function AppearanceSettings() {
         )}
       </div>
       <div className="sp-appearance-settings-row">
-        <Button variant="subtle" onClick={handleExportProfile}>
+        <Button variant="ghost" onClick={handleExportProfile}>
           Export…
         </Button>
-        <Button variant="subtle" onClick={() => fileInputRef.current?.click()}>
+        <Button variant="ghost" onClick={() => fileInputRef.current?.click()}>
           Import…
         </Button>
         <input ref={fileInputRef} type="file" accept="application/json" style={{ display: "none" }} onChange={handleImportFile} />
