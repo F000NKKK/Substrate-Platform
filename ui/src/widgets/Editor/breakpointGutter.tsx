@@ -55,7 +55,14 @@ export function breakpointGutter(onToggle: (line: number) => void) {
       },
       initialSpacer: () => marker,
       domEventHandlers: {
-        mousedown(view, line) {
+        mousedown(view, line, event) {
+          // Without this, the browser's/CodeMirror's default mousedown
+          // behavior (placing the selection at the nearest content
+          // position and scrolling it into view) still runs alongside
+          // ours, which is what was jumping the view back to the top —
+          // returning `true` alone only stops *our* handler's own event
+          // from bubbling, it doesn't cancel the default action.
+          event.preventDefault();
           const lineNumber = view.state.doc.lineAt(line.from).number;
           onToggle(lineNumber);
           return true;
