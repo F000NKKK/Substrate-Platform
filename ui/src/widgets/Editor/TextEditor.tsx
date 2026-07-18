@@ -13,6 +13,23 @@ export interface TextEditorProps extends EditorProps {
 }
 
 /**
+ * A *code* editor's contract — everything `TextEditorProps` has, plus
+ * breakpoint gutter support. Deliberately its own interface, not folded
+ * into `TextEditorProps`: most language editors built on `TextEditor`
+ * (`JsonEditor`, `YamlEditor`, ...) have no notion of a breakpoint — only
+ * ones for genuinely debuggable source (`RustEditor`) declare themselves
+ * with this wider contract, so only they can be passed `breakpoints` at
+ * all (a `JsonEditor` caller gets a compile error trying to, exactly as it
+ * should).
+ */
+export interface CodeEditorProps extends TextEditorProps {
+  /** Lines (1-indexed) with a breakpoint set. Omit entirely for no gutter. */
+  breakpoints?: ReadonlySet<number>;
+  /** Called when the user toggles a breakpoint via the gutter — see `breakpoints`. */
+  onToggleBreakpoint?: (line: number) => void;
+}
+
+/**
  * The base text-editing implementation shared by every language-specific
  * editor — a CodeMirror 6 instance. `content` seeds the document once at
  * mount; further changes flow *out* via `onChange` as the user types, never
@@ -20,8 +37,13 @@ export interface TextEditorProps extends EditorProps {
  * position) — each open file tab mounts its own `TextEditor` instance, so
  * there's never a need to re-point one instance at a different file's
  * content.
+ *
+ * Typed against `CodeEditorProps` (the wider contract) since this is the
+ * one place the gutter mechanism actually lives — plain `TextEditorProps`
+ * callers (`JsonEditor`, ...) simply never populate the two extra fields,
+ * which is exactly why the gutter never appears for them.
  */
-export function TextEditor({ content, onChange, language, readOnly, breakpoints, onToggleBreakpoint }: TextEditorProps) {
+export function TextEditor({ content, onChange, language, readOnly, breakpoints, onToggleBreakpoint }: CodeEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;

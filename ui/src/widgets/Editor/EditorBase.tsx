@@ -14,10 +14,6 @@ export interface EditorProps {
   /** Called with the new content whenever the user changes it — the host owns deciding when/whether to persist it. */
   onChange: (next: string) => void;
   readOnly?: boolean;
-  /** Lines (1-indexed) with a breakpoint set, for editors that render a breakpoint gutter (currently only `TextEditor`-based ones — others ignore this). Omit entirely for a plain editor with no gutter. */
-  breakpoints?: ReadonlySet<number>;
-  /** Called when the user toggles a breakpoint via the gutter — see `breakpoints`. */
-  onToggleBreakpoint?: (line: number) => void;
 }
 
 export type EditorComponent = ComponentType<EditorProps>;
