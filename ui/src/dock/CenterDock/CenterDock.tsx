@@ -23,7 +23,7 @@ export function CenterDock({ layout }: CenterDockProps) {
       <div className="sp-center-tabs" data-drag-over={dragOver} {...handlers}>
         {layout.centerIds.map((id) => {
           const panel = layout.panelsById[id];
-          if (!panel) return null;
+          if (!panel || panel.hidden) return null;
           return (
             <Tab
               key={id}
