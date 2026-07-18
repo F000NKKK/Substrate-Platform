@@ -25,7 +25,9 @@
    is native-rendered regardless (see `color-scheme` in tokens.css) and
    CSS can't reach further into it than that on every platform anyway. */
 .sp-appearance-settings-select {
-  padding: var(--sp-space-xs) var(--sp-space-md);
+  height: 28px;
+  box-sizing: border-box;
+  padding: 0 var(--sp-space-sm);
   border: none;
   border-radius: var(--sp-radius-sm);
   background: transparent;
@@ -38,6 +40,15 @@
 .sp-appearance-settings-select:hover {
   background: var(--sp-surface-2);
   color: var(--sp-text);
+}
+
+/* Native <select>s and our own `Button` don't share a sizing formula (the
+   select's own chrome adds bulk our CSS can't fully reach), so this row
+   pins both to the same explicit height rather than trusting padding alone
+   to make them line up. */
+.sp-appearance-settings-row .sp-btn {
+  height: 28px;
+  box-sizing: border-box;
 }
 
 .sp-appearance-settings-error {
