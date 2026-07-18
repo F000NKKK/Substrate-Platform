@@ -1,8 +1,16 @@
 import { createContext, useCallback, useMemo, useState, type ReactNode } from "react";
+import type { HslColor } from "../color";
 import { tokens } from "../tokens";
-import type { AccentColor, ThemeContextValue } from "./types";
-import { accentPresets, defaultAccent } from "./presets";
-import { loadStoredAccent, storeAccent } from "./storage";
+import type { AccentColor, EditorThemeId, ThemeContextValue } from "./types";
+import { accentPresets, defaultAccent, defaultEditorTheme, defaultSelectionColor, editorThemePresets, selectionColorPresets } from "./presets";
+import {
+  loadStoredAccent,
+  loadStoredEditorTheme,
+  loadStoredSelectionColor,
+  storeAccent,
+  storeEditorTheme,
+  storeSelectionColor,
+} from "./storage";
 
 export const ThemeContext = createContext<ThemeContextValue | null>(null);
 
@@ -19,7 +27,14 @@ export interface ThemeProviderProps {
   initialAccent?: AccentColor;
 }
 
-/** Owns the live accent color, mirrors it onto `--sp-accent-*`, and persists edits across sessions. */
+/**
+ * Owns every live theming choice — the UI's accent color, the code editor's
+ * syntax-highlighting profile, and its selection-highlight color (kept
+ * separate from `accent` on purpose: a code editor's palette and a brand
+ * accent serve different purposes) — mirrors each onto CSS custom
+ * properties or hands it to consumers directly, and persists edits across
+ * sessions.
+ */
 export function ThemeProvider({ children, initialAccent }: ThemeProviderProps) {
   const [accent, setAccentState] = useState<AccentColor>(() => {
     const stored = loadStoredAccent();
@@ -27,6 +42,8 @@ export function ThemeProvider({ children, initialAccent }: ThemeProviderProps) {
     applyAccent(initial);
     return initial;
   });
+  const [editorTheme, setEditorThemeState] = useState<EditorThemeId>(() => loadStoredEditorTheme() ?? defaultEditorTheme);
+  const [selectionColor, setSelectionColorState] = useState<HslColor>(() => loadStoredSelectionColor() ?? defaultSelectionColor);
 
   const setAccent = useCallback((next: AccentColor) => {
     applyAccent(next);
@@ -34,9 +51,29 @@ export function ThemeProvider({ children, initialAccent }: ThemeProviderProps) {
     setAccentState(next);
   }, []);
 
+  const setEditorTheme = useCallback((next: EditorThemeId) => {
+    storeEditorTheme(next);
+    setEditorThemeState(next);
+  }, []);
+
+  const setSelectionColor = useCallback((next: HslColor) => {
+    storeSelectionColor(next);
+    setSelectionColorState(next);
+  }, []);
+
   const value = useMemo<ThemeContextValue>(
-    () => ({ accent, setAccent, presets: accentPresets }),
-    [accent, setAccent]
+    () => ({
+      accent,
+      setAccent,
+      presets: accentPresets,
+      editorTheme,
+      setEditorTheme,
+      editorThemePresets,
+      selectionColor,
+      setSelectionColor,
+      selectionColorPresets,
+    }),
+    [accent, setAccent, editorTheme, setEditorTheme, selectionColor, setSelectionColor]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
