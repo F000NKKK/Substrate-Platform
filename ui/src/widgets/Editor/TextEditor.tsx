@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { EditorState, type Extension } from "@codemirror/state";
 import { basicSetup, EditorView } from "codemirror";
 import { useTheme } from "../../infra/theme";
+import { breakpointGutter, syncBreakpoints } from "./breakpointGutter";
 import type { EditorProps } from "./EditorBase";
 import { resolveEditorTheme } from "./editorThemes";
 import "./TextEditor.css";
@@ -9,6 +10,10 @@ import "./TextEditor.css";
 export interface TextEditorProps extends EditorProps {
   /** CodeMirror language support for this file kind — omit for plain, unhighlighted text. Every concrete language editor (JsonEditor, RustEditor, ...) is just this component composed with a fixed `language`. */
   language?: Extension;
+  /** Lines (1-indexed) currently marked as breakpoints — omit entirely to skip the gutter altogether (most editors don't need one; only a debugger-aware host does). Updates without recreating the view/losing undo history. */
+  breakpoints?: ReadonlySet<number>;
+  /** Called when the user clicks the breakpoint gutter on a line. Required together with `breakpoints` to actually render the gutter — the host owns what "toggling" means (persistence, calling a debugger backend, ...). */
+  onToggleBreakpoint?: (line: number) => void;
 }
 
 /**
