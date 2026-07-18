@@ -17,12 +17,14 @@ export interface RunBarProps {
 }
 
 /**
- * A Visual Studio-style run bar: pick a target from a dropdown, then hit the
- * solid green Start arrow to launch it — purely presentational, the product
- * supplies `targets`/`running`/`onRun` from whatever actually resolves and
- * executes them (a workflow engine, `yog run <name>`, anything). Sits below
- * the menu bar as its own row, mirroring VS's startup-item selector + Start
- * button.
+ * A Visual Studio-style run-target picker: choose a target from a dropdown,
+ * then hit the solid green Start arrow to launch it — purely presentational,
+ * the product supplies `targets`/`running`/`onRun` from whatever actually
+ * resolves and executes them (a workflow engine, `yog run <name>`, anything).
+ * Owns its own state/behavior entirely separately from `Toolbar`; meant to
+ * be composed into one via its `leading` slot rather than merged into it,
+ * mirroring VS's startup-item selector + Start button sitting in the same
+ * toolbar row as its other actions.
  */
 export function RunBar({ targets, running, onRun, emptyLabel = "No targets" }: RunBarProps) {
   const [selected, setSelected] = useState<string | null>(null);
