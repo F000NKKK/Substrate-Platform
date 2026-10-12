@@ -60,3 +60,18 @@
 .sp-execution-line {
   background: rgba(245, 196, 0, 0.18);
 }
+
+/* A host-supplied hover popup (`CodeEditor`'s `hoverTip`) — the frame is
+   ours, the content the host's. */
+.sp-hover-tip {
+  max-width: min(640px, 80vw);
+  max-height: 360px;
+  overflow: auto;
+  background: var(--sp-surface-2);
+  border: 1px solid var(--sp-border-strong);
+  border-radius: var(--sp-radius-md);
+  box-shadow: var(--sp-shadow-md);
+  font-family: var(--sp-font-ui);
+  font-size: 12px;
+  color: var(--sp-text);
+}

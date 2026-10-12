@@ -14,6 +14,7 @@ registerTranslations(
     Close: "Закрыть",
     Delete: "Удалить",
     Create: "Создать",
+    Cut: "Вырезать",
     Copy: "Копировать",
     Paste: "Вставить",
     Dismiss: "Скрыть",

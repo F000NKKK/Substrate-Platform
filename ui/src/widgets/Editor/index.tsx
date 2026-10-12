@@ -3,6 +3,7 @@ export { TextEditor } from "./TextEditor";
 export type { TextEditorProps } from "./TextEditor";
 export { CodeEditor } from "./CodeEditor";
 export type { CodeEditorProps } from "./CodeEditor";
+export type { EditorPointRequest, EditorHoverTip, EditorHoverProvider } from "./editorPointer";
 export {
   PlainTextEditor,
   JsonEditor,
