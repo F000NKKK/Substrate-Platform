@@ -191,6 +191,7 @@ registerTranslations(
     Completions: "Варианты завершения",
     Diagnostics: "Диагностика",
     "No diagnostics": "Нет диагностики",
+    "$ unchanged lines": "Неизмененных строк: $",
 
     // Quick Find / Quick Replace / Go To Line
     "Find...": "Найти...",

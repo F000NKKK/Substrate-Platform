@@ -1,0 +1,18 @@
+/* The merge view scrolls as a whole — both sides move together. */
+.sp-diff-editor .cm-mergeView {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.sp-diff-editor .cm-mergeView .cm-editor {
+  height: auto;
+}
+
+.sp-diff-editor .cm-mergeViewEditors {
+  min-height: 100%;
+}
+
+.sp-diff-editor .cm-collapsedLines {
+  font-family: var(--sp-font-ui);
+  font-size: 11px;
+}

@@ -36,6 +36,8 @@ const PHRASES = [
   "Completions",
   "Diagnostics",
   "No diagnostics",
+  // The diff view (@codemirror/merge).
+  "$ unchanged lines",
 ];
 
 /** CodeMirror's phrases in the active locale — rebuild (via a compartment) when the locale changes. */

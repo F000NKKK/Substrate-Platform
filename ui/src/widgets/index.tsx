@@ -23,6 +23,8 @@ export type { FileTreeNode, FileTreeMenuItem, FileTreeProps } from "./FileTree";
 export { useDirectoryTree } from "./FileTree";
 export type { DirEntry, DirectoryTreeCommands } from "./FileTree";
 export * from "./Editor";
+export { DiffEditor } from "./DiffEditor";
+export type { DiffEditorProps, DiffLayout } from "./DiffEditor";
 export { EditorColorField } from "./EditorColorField";
 export { RunBar } from "./RunBar";
 export type { RunBarProps, RunTarget, RunMode } from "./RunBar";
