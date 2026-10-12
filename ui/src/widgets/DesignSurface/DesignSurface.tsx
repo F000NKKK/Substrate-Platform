@@ -1,4 +1,5 @@
-import { useRef, useState, type CSSProperties, type DragEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useItemDropTarget } from "../../infra/dnd";
 import "./DesignSurface.css";
 
 /** A rectangle in design units (the designed thing's own pixels, before `scale`). */
@@ -85,7 +86,7 @@ export interface DesignSurfaceProps {
   grid?: number;
   /** Snap to siblings' edges and centers, drawing guides (Visual Studio's snaplines). Hold Alt while dragging to suspend snapping. Default `true`. */
   snaplines?: boolean;
-  /** Accepts HTML drag-and-drop of `mime` (a toolbox item) — `onDrop` gets its data, where it was dropped and the container there. */
+  /** Accepts drops of `mime` items (a toolbox entry, via `beginItemDrag`) — `onDrop` gets its data, where it was dropped and the container there. */
   externalDrop?: { mime: string; onDrop: (data: string, point: DesignPoint, target: string | null) => void };
   /** Right-click — the item under the pointer is selected first (`null` over empty space). */
   onContextMenu?: (e: ReactMouseEvent, id: string | null) => void;
@@ -154,7 +155,7 @@ function nearest(edges: number[], lines: SnapLine[], threshold: number): { shift
  * A WinForms/WPF-style design surface: a scrollable, zoomed page on which
  * the product draws its content (`children`), with selection frames and
  * resize handles, rubber-band selection, dragging with grid snapping and
- * snaplines to siblings, and HTML drops from a toolbox. Product-neutral —
+ * snaplines to siblings, and drops from a toolbox (`beginItemDrag`). Product-neutral —
  * it only reports geometry (`onCommit`), the product decides what an edit
  * means for its document. Keyboard commands (nudge, delete, copy) are the
  * product's: the surface is focusable, bind them to "focus is inside".
@@ -393,26 +394,24 @@ export function DesignSurface({
     }
   }
 
-  function onDragOver(e: DragEvent) {
-    if (!externalDrop || !Array.from(e.dataTransfer.types).includes(externalDrop.mime)) return;
-    // Claim it, so drop targets around the surface (a dock) don't react too.
-    e.preventDefault();
-    e.stopPropagation();
-    e.dataTransfer.dropEffect = "copy";
-    setTarget(containerAt(pointOf(e), []));
-  }
-
-  function onDrop(e: DragEvent) {
-    if (!externalDrop) return;
-    const data = e.dataTransfer.getData(externalDrop.mime);
-    setTarget(null);
-    if (!data) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const p = pointOf(e);
-    externalDrop.onDrop(data, { x: Math.round(p.x), y: Math.round(p.y) }, containerAt(p, []));
-    pageRef.current?.parentElement?.focus();
-  }
+  // Toolbox drops arrive through `beginItemDrag` (pointer events), not HTML drag and drop.
+  const rootRef = useRef<HTMLDivElement>(null);
+  useItemDropTarget(
+    rootRef,
+    externalDrop
+      ? {
+          accepts: (type) => type === externalDrop.mime,
+          over: (x, y) => setTarget(containerAt(pointOf({ clientX: x, clientY: y }), [])),
+          leave: () => setTarget(null),
+          drop: (x, y, item) => {
+            setTarget(null);
+            const p = pointOf({ clientX: x, clientY: y });
+            externalDrop.onDrop(item.data, { x: Math.round(p.x), y: Math.round(p.y) }, containerAt(p, []));
+            rootRef.current?.focus();
+          },
+        }
+      : null
+  );
 
   function handleContextMenu(e: ReactMouseEvent) {
     if (!onContextMenu) return;
@@ -439,6 +438,7 @@ export function DesignSurface({
 
   return (
     <div
+      ref={rootRef}
       className={["sp-design-surface", className].filter(Boolean).join(" ")}
       tabIndex={0}
       onPointerDown={onPointerDown}
@@ -447,10 +447,6 @@ export function DesignSurface({
       onPointerCancel={() => endDrag(false)}
       onPointerLeave={() => setHover(null)}
       onKeyDown={onKeyDown}
-      onDragEnter={onDragOver}
-      onDragOver={onDragOver}
-      onDragLeave={() => setTarget(null)}
-      onDrop={onDrop}
       onContextMenu={handleContextMenu}
     >
       <div className="sp-design-surface-canvas" style={{ width: width * scale + MARGIN_PX * 2, height: height * scale + MARGIN_PX * 2 }}>

@@ -1,0 +1,29 @@
+.sp-item-dragging,
+.sp-item-dragging * {
+  cursor: copy !important;
+  user-select: none !important;
+}
+
+.sp-item-dragging.sp-item-drag-none,
+.sp-item-dragging.sp-item-drag-none * {
+  cursor: no-drop !important;
+}
+
+.sp-item-drag-ghost {
+  position: fixed;
+  z-index: 1000;
+  max-width: 260px;
+  padding: 2px 8px;
+  overflow: hidden;
+  color: var(--sp-text);
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  background: var(--sp-surface-2);
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius-xs);
+  box-shadow: 0 4px 12px hsl(0 0% 0% / 0.4);
+  opacity: 0.92;
+}
