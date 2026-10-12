@@ -39,11 +39,10 @@ export function CodeEditor({ breakpoints, onToggleBreakpoint, ...rest }: CodeEdi
     [!!onToggleBreakpoint]
   );
 
-  // Separate from `TextEditor`'s own recreate-on-language/readOnly/theme
-  // effect on purpose: updating which lines have a breakpoint must not
-  // recreate the view (that would drop undo history and cursor position
-  // every time a breakpoint is toggled, including from outside this editor
-  // instance — e.g. a debug panel's own toggle).
+  // Breakpoints are synced as plain transactions into the live view, not
+  // passed through `extensions`: that would reconfigure the gutter on every
+  // toggle (including ones from outside this editor instance — e.g. a debug
+  // panel's own toggle) for what is really just a state update.
   useEffect(() => {
     if (viewRef.current && breakpoints) syncBreakpoints(viewRef.current, breakpoints);
   }, [breakpoints]);

@@ -26,12 +26,10 @@ import { TextEditor, type TextEditorProps } from "./TextEditor";
 // breakpoint, so their own contract simply doesn't offer one.
 //
 // Every `language` extension is built exactly once at module load, not
-// inline in JSX: `TextEditor` recreates its whole CodeMirror view (losing
-// undo history and scroll position) whenever the `language` prop's
-// *identity* changes, and `json()`/`rust()`/... each return a brand new
-// object on every call — calling them inline would hand a fresh identity
-// to every single render, recreating the view (jumping the scroll back to
-// the top) on any re-render at all, not just ones that actually need it.
+// inline in JSX: `TextEditor` reconfigures its CodeMirror view whenever the
+// `language` prop's *identity* changes, and `json()`/`rust()`/... each
+// return a brand new object on every call — calling them inline would
+// trigger a pointless (re-highlighting) reconfigure on every single render.
 
 const jsonLanguage = json();
 const rustLanguage = rust();

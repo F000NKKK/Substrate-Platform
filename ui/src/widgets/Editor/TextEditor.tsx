@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { EditorState, type Extension } from "@codemirror/state";
+import { useEffect, useMemo, useRef, type RefObject } from "react";
+import { Compartment, EditorState, type Extension } from "@codemirror/state";
 import { basicSetup, EditorView } from "codemirror";
 import { useTheme } from "../../infra/theme";
 import type { EditorProps } from "./EditorBase";
@@ -11,7 +11,7 @@ export interface TextEditorProps extends EditorProps {
   language?: Extension;
   /** Extra CodeMirror extensions layered on top of the base set — the escape hatch a composing component (`CodeEditor`'s breakpoint gutter) uses instead of `TextEditor` knowing anything about what they're for. */
   extensions?: Extension[];
-  /** Called once with the live `EditorView` right after it's created — lets a composing component (that supplied `extensions`) dispatch its own transactions into it later, without `TextEditor` itself needing to know why. */
+  /** Called once with the live `EditorView` right after it's created (the view lives for the component's whole lifetime — prop changes reconfigure it in place) — lets a composing component (that supplied `extensions`) dispatch its own transactions into it later, without `TextEditor` itself needing to know why. */
   onViewReady?: (view: EditorView) => void;
 }
 
@@ -31,34 +31,73 @@ export interface TextEditorProps extends EditorProps {
  */
 export function TextEditor({ content, onChange, language, readOnly, extensions: extraExtensions, onViewReady }: TextEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
   const onViewReadyRef = useRef(onViewReady);
   onViewReadyRef.current = onViewReady;
   const { editorColors } = useTheme();
 
+  // One compartment per prop that can change after mount — each is swapped
+  // in place via `reconfigure` rather than recreating the view, which would
+  // throw away undo history, selection and scroll position.
+  const compartments = useMemo(
+    () => ({ language: new Compartment(), readOnly: new Compartment(), theme: new Compartment(), extra: new Compartment() }),
+    []
+  );
+
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const extensions: Extension[] = [basicSetup, EditorView.lineWrapping, resolveEditorTheme(editorColors)];
-    if (language) extensions.push(language);
-    if (readOnly) extensions.push(EditorView.editable.of(false));
-    if (extraExtensions) extensions.push(...extraExtensions);
-    extensions.push(
+    const extensions: Extension[] = [
+      basicSetup,
+      EditorView.lineWrapping,
+      compartments.theme.of(resolveEditorTheme(editorColors)),
+      compartments.language.of(language ?? []),
+      compartments.readOnly.of(readOnlyExtension(readOnly)),
+      compartments.extra.of(extraExtensions ?? []),
       EditorView.updateListener.of((update) => {
         if (update.docChanged) onChangeRef.current(update.state.doc.toString());
-      })
-    );
+      }),
+    ];
 
     const view = new EditorView({
       state: EditorState.create({ doc: content, extensions }),
       parent: containerRef.current,
     });
+    viewRef.current = view;
     onViewReadyRef.current?.(view);
 
-    return () => view.destroy();
+    return () => {
+      viewRef.current = null;
+      view.destroy();
+    };
+    // Mount-only: every later prop change goes through a compartment below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [language, readOnly, editorColors, extraExtensions]);
+  }, []);
+
+  useReconfigure(viewRef, compartments.language, language ?? EMPTY_EXTENSIONS);
+  useReconfigure(viewRef, compartments.readOnly, useMemo(() => readOnlyExtension(readOnly), [readOnly]));
+  useReconfigure(viewRef, compartments.theme, useMemo(() => resolveEditorTheme(editorColors), [editorColors]));
+  useReconfigure(viewRef, compartments.extra, extraExtensions ?? EMPTY_EXTENSIONS);
 
   return <div ref={containerRef} className="sp-text-editor" />;
+}
+
+const EMPTY_EXTENSIONS: Extension[] = [];
+
+function readOnlyExtension(readOnly: boolean | undefined): Extension {
+  return readOnly ? [EditorView.editable.of(false), EditorState.readOnly.of(true)] : [];
+}
+
+/** Swaps `compartment`'s content whenever `extension`'s identity changes after mount (the mount itself already installed the initial value). */
+function useReconfigure(viewRef: RefObject<EditorView | null>, compartment: Compartment, extension: Extension) {
+  const mounted = useRef(false);
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
+    viewRef.current?.dispatch({ effects: compartment.reconfigure(extension) });
+  }, [viewRef, compartment, extension]);
 }

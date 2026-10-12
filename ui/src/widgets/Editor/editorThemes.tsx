@@ -13,8 +13,8 @@ function alpha(color: HslColor, a: number): string {
  * Builds the CodeMirror extension for a color scheme — every entry in
  * `EditorColorScheme` maps to exactly one visual role here, so a user
  * recoloring "Keyword" in Settings only ever touches keyword-tagged tokens,
- * never anything else. Rebuilt (mount + re-run, not live-patched) whenever
- * the scheme changes, same as switching `language`.
+ * never anything else. Rebuilt whenever the scheme changes and swapped into
+ * a live editor via a compartment, same as switching `language`.
  */
 export function resolveEditorTheme(colors: EditorColorScheme): Extension {
   const highlightStyle = HighlightStyle.define([
