@@ -6,6 +6,7 @@ import { listen } from "@tauri-apps/api/event";
 import { IconButton } from "../IconButton";
 import { Icon } from "../../infra/icons";
 import { eventKey } from "../../infra/keys";
+import { useT } from "../../infra/i18n";
 import { ContextMenu, useContextMenu } from "../ContextMenu";
 import { useStateStore } from "../../infra/state";
 import "@xterm/xterm/css/xterm.css";
@@ -122,6 +123,7 @@ export function TerminalPanel({
   shells: shellsProp,
   listShellsCommand = "list_shells",
 }: TerminalPanelProps) {
+  const t = useT();
   const [detectedShells, setDetectedShells] = useState<TerminalShellKind[] | null>(shellsProp ?? null);
   const [tabs, setTabs] = useState<TerminalTab[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -225,7 +227,7 @@ export function TerminalPanel({
         <div className="sp-terminal-toolbar-anchor">
           <IconButton
             size={22}
-            title="New terminal"
+            title={t("New Terminal")}
             disabled={!shells}
             onClick={() => (shells && shells.length > 1 ? addMenu.openAtAnchor() : shells?.[0] && addTerminal(shells[0]))}
           >
@@ -237,21 +239,21 @@ export function TerminalPanel({
             onClose={addMenu.close}
           />
         </div>
-        <IconButton size={22} title="Split terminal" disabled={!activeId} onClick={splitTerminal}>
+        <IconButton size={22} title={t("Split Terminal")} disabled={!activeId} onClick={splitTerminal}>
           <Icon name="split" size={14} />
         </IconButton>
-        <IconButton size={22} title="Kill terminal" disabled={!activeId} onClick={() => activeId && closeTerminal(activeId)}>
+        <IconButton size={22} title={t("Kill Terminal")} disabled={!activeId} onClick={() => activeId && closeTerminal(activeId)}>
           <Icon name="trash" size={14} />
         </IconButton>
         <div className="sp-terminal-toolbar-anchor">
-          <IconButton size={22} title="More actions" onClick={() => moreMenu.openAtAnchor()}>
+          <IconButton size={22} title={t("More Actions")} onClick={() => moreMenu.openAtAnchor()}>
             <Icon name="more" size={14} />
           </IconButton>
           <ContextMenu
             target={moreMenu.target ? { mode: "anchor" } : null}
             items={[
               {
-                label: "Clear Terminal",
+                label: t("Clear Terminal"),
                 shortcut: "Ctrl+L",
                 disabled: !activeId,
                 onSelect: () => activeId && clearHandlesRef.current[activeId]?.(),
@@ -298,23 +300,23 @@ export function TerminalPanel({
           ))}
         </div>
         <div className="sp-terminal-sidebar">
-          {orderedTabs.map((t, i) => (
+          {orderedTabs.map((tab, i) => (
             <div
-              key={t.id}
+              key={tab.id}
               className="sp-terminal-sidebar-item"
-              data-active={t.id === activeId || undefined}
-              data-split={(i > 0 && orderedTabs[i - 1].groupId === t.groupId) || undefined}
-              onClick={() => setActiveId(t.id)}
+              data-active={tab.id === activeId || undefined}
+              data-split={(i > 0 && orderedTabs[i - 1].groupId === tab.groupId) || undefined}
+              onClick={() => setActiveId(tab.id)}
             >
               <Icon name="terminal" size={14} />
-              {renamingId === t.id ? (
+              {renamingId === tab.id ? (
                 <input
                   className="sp-terminal-sidebar-item-rename"
                   autoFocus
-                  defaultValue={labelFor(shells?.find((s) => s.id === t.shellId), t)}
+                  defaultValue={labelFor(shells?.find((s) => s.id === tab.shellId), tab)}
                   onClick={(e) => e.stopPropagation()}
                   onBlur={(e) => {
-                    renameTerminal(t.id, e.currentTarget.value);
+                    renameTerminal(tab.id, e.currentTarget.value);
                     setRenamingId(null);
                   }}
                   onKeyDown={(e) => {
@@ -328,19 +330,19 @@ export function TerminalPanel({
                   className="sp-terminal-sidebar-item-label"
                   onDoubleClick={(e) => {
                     e.stopPropagation();
-                    setRenamingId(t.id);
+                    setRenamingId(tab.id);
                   }}
                 >
-                  {labelFor(shells?.find((s) => s.id === t.shellId), t)}
+                  {labelFor(shells?.find((s) => s.id === tab.shellId), tab)}
                 </span>
               )}
               <IconButton
                 size={22}
-                title="Close terminal"
+                title={t("Close Terminal")}
                 className="sp-terminal-sidebar-item-close"
                 onClick={(e) => {
                   e.stopPropagation();
-                  closeTerminal(t.id);
+                  closeTerminal(tab.id);
                 }}
               >
                 <Icon name="close" size={14} />
@@ -378,6 +380,7 @@ function TerminalInstance({ id, shell, clearCommand, active, focused, commands, 
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
   const menu = useContextMenu<void>();
+  const t = useT();
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -531,7 +534,7 @@ function TerminalInstance({ id, shell, clearCommand, active, focused, commands, 
         target={menu.target && menu.target.mode === "viewport" ? { mode: "viewport", x: menu.target.x, y: menu.target.y } : null}
         items={[
           {
-            label: "Copy",
+            label: t("Copy"),
             shortcut: "Ctrl+Shift+C",
             disabled: !termRef.current?.hasSelection(),
             onSelect: () => {
@@ -540,7 +543,7 @@ function TerminalInstance({ id, shell, clearCommand, active, focused, commands, 
             },
           },
           {
-            label: "Paste",
+            label: t("Paste"),
             shortcut: "Ctrl+Shift+V",
             onSelect: () => {
               navigator.clipboard

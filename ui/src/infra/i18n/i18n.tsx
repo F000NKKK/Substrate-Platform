@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
 import { parseShortcut } from "../keys";
 
 /**
@@ -7,6 +7,11 @@ import { parseShortcut } from "../keys";
  * itself when there isn't one — so untranslated text still reads fine and
  * nothing needs a separate id. `{name}` placeholders are filled from
  * `params`: `t("Delete profile \"{name}\"?", { name })`.
+ *
+ * Count-dependent text goes through `tn(count, "{count} file", "{count}
+ * files")`: the catalog entry is keyed by the singular English and maps
+ * to the target language's plural forms (`Intl.PluralRules` categories,
+ * `{ one, few, many, other }`); `{count}` is filled automatically.
  *
  * Products and the platform register catalogs per locale
  * (`registerTranslations("ru", {...})`); several registrations for one
@@ -24,7 +29,13 @@ export interface LocaleInfo {
 const STORAGE_KEY = "substrate.locale";
 const SOURCE_LOCALE: LocaleInfo = { id: "en", name: "English" };
 
-const catalogs = new Map<string, Map<string, string>>();
+/** A translation's plural forms by `Intl.PluralRules` category; `other` is the fallback. */
+export type PluralForms = Partial<Record<Intl.LDMLPluralRule, string>> & { other: string };
+
+/** A locale's catalog: English source text → translation (plural forms for `tn` entries). */
+export type Messages = Record<string, string | PluralForms>;
+
+const catalogs = new Map<string, Map<string, string | PluralForms>>();
 const locales = new Map<string, LocaleInfo>([[SOURCE_LOCALE.id, SOURCE_LOCALE]]);
 const subscribers = new Set<() => void>();
 let current = initialLocale();
@@ -53,12 +64,12 @@ if (typeof window !== "undefined") {
 }
 
 /** The catalog for `locale`, falling back from a region to its language (`"ru-RU"` → `"ru"`). */
-function catalogFor(locale: string): Map<string, string> | undefined {
+function catalogFor(locale: string): Map<string, string | PluralForms> | undefined {
   return catalogs.get(locale) ?? catalogs.get(locale.split("-")[0]);
 }
 
 /** Adds translations (English text → translated text) for `locale`; `name` lists it in the language picker. */
-export function registerTranslations(locale: LocaleInfo | string, messages: Record<string, string>): void {
+export function registerTranslations(locale: LocaleInfo | string, messages: Messages): void {
   const info = typeof locale === "string" ? { id: locale, name: locales.get(locale)?.name ?? locale } : locale;
   locales.set(info.id, info);
   let catalog = catalogs.get(info.id);
@@ -77,6 +88,16 @@ export function getLocale(): string {
   return current;
 }
 
+/**
+ * The registered locale the UI is actually shown in — the active tag, or
+ * its language (`"ru-RU"` → `"ru"`), else English. What a picker selects.
+ */
+export function resolvedLocale(): string {
+  if (locales.has(current)) return current;
+  const language = current.split("-")[0];
+  return locales.has(language) ? language : SOURCE_LOCALE.id;
+}
+
 /** Switches the UI language everywhere (every window) and remembers it. */
 export function setLocale(locale: string): void {
   current = locale;
@@ -88,11 +109,44 @@ export function setLocale(locale: string): void {
   notify();
 }
 
+function fill(text: string, params?: Record<string, string | number>): string {
+  if (!params) return text;
+  return text.replace(/\{(\w+)\}/g, (match, name: string) => (name in params ? String(params[name]) : match));
+}
+
+const pluralRules = new Map<string, Intl.PluralRules>();
+
+function pluralCategory(locale: string, count: number): Intl.LDMLPluralRule {
+  let rules = pluralRules.get(locale);
+  if (!rules) {
+    try {
+      rules = new Intl.PluralRules(locale);
+    } catch {
+      rules = new Intl.PluralRules(SOURCE_LOCALE.id);
+    }
+    pluralRules.set(locale, rules);
+  }
+  return rules.select(count);
+}
+
 /** `text` in the active locale, `{placeholders}` filled from `params`. */
 export function t(text: string, params?: Record<string, string | number>): string {
-  const translated = catalogFor(current)?.get(text) ?? text;
-  if (!params) return translated;
-  return translated.replace(/\{(\w+)\}/g, (match, name: string) => (name in params ? String(params[name]) : match));
+  const entry = catalogFor(current)?.get(text);
+  const translated = entry === undefined ? text : typeof entry === "string" ? entry : entry.other;
+  return fill(translated, params);
+}
+
+/**
+ * Count-dependent text: `tn(n, "{count} file", "{count} files")`. The
+ * catalog entry (keyed by `one`) gives the locale's plural forms; without
+ * one, English rules pick `one` or `other`. `{count}` is `count`.
+ */
+export function tn(count: number, one: string, other: string, params?: Record<string, string | number>): string {
+  const values = { count, ...params };
+  const entry = catalogFor(current)?.get(one);
+  if (entry === undefined) return fill(count === 1 ? one : other, values);
+  if (typeof entry === "string") return fill(entry, values);
+  return fill(entry[pluralCategory(resolvedLocale(), count)] ?? entry.other, values);
 }
 
 let version = 0;
@@ -118,6 +172,12 @@ export function useLocale(): string {
 export function useT(): typeof t {
   useLocale();
   return t;
+}
+
+/** `t` as an element, subscribed: `<T>Close</T>`, `<T params={{ name }}>Open {name}</T>`. */
+export function T({ children, params }: { children: string; params?: Record<string, string | number> }): ReactNode {
+  useLocale();
+  return t(children, params);
 }
 
 const KEY_LABELS: Record<string, string> = {

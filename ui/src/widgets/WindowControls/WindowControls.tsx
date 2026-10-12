@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getCurrentWindow, type Window } from "@tauri-apps/api/window";
 import { Icon } from "../../infra/icons";
+import { useT } from "../../infra/i18n";
 import "./WindowControls.css";
 
 // `getCurrentWindow()` reaches for the Tauri IPC bridge
@@ -22,6 +23,7 @@ function currentWindowOrNull(): Window | null {
  * draggable and double-click-to-maximize still works.
  */
 export function WindowControls() {
+  const t = useT();
   const [maximized, setMaximized] = useState(false);
   const appWindow = useMemo(() => currentWindowOrNull(), []);
 
@@ -42,7 +44,7 @@ export function WindowControls() {
       <button
         type="button"
         className="sp-windowcontrols-btn"
-        aria-label="Minimize"
+        aria-label={t("Minimize")}
         onClick={() => appWindow?.minimize()}
       >
         <Icon name="minimize" size={14} />
@@ -50,7 +52,7 @@ export function WindowControls() {
       <button
         type="button"
         className="sp-windowcontrols-btn"
-        aria-label={maximized ? "Restore" : "Maximize"}
+        aria-label={maximized ? t("Restore") : t("Maximize")}
         onClick={() => appWindow?.toggleMaximize()}
       >
         <Icon name={maximized ? "restore" : "maximize"} size={14} />
@@ -58,7 +60,7 @@ export function WindowControls() {
       <button
         type="button"
         className="sp-windowcontrols-btn sp-windowcontrols-btn--close"
-        aria-label="Close"
+        aria-label={t("Close")}
         onClick={() => appWindow?.close()}
       >
         <Icon name="close" size={14} />

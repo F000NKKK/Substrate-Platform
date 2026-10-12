@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { ContextMenu } from "../ContextMenu";
+import { tn, useT } from "../../infra/i18n";
 import { useDataGrid, formatAggregate } from "./useDataGrid";
 import { buildDataGridMenuItems } from "./contextMenuItems";
 import "./DataGrid.css";
@@ -90,6 +91,7 @@ export interface DataGridProps<T> {
 export function DataGrid<T>(props: DataGridProps<T>) {
   const { selectable = false, filterRow = true, onRowActivate, emptyState, className, style, rowHeight = 28 } = props;
   const grid = useDataGrid(props);
+  const t = useT();
 
   return (
     <div className={["sp-datagrid", className].filter(Boolean).join(" ")} style={style}>
@@ -102,7 +104,7 @@ export function DataGrid<T>(props: DataGridProps<T>) {
           onDrop={grid.handleGroupPanelDrop}
         >
           {grid.activeGroupBy.length === 0 ? (
-            <span className="sp-datagrid-grouppanel-placeholder">Drag a column header here to group by that column</span>
+            <span className="sp-datagrid-grouppanel-placeholder">{t("Drag a column header here to group by that column")}</span>
           ) : (
             grid.activeGroupBy.map((key) => (
               <span className="sp-datagrid-groupchip" key={key}>
@@ -110,7 +112,7 @@ export function DataGrid<T>(props: DataGridProps<T>) {
                 <button
                   type="button"
                   className="sp-datagrid-groupchip-remove"
-                  aria-label={`Stop grouping by ${key}`}
+                  aria-label={t("Stop grouping by {column}", { column: key })}
                   onClick={() => grid.commitGroupBy(grid.activeGroupBy.filter((k) => k !== key))}
                 >
                   ×
@@ -137,7 +139,7 @@ export function DataGrid<T>(props: DataGridProps<T>) {
               onChange={() =>
                 grid.commitSelection(grid.allSelected ? new Set() : new Set(grid.sortedRows.map(props.getRowId)))
               }
-              aria-label="Select all rows"
+              aria-label={t("Select all rows")}
             />
           </div>
         )}
@@ -193,13 +195,13 @@ export function DataGrid<T>(props: DataGridProps<T>) {
                 {filterable && (
                   <input
                     className="sp-datagrid-filterinput"
-                    placeholder="Filter…"
+                    placeholder={t("Filter…")}
                     value={grid.filters[column.key] ?? ""}
                     onChange={(e) => grid.setFilters((f) => ({ ...f, [column.key]: e.target.value }))}
                     onKeyDown={(e) => {
                       if (e.key === "Escape") grid.setFilters((f) => ({ ...f, [column.key]: "" }));
                     }}
-                    aria-label={`Filter ${typeof column.header === "string" ? column.header : column.key}`}
+                    aria-label={t("Filter {column}", { column: typeof column.header === "string" ? column.header : column.key })}
                   />
                 )}
               </div>
@@ -219,7 +221,7 @@ export function DataGrid<T>(props: DataGridProps<T>) {
         }}
       >
         {grid.visibleColumns.length === 0 || grid.displayItems.length === 0 ? (
-          <div className="sp-datagrid-empty">{emptyState ?? "No rows"}</div>
+          <div className="sp-datagrid-empty">{emptyState ?? t("No rows")}</div>
         ) : (
           <div
             className="sp-datagrid-spacer"
@@ -254,7 +256,7 @@ export function DataGrid<T>(props: DataGridProps<T>) {
                     <span className="sp-datagrid-grouplabel">
                       {column?.header ?? item.columnKey}: <strong>{item.label}</strong>
                     </span>
-                    <span className="sp-datagrid-groupcount">{item.count} items</span>
+                    <span className="sp-datagrid-groupcount">{tn(item.count, "{count} item", "{count} items")}</span>
                     {Object.entries(item.aggregates).map(([key, value]) => {
                       const col = grid.columnByKey.get(key);
                       if (!col) return null;
@@ -296,7 +298,7 @@ export function DataGrid<T>(props: DataGridProps<T>) {
                         type="checkbox"
                         checked={selected}
                         onChange={() => grid.selectRow(rowIndexInSorted, { toggle: true })}
-                        aria-label={`Select row ${id}`}
+                        aria-label={t("Select row {id}", { id })}
                       />
                     </div>
                   )}

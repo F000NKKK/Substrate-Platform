@@ -3,6 +3,7 @@ import { IconButton } from "../IconButton";
 import { Icon } from "../../infra/icons";
 import { ContextMenu, useContextMenu } from "../ContextMenu";
 import { useStoredState } from "../../infra/state";
+import { useT } from "../../infra/i18n";
 import "./RunBar.css";
 
 export interface RunTarget {
@@ -47,8 +48,9 @@ export interface RunBarProps {
  * toolbar row as its other actions. The chosen target is remembered in the
  * current `StateStore` (`"run.target"`).
  */
-export function RunBar({ targets, running, onRun, emptyLabel = "No targets", modes, selectedMode, onModeChange }: RunBarProps) {
+export function RunBar({ targets, running, onRun, emptyLabel, modes, selectedMode, onModeChange }: RunBarProps) {
   const [selected, setSelected] = useStoredState<string | null>("run.target", null, (v) => typeof v === "string");
+  const t = useT();
   const menu = useContextMenu<void>();
   const modeMenu = useContextMenu<void>();
 
@@ -70,7 +72,7 @@ export function RunBar({ targets, running, onRun, emptyLabel = "No targets", mod
     <div className="sp-run-bar">
       <IconButton
         size={26}
-        title={selectedTarget ? `Run: ${selectedTarget.name}` : "Select a target first"}
+        title={selectedTarget ? t("Run: {target}", { target: selectedTarget.name }) : t("Select a target first")}
         disabled={!selectedTarget || running}
         className="sp-run-bar-play"
         onClick={() => selectedTarget && onRun(selectedTarget.name)}
@@ -79,7 +81,7 @@ export function RunBar({ targets, running, onRun, emptyLabel = "No targets", mod
       </IconButton>
       <div className="sp-run-bar-target-anchor">
         <button type="button" className="sp-run-bar-target" disabled={targets.length === 0} onClick={() => menu.openAtAnchor()}>
-          <span>{selectedTarget?.displayName ?? selectedTarget?.description ?? selectedTarget?.name ?? emptyLabel}</span>
+          <span>{selectedTarget?.displayName ?? selectedTarget?.description ?? selectedTarget?.name ?? emptyLabel ?? t("No targets")}</span>
           <Icon name="chevronRight" size={11} className="sp-run-bar-chevron" />
         </button>
         <ContextMenu

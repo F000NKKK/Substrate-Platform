@@ -1,2 +1,2 @@
-export { t, useT, useLocale, getLocale, setLocale, registerTranslations, availableLocales, formatShortcut } from "./i18n";
-export type { LocaleInfo } from "./i18n";
+export { t, tn, T, useT, useLocale, getLocale, resolvedLocale, setLocale, registerTranslations, availableLocales, formatShortcut } from "./i18n";
+export type { LocaleInfo, Messages, PluralForms } from "./i18n";

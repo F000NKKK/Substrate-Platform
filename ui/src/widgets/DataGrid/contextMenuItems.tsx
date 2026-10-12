@@ -1,4 +1,5 @@
 import type { ContextMenuItem } from "../ContextMenu";
+import { t } from "../../infra/i18n";
 import type { DataGridColumn, DataGridSortState } from "./DataGrid";
 import type { DataGridMenuTarget } from "./useDataGrid";
 
@@ -18,11 +19,11 @@ interface MenuGrid<T> {
 function hiddenColumnsSubmenu<T>(grid: MenuGrid<T>, separatorBefore = false): ContextMenuItem {
   const hidden = grid.orderedColumns.filter((c) => grid.activeHiddenColumns.has(c.key));
   return {
-    label: "Show hidden columns",
+    label: t("Show hidden columns"),
     separatorBefore,
     submenu:
       hidden.length === 0
-        ? [{ label: "No hidden columns", disabled: true }]
+        ? [{ label: t("No hidden columns"), disabled: true }]
         : hidden.map((column) => ({
             label: column.header,
             onSelect: () => grid.toggleColumnHidden(column.key),
@@ -38,14 +39,14 @@ export function buildDataGridMenuItems<T>(
 
   if (target.kind === "grid") {
     return [
-      { label: "Reset to default", onSelect: grid.resetToDefaults },
+      { label: t("Reset to default"), onSelect: grid.resetToDefaults },
       {
-        label: "Clear grouping",
+        label: t("Clear grouping"),
         disabled: grid.activeGroupBy.length === 0,
         onSelect: () => grid.commitGroupBy([]),
       },
       {
-        label: grid.groupPanelVisible ? "Hide group panel" : "Show group panel",
+        label: grid.groupPanelVisible ? t("Hide group panel") : t("Show group panel"),
         onSelect: grid.toggleGroupPanelVisible,
       },
       hiddenColumnsSubmenu(grid, true),
@@ -60,34 +61,34 @@ export function buildDataGridMenuItems<T>(
 
   return [
     {
-      label: "Hide column",
+      label: t("Hide column"),
       disabled: column.hideable === false,
       onSelect: () => grid.toggleColumnHidden(column.key),
     },
     {
-      label: grouped ? "Stop grouping" : "Group by this column",
+      label: grouped ? t("Stop grouping") : t("Group by this column"),
       disabled: column.lockGroup,
       onSelect: () => grid.commitGroupBy(grouped ? grid.activeGroupBy.filter((k) => k !== column.key) : [...grid.activeGroupBy, column.key]),
     },
     {
-      label: "Sort ascending",
+      label: t("Sort ascending"),
       checked: sortedAsc,
       disabled: !column.sortable || column.lockSort,
       onSelect: () => grid.commitSort([{ key: column.key, direction: "asc" }]),
     },
     {
-      label: "Sort descending",
+      label: t("Sort descending"),
       checked: sortedDesc,
       disabled: !column.sortable || column.lockSort,
       onSelect: () => grid.commitSort([{ key: column.key, direction: "desc" }]),
     },
     {
-      label: "Clear sort",
+      label: t("Clear sort"),
       disabled: (!column.sortable || column.lockSort) && sortIndex === -1,
       onSelect: () => grid.commitSort(grid.activeSort.filter((s) => s.key !== column.key)),
     },
     {
-      label: grid.groupPanelVisible ? "Hide group panel" : "Show group panel",
+      label: grid.groupPanelVisible ? t("Hide group panel") : t("Show group panel"),
       separatorBefore: true,
       onSelect: grid.toggleGroupPanelVisible,
     },

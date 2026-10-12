@@ -2,6 +2,7 @@ import { useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEven
 import { Button, type ButtonVariant } from "../Button";
 import { TextField } from "../TextField";
 import { ViewportPortal } from "../../infra/portal";
+import { t } from "../../infra/i18n";
 import "./Dialog.css";
 
 export interface DialogButton {
@@ -83,8 +84,8 @@ export async function confirmDialog(options: {
     title: options.title,
     message: options.message,
     buttons: [
-      { id: "cancel", label: options.cancelLabel ?? "Cancel" },
-      { id: "confirm", label: options.confirmLabel ?? "OK", variant: "primary" },
+      { id: "cancel", label: options.cancelLabel ?? t("Cancel") },
+      { id: "confirm", label: options.confirmLabel ?? t("OK"), variant: "primary" },
     ],
   });
   return result.button === "confirm";
@@ -105,8 +106,8 @@ export async function promptDialog(options: {
     message: options.message,
     input: { label: options.label, defaultValue: options.defaultValue, placeholder: options.placeholder, validate: options.validate },
     buttons: [
-      { id: "cancel", label: "Cancel" },
-      { id: "confirm", label: options.confirmLabel ?? "OK", variant: "primary" },
+      { id: "cancel", label: t("Cancel") },
+      { id: "confirm", label: options.confirmLabel ?? t("OK"), variant: "primary" },
     ],
   });
   return result.button === "confirm" ? result.value : null;
@@ -114,7 +115,7 @@ export async function promptDialog(options: {
 
 /** Shows a message with a single dismiss button. */
 export async function messageDialog(options: { title: string; message?: ReactNode; okLabel?: string }): Promise<void> {
-  await showDialog({ title: options.title, message: options.message, buttons: [{ id: "ok", label: options.okLabel ?? "OK", variant: "primary", cancel: true }] });
+  await showDialog({ title: options.title, message: options.message, buttons: [{ id: "ok", label: options.okLabel ?? t("OK"), variant: "primary", cancel: true }] });
 }
 
 function subscribe(notify: () => void) {

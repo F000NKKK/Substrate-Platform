@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from "react";
+import { useT } from "../../infra/i18n";
 import "./Tab.css";
 
 export type TabOrientation = "horizontal" | "horizontal-dock" | "vertical-left" | "vertical-right" | "list";
@@ -21,6 +22,7 @@ export interface TabProps extends ButtonHTMLAttributes<HTMLButtonElement> {
  * through this rather than each hand-rolling their own button/label markup.
  */
 export function Tab({ active, orientation = "horizontal", onRequestClose, pinned, onRequestUnpin, className, children, ...props }: TabProps) {
+  const t = useT();
   const classes = ["sp-tab", `sp-tab--${orientation}`, className].filter(Boolean).join(" ");
 
   function handleCloseClick(e: MouseEvent) {
@@ -37,11 +39,11 @@ export function Tab({ active, orientation = "horizontal", onRequestClose, pinned
     <button className={classes} data-active={active} data-pinned={pinned || undefined} {...props}>
       <span className="sp-tab-label">{children}</span>
       {pinned ? (
-        <span className="sp-tab-close sp-tab-pin" role="button" aria-label="Unpin tab" title="Unpin" onClick={handleUnpinClick}>
+        <span className="sp-tab-close sp-tab-pin" role="button" aria-label={t("Unpin tab")} title={t("Unpin")} onClick={handleUnpinClick}>
           <PinIcon />
         </span>
       ) : onRequestClose && (
-        <span className="sp-tab-close" role="button" aria-label="Close tab" onClick={handleCloseClick}>
+        <span className="sp-tab-close" role="button" aria-label={t("Close tab")} onClick={handleCloseClick}>
           ×
         </span>
       )}

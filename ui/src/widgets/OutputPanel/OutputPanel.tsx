@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useReducer, useRef } from "react";
 import { getOutputBuffer, subscribeOutput, MAX_LINES_DEFAULT } from "./outputBuffer";
+import { useT } from "../../infra/i18n";
 import "./OutputPanel.css";
 
 export type OutputLineLevel = "info" | "warn" | "error";
@@ -39,11 +40,12 @@ const STICK_THRESHOLD = 24;
 export function OutputPanel({
   eventName,
   lines: staticLines,
-  emptyLabel = "No output yet.",
+  emptyLabel,
   maxLines = MAX_LINES_DEFAULT,
   lineLevel = defaultLineLevel,
 }: OutputPanelProps) {
   const [, forceUpdate] = useReducer((n: number) => n + 1, 0);
+  const t = useT();
   const containerRef = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
 
@@ -67,7 +69,7 @@ export function OutputPanel({
   return (
     <div className="sp-output-panel" ref={containerRef} onScroll={handleScroll}>
       {lines.length === 0 ? (
-        <p className="sp-output-panel-empty">{emptyLabel}</p>
+        <p className="sp-output-panel-empty">{emptyLabel ?? t("No output yet.")}</p>
       ) : (
         lines.map((line, i) => (
           <div className={`sp-output-panel-line sp-output-panel-line--${lineLevel(line)}`} key={i}>

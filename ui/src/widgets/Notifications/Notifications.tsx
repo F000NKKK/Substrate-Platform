@@ -2,6 +2,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import { IconButton } from "../IconButton";
 import { Icon } from "../../infra/icons";
 import { ViewportPortal } from "../../infra/portal";
+import { useT } from "../../infra/i18n";
 import "./Notifications.css";
 
 export type NotificationLevel = "info" | "warn" | "error";
@@ -67,6 +68,7 @@ export function NotificationHost() {
 }
 
 function Toast({ notification }: { notification: Notification }) {
+  const t = useT();
   const { id, level, message, timeout } = notification;
   useEffect(() => {
     if (timeout <= 0) return;
@@ -77,7 +79,7 @@ function Toast({ notification }: { notification: Notification }) {
   return (
     <div className={`sp-notification sp-notification--${level}`} role={level === "error" ? "alert" : "status"}>
       <span className="sp-notification-message">{message}</span>
-      <IconButton size={20} aria-label="Dismiss" onClick={() => dismiss(id)}>
+      <IconButton size={20} aria-label={t("Dismiss")} onClick={() => dismiss(id)}>
         <Icon name="close" size={12} />
       </IconButton>
     </div>

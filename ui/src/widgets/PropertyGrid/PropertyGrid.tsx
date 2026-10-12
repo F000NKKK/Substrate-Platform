@@ -4,6 +4,7 @@ import { useStoredState } from "../../infra/state";
 import { IconButton } from "../IconButton";
 import { TextField } from "../TextField";
 import { notify } from "../Notifications";
+import { useT } from "../../infra/i18n";
 import "./PropertyGrid.css";
 
 export type PropertyKind = "string" | "number" | "bool" | "enum";
@@ -125,10 +126,11 @@ export function PropertyGrid({
   objectType,
   objectKey,
   properties,
-  emptyLabel = "No object selected.",
+  emptyLabel,
   persistKey = "properties",
   className,
 }: PropertyGridProps) {
+  const t = useT();
   const [mode, setMode] = useStoredState<ViewMode>(`${persistKey}.view`, "categorized", (v) => v === "categorized" || v === "alphabetical");
   const [split, setSplit] = useStoredState<number>(`${persistKey}.split`, 0.4, (v) => typeof v === "number" && v >= MIN_SPLIT && v <= MAX_SPLIT);
   const [collapsedList, setCollapsedList] = useStoredState<string[]>(`${persistKey}.collapsed`, [], Array.isArray);
@@ -219,7 +221,7 @@ export function PropertyGrid({
   function parseDraft(p: PropertyDescriptor, draft: string): PropertyValue | { error: string } {
     if (kindOf(p) !== "number") return draft;
     const n = Number(draft.trim());
-    return draft.trim() === "" || Number.isNaN(n) ? { error: "Not a valid number." } : n;
+    return draft.trim() === "" || Number.isNaN(n) ? { error: t("Not a valid number.") } : n;
   }
 
   async function commitText(p: PropertyDescriptor, draft: string, viaBlur: boolean) {
@@ -420,7 +422,7 @@ export function PropertyGrid({
       <div className="sp-propgrid-toolbar">
         <IconButton
           size={22}
-          title="Categorized"
+          title={t("Categorized")}
           aria-pressed={mode === "categorized"}
           data-active={mode === "categorized" || undefined}
           disabled={toolbarDisabled}
@@ -430,7 +432,7 @@ export function PropertyGrid({
         </IconButton>
         <IconButton
           size={22}
-          title="Alphabetical"
+          title={t("Alphabetical")}
           aria-pressed={mode === "alphabetical"}
           data-active={mode === "alphabetical" || undefined}
           disabled={toolbarDisabled}
@@ -441,7 +443,7 @@ export function PropertyGrid({
         <span className="sp-propgrid-toolbar-separator" />
         <TextField
           className="sp-propgrid-search"
-          placeholder="Search Properties"
+          placeholder={t("Search Properties")}
           value={query}
           disabled={toolbarDisabled}
           onChange={(e) => setQuery(e.target.value)}
@@ -451,7 +453,7 @@ export function PropertyGrid({
         />
         <IconButton
           size={22}
-          title={descriptionVisible ? "Hide Description" : "Show Description"}
+          title={descriptionVisible ? t("Hide Description") : t("Show Description")}
           aria-pressed={descriptionVisible}
           data-active={descriptionVisible || undefined}
           onClick={() => setDescriptionVisible((v) => !v)}
@@ -461,13 +463,13 @@ export function PropertyGrid({
       </div>
       <div className="sp-propgrid-body" style={{ ["--sp-propgrid-split" as string]: `${split * 100}%` }}>
         {objectName === undefined ? (
-          <div className="sp-propgrid-empty">{emptyLabel}</div>
+          <div className="sp-propgrid-empty">{emptyLabel ?? t("No object selected.")}</div>
         ) : (
           <div
             className="sp-propgrid-rows"
             ref={rowsRef}
             role="grid"
-            aria-label={`${objectName} properties`}
+            aria-label={t("{object} properties", { object: objectName })}
             tabIndex={0}
             data-mode={mode}
             onKeyDown={handleKeyDown}
@@ -498,7 +500,7 @@ export function PropertyGrid({
                     >
                       <Icon name="chevronRight" size={12} />
                     </span>
-                    {item.name}
+                    {item.name === DEFAULT_CATEGORY ? t("Misc") : item.name}
                   </div>
                 );
               }
@@ -561,7 +563,7 @@ export function PropertyGrid({
           <div className="sp-propgrid-description" style={{ height: descriptionHeight }}>
             {current && (
               <>
-                <div className="sp-propgrid-description-name">{current.type === "category" ? current.name : current.property.name}</div>
+                <div className="sp-propgrid-description-name">{current.type === "category" ? (current.name === DEFAULT_CATEGORY ? t("Misc") : current.name) : current.property.name}</div>
                 {selectedProperty?.description && <div className="sp-propgrid-description-text">{selectedProperty.description}</div>}
               </>
             )}

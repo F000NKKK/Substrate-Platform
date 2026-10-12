@@ -1,6 +1,7 @@
 import { useRef, useState, type ReactNode } from "react";
 import { Tab } from "../Tab";
 import { useViewportPosition, ViewportPortal } from "../../infra/portal";
+import { formatShortcut, useLocale } from "../../infra/i18n";
 import "./ContextMenu.css";
 
 export interface ContextMenuItem {
@@ -14,7 +15,7 @@ export interface ContextMenuItem {
   submenu?: ContextMenuItem[];
   /** Draws a divider line above this item — for grouping unrelated actions within one menu. */
   separatorBefore?: boolean;
-  /** A keybinding hint shown right-aligned in the row (e.g. `"Ctrl+Shift+`"`) — display only, doesn't register any actual keybinding. */
+  /** A keybinding hint shown right-aligned in the row (e.g. `"Ctrl+Shift+`"`), rendered through `formatShortcut` — display only, doesn't register any actual keybinding. */
   shortcut?: string;
 }
 
@@ -64,6 +65,7 @@ function MenuItemRow({ item, onClose }: { item: ContextMenuItem; onClose: () => 
   const rowRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<number | undefined>(undefined);
+  useLocale();
 
   function scheduleClose() {
     window.clearTimeout(closeTimer.current);
@@ -105,7 +107,7 @@ function MenuItemRow({ item, onClose }: { item: ContextMenuItem; onClose: () => 
       >
         {item.checked && <span className="sp-contextmenu-check">✓</span>}
         <span className="sp-contextmenu-label">{item.label}</span>
-        {item.shortcut && <span className="sp-contextmenu-shortcut">{item.shortcut}</span>}
+        {item.shortcut && <span className="sp-contextmenu-shortcut">{formatShortcut(item.shortcut)}</span>}
         {item.submenu && <span className="sp-contextmenu-dot" />}
       </Tab>
       {item.submenu && open && rowRef.current && (
