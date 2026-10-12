@@ -56,6 +56,12 @@ export interface ShellLayout {
   pin: (id: string) => void;
   unpin: (id: string) => void;
   close: (id: string) => void;
+  /** Brings a tool window into view wherever it currently lives — pins it open on its edge if it was hidden, or makes it the active tab if it's docked in the center. A no-op for a floating panel (already visible). */
+  show: (id: string) => void;
+  /** Hides a tool window — stays on its current edge (just collapsed to its strip), or goes back to its home edge if it was docked in the center or floating. */
+  hide: (id: string) => void;
+  /** Whether a panel is currently on screen (pinned, peeking as a flyout, floating, or a center tab) rather than collapsed to its strip. */
+  isVisible: (id: string) => boolean;
   dockTo: (id: string, anchor: DockAnchor) => void;
   floatAt: (id: string, x: number, y: number) => void;
   /** Remembers a floating panel's new size (no-op for a panel that isn't floating) — persisted along with every other placement. */
@@ -140,6 +146,12 @@ export function useShellLayout(
     }
     return initial;
   });
+
+  // Read by `show`/`hide`, which branch on the current placement before
+  // deciding what to set — kept out of a state updater so `close` (which
+  // has side effects of its own) is never called from inside one.
+  const placementsRef = useRef(placements);
+  placementsRef.current = placements;
 
   const [centerActiveId, setCenterActive] = useState(() => {
     const restored = persisted?.centerActiveId;
@@ -228,6 +240,37 @@ export function useShellLayout(
     [homeAnchor, main.id, onCloseDynamicPanel]
   );
 
+  const show = useCallback((id: string) => {
+    const cur = placementsRef.current[id];
+    if (!cur || cur.anchor === "float") return;
+    if (cur.anchor === "center") {
+      setCenterActive(id);
+      return;
+    }
+    if (cur.mode === "hidden") setPlacements((prev) => ({ ...prev, [id]: { anchor: cur.anchor, mode: "pinned" } }));
+  }, []);
+
+  const hide = useCallback(
+    (id: string) => {
+      const cur = placementsRef.current[id];
+      if (!cur) return;
+      if (cur.anchor === "float" || cur.anchor === "center") {
+        close(id);
+        return;
+      }
+      setPlacements((prev) => ({ ...prev, [id]: { anchor: cur.anchor, mode: "hidden" } }));
+    },
+    [close]
+  );
+
+  const isVisible = useCallback(
+    (id: string) => {
+      const p = placements[id];
+      return !!p && (p.anchor === "float" || p.anchor === "center" || p.mode !== "hidden");
+    },
+    [placements]
+  );
+
   // Keeps placements/the active center tab in sync with `extraCenterPanels`
   // as the product adds/removes entries — newly-added panels get pinned to
   // center and become active; removed ones lose their placement entirely
@@ -314,6 +357,9 @@ export function useShellLayout(
     pin,
     unpin,
     close,
+    show,
+    hide,
+    isVisible,
     dockTo,
     floatAt,
     resizeFloat,
