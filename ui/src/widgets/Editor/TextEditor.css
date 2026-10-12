@@ -23,10 +23,32 @@
   cursor: pointer;
 }
 
+.sp-breakpoint-cell {
+  position: relative;
+  height: 100%;
+}
+
 .sp-breakpoint-dot {
   width: 9px;
   height: 9px;
   margin: 5px 2.5px;
   border-radius: 50%;
   background: #e5484d;
+}
+
+/* The debugger's current line: a yellow arrow over the gutter (on top of a breakpoint dot, if any) plus a tinted line. */
+.sp-execution-arrow {
+  position: absolute;
+  top: 50%;
+  left: 1px;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 11px solid #f5c400;
+}
+
+.sp-execution-line {
+  background: rgba(245, 196, 0, 0.18);
 }

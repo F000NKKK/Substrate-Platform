@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import type { EditorView } from "@codemirror/view";
-import { breakpointGutter, syncBreakpoints } from "./breakpointGutter";
+import { breakpointGutter, syncBreakpoints, syncExecutionLine } from "./breakpointGutter";
 import { TextEditor, type TextEditorProps } from "./TextEditor";
 
 /**
@@ -19,6 +19,8 @@ export interface CodeEditorProps extends TextEditorProps {
   breakpoints?: ReadonlySet<number>;
   /** Called when the user toggles a breakpoint via the gutter — see `breakpoints`. */
   onToggleBreakpoint?: (line: number) => void;
+  /** The line (1-indexed) a paused debugger is stopped at in this file — drawn as an arrow in the breakpoint gutter plus a highlighted line, and scrolled into view. Needs `onToggleBreakpoint` (the gutter). */
+  executionLine?: number | null;
 }
 
 /**
@@ -28,7 +30,7 @@ export interface CodeEditorProps extends TextEditorProps {
  * editing vs. debugger-aware code editing) in separate components rather
  * than one growing conditional logic for the other.
  */
-export function CodeEditor({ breakpoints, onToggleBreakpoint, ...rest }: CodeEditorProps) {
+export function CodeEditor({ breakpoints, onToggleBreakpoint, executionLine = null, ...rest }: CodeEditorProps) {
   const viewRef = useRef<EditorView | null>(null);
   const onToggleRef = useRef(onToggleBreakpoint);
   onToggleRef.current = onToggleBreakpoint;
@@ -47,6 +49,10 @@ export function CodeEditor({ breakpoints, onToggleBreakpoint, ...rest }: CodeEdi
     if (viewRef.current && breakpoints) syncBreakpoints(viewRef.current, breakpoints);
   }, [breakpoints]);
 
+  useEffect(() => {
+    if (viewRef.current && onToggleRef.current) syncExecutionLine(viewRef.current, executionLine);
+  }, [executionLine]);
+
   return (
     <TextEditor
       {...rest}
@@ -54,6 +60,7 @@ export function CodeEditor({ breakpoints, onToggleBreakpoint, ...rest }: CodeEdi
       onViewReady={(view) => {
         viewRef.current = view;
         if (breakpoints) syncBreakpoints(view, breakpoints);
+        if (onToggleRef.current && executionLine !== null) syncExecutionLine(view, executionLine);
       }}
     />
   );
