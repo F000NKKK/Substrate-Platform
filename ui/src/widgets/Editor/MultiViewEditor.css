@@ -1,0 +1,29 @@
+.sp-multiview-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sp-multiview-editor-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* The view switcher sits under the editor, like a designer's Design/Code
+   tabs — flipped tab shape, the accent edge on top. */
+.sp-multiview-editor-views {
+  display: flex;
+  gap: 2px;
+  padding: 0 var(--sp-space-sm);
+  border-top: 1px solid var(--sp-border);
+  background: var(--sp-surface-1);
+}
+
+.sp-multiview-editor-views .sp-tab--horizontal {
+  border-radius: 0 0 var(--sp-radius-sm) var(--sp-radius-sm);
+}
+
+.sp-multiview-editor-views .sp-tab--horizontal[data-active="true"] {
+  box-shadow: inset 0 2px 0 var(--sp-accent);
+}
