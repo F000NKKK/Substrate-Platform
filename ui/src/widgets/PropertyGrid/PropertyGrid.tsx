@@ -120,7 +120,15 @@ async function applyEdit(p: PropertyDescriptor, value: PropertyValue): Promise<s
  * under the row (one rejected by leaving the box is reported as a
  * notification instead, since the box is gone).
  */
-export function PropertyGrid({ objectName, objectType, objectKey, properties, emptyLabel = "No object selected.", persistKey = "properties", className }: PropertyGridProps) {
+export function PropertyGrid({
+  objectName,
+  objectType,
+  objectKey,
+  properties,
+  emptyLabel = "No object selected.",
+  persistKey = "properties",
+  className,
+}: PropertyGridProps) {
   const [mode, setMode] = useStoredState<ViewMode>(`${persistKey}.view`, "categorized", (v) => v === "categorized" || v === "alphabetical");
   const [split, setSplit] = useStoredState<number>(`${persistKey}.split`, 0.4, (v) => typeof v === "number" && v >= MIN_SPLIT && v <= MAX_SPLIT);
   const [collapsedList, setCollapsedList] = useStoredState<string[]>(`${persistKey}.collapsed`, [], Array.isArray);
@@ -320,8 +328,7 @@ export function PropertyGrid({ objectName, objectType, objectKey, properties, em
     target.setPointerCapture(e.pointerId);
     const startY = e.clientY;
     const startHeight = descriptionHeight;
-    const onMove = (ev: PointerEvent) =>
-      setDescriptionHeight(Math.max(MIN_DESCRIPTION, Math.min(MAX_DESCRIPTION, startHeight - (ev.clientY - startY))));
+    const onMove = (ev: PointerEvent) => setDescriptionHeight(Math.max(MIN_DESCRIPTION, Math.min(MAX_DESCRIPTION, startHeight - (ev.clientY - startY))));
     const onUp = () => {
       target.removeEventListener("pointermove", onMove);
       target.removeEventListener("pointerup", onUp);
@@ -456,88 +463,89 @@ export function PropertyGrid({ objectName, objectType, objectKey, properties, em
           <div className="sp-propgrid-empty">{emptyLabel}</div>
         ) : (
           <div
-              className="sp-propgrid-rows"
-              ref={rowsRef}
-              role="grid"
-              aria-label={`${objectName} properties`}
-              tabIndex={0}
-              data-mode={mode}
-              onKeyDown={handleKeyDown}
-            >
-              {items.map((item) => {
-                const active = item.key === cursor;
-                if (item.type === "category") {
-                  return (
-                    <div
-                      key={item.key}
-                      data-key={item.key}
-                      className="sp-propgrid-category"
-                      role="row"
-                      aria-expanded={!item.collapsed}
-                      aria-selected={active}
-                      data-selected={active || undefined}
-                      onClick={() => setCursor(item.key)}
-                      onDoubleClick={() => !searching && toggleCategory(item.name)}
-                    >
-                      <span
-                        className="sp-propgrid-chevron"
-                        data-expanded={!item.collapsed || undefined}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCursor(item.key);
-                          if (!searching) toggleCategory(item.name);
-                        }}
-                      >
-                        <Icon name="chevronRight" size={12} />
-                      </span>
-                      {item.name}
-                    </div>
-                  );
-                }
-                const p = item.property;
-                const editable = isEditable(p);
-                const rowError = error?.id === p.id ? error.message : null;
+            className="sp-propgrid-rows"
+            ref={rowsRef}
+            role="grid"
+            aria-label={`${objectName} properties`}
+            tabIndex={0}
+            data-mode={mode}
+            onKeyDown={handleKeyDown}
+          >
+            {items.map((item) => {
+              const active = item.key === cursor;
+              if (item.type === "category") {
                 return (
-                  <div key={item.key} className="sp-propgrid-entry">
-                    <div
-                      data-key={item.key}
-                      data-property-id={p.id}
-                      className="sp-propgrid-row"
-                      role="row"
-                      aria-selected={active}
-                      data-selected={active || undefined}
-                      data-readonly={!editable || undefined}
-                      onClick={() => setCursor(item.key)}
+                  <div
+                    key={item.key}
+                    data-key={item.key}
+                    className="sp-propgrid-category"
+                    role="row"
+                    aria-expanded={!item.collapsed}
+                    aria-selected={active}
+                    data-selected={active || undefined}
+                    onClick={() => setCursor(item.key)}
+                    onDoubleClick={() => !searching && toggleCategory(item.name)}
+                  >
+                    <span
+                      className="sp-propgrid-chevron"
+                      data-expanded={!item.collapsed || undefined}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCursor(item.key);
+                        if (!searching) toggleCategory(item.name);
+                      }}
                     >
-                      <div
-                        className="sp-propgrid-name"
-                        role="gridcell"
-                        title={p.name}
-                        onDoubleClick={() => (kindOf(p) === "bool" || kindOf(p) === "enum" ? cycle(p) : beginEdit(p))}
-                      >
-                        {p.name}
-                        <span className="sp-propgrid-splitter" onPointerDown={startSplitDrag} onClick={(e) => e.stopPropagation()} />
-                      </div>
-                      <div
-                        className="sp-propgrid-value"
-                        role="gridcell"
-                        title={editing?.id === p.id ? undefined : displayText(p)}
-                        onClick={() => {
-                          if (editable && editing?.id !== p.id && kindOf(p) !== "bool" && kindOf(p) !== "enum") beginEdit(p);
-                        }}
-                        onDoubleClick={() => cycle(p)}
-                      >
-                        {renderValue(p)}
-                      </div>
-                    </div>
-                    {rowError && (
-                      <div className="sp-propgrid-error" role="alert">
-                        {rowError}
-                      </div>
-                    )}
+                      <Icon name="chevronRight" size={12} />
+                    </span>
+                    {item.name}
                   </div>
                 );
-              })}
+              }
+              const p = item.property;
+              const editable = isEditable(p);
+              const rowError = error?.id === p.id ? error.message : null;
+              return (
+                <div key={item.key} className="sp-propgrid-entry">
+                  <div
+                    data-key={item.key}
+                    data-property-id={p.id}
+                    className="sp-propgrid-row"
+                    role="row"
+                    aria-selected={active}
+                    data-selected={active || undefined}
+                    data-readonly={!editable || undefined}
+                    onClick={() => setCursor(item.key)}
+                  >
+                    <div
+                      className="sp-propgrid-name"
+                      role="gridcell"
+                      title={p.name}
+                      onDoubleClick={() => (kindOf(p) === "bool" || kindOf(p) === "enum" ? cycle(p) : beginEdit(p))}
+                    >
+                      <span className="sp-propgrid-name-text">{p.name}</span>
+                      {/* The column splitter rides on every row's name/value boundary. */}
+                      <span className="sp-propgrid-splitter" onPointerDown={startSplitDrag} onClick={(e) => e.stopPropagation()} />
+                    </div>
+                    <div
+                      className="sp-propgrid-value"
+                      role="gridcell"
+                      title={editing?.id === p.id ? undefined : displayText(p)}
+                      onClick={() => {
+                        if (editable && editing?.id !== p.id && kindOf(p) !== "bool" && kindOf(p) !== "enum") beginEdit(p);
+                      }}
+                      onDoubleClick={() => cycle(p)}
+                    >
+                      {renderValue(p)}
+                    </div>
+                  </div>
+                  {rowError && (
+                    <div className="sp-propgrid-error" role="alert">
+                      {rowError}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
