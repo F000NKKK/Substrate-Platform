@@ -72,7 +72,10 @@ pub(crate) struct Completion<T> {
 
 impl<T: Clone> Completion<T> {
     pub(crate) fn new() -> Self {
-        Self { value: Mutex::new(None), ready: Condvar::new() }
+        Self {
+            value: Mutex::new(None),
+            ready: Condvar::new(),
+        }
     }
 
     pub(crate) fn set(&self, value: T) {
@@ -217,19 +220,35 @@ fn finish_streamed(mut running: StreamingChild, cancel: &AtomicBool, sink: &LogS
     match status {
         _ if cancelled => {
             sink.warn("(process cancelled)");
-            TaskExit { success: false, code: None, cancelled: true }
+            TaskExit {
+                success: false,
+                code: None,
+                cancelled: true,
+            }
         }
         Ok(status) if status.success() => {
             sink.info("(process exited successfully)");
-            TaskExit { success: true, code: status.code(), cancelled: false }
+            TaskExit {
+                success: true,
+                code: status.code(),
+                cancelled: false,
+            }
         }
         Ok(status) => {
             sink.error(format!("(process exited with {status})"));
-            TaskExit { success: false, code: status.code(), cancelled: false }
+            TaskExit {
+                success: false,
+                code: status.code(),
+                cancelled: false,
+            }
         }
         Err(err) => {
             sink.error(format!("(failed to wait on process: {err})"));
-            TaskExit { success: false, code: None, cancelled: false }
+            TaskExit {
+                success: false,
+                code: None,
+                cancelled: false,
+            }
         }
     }
 }
@@ -255,8 +274,17 @@ pub(crate) fn run_streamed(
 /// streamed line-by-line into `sink` as they arrive, from dedicated reader
 /// threads, so the UI thread is never blocked waiting on the child process.
 pub fn spawn(task: Task, sink: LogSink) -> std::io::Result<TaskHandle> {
-    let running = spawn_streaming(&task.program, &task.args, task.cwd.as_deref(), &task.envs, &sink)?;
-    let shared = Arc::new(TaskShared { cancel: AtomicBool::new(false), exit: Completion::new() });
+    let running = spawn_streaming(
+        &task.program,
+        &task.args,
+        task.cwd.as_deref(),
+        &task.envs,
+        &sink,
+    )?;
+    let shared = Arc::new(TaskShared {
+        cancel: AtomicBool::new(false),
+        exit: Completion::new(),
+    });
 
     let thread_shared = shared.clone();
     std::thread::spawn(move || {

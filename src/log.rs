@@ -44,7 +44,11 @@ struct LogSinkState {
 
 impl Default for LogSinkState {
     fn default() -> Self {
-        Self { lines: VecDeque::new(), max_lines: Some(DEFAULT_MAX_LINES), on_push: None }
+        Self {
+            lines: VecDeque::new(),
+            max_lines: Some(DEFAULT_MAX_LINES),
+            on_push: None,
+        }
     }
 }
 
@@ -86,7 +90,10 @@ impl LogSink {
     }
 
     pub fn push(&self, level: Level, text: impl Into<String>) {
-        let line = LogLine { level, text: text.into() };
+        let line = LogLine {
+            level,
+            text: text.into(),
+        };
         // Clone the callback out and call it with the lock released, in case
         // the callback itself is slow or re-enters this sink.
         let callback = self.state().on_push.clone();

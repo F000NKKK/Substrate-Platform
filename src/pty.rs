@@ -7,7 +7,7 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
-use portable_pty::{native_pty_system, CommandBuilder, MasterPty, PtySize};
+use portable_pty::{CommandBuilder, MasterPty, PtySize, native_pty_system};
 
 /// Picks a sensible default shell for the current OS.
 pub fn default_shell() -> String {
@@ -117,7 +117,17 @@ impl PtySession {
         on_output: impl FnMut(Vec<u8>) + Send + 'static,
         on_exit: impl FnOnce() + Send + 'static,
     ) -> anyhow::Result<Self> {
-        Self::spawn_with(PtyOptions { shell, cwd, ..PtyOptions::default() }, cols, rows, on_output, on_exit)
+        Self::spawn_with(
+            PtyOptions {
+                shell,
+                cwd,
+                ..PtyOptions::default()
+            },
+            cols,
+            rows,
+            on_output,
+            on_exit,
+        )
     }
 
     /// [`Self::spawn`] with the full set of [`PtyOptions`] (extra arguments

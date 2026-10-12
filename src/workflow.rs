@@ -8,13 +8,13 @@
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use serde::{Deserialize, Serialize};
 
 use crate::log::LogSink;
-use crate::task::{run_streamed, Completion};
+use crate::task::{Completion, run_streamed};
 
 /// One `workflow.toml`'s worth of named flows.
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -130,7 +130,10 @@ fn run_named(
     chain: &mut Vec<String>,
 ) -> bool {
     if chain.iter().any(|n| n == name) {
-        sink.error(format!("workflow '{name}' composes itself (chain: {} -> {name})", chain.join(" -> ")));
+        sink.error(format!(
+            "workflow '{name}' composes itself (chain: {} -> {name})",
+            chain.join(" -> ")
+        ));
         return false;
     }
     let Some(def) = file.workflow.get(name) else {
@@ -145,14 +148,22 @@ fn run_named(
             return false;
         }
         let ok = match step {
-            WorkflowStep::Run { run, args, cwd: step_cwd, env } => {
+            WorkflowStep::Run {
+                run,
+                args,
+                cwd: step_cwd,
+                env,
+            } => {
                 let program = substitute(run, vars);
                 let args: Vec<String> = args.iter().map(|a| substitute(a, vars)).collect();
                 let resolved_cwd = step_cwd
                     .as_ref()
                     .map(|c| cwd.join(substitute(c, vars)))
                     .unwrap_or_else(|| cwd.to_path_buf());
-                let envs: Vec<(String, String)> = env.iter().map(|(k, v)| (k.clone(), substitute(v, vars))).collect();
+                let envs: Vec<(String, String)> = env
+                    .iter()
+                    .map(|(k, v)| (k.clone(), substitute(v, vars)))
+                    .collect();
 
                 match run_streamed(&program, &args, Some(&resolved_cwd), &envs, sink, cancel) {
                     Ok(exit) => exit.success,
@@ -162,7 +173,9 @@ fn run_named(
                     }
                 }
             }
-            WorkflowStep::Compose { workflow } => run_named(file, workflow, vars, cwd, sink, cancel, chain),
+            WorkflowStep::Compose { workflow } => {
+                run_named(file, workflow, vars, cwd, sink, cancel, chain)
+            }
         };
         if !ok {
             chain.pop();
@@ -177,14 +190,31 @@ fn run_named(
 /// thread that runs `name`'s steps strictly in order, stopping at the first
 /// failure. `${VAR}` in any step's `run`/`args`/`cwd`/`env` is substituted
 /// from `vars` before that step runs.
-pub fn run(file: WorkflowFile, name: impl Into<String>, vars: HashMap<String, String>, cwd: impl Into<PathBuf>, sink: LogSink) -> WorkflowHandle {
+pub fn run(
+    file: WorkflowFile,
+    name: impl Into<String>,
+    vars: HashMap<String, String>,
+    cwd: impl Into<PathBuf>,
+    sink: LogSink,
+) -> WorkflowHandle {
     let name = name.into();
     let cwd = cwd.into();
-    let shared = Arc::new(WorkflowShared { cancel: AtomicBool::new(false), result: Completion::new() });
+    let shared = Arc::new(WorkflowShared {
+        cancel: AtomicBool::new(false),
+        result: Completion::new(),
+    });
     let thread_shared = shared.clone();
 
     std::thread::spawn(move || {
-        let ok = run_named(&file, &name, &vars, &cwd, &sink, &thread_shared.cancel, &mut Vec::new());
+        let ok = run_named(
+            &file,
+            &name,
+            &vars,
+            &cwd,
+            &sink,
+            &thread_shared.cancel,
+            &mut Vec::new(),
+        );
         let result = if thread_shared.cancel.load(Ordering::Acquire) {
             sink.warn(format!("workflow '{name}' cancelled"));
             WorkflowResult::Cancelled

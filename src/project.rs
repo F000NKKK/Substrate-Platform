@@ -86,7 +86,11 @@ impl Solution {
             projects: file
                 .projects
                 .into_iter()
-                .map(|p| Project { name: p.name, root: base.join(&p.path), kind: p.kind })
+                .map(|p| Project {
+                    name: p.name,
+                    root: base.join(&p.path),
+                    kind: p.kind,
+                })
                 .collect(),
         })
     }
@@ -96,7 +100,9 @@ impl Solution {
     /// not required for a solution to load back correctly.
     pub fn save(&self, path: &Path) -> anyhow::Result<()> {
         let file = SolutionFile {
-            solution: SolutionFileMeta { name: self.name.clone() },
+            solution: SolutionFileMeta {
+                name: self.name.clone(),
+            },
             projects: self
                 .projects
                 .iter()

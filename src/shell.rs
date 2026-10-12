@@ -24,9 +24,12 @@ pub struct ShellInfo {
 }
 
 fn exists_in_path(name: &str) -> bool {
-    let Some(path) = std::env::var_os("PATH") else { return false };
+    let Some(path) = std::env::var_os("PATH") else {
+        return false;
+    };
     std::env::split_paths(&path).any(|dir| {
-        dir.join(name).is_file() || (cfg!(target_os = "windows") && dir.join(format!("{name}.exe")).is_file())
+        dir.join(name).is_file()
+            || (cfg!(target_os = "windows") && dir.join(format!("{name}.exe")).is_file())
     })
 }
 
@@ -48,9 +51,18 @@ fn clear_command_for(id: &str) -> &'static str {
 /// just because they're common.
 pub fn detect_shells() -> Vec<ShellInfo> {
     let candidates: &[(&str, &str)] = if cfg!(target_os = "windows") {
-        &[("pwsh", "PowerShell"), ("powershell", "Windows PowerShell"), ("cmd", "Command Prompt")]
+        &[
+            ("pwsh", "PowerShell"),
+            ("powershell", "Windows PowerShell"),
+            ("cmd", "Command Prompt"),
+        ]
     } else {
-        &[("bash", "Bash"), ("zsh", "Zsh"), ("fish", "Fish"), ("pwsh", "PowerShell")]
+        &[
+            ("bash", "Bash"),
+            ("zsh", "Zsh"),
+            ("fish", "Fish"),
+            ("pwsh", "PowerShell"),
+        ]
     };
 
     candidates

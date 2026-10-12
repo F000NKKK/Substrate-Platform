@@ -33,7 +33,11 @@ pub fn list_dir(path: &Path) -> io::Result<Vec<DirEntryInfo>> {
     for entry in std::fs::read_dir(path)? {
         let entry = entry?;
         let file_type = entry.file_type()?;
-        let kind = if file_type.is_dir() { EntryKind::Dir } else { EntryKind::File };
+        let kind = if file_type.is_dir() {
+            EntryKind::Dir
+        } else {
+            EntryKind::File
+        };
         entries.push(DirEntryInfo {
             name: entry.file_name().to_string_lossy().into_owned(),
             path: entry.path(),

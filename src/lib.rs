@@ -23,6 +23,8 @@ pub use dir::{DirEntryInfo, EntryKind};
 pub use log::{Level, LogLine, LogSink};
 pub use project::{Project, ProjectStandard, Solution};
 pub use pty::{PtyOptions, PtySession, Utf8Chunker};
-pub use shell::{detect_shells, ShellInfo};
-pub use task::{spawn as spawn_task, Task, TaskExit, TaskHandle};
-pub use workflow::{run as run_workflow, WorkflowDef, WorkflowFile, WorkflowHandle, WorkflowResult, WorkflowStep};
+pub use shell::{ShellInfo, detect_shells};
+pub use task::{Task, TaskExit, TaskHandle, spawn as spawn_task};
+pub use workflow::{
+    WorkflowDef, WorkflowFile, WorkflowHandle, WorkflowResult, WorkflowStep, run as run_workflow,
+};
