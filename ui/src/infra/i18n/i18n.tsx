@@ -38,16 +38,20 @@ export type Messages = Record<string, string | PluralForms>;
 const catalogs = new Map<string, Map<string, string | PluralForms>>();
 const locales = new Map<string, LocaleInfo>([[SOURCE_LOCALE.id, SOURCE_LOCALE]]);
 const subscribers = new Set<() => void>();
-let current = initialLocale();
+let explicit = storedLocale();
+let current = explicit ?? systemLocale();
 
-function initialLocale(): string {
+function storedLocale(): string | null {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return stored;
+    return localStorage.getItem(STORAGE_KEY) || null;
   } catch {
     // storage unavailable — fall back to the system language
+    return null;
   }
-  return typeof navigator !== "undefined" ? navigator.language : SOURCE_LOCALE.id;
+}
+
+function systemLocale(): string {
+  return typeof navigator !== "undefined" && navigator.language ? navigator.language : SOURCE_LOCALE.id;
 }
 
 function notify() {
@@ -56,8 +60,11 @@ function notify() {
 
 if (typeof window !== "undefined") {
   window.addEventListener("storage", (e) => {
-    if (e.key === STORAGE_KEY && e.newValue && e.newValue !== current) {
-      current = e.newValue;
+    if (e.key !== STORAGE_KEY) return;
+    explicit = e.newValue || null;
+    const next = explicit ?? systemLocale();
+    if (next !== current) {
+      current = next;
       notify();
     }
   });
@@ -98,15 +105,25 @@ export function resolvedLocale(): string {
   return locales.has(language) ? language : SOURCE_LOCALE.id;
 }
 
-/** Switches the UI language everywhere (every window) and remembers it. */
-export function setLocale(locale: string): void {
-  current = locale;
+/**
+ * Switches the UI language everywhere (every window) and remembers it;
+ * `null` forgets the choice and follows the system language again.
+ */
+export function setLocale(locale: string | null): void {
+  explicit = locale;
+  current = locale ?? systemLocale();
   try {
-    localStorage.setItem(STORAGE_KEY, locale);
+    if (locale) localStorage.setItem(STORAGE_KEY, locale);
+    else localStorage.removeItem(STORAGE_KEY);
   } catch {
     // storage unavailable — the choice just won't persist
   }
   notify();
+}
+
+/** Whether the UI language follows the system's (nothing chosen with `setLocale`). */
+export function localeFollowsSystem(): boolean {
+  return explicit === null;
 }
 
 function fill(text: string, params?: Record<string, string | number>): string {

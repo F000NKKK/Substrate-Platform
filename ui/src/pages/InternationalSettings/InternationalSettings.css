@@ -1,0 +1,31 @@
+.sp-international-settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-sm);
+  max-width: 420px;
+}
+
+/* Same look as the Appearance page's profile picker. */
+.sp-international-settings-select {
+  height: 28px;
+  box-sizing: border-box;
+  padding: 0 var(--sp-space-sm);
+  border: none;
+  border-radius: var(--sp-radius-sm);
+  background: transparent;
+  color: var(--sp-text-muted);
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.sp-international-settings-select:hover {
+  background: var(--sp-surface-2);
+  color: var(--sp-text);
+}
+
+.sp-international-settings-hint {
+  color: var(--sp-text-muted);
+  font-size: 0.85em;
+}
