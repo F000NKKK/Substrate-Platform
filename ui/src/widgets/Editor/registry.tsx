@@ -39,6 +39,7 @@ const extensionEditors: Record<string, EditorComponent> = {
   webp: ImageEditor,
   bmp: ImageEditor,
   ico: ImageEditor,
+  svg: ImageEditor,
 };
 
 /** Editors that render something other than text and ignore `EditorProps.content` — see `isBinaryFile`. */
