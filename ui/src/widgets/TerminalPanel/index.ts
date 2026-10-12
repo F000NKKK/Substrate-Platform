@@ -1,2 +1,2 @@
-export { TerminalPanel } from "./TerminalPanel";
+export { TerminalPanel, openTerminalIn } from "./TerminalPanel";
 export type { TerminalPanelProps } from "./TerminalPanel";

@@ -43,7 +43,7 @@ export type { OutputPanelProps, OutputLineLevel } from "./OutputPanel";
 export { defaultLineLevel, clearOutputBuffer, getOutputBuffer, startOutputBuffer } from "./OutputPanel";
 export { StatusBar } from "./StatusBar";
 export type { StatusBarProps } from "./StatusBar";
-export { TerminalPanel } from "./TerminalPanel";
+export { TerminalPanel, openTerminalIn } from "./TerminalPanel";
 export type { TerminalPanelProps } from "./TerminalPanel";
 export { DialogHost, showDialog, confirmDialog, promptDialog, messageDialog } from "./Dialog";
 export type { DialogButton, DialogInput, DialogOptions, DialogResult } from "./Dialog";

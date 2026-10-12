@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { invoke } from "@tauri-apps/api/core";
@@ -22,7 +22,7 @@ export interface TerminalShellKind {
 }
 
 export interface TerminalPanelProps {
-  /** Names of the Tauri commands backing each terminal — defaults match substrate-platform's own pty module. `spawn`/`write`/`resize`/`kill` all take a string `id` addressing one session. */
+  /** Names of the Tauri commands backing each terminal — defaults match substrate-platform's own pty module. `spawn`/`write`/`resize`/`kill` all take a string `id` addressing one session; `spawn` also gets `shell` and, for "Open in Terminal" (`openTerminalIn`), `cwd`. */
   commands?: { spawn: string; write: string; resize: string; kill: string };
   /** Tauri event carrying `{ id, data }` PTY output chunks. */
   outputEvent?: string;
@@ -72,6 +72,8 @@ interface TerminalTab {
   customLabel?: string;
   /** Terminals sharing a groupId render side by side as split panes in the main view — a plain "new terminal" starts its own group (equal to its own id); "Split Terminal" joins the active tab's group instead. */
   groupId: string;
+  /** The folder it was opened in ("Open in Terminal"); unset, the backend picks (the project root). Not persisted. */
+  cwd?: string;
 }
 
 /** What's remembered of each terminal across restarts (under `TERMINAL_STATE_KEY` in the current `StateStore`) — its shell kind, label and split grouping, never its contents: a restored terminal is a fresh shell session. */
@@ -82,6 +84,27 @@ interface PersistedTerminals {
 }
 
 const TERMINAL_STATE_KEY = "terminal.tabs";
+
+// "Open in Terminal" requests — module-level, so a file explorer can ask
+// before the panel is even shown; the panel opens each once it's ready.
+let pendingCwds: string[] = [];
+const cwdSubscribers = new Set<() => void>();
+
+/** Opens a new terminal (of the first shell kind) in `cwd` — the product shows the Terminal panel itself. */
+export function openTerminalIn(cwd: string): void {
+  pendingCwds = [...pendingCwds, cwd];
+  cwdSubscribers.forEach((notify) => notify());
+}
+
+function usePendingCwds(): string[] {
+  return useSyncExternalStore(
+    (notify) => {
+      cwdSubscribers.add(notify);
+      return () => cwdSubscribers.delete(notify);
+    },
+    () => pendingCwds
+  );
+}
 
 function isPersistedTerminals(value: unknown): value is PersistedTerminals {
   const v = value as PersistedTerminals;
@@ -158,14 +181,14 @@ export function TerminalPanel({
   }, [shellsProp, listShellsCommand]);
 
   /** `groupId` omitted starts a new split group of its own; passed, the new terminal joins that group as an additional side-by-side pane. */
-  function addTerminal(kind: TerminalShellKind, groupId?: string) {
+  function addTerminal(kind: TerminalShellKind, groupId?: string, cwd?: string) {
     setTabs((prev) => {
       const used = new Set(prev.filter((t) => t.shellId === kind.id).map((t) => t.n));
       let n = 1;
       while (used.has(n)) n++;
       const id = `term-${kind.id}-${n}-${Date.now()}`;
       setActiveId(id);
-      return [...prev, { id, shellId: kind.id, n, groupId: groupId ?? id }];
+      return [...prev, { id, shellId: kind.id, n, groupId: groupId ?? id, cwd }];
     });
   }
 
@@ -212,10 +235,18 @@ export function TerminalPanel({
       const groupIds = known.map((t, i) => ids[known.findIndex((o) => o.group === t.group)] ?? ids[i]);
       setTabs(known.map((t, i) => ({ id: ids[i], shellId: t.shellId, n: t.n, customLabel: t.customLabel, groupId: groupIds[i] })));
       setActiveId(ids[Math.min((saved as PersistedTerminals).active, ids.length - 1)] ?? null);
-    } else if (tabs.length === 0 && shells[0]) addTerminal(shells[0]);
+    } else if (tabs.length === 0 && shells[0] && pendingCwds.length === 0) addTerminal(shells[0]);
     setRestoredScope(store.scope);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shells, store]);
+
+  const cwds = usePendingCwds();
+  useEffect(() => {
+    if (!shells?.[0] || restoredScope !== store.scope || cwds.length === 0) return;
+    pendingCwds = [];
+    for (const cwd of cwds) addTerminal(shells[0], undefined, cwd);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cwds, shells, restoredScope, store]);
 
   useEffect(() => {
     if (restoredScope === store.scope) store.set(TERMINAL_STATE_KEY, toPersisted(tabs, activeId));
@@ -281,6 +312,7 @@ export function TerminalPanel({
                       <TerminalInstance
                         id={t.id}
                         shell={kind?.shell}
+                        cwd={t.cwd}
                         clearCommand={kind?.clearCommand ?? defaultClearCommand(t.shellId)}
                         active={groupId === activeGroupId}
                         focused={t.id === activeId}
@@ -358,6 +390,7 @@ export function TerminalPanel({
 interface TerminalInstanceProps {
   id: string;
   shell?: string;
+  cwd?: string;
   clearCommand: string;
   /** This pane's split group is the one currently shown (drives `fit()` — xterm can't measure while hidden). Several panes can be `active` at once (every pane in a shown group); at most one is `focused`. */
   active: boolean;
@@ -371,7 +404,7 @@ interface TerminalInstanceProps {
   onReady: (clear: (() => void) | null) => void;
 }
 
-function TerminalInstance({ id, shell, clearCommand, active, focused, commands, outputEvent, exitEvent, onExit, onReady }: TerminalInstanceProps) {
+function TerminalInstance({ id, shell, cwd, clearCommand, active, focused, commands, outputEvent, exitEvent, onExit, onReady }: TerminalInstanceProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const fitRef = useRef<(() => void) | null>(null);
   const termRef = useRef<XTerm | null>(null);
@@ -470,7 +503,7 @@ function TerminalInstance({ id, shell, clearCommand, active, focused, commands, 
       if (!disposed && event.payload.id === id) onExitRef.current();
     });
 
-    invoke(commands.spawn, { id, cols: term.cols, rows: term.rows, shell })
+    invoke(commands.spawn, { id, cols: term.cols, rows: term.rows, shell, cwd })
       .then(scheduleClear)
       .catch((err) => term.writeln(`\r\n[failed to start shell: ${err}]`));
 
