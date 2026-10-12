@@ -1,7 +1,8 @@
-import { redo, redoDepth, toggleComment, undo, undoDepth } from "@codemirror/commands";
+import { redo, redoDepth, undo, undoDepth } from "@codemirror/commands";
 import { openSearchPanel } from "@codemirror/search";
 import { EditorSelection } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
+import { toggleLineComments } from "./lineComments";
 
 // Plain functions over a live `EditorView` (see `useEditorView`) — what a
 // host's Edit menu/toolbar binds to. Every action refocuses the editor
@@ -31,7 +32,7 @@ export function editorCanToggleComment(view: EditorView): boolean {
 }
 
 export function editorToggleComment(view: EditorView): void {
-  toggleComment(view);
+  toggleLineComments(view);
   view.focus();
 }
 
