@@ -84,3 +84,43 @@
   overflow: hidden;
   min-height: 0;
 }
+
+.sp-tree[data-dragging] .sp-tree-row:hover {
+  background: none;
+}
+
+.sp-tree-row[data-drop-target] {
+  background: var(--sp-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--sp-accent);
+}
+
+.sp-tree-drag-ghost {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 260px;
+  padding: 2px 8px;
+  overflow: hidden;
+  color: var(--sp-text);
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  background: var(--sp-surface-2);
+  border: 1px solid var(--sp-border-strong, var(--sp-border));
+  border-radius: var(--sp-radius-xs);
+  box-shadow: var(--sp-shadow-md, 0 4px 12px hsl(0 0% 0% / 0.4));
+  opacity: 0.92;
+}
+
+.sp-tree-drag-ghost[data-invalid] {
+  opacity: 0.6;
+}
+
+.sp-tree-drag-copy {
+  color: var(--sp-accent);
+  font-weight: 700;
+}

@@ -1,5 +1,5 @@
 import { useState, type DragEventHandler } from "react";
-import { readPanelDrag } from "../dnd";
+import { isPanelDrag, readPanelDrag } from "../dnd";
 
 export interface DropTargetHandlers {
   onDragEnter: DragEventHandler;
@@ -17,7 +17,8 @@ export interface DropTarget {
  * The one implementation of "this element accepts a dropped panel" — every
  * drop zone (dock strips, the center dock's tab bar and body) wires through
  * this instead of each re-declaring the same preventDefault/dragOver-state/
- * readPanelDrag boilerplate.
+ * readPanelDrag boilerplate. Drags that aren't panels are left alone, so
+ * they reach whatever inside actually accepts them.
  */
 export function useDropTarget(onDropPanel: (panelId: string) => void): DropTarget {
   const [dragOver, setDragOver] = useState(false);
@@ -26,19 +27,22 @@ export function useDropTarget(onDropPanel: (panelId: string) => void): DropTarge
     dragOver,
     handlers: {
       onDragEnter: (e) => {
+        if (!isPanelDrag(e)) return;
         e.preventDefault();
         setDragOver(true);
       },
       onDragOver: (e) => {
+        if (!isPanelDrag(e)) return;
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
       },
       onDragLeave: () => setDragOver(false),
       onDrop: (e) => {
-        e.preventDefault();
         setDragOver(false);
         const id = readPanelDrag(e);
-        if (id) onDropPanel(id);
+        if (!id) return;
+        e.preventDefault();
+        onDropPanel(id);
       },
     },
   };

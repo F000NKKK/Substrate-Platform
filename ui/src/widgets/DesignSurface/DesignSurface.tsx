@@ -394,8 +394,10 @@ export function DesignSurface({
   }
 
   function onDragOver(e: DragEvent) {
-    if (!externalDrop || !e.dataTransfer.types.includes(externalDrop.mime)) return;
+    if (!externalDrop || !Array.from(e.dataTransfer.types).includes(externalDrop.mime)) return;
+    // Claim it, so drop targets around the surface (a dock) don't react too.
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = "copy";
     setTarget(containerAt(pointOf(e), []));
   }
@@ -406,6 +408,7 @@ export function DesignSurface({
     setTarget(null);
     if (!data) return;
     e.preventDefault();
+    e.stopPropagation();
     const p = pointOf(e);
     externalDrop.onDrop(data, { x: Math.round(p.x), y: Math.round(p.y) }, containerAt(p, []));
     pageRef.current?.parentElement?.focus();
@@ -444,6 +447,7 @@ export function DesignSurface({
       onPointerCancel={() => endDrag(false)}
       onPointerLeave={() => setHover(null)}
       onKeyDown={onKeyDown}
+      onDragEnter={onDragOver}
       onDragOver={onDragOver}
       onDragLeave={() => setTarget(null)}
       onDrop={onDrop}

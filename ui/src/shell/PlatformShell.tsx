@@ -4,7 +4,7 @@ import { ToolWindowDock } from "../dock/ToolWindowDock/ToolWindowDock";
 import { CenterDock } from "../dock/CenterDock/CenterDock";
 import { FloatingPanel } from "../dock/FloatingPanel/FloatingPanel";
 import { useShellLayout } from "../dock/hooks/useShellLayout";
-import { readPanelDrag, zoneFromPoint, type DropZone } from "../dock/dnd";
+import { isPanelDrag, readPanelDrag, zoneFromPoint, type DropZone } from "../dock/dnd";
 import { DialogHost } from "../widgets/Dialog";
 import { NotificationHost } from "../widgets/Notifications";
 import { ShellContext, type ShellController } from "./ShellContext";
@@ -75,6 +75,8 @@ export function PlatformShell({
   };
 
   function handleMainDragOver(e: DragEvent) {
+    // Only panel drags redock; anything else (a toolbox item over a designer) is the content's business.
+    if (!isPanelDrag(e)) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
     setDropZone(zoneFromPoint(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect()));
@@ -85,10 +87,10 @@ export function PlatformShell({
   }
 
   function handleMainDrop(e: DragEvent) {
-    e.preventDefault();
     const id = readPanelDrag(e);
     setDropZone(null);
     if (!id) return;
+    e.preventDefault();
     const zone = zoneFromPoint(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect());
     layout.dockTo(id, zone === "center" ? "center" : zone);
   }

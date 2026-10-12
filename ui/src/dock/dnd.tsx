@@ -18,6 +18,16 @@ export function endPanelDrag(e: DragEvent): void {
   (e.currentTarget as HTMLElement).style.opacity = "";
 }
 
+/**
+ * Whether a drag in progress carries a panel — the only drags the dock reacts
+ * to. Only the types are readable before the drop, so this is what
+ * dragenter/dragover check; anything else (a toolbox item headed for a
+ * designer, files from the OS) passes through untouched.
+ */
+export function isPanelDrag(e: DragEvent): boolean {
+  return Array.from(e.dataTransfer.types).includes(PANEL_DRAG_MIME);
+}
+
 export function readPanelDrag(e: DragEvent): string | null {
   const id = e.dataTransfer.getData(PANEL_DRAG_MIME);
   return id || null;

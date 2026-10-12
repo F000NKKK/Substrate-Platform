@@ -42,6 +42,10 @@ export interface FileTreeProps {
   onSelectionChange?: (ids: Set<string>) => void;
   onActivate?: (node: FileTreeNode) => void;
   getMenuItems?: (node: FileTreeNode) => FileTreeMenuItem[];
+  /** Files/folders (by id) dragged onto `folder` — moved, or copied with Ctrl. Omit to disable drag and drop. */
+  onDropNodes?: (ids: string[], folder: FileTreeNode, copy: boolean) => void;
+  /** Whether a node can be dragged (default: every one). */
+  canDrag?: (node: FileTreeNode) => boolean;
   className?: string;
 }
 
@@ -55,7 +59,7 @@ function toTreeNodes(nodes: FileTreeNode[]): TreeNode<FileTreeNode>[] {
 }
 
 /** `Tree` configured for a file explorer: folder/file (open/closed) icons on top of its generic expand/collapse, selection, and context-menu behavior. */
-export function FileTree({ nodes, onActivate, getMenuItems, ...rest }: FileTreeProps) {
+export function FileTree({ nodes, onActivate, getMenuItems, onDropNodes, canDrag, ...rest }: FileTreeProps) {
   const treeNodes = useMemo(() => toTreeNodes(nodes), [nodes]);
 
   return (
@@ -69,6 +73,8 @@ export function FileTree({ nodes, onActivate, getMenuItems, ...rest }: FileTreeP
         getMenuItems &&
         ((node: TreeNode<FileTreeNode>) => toTreeMenuItems(getMenuItems(node.data)))
       }
+      onDropNodes={onDropNodes && ((ids, target, copy) => onDropNodes(ids, target.data, copy))}
+      canDrag={canDrag && ((node) => canDrag(node.data))}
       {...rest}
     />
   );
