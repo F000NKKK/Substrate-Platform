@@ -48,6 +48,16 @@
   --sp-warning: #d7ba7d;
   --sp-danger: #f48771;
 
+  /* symbol kinds — Code Search / outline icons, Visual Studio's hues */
+  --sp-symbol-type: #ee9d28;
+  --sp-symbol-interface: #75beff;
+  --sp-symbol-function: #b180d7;
+  --sp-symbol-field: #75beff;
+  --sp-symbol-constant: #9cdcfe;
+  --sp-symbol-module: #c5c5c5;
+  /* a search hit inside result text */
+  --sp-match-bg: color-mix(in srgb, var(--sp-warning) 30%, transparent);
+
   /* elevation */
   --sp-shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.35);
   --sp-shadow-md: 0 8px 24px hsl(0 0% 0% / 0.45);

@@ -35,3 +35,4 @@ export { IconInfo } from "./IconInfo";
 export { IconPreview } from "./IconPreview";
 export { IconPreviewSide } from "./IconPreviewSide";
 export { IconCode } from "./IconCode";
+export { IconSearch } from "./IconSearch";

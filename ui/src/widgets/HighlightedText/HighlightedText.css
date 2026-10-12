@@ -1,0 +1,10 @@
+.sp-hl {
+  white-space: pre;
+}
+
+.sp-hl-match {
+  background: var(--sp-match-bg);
+  color: inherit;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--sp-warning) 35%, transparent);
+}

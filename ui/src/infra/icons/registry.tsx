@@ -43,6 +43,7 @@ const defaultIcons: Record<string, IconComponent> = {
   preview: glyphs.IconPreview,
   previewSide: glyphs.IconPreviewSide,
   code: glyphs.IconCode,
+  search: glyphs.IconSearch,
 };
 
 const globalOverrides: Record<string, IconComponent> = {};

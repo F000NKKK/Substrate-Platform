@@ -1,0 +1,28 @@
+.sp-symbol-icon {
+  flex: 0 0 auto;
+  color: var(--sp-text-muted);
+}
+
+.sp-symbol-icon[data-family="type"] {
+  color: var(--sp-symbol-type);
+}
+
+.sp-symbol-icon[data-family="interface"] {
+  color: var(--sp-symbol-interface);
+}
+
+.sp-symbol-icon[data-family="function"] {
+  color: var(--sp-symbol-function);
+}
+
+.sp-symbol-icon[data-family="field"] {
+  color: var(--sp-symbol-field);
+}
+
+.sp-symbol-icon[data-family="constant"] {
+  color: var(--sp-symbol-constant);
+}
+
+.sp-symbol-icon[data-family="module"] {
+  color: var(--sp-symbol-module);
+}

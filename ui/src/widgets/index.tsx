@@ -49,3 +49,15 @@ export { DialogHost, showDialog, confirmDialog, promptDialog, messageDialog } fr
 export type { DialogButton, DialogInput, DialogOptions, DialogResult } from "./Dialog";
 export { NotificationHost, notify } from "./Notifications";
 export type { NotificationLevel, NotificationOptions } from "./Notifications";
+export { HighlightedText, positionsToRanges } from "./HighlightedText";
+export type { HighlightedTextProps } from "./HighlightedText";
+export { SymbolIcon } from "./SymbolIcon";
+export type { SymbolIconProps, SymbolKind } from "./SymbolIcon";
+export { FloatingWindow } from "./FloatingWindow";
+export type { FloatingWindowProps } from "./FloatingWindow";
+export { SearchField } from "./SearchField";
+export type { SearchFieldProps, SearchOptions } from "./SearchField";
+export { QuickPick } from "./QuickPick";
+export type { QuickPickProps, QuickPickItem, QuickPickFilter } from "./QuickPick";
+export { SearchResults } from "./SearchResults";
+export type { SearchResultsProps, SearchResultGroup, SearchResultHit } from "./SearchResults";
