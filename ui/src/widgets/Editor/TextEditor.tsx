@@ -13,6 +13,7 @@ import { quickFind } from "./findWidget";
 import { editorPhrases } from "./editorPhrases";
 import { notifyEditorUpdate, registerEditorView } from "./editorRegistry";
 import { resolveEditorTheme } from "./editorThemes";
+import { changeGutter } from "./changeGutter";
 import "./TextEditor.css";
 
 export interface TextEditorProps extends EditorProps {
@@ -89,6 +90,7 @@ export function TextEditor({
       basicSetup,
       editorKeymap,
       quickFind,
+      changeGutter,
       compartments.theme.of(resolveEditorTheme(editorColors)),
       compartments.preferences.of(preferencesExtension(editorPreferences)),
       compartments.phrases.of(editorPhrases()),

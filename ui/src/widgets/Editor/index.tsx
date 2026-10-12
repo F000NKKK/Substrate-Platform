@@ -17,7 +17,9 @@ export {
   PropertiesTextEditor,
   GroovyEditor,
   PythonEditor,
+  languageForPath,
 } from "./languageEditors";
+export { changeGutter, setChangeBaseline } from "./changeGutter";
 export { ImageEditor } from "./ImageEditor";
 export type { ImageEditorProps } from "./ImageEditor";
 export { PropertiesGridEditor } from "./PropertiesGridEditor";

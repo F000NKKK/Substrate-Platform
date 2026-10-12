@@ -10,6 +10,7 @@ import { shell } from "@codemirror/legacy-modes/mode/shell";
 import { properties } from "@codemirror/legacy-modes/mode/properties";
 import { groovy } from "@codemirror/legacy-modes/mode/groovy";
 import { python } from "@codemirror/legacy-modes/mode/python";
+import type { Extension } from "@codemirror/state";
 import { CodeEditor, type CodeEditorProps } from "./CodeEditor";
 import { TextEditor, type TextEditorProps } from "./TextEditor";
 
@@ -89,4 +90,30 @@ export function GroovyEditor(props: CodeEditorProps) {
 
 export function PythonEditor(props: CodeEditorProps) {
   return <CodeEditor {...props} language={pythonLanguage} />;
+}
+
+const LANGUAGES_BY_EXTENSION: Record<string, Extension> = {
+  json: jsonLanguage,
+  rs: rustLanguage,
+  xml: xmlLanguage,
+  svg: xmlLanguage,
+  java: javaLanguage,
+  md: markdownLanguage,
+  markdown: markdownLanguage,
+  toml: tomlLanguage,
+  yml: yamlLanguage,
+  yaml: yamlLanguage,
+  sh: shellLanguage,
+  bash: shellLanguage,
+  properties: propertiesLanguage,
+  gradle: groovyLanguage,
+  groovy: groovyLanguage,
+  py: pythonLanguage,
+};
+
+/** The syntax highlighting the language editors use for `path`'s kind of file — for a CodeMirror view outside them (a diff). `undefined` for plain text. */
+export function languageForPath(path: string): Extension | undefined {
+  const name = path.split(/[/\\]/).pop() ?? "";
+  const ext = name.includes(".") ? name.split(".").pop()!.toLowerCase() : "";
+  return LANGUAGES_BY_EXTENSION[ext];
 }
