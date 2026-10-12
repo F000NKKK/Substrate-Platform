@@ -2,6 +2,7 @@
 name = "substrate-platform"
 version = "0.2.0"
 edition = "2024"
+rust-version = "1.99"
 authors = ["F000NK"]
 description = "Brand-neutral IDE platform core (task/workflow runner, log sink, PTY sessions, directory + project/solution engines) — the shared backend foundation for future IDE-style tools."
 license = "AGPL-3.0-only"
