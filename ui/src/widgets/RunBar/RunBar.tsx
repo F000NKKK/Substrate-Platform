@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { IconButton } from "../IconButton";
 import { Icon } from "../../infra/icons";
 import { ContextMenu, useContextMenu } from "../ContextMenu";
+import { useStoredState } from "../../infra/state";
 import "./RunBar.css";
 
 export interface RunTarget {
@@ -43,24 +44,24 @@ export interface RunBarProps {
  * Owns its own state/behavior entirely separately from `Toolbar`; meant to
  * be composed into one via its `leading` slot rather than merged into it,
  * mirroring VS's startup-item selector + Start button sitting in the same
- * toolbar row as its other actions.
+ * toolbar row as its other actions. The chosen target is remembered in the
+ * current `StateStore` (`"run.target"`).
  */
 export function RunBar({ targets, running, onRun, emptyLabel = "No targets", modes, selectedMode, onModeChange }: RunBarProps) {
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useStoredState<string | null>("run.target", null, (v) => typeof v === "string");
   const menu = useContextMenu<void>();
   const modeMenu = useContextMenu<void>();
 
   useEffect(() => {
-    if (targets.length === 0) {
-      setSelected(null);
-      return;
-    }
+    // No targets (yet — they're often still loading) isn't a reason to
+    // forget the remembered choice.
+    if (targets.length === 0) return;
     if (selected && targets.some((t) => t.name === selected)) return;
     // Prefer a "run"-named target as the default, the same way VS defaults
     // its Start button to the solution's startup project.
     const preferred = targets.find((t) => t.name.toLowerCase().includes("run")) ?? targets[0];
     setSelected(preferred.name);
-  }, [targets, selected]);
+  }, [targets, selected, setSelected]);
 
   const selectedTarget = targets.find((t) => t.name === selected);
   const selectedModeEntry = modes?.find((m) => m.name === selectedMode);
@@ -70,9 +71,9 @@ export function RunBar({ targets, running, onRun, emptyLabel = "No targets", mod
       <IconButton
         size={26}
         title={selectedTarget ? `Run: ${selectedTarget.name}` : "Select a target first"}
-        disabled={!selected || running}
+        disabled={!selectedTarget || running}
         className="sp-run-bar-play"
-        onClick={() => selected && onRun(selected)}
+        onClick={() => selectedTarget && onRun(selectedTarget.name)}
       >
         <Icon name="play" size={15} />
       </IconButton>
