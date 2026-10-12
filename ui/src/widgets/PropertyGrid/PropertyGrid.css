@@ -1,0 +1,264 @@
+.sp-propgrid {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+  color: var(--sp-text);
+}
+
+/* Object selector line — "main.rs  File Properties". */
+
+.sp-propgrid-object {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-space-sm);
+  flex: 0 0 auto;
+  min-height: 24px;
+  padding: var(--sp-space-xs) var(--sp-space-sm);
+  border-bottom: 1px solid var(--sp-border);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sp-propgrid-object-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sp-propgrid-object-type {
+  flex: 0 0 auto;
+  color: var(--sp-text-muted);
+}
+
+/* Toolbar */
+
+.sp-propgrid-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+  padding: var(--sp-space-xs);
+  border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-propgrid-toolbar .sp-icon-btn[data-active] {
+  background: var(--sp-accent-soft);
+  color: var(--sp-text);
+}
+
+.sp-propgrid-toolbar-separator {
+  flex: 0 0 auto;
+  width: 1px;
+  height: 16px;
+  margin: 0 var(--sp-space-xs);
+  background: var(--sp-border-strong);
+}
+
+.sp-propgrid-search.sp-textfield {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  height: 22px;
+  margin-right: 2px;
+  padding: 0 var(--sp-space-sm);
+}
+
+/* Grid */
+
+.sp-propgrid-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sp-propgrid-empty {
+  padding: var(--sp-space-sm);
+  color: var(--sp-text-muted);
+}
+
+.sp-propgrid-rows {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  outline: none;
+  user-select: none;
+}
+
+.sp-propgrid-category {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-xs);
+  height: 22px;
+  padding: 0 var(--sp-space-xs);
+  background: var(--sp-surface-2);
+  font-weight: 600;
+  cursor: default;
+}
+
+.sp-propgrid-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  color: var(--sp-text-faint);
+  transform: rotate(0deg);
+  transition: transform var(--sp-duration-base) var(--sp-easing);
+}
+
+.sp-propgrid-chevron[data-expanded] {
+  transform: rotate(90deg);
+}
+
+.sp-propgrid-row {
+  display: flex;
+  height: 22px;
+  border-bottom: 1px solid var(--sp-border);
+  cursor: default;
+}
+
+.sp-propgrid-name {
+  position: relative;
+  flex: 0 0 var(--sp-propgrid-split);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0 var(--sp-space-sm);
+  border-right: 1px solid var(--sp-border);
+}
+
+/* Categorized: a left margin under the category chevrons, as in Visual Studio. */
+.sp-propgrid-rows[data-mode="categorized"] .sp-propgrid-name {
+  padding-left: 22px;
+}
+
+.sp-propgrid-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sp-propgrid-splitter {
+  position: absolute;
+  top: 0;
+  bottom: -1px;
+  right: -3px;
+  width: 6px;
+  z-index: 1;
+  cursor: col-resize;
+}
+
+.sp-propgrid-value {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.sp-propgrid-value-text {
+  padding: 0 var(--sp-space-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: text;
+}
+
+.sp-propgrid-row[data-readonly] .sp-propgrid-value-text {
+  color: var(--sp-text-muted);
+}
+
+.sp-propgrid-category[data-selected],
+.sp-propgrid-row[data-selected] .sp-propgrid-name {
+  background: var(--sp-accent-soft);
+}
+
+.sp-propgrid-rows:focus-visible .sp-propgrid-category[data-selected],
+.sp-propgrid-rows:focus-visible .sp-propgrid-row[data-selected] .sp-propgrid-name {
+  box-shadow: inset 0 0 0 1px var(--sp-accent);
+}
+
+.sp-propgrid-editor {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+  color: var(--sp-text);
+  background: var(--sp-surface-2);
+  border: 1px solid var(--sp-accent);
+  border-radius: 0;
+  padding: 0 calc(var(--sp-space-sm) - 1px);
+  outline: none;
+}
+
+.sp-propgrid-editor[data-invalid] {
+  border-color: var(--sp-danger);
+}
+
+/* Booleans and enums are always-live native dropdowns, flat until hovered
+   or focused so a column of them still reads as plain values. */
+.sp-propgrid-select {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0 var(--sp-space-xs);
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--sp-text);
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+  outline: none;
+  cursor: pointer;
+}
+
+.sp-propgrid-select:hover {
+  background: var(--sp-surface-2);
+}
+
+.sp-propgrid-select:focus {
+  border-color: var(--sp-accent);
+  background: var(--sp-surface-2);
+}
+
+.sp-propgrid-error {
+  padding: 2px var(--sp-space-sm) 3px 22px;
+  color: var(--sp-danger);
+  font-size: 12px;
+  border-bottom: 1px solid var(--sp-border);
+  user-select: text;
+}
+
+/* Description pane */
+
+.sp-propgrid-description-sizer {
+  flex: 0 0 auto;
+  height: 5px;
+  border-top: 1px solid var(--sp-border-strong);
+  cursor: row-resize;
+}
+
+.sp-propgrid-description {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  padding: 0 var(--sp-space-sm) var(--sp-space-xs);
+  overflow-y: auto;
+}
+
+.sp-propgrid-description-name {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.sp-propgrid-description-text {
+  color: var(--sp-text-muted);
+  line-height: 1.35;
+  user-select: text;
+}
