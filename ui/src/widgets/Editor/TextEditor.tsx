@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, type CSSProperties, type RefObject } from "react";
 import { Annotation, Compartment, EditorSelection, EditorState, type Extension } from "@codemirror/state";
 import { indentUnit } from "@codemirror/language";
+import { getSearchQuery, SearchQuery, setSearchQuery } from "@codemirror/search";
 import { basicSetup, EditorView } from "codemirror";
 import { useTheme, type EditorPreferences } from "../../infra/theme";
+import { useStateStore } from "../../infra/state";
 import type { EditorProps } from "./EditorBase";
 import { minimalChange } from "./editorCommands";
 import { notifyEditorUpdate, registerEditorView } from "./editorRegistry";
@@ -30,7 +32,9 @@ export interface TextEditorProps extends EditorProps {
  *
  * The live view is registered under `path` (see `useEditorView`), which is
  * how a host's menus/toolbar reach the active editor; font, tab size and
- * word wrap follow the theme's `editorPreferences` live.
+ * word wrap follow the theme's `editorPreferences` live. The find/replace
+ * query is shared through the current `StateStore` (`"editor.search"`), so
+ * every editor — and the next session — starts with the last one used.
  *
  * Deliberately knows nothing about breakpoints or any other code-editing
  * concern beyond plain text + syntax highlighting — see `CodeEditor`, which
@@ -54,6 +58,9 @@ export function TextEditor({
   const onViewReadyRef = useRef(onViewReady);
   onViewReadyRef.current = onViewReady;
   const { editorColors, editorPreferences } = useTheme();
+  const store = useStateStore();
+  const storeRef = useRef(store);
+  storeRef.current = store;
 
   // One compartment per prop that can change after mount — each is swapped
   // in place via `reconfigure` rather than recreating the view, which would
@@ -83,6 +90,8 @@ export function TextEditor({
         const external = update.transactions.some((tr) => tr.annotation(externalContent));
         if (update.docChanged && !external) onChangeRef.current(update.state.doc.toString());
         if (update.docChanged || update.selectionSet || update.transactions.some((tr) => tr.reconfigured)) notifyEditorUpdate();
+        const query = getSearchQuery(update.state);
+        if (!query.eq(getSearchQuery(update.startState))) storeRef.current.set(SEARCH_STATE_KEY, toStoredQuery(query));
       }),
     ];
 
@@ -91,6 +100,8 @@ export function TextEditor({
       parent: containerRef.current,
     });
     viewRef.current = view;
+    const savedQuery = fromStoredQuery(storeRef.current.get(SEARCH_STATE_KEY));
+    if (savedQuery) view.dispatch({ effects: setSearchQuery.of(savedQuery) });
     onViewReadyRef.current?.(view);
 
     return () => {
@@ -162,6 +173,32 @@ const EMPTY_EXTENSIONS: Extension[] = [];
 
 function readOnlyExtension(readOnly: boolean | undefined): Extension {
   return readOnly ? [EditorView.editable.of(false), EditorState.readOnly.of(true)] : [];
+}
+
+const SEARCH_STATE_KEY = "editor.search";
+
+interface StoredQuery {
+  search: string;
+  replace: string;
+  caseSensitive: boolean;
+  regexp: boolean;
+  wholeWord: boolean;
+}
+
+function toStoredQuery(q: SearchQuery): StoredQuery {
+  return { search: q.search, replace: q.replace, caseSensitive: q.caseSensitive, regexp: q.regexp, wholeWord: q.wholeWord };
+}
+
+function fromStoredQuery(value: unknown): SearchQuery | null {
+  const v = value as StoredQuery | null;
+  if (!v || typeof v.search !== "string" || !v.search) return null;
+  return new SearchQuery({
+    search: v.search,
+    replace: typeof v.replace === "string" ? v.replace : "",
+    caseSensitive: v.caseSensitive === true,
+    regexp: v.regexp === true,
+    wholeWord: v.wholeWord === true,
+  });
 }
 
 /** Swaps `compartment`'s content whenever `extension`'s identity changes after mount (the mount itself already installed the initial value). */

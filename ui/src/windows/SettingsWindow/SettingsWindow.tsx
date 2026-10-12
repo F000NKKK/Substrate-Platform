@@ -3,6 +3,7 @@ import { IconButton } from "../../widgets/IconButton";
 import { Tab } from "../../widgets/Tab";
 import { TextField } from "../../widgets/TextField";
 import { useDraggable } from "../../infra/hooks";
+import { useStoredState } from "../../infra/state";
 import { IconClose, IconSettings } from "../../infra/icons";
 import "./SettingsWindow.css";
 
@@ -21,6 +22,7 @@ function matches(section: SettingsSection, query: string): boolean {
 
 export interface SettingsWindowProps {
   sections: SettingsSection[];
+  /** Opens on this section — otherwise on the one last viewed (remembered in the current `StateStore`), or the first. */
   initialSectionId?: string;
   onClose: () => void;
 }
@@ -34,7 +36,12 @@ export interface SettingsWindowProps {
  */
 export function SettingsWindow({ sections, initialSectionId, onClose }: SettingsWindowProps) {
   const { pos, handlers } = useDraggable({ x: 240, y: 100 });
-  const [selectedId, setSelectedId] = useState(initialSectionId ?? sections[0]?.id);
+  const [lastSectionId, setLastSectionId] = useStoredState<string | undefined>(
+    "settings.section",
+    undefined,
+    (v) => typeof v === "string"
+  );
+  const [selectedId, setSelectedId] = useState(initialSectionId ?? lastSectionId ?? sections[0]?.id);
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => sections.filter((s) => matches(s, search.trim().toLowerCase())), [sections, search]);
@@ -65,7 +72,10 @@ export function SettingsWindow({ sections, initialSectionId, onClose }: Settings
                 key={section.id}
                 orientation="list"
                 active={section.id === selected?.id}
-                onClick={() => setSelectedId(section.id)}
+                onClick={() => {
+                  setSelectedId(section.id);
+                  setLastSectionId(section.id);
+                }}
               >
                 {section.label}
               </Tab>

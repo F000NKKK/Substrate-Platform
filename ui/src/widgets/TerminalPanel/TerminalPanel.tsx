@@ -6,6 +6,7 @@ import { listen } from "@tauri-apps/api/event";
 import { IconButton } from "../IconButton";
 import { Icon } from "../../infra/icons";
 import { ContextMenu, useContextMenu } from "../ContextMenu";
+import { useStateStore } from "../../infra/state";
 import "@xterm/xterm/css/xterm.css";
 import "./TerminalPanel.css";
 
@@ -71,6 +72,33 @@ interface TerminalTab {
   groupId: string;
 }
 
+/** What's remembered of each terminal across restarts (under `TERMINAL_STATE_KEY` in the current `StateStore`) — its shell kind, label and split grouping, never its contents: a restored terminal is a fresh shell session. */
+interface PersistedTerminals {
+  tabs: { shellId: string; n: number; customLabel?: string; group: number }[];
+  /** Index into `tabs` of the focused one. */
+  active: number;
+}
+
+const TERMINAL_STATE_KEY = "terminal.tabs";
+
+function isPersistedTerminals(value: unknown): value is PersistedTerminals {
+  const v = value as PersistedTerminals;
+  return (
+    !!v &&
+    Array.isArray(v.tabs) &&
+    typeof v.active === "number" &&
+    v.tabs.every((t) => t && typeof t.shellId === "string" && typeof t.n === "number" && typeof t.group === "number")
+  );
+}
+
+function toPersisted(tabs: TerminalTab[], activeId: string | null): PersistedTerminals {
+  const groups = [...new Set(tabs.map((t) => t.groupId))];
+  return {
+    tabs: tabs.map((t) => ({ shellId: t.shellId, n: t.n, customLabel: t.customLabel, group: groups.indexOf(t.groupId) })),
+    active: Math.max(0, tabs.findIndex((t) => t.id === activeId)),
+  };
+}
+
 function labelFor(kind: TerminalShellKind | undefined, tab: TerminalTab): string {
   if (tab.customLabel) return tab.customLabel;
   const base = kind?.label ?? tab.shellId;
@@ -100,6 +128,10 @@ export function TerminalPanel({
   const clearHandlesRef = useRef<Record<string, () => void>>({});
   const addMenu = useContextMenu<void>();
   const moreMenu = useContextMenu<void>();
+  const store = useStateStore();
+  // The store scope whose saved terminals have been restored — until then,
+  // the tabs on screen aren't that scope's and mustn't be saved over it.
+  const [restoredScope, setRestoredScope] = useState<string | null>(null);
 
   const shells = shellsProp ?? detectedShells;
   const activeGroupId = tabs.find((t) => t.id === activeId)?.groupId;
@@ -163,12 +195,28 @@ export function TerminalPanel({
     });
   }
 
-  // Open a first terminal (the first detected/configured shell kind) as soon
-  // as the shell list is known.
+  // As soon as the shell list is known (and again whenever the state store
+  // switches scope — another project opened), reopen the terminals saved
+  // there, as fresh sessions; with none saved, keep what's open, or open a
+  // first terminal of the first detected/configured shell kind.
   useEffect(() => {
-    if (shells?.[0] && tabs.length === 0) addTerminal(shells[0]);
+    if (!shells) return;
+    const saved = store.get(TERMINAL_STATE_KEY);
+    const known = isPersistedTerminals(saved) ? saved.tabs.filter((t) => shells.some((s) => s.id === t.shellId)) : [];
+    if (known.length > 0) {
+      const stamp = Date.now();
+      const ids = known.map((t, i) => `term-${t.shellId}-${t.n}-${stamp}-${i}`);
+      const groupIds = known.map((t, i) => ids[known.findIndex((o) => o.group === t.group)] ?? ids[i]);
+      setTabs(known.map((t, i) => ({ id: ids[i], shellId: t.shellId, n: t.n, customLabel: t.customLabel, groupId: groupIds[i] })));
+      setActiveId(ids[Math.min((saved as PersistedTerminals).active, ids.length - 1)] ?? null);
+    } else if (tabs.length === 0 && shells[0]) addTerminal(shells[0]);
+    setRestoredScope(store.scope);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shells]);
+  }, [shells, store]);
+
+  useEffect(() => {
+    if (restoredScope === store.scope) store.set(TERMINAL_STATE_KEY, toPersisted(tabs, activeId));
+  }, [tabs, activeId, restoredScope, store]);
 
   return (
     <div className="sp-terminal-manager">

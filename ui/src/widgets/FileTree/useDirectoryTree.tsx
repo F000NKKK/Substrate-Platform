@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FileTreeNode } from "./FileTree";
+import { useStateStore } from "../../infra/state";
 
 export interface DirEntry {
   name: string;
@@ -54,12 +55,17 @@ function withoutSubtree(set: Set<string>, root: string): Set<string> {
  * A failed listing never rejects out of the hook's own effects — it's
  * reported to `onError` (default: `console.error`) and the folder stays
  * unloaded, so expanding it again retries.
+ *
+ * With `persistKey`, the expanded folders are remembered under that key in
+ * the current `StateStore` (relative to the root) and re-expanded the next
+ * time this root is shown — any that no longer exist are silently skipped.
  */
 export function useDirectoryTree(
   rootPath: string,
   rootName: string,
   commands: DirectoryTreeCommands,
-  onError: (error: unknown, path: string) => void = defaultOnError
+  onError: (error: unknown, path: string) => void = defaultOnError,
+  persistKey?: string
 ) {
   const [nodes, setNodes] = useState<FileTreeNode[]>([{ id: rootPath, name: rootName, kind: "folder" }]);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set([rootPath]));
@@ -69,20 +75,26 @@ export function useDirectoryTree(
   rootRef.current = rootPath;
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
+  const store = useStateStore();
+  // Whether the persisted expansion has been re-applied for the current root
+  // — until then, what's expanded isn't worth saving (it'd overwrite the
+  // saved set with just the root).
+  const restoredRef = useRef(false);
 
+  /** Resolves `false` if the listing failed (reported to `onError` unless `silent`) or belongs to a root no longer shown. */
   const loadFolder = useCallback(
-    async (id: string) => {
+    async (id: string, silent = false): Promise<boolean> => {
       const root = rootRef.current;
       let entries: DirEntry[];
       try {
         entries = await commands.list(id);
       } catch (err) {
-        onErrorRef.current(err, id);
-        return;
+        if (!silent) onErrorRef.current(err, id);
+        return false;
       }
       // The root changed while this listing was in flight — it belongs to a
       // tree that no longer exists.
-      if (rootRef.current !== root) return;
+      if (rootRef.current !== root) return false;
       setNodes((prev) => replaceChildren(prev, id, entries.map(toNode)));
       setParentById((prev) => {
         const next = { ...prev };
@@ -90,6 +102,7 @@ export function useDirectoryTree(
         return next;
       });
       setLoadedIds((prev) => new Set(prev).add(id));
+      return true;
     },
     [commands]
   );
@@ -106,9 +119,38 @@ export function useDirectoryTree(
       setLoadedIds(new Set());
       setParentById({});
     }
-    loadFolder(rootPath);
+    restoredRef.current = false;
+    const saved = persistKey ? store.get(persistKey) : undefined;
+    const relative = Array.isArray(saved) ? saved.filter((p): p is string => typeof p === "string" && p !== "") : [];
+    (async () => {
+      if (!(await loadFolder(rootPath))) return;
+      // Parents before children (a child's node only exists once its parent
+      // is listed); a folder that's gone, or whose parent didn't come back,
+      // just stays collapsed.
+      const restored = new Set<string>();
+      for (const rel of [...relative].sort((a, b) => a.length - b.length)) {
+        const id = joinPath(rootPath, rel);
+        const parent = id.replace(/[/\\][^/\\]*$/, "");
+        if (parent !== rootPath.replace(/[/\\]+$/, "") && !restored.has(parent)) continue;
+        if (rootRef.current !== rootPath) return;
+        if (await loadFolder(id, true)) restored.add(id);
+      }
+      if (rootRef.current !== rootPath) return;
+      if (restored.size > 0) setExpandedIds((prev) => new Set([...prev, ...restored]));
+      restoredRef.current = true;
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rootPath]);
+
+  useEffect(() => {
+    if (!persistKey || !restoredRef.current) return;
+    const base = rootPath.replace(/[/\\]+$/, "");
+    const relative = [...expandedIds]
+      .filter((id) => id !== rootPath && isWithin(id, base))
+      .map((id) => id.slice(base.length + 1));
+    store.set(persistKey, relative);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expandedIds]);
 
   // Renaming the root's display name alone doesn't need a reload.
   useEffect(() => {
@@ -170,7 +212,7 @@ export function useDirectoryTree(
     createDirIn,
     renameNode,
     removeNode,
-    reload: loadFolder,
+    reload: (id: string) => loadFolder(id).then(() => {}),
   };
 }
 
