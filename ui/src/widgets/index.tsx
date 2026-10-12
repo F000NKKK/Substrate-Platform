@@ -38,7 +38,7 @@ export { WindowControls } from "./WindowControls";
 export { AccentColorField } from "./AccentColorField";
 export { OutputPanel } from "./OutputPanel";
 export type { OutputPanelProps, OutputLineLevel } from "./OutputPanel";
-export { defaultLineLevel, clearOutputBuffer, getOutputBuffer } from "./OutputPanel";
+export { defaultLineLevel, clearOutputBuffer, getOutputBuffer, startOutputBuffer } from "./OutputPanel";
 export { StatusBar } from "./StatusBar";
 export type { StatusBarProps } from "./StatusBar";
 export { TerminalPanel } from "./TerminalPanel";

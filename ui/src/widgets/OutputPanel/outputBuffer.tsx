@@ -27,6 +27,11 @@ function ensureListening(eventName: string, maxLines: number) {
   });
 }
 
+/** Starts buffering `eventName` now, before any `OutputPanel` shows it — for a source the user may switch to later (lines emitted before the first subscribe are otherwise never seen). */
+export function startOutputBuffer(eventName: string, maxLines = MAX_LINES_DEFAULT): void {
+  ensureListening(eventName, maxLines);
+}
+
 export function getOutputBuffer(eventName: string): string[] {
   return buffers.get(eventName) ?? [];
 }
