@@ -1,5 +1,5 @@
 import { useMemo, type ReactNode } from "react";
-import { Tree, type TreeNode } from "../Tree";
+import { Tree, type TreeMenuItem, type TreeNode } from "../Tree";
 import { Icon } from "../../infra/icons";
 
 export interface FileTreeNode {

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Icon } from "../../infra/icons";
-import { ContextMenu } from "../ContextMenu";
+import { ContextMenu, type ContextMenuItem } from "../ContextMenu";
 import { useTree } from "./useTree";
 import type { FlatEntry } from "./useTree";
 import "./Tree.css";

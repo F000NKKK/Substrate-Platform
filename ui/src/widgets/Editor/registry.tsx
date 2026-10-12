@@ -48,6 +48,13 @@ export interface EditorProvider {
    * (see `isBinaryFile`).
    */
   kind: "text" | "designer" | "binary";
+  /**
+   * Offered only for the files it matches, even in "Open With…" — for an
+   * editor that can't make sense of anything else (a designer over one file
+   * format, an image viewer). Defaults to `true` for designers and binary
+   * editors; any text editor can show any file.
+   */
+  strict?: boolean;
 }
 
 const providers: EditorProvider[] = [];
@@ -92,12 +99,14 @@ export function editorProvidersFor(path: string): EditorProvider[] {
 }
 
 /**
- * Every registered editor, by name — "Open With…" offers all of them, not
- * just the ones matching the file: the user may know better (a `.log` that's
- * really JSON).
+ * Every editor that can open any file (all but `strict` ones), by name —
+ * "Open With…" offers these on top of the ones matching the file: the user
+ * may know better (a `.log` that's really JSON).
  */
-export function allEditorProviders(): EditorProvider[] {
-  return [...providers, plainText].sort((a, b) => (a.name ?? a.label).localeCompare(b.name ?? b.label));
+export function generalEditorProviders(): EditorProvider[] {
+  return [...providers, plainText]
+    .filter((p) => !(p.strict ?? p.kind !== "text"))
+    .sort((a, b) => (a.name ?? a.label).localeCompare(b.name ?? b.label));
 }
 
 /** The editor registered under `id`, matching any file or not. */
@@ -134,7 +143,7 @@ export function isBinaryFile(filename: string): boolean {
   return editorProvidersFor(filename).every((p) => p.kind === "binary");
 }
 
-const plainText: EditorProvider = { id: "substrate.text", label: "Text", name: "Text Editor", component: PlainTextEditor, kind: "text" };
+const plainText: EditorProvider = { id: "substrate.text", label: "Plain Text", name: "Plain Text Editor", component: PlainTextEditor, kind: "text" };
 
 const builtIns: EditorProvider[] = [
   { id: "substrate.json", name: "JSON Editor", label: "Code", extensions: ["json"], component: JsonEditor, kind: "text" },
