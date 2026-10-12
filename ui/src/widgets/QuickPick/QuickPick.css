@@ -152,11 +152,6 @@
   color: var(--sp-text);
 }
 
-.sp-quickpick-filter-prefix {
-  font-family: var(--sp-font-mono);
-  font-size: 10px;
-  color: var(--sp-text-faint);
-}
 
 .sp-quickpick-list {
   flex: 1 1 auto;

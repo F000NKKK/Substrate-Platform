@@ -19,7 +19,7 @@ export interface QuickPickItem {
 export interface QuickPickFilter {
   id: string;
   label: string;
-  /** The query prefix that switches to this filter (`"f:"`), shown as a hint. */
+  /** The query prefix that selects this filter (`"f:"`) — the tab's tooltip; the product keeps it in the query text. */
   prefix?: string;
 }
 
@@ -189,7 +189,6 @@ export function QuickPick<T extends QuickPickItem>({
               onClick={() => onFilterChange?.(f.id)}
             >
               {f.label}
-              {f.prefix && <span className="sp-quickpick-filter-prefix">{f.prefix}</span>}
             </button>
           ))}
         </div>
