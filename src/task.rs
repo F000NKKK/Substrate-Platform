@@ -206,7 +206,7 @@ fn spawn_streaming(
         std::thread::spawn(move || {
             let _done = done;
             for line in BufReader::new(stderr).lines().map_while(Result::ok) {
-                sink.warn(line);
+                sink.stderr(line);
             }
         });
     }

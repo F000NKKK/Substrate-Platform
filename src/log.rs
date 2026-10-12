@@ -25,6 +25,24 @@ pub enum Level {
     Error,
 }
 
+impl Level {
+    /// The level of one line a tool wrote to **stderr**. Build tools (cargo,
+    /// rustc, gradle, ...) print ordinary progress there too, so only lines
+    /// that announce themselves as diagnostics are flagged; the rest — and
+    /// the indented/`|`-prefixed continuation lines under a diagnostic —
+    /// are plain output.
+    pub fn of_stderr_line(line: &str) -> Self {
+        let head = line.trim_start().to_ascii_lowercase();
+        if head.starts_with("error") || head.starts_with("fatal") || head.starts_with("panicked") {
+            Level::Error
+        } else if head.starts_with("warning") || head.starts_with("warn:") {
+            Level::Warn
+        } else {
+            Level::Info
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct LogLine {
     pub level: Level,
@@ -116,6 +134,11 @@ impl LogSink {
     pub fn error(&self, text: impl Into<String>) {
         self.push(Level::Error, text);
     }
+    /// A line a child process wrote to stderr — see [`Level::of_stderr_line`].
+    pub fn stderr(&self, text: impl Into<String>) {
+        let text = text.into();
+        self.push(Level::of_stderr_line(&text), text);
+    }
 
     /// Snapshot of every retained line.
     pub fn lines(&self) -> Vec<LogLine> {
@@ -191,5 +214,26 @@ mod tests {
             toml::to_string(&line).unwrap(),
             "level = \"warn\"\ntext = \"x\"\n"
         );
+    }
+
+    #[test]
+    fn stderr_lines_are_classified_by_content() {
+        assert_eq!(
+            Level::of_stderr_line("   Compiling foo v0.1.0"),
+            Level::Info
+        );
+        assert_eq!(
+            Level::of_stderr_line("    Finished `release` profile"),
+            Level::Info
+        );
+        assert_eq!(
+            Level::of_stderr_line("warning: unused variable: `x`"),
+            Level::Warn
+        );
+        assert_eq!(
+            Level::of_stderr_line("error[E0599]: no method named `pause`"),
+            Level::Error
+        );
+        assert_eq!(Level::of_stderr_line("  --> src/lib.rs:1:5"), Level::Info);
     }
 }
