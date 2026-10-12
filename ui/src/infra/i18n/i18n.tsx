@@ -13,6 +13,10 @@ import { parseShortcut } from "../keys";
  * to the target language's plural forms (`Intl.PluralRules` categories,
  * `{ one, few, many, other }`); `{count}` is filled automatically.
  *
+ * One English word that needs two translations (the Build menu and its
+ * Build command) is told apart by a context, gettext's `pgettext`:
+ * `pt("menu", "Build")`, catalogued under `contextKey("menu", "Build")`.
+ *
  * Products and the platform register catalogs per locale
  * (`registerTranslations("ru", {...})`); several registrations for one
  * locale merge, later ones winning. The chosen locale persists in
@@ -151,6 +155,18 @@ export function t(text: string, params?: Record<string, string | number>): strin
   const entry = catalogFor(current)?.get(text);
   const translated = entry === undefined ? text : typeof entry === "string" ? entry : entry.other;
   return fill(translated, params);
+}
+
+/** The catalog key of `text` in `context` — see `pt`. */
+export function contextKey(context: string, text: string): string {
+  return `${context}\u0004${text}`;
+}
+
+/** `t` for `text` in a `context` (`pt("menu", "Build")`): the context's translation, else the plain one, else the English. */
+export function pt(context: string, text: string, params?: Record<string, string | number>): string {
+  const entry = catalogFor(current)?.get(contextKey(context, text));
+  if (entry === undefined) return t(text, params);
+  return fill(typeof entry === "string" ? entry : entry.other, params);
 }
 
 /**
