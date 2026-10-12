@@ -3,6 +3,7 @@ import { Label } from "../../widgets/Label";
 import { AccentColorField } from "../../widgets/AccentColorField";
 import { EditorColorField } from "../../widgets/EditorColorField";
 import { Button } from "../../widgets/Button";
+import { confirmDialog, promptDialog } from "../../widgets/Dialog";
 import { useTheme, editorColorKeys, isBuiltInProfile } from "../../infra/theme";
 import "./AppearanceSettings.css";
 
@@ -23,15 +24,22 @@ export function AppearanceSettings() {
 
   const activeIsBuiltIn = isBuiltInProfile(editorTheme);
 
-  function handleNewProfile() {
-    const name = window.prompt("New profile name:");
-    if (name) createEditorProfile(name);
+  async function handleNewProfile() {
+    const name = await promptDialog({
+      title: "New Color Profile",
+      label: "Profile name",
+      confirmLabel: "Create",
+      validate: (value) => (value.trim() ? null : ""),
+    });
+    if (name) createEditorProfile(name.trim());
   }
 
-  function handleDeleteProfile() {
+  async function handleDeleteProfile() {
     if (activeIsBuiltIn) return;
     const profile = editorProfiles.find((p) => p.id === editorTheme);
-    if (profile && window.confirm(`Delete profile "${profile.name}"?`)) deleteEditorProfile(editorTheme);
+    if (!profile) return;
+    const confirmed = await confirmDialog({ title: "Delete Color Profile", message: `Delete profile "${profile.name}"?`, confirmLabel: "Delete" });
+    if (confirmed) deleteEditorProfile(profile.id);
   }
 
   function handleExportProfile() {

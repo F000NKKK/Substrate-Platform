@@ -43,3 +43,7 @@ export { StatusBar } from "./StatusBar";
 export type { StatusBarProps } from "./StatusBar";
 export { TerminalPanel } from "./TerminalPanel";
 export type { TerminalPanelProps } from "./TerminalPanel";
+export { DialogHost, showDialog, confirmDialog, promptDialog, messageDialog } from "./Dialog";
+export type { DialogButton, DialogInput, DialogOptions, DialogResult } from "./Dialog";
+export { NotificationHost, notify } from "./Notifications";
+export type { NotificationLevel, NotificationOptions } from "./Notifications";

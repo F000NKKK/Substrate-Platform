@@ -1,0 +1,60 @@
+/* Above everything else the platform layers — context menus (200/201),
+   floating windows like Settings (150) — since a dialog is modal. */
+.sp-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 0.35);
+}
+
+.sp-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-md);
+  width: 420px;
+  max-width: calc(100vw - 2 * var(--sp-space-lg));
+  padding: var(--sp-space-lg);
+  box-sizing: border-box;
+  background: var(--sp-surface-1);
+  border: 1px solid var(--sp-border-strong);
+  border-radius: var(--sp-radius-md);
+  box-shadow: var(--sp-shadow-md);
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+  color: var(--sp-text);
+}
+
+.sp-dialog-title {
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.sp-dialog-message {
+  color: var(--sp-text-muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.sp-dialog-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-xs);
+}
+
+.sp-dialog-field-label {
+  color: var(--sp-text-muted);
+}
+
+.sp-dialog-error {
+  font-size: 0.85em;
+  color: var(--sp-danger);
+}
+
+.sp-dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-space-sm);
+}

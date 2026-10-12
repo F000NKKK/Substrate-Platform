@@ -1,0 +1,47 @@
+/* Bottom-right, clear of the status bar; below dialogs (1000) but above
+   menus and floating windows. */
+.sp-notifications {
+  position: fixed;
+  right: var(--sp-space-md);
+  bottom: calc(var(--sp-space-md) + 24px);
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--sp-space-xs);
+  pointer-events: none;
+}
+
+.sp-notification {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-space-sm);
+  max-width: 420px;
+  padding: var(--sp-space-sm) var(--sp-space-xs) var(--sp-space-sm) var(--sp-space-md);
+  background: var(--sp-surface-glass);
+  backdrop-filter: blur(var(--sp-blur));
+  -webkit-backdrop-filter: blur(var(--sp-blur));
+  border: 1px solid var(--sp-border-strong);
+  border-left: 3px solid var(--sp-accent);
+  border-radius: var(--sp-radius-xs);
+  box-shadow: var(--sp-shadow-md);
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+  color: var(--sp-text);
+  pointer-events: auto;
+}
+
+.sp-notification--warn {
+  border-left-color: var(--sp-warning);
+}
+
+.sp-notification--error {
+  border-left-color: var(--sp-danger);
+}
+
+.sp-notification-message {
+  flex: 1;
+  padding-top: 2px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
