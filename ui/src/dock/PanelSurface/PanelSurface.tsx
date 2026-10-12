@@ -3,6 +3,7 @@ import { IconButton } from "../../widgets/IconButton";
 import { IconPin, IconPinOff, IconClose, IconFloat } from "../../infra/icons";
 import { Outline } from "../../infra/outline";
 import { startPanelDrag, endPanelDrag } from "../dnd";
+import { useT } from "../../infra/i18n";
 
 export interface PanelSurfaceProps {
   panelId: string;
@@ -34,6 +35,7 @@ export interface PanelSurfaceProps {
  * tab, which only a region-mode outline drawn one level up can do.
  */
 export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onFloat, style, outline = true, outlineRevision, children }: PanelSurfaceProps) {
+  const t = useT();
   return (
     <div className="sp-panel-surface" style={style}>
       <div
@@ -44,15 +46,15 @@ export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onF
       >
         <span className="sp-panel-surface-title">{title}</span>
         <div className="sp-panel-surface-actions">
-          <IconButton size={24} title={pinned ? "Auto-hide" : "Pin"} onClick={onTogglePin}>
+          <IconButton size={24} title={pinned ? t("Auto Hide") : t("Pin")} onClick={onTogglePin}>
             {pinned ? <IconPinOff size={20} /> : <IconPin size={20} />}
           </IconButton>
           {onFloat && (
-            <IconButton size={24} title="Float" onClick={onFloat}>
+            <IconButton size={24} title={t("Float")} onClick={onFloat}>
               <IconFloat size={20} />
             </IconButton>
           )}
-          <IconButton size={24} title="Close" onClick={onClose}>
+          <IconButton size={24} title={t("Close")} onClick={onClose}>
             <IconClose size={20} />
           </IconButton>
         </div>

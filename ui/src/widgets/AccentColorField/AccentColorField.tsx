@@ -3,6 +3,7 @@ import { Swatch } from "../Swatch";
 import { Button } from "../Button";
 import { ColorPickerWindow } from "../../windows/ColorPickerWindow";
 import { useTheme, defaultAccent } from "../../infra/theme";
+import { useT } from "../../infra/i18n";
 import "./AccentColorField.css";
 
 /**
@@ -11,19 +12,20 @@ import "./AccentColorField.css";
  * no color-picking logic itself, only the trigger.
  */
 export function AccentColorField() {
+  const t = useT();
   const { accent, setAccent, presets } = useTheme();
   const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
     <div className="sp-accent-field">
-      <Swatch color={accent} onClick={() => setPickerOpen(true)} aria-label="Current accent color" />
+      <Swatch color={accent} onClick={() => setPickerOpen(true)} aria-label={t("Current accent color")} />
       <Button variant="ghost" onClick={() => setPickerOpen(true)}>
-        Choose Color…
+        {t("Choose Color…")}
       </Button>
 
       {pickerOpen && (
         <ColorPickerWindow
-          title="Accent Color"
+          title={t("Accent Color")}
           value={accent}
           presets={presets}
           defaultValue={defaultAccent}
