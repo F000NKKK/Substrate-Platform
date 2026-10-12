@@ -14,9 +14,19 @@
 .sp-split-pane-first,
 .sp-split-pane-second {
   position: relative;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
+}
+
+/* A pane's content fills it. */
+.sp-split-pane-first > *,
+.sp-split-pane-second > * {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
 }
 
 /* A collapsed pane stays mounted (editor state survives), just out of the layout. */

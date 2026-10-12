@@ -140,6 +140,7 @@ registerTranslations(
     Source: "Исходный код",
     Preview: "Просмотр",
     Designer: "Конструктор",
+    "Resize panes": "Изменить размер областей",
     "Preview to the Side": "Просмотр сбоку",
     "Plain Text": "Обычный текст",
     "Plain Text Editor": "Редактор обычного текста",

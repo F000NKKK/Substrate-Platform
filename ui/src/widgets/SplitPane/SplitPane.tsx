@@ -11,7 +11,7 @@ export interface SplitPaneProps {
   ratio: number;
   /** Called once a drag (or a keyboard resize) ends, with the new ratio — the host persists it. */
   onRatioChange?: (ratio: number) => void;
-  /** Shows only one pane, the other kept mounted but hidden (its state survives). */
+  /** Hides one pane (the other fills the space), keeping it mounted so its state survives. */
   collapsed?: "first" | "second" | null;
   /** Smallest size of either pane while dragging, in pixels. Default 60. */
   minSize?: number;
