@@ -45,3 +45,7 @@ export { IconMinus } from "./IconMinus";
 export { IconCheck } from "./IconCheck";
 export { IconHistory } from "./IconHistory";
 export { IconStash } from "./IconStash";
+export { IconSplitRows } from "./IconSplitRows";
+export { IconSwap } from "./IconSwap";
+export { IconCollapse } from "./IconCollapse";
+export { IconExpand } from "./IconExpand";
