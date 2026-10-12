@@ -38,7 +38,7 @@ export function Tab({ active, orientation = "horizontal", onRequestClose, pinned
       <span className="sp-tab-label">{children}</span>
       {pinned ? (
         <span className="sp-tab-close sp-tab-pin" role="button" aria-label="Unpin tab" title="Unpin" onClick={handleUnpinClick}>
-          📌
+          <PinIcon />
         </span>
       ) : onRequestClose && (
         <span className="sp-tab-close" role="button" aria-label="Close tab" onClick={handleCloseClick}>
@@ -46,5 +46,15 @@ export function Tab({ active, orientation = "horizontal", onRequestClose, pinned
         </span>
       )}
     </button>
+  );
+}
+
+/** Visual Studio's pinned-tab glyph: an upright pushpin, drawn in the text color. */
+function PinIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true">
+      <path d="M4 1.5h4M4.5 1.5v4L3 7h6L7.5 5.5v-4" strokeLinejoin="round" />
+      <path d="M6 7v4" strokeLinecap="round" />
+    </svg>
   );
 }
