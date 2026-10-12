@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DockAnchor, PanelDef, PanelPlacement, ToolWindowAnchor } from "../types";
-import { loadShellLayoutState, saveShellLayoutState } from "./shellLayoutPersistence";
+import { useStateStore } from "../../infra/state";
+import { loadShellLayoutState, type PersistedShellLayoutState } from "./shellLayoutPersistence";
 
 const ANCHORS: readonly ToolWindowAnchor[] = ["left", "right", "bottom"];
 const DEFAULT_FLOAT_SIZE = { w: 340, h: 280 };
@@ -21,6 +22,17 @@ type SizeMode = "pinned" | "flyout";
 
 function sizeKey(panelId: string, anchor: ToolWindowAnchor, mode: SizeMode): string {
   return `${panelId}:${anchor}:${mode}`;
+}
+
+/** A restored placement is only trusted if it's well-formed — a corrupt or hand-edited entry (a zero/negative/huge floating size, an unknown anchor) falls back to the default instead of producing a degenerate panel. */
+function isSanePlacement(p: unknown): p is PanelPlacement {
+  const v = p as Record<string, unknown> | null;
+  if (!v || typeof v !== "object") return false;
+  if (v.anchor === "float") {
+    const inRange = (n: unknown, min: number, max: number) => typeof n === "number" && Number.isFinite(n) && n >= min && n <= max;
+    return inRange(v.x, -10_000, 10_000) && inRange(v.y, -10_000, 10_000) && inRange(v.w, 120, 4000) && inRange(v.h, 80, 4000);
+  }
+  return ["left", "right", "bottom", "center"].includes(v.anchor as string) && ["hidden", "flyout", "pinned"].includes(v.mode as string);
 }
 
 /** Only one flyout may peek open per anchor at a time — pinned panels are untouched by this (several can be pinned side by side). */
@@ -92,7 +104,12 @@ export function useShellLayout(
   main: PanelDef,
   toolWindows: Partial<Record<ToolWindowAnchor, PanelDef[]>>,
   defaultPinned?: Partial<Record<ToolWindowAnchor, string>>,
-  /** When set, panel placements/sizes/the active center tab survive a reload via `localStorage`, keyed by this string (make it unique per app). */
+  /**
+   * When set, panel placements/sizes/the active center tab survive a reload
+   * — stored in the current `StateStore` (see `StateStoreProvider`) under
+   * `shell.layout:<persistKey>`, so a product whose store is per-project gets
+   * a per-project layout. Re-applied whenever the store's scope changes.
+   */
   persistKey?: string,
   /**
    * Panels docked to the center beyond `main`, registered dynamically at
@@ -128,9 +145,17 @@ export function useShellLayout(
     return map;
   }, [main, toolWindows]);
 
-  const persisted = useMemo(() => (persistKey ? loadShellLayoutState(persistKey) : undefined), [persistKey]);
+  const store = useStateStore();
+  const storeKey = persistKey ? `shell.layout:${persistKey}` : null;
+  // Nothing in the store yet (a project opened for the first time) falls
+  // back to the layout saved by older versions in `localStorage`, rather
+  // than all the way back to the defaults.
+  const readPersisted = (): PersistedShellLayoutState | undefined =>
+    storeKey && persistKey ? ((store.get(storeKey) as PersistedShellLayoutState | undefined) ?? loadShellLayoutState(persistKey)) : undefined;
+  const persisted = useMemo(readPersisted, [store, storeKey]);
 
-  const [placements, setPlacements] = useState<Record<string, PanelPlacement>>(() => {
+  /** Every declared tool window at its default placement, overridden by whatever `from` restores. */
+  function restoredPlacements(from: PersistedShellLayoutState | undefined): Record<string, PanelPlacement> {
     const initial: Record<string, PanelPlacement> = { [main.id]: { anchor: "center", mode: "pinned" } };
     for (const anchor of ANCHORS) {
       for (const panel of toolWindows[anchor] ?? []) {
@@ -139,13 +164,21 @@ export function useShellLayout(
     }
     // The center's original tab is always center/pinned (see `close` above) —
     // every other panel's placement can be restored from last session.
-    if (persisted?.placements) {
+    const saved = from?.placements;
+    if (saved && typeof saved === "object") {
       for (const id of Object.keys(initial)) {
-        if (id !== main.id && persisted.placements[id]) initial[id] = persisted.placements[id];
+        if (id !== main.id && isSanePlacement(saved[id])) initial[id] = saved[id];
       }
     }
     return initial;
-  });
+  }
+
+  function restoredSizes(from: PersistedShellLayoutState | undefined): Record<string, number> {
+    const saved = from?.sizes && typeof from.sizes === "object" ? from.sizes : {};
+    return Object.fromEntries(Object.entries(saved).filter(([, n]) => typeof n === "number" && Number.isFinite(n)));
+  }
+
+  const [placements, setPlacements] = useState<Record<string, PanelPlacement>>(() => restoredPlacements(persisted));
 
   // Read by `show`/`hide`, which branch on the current placement before
   // deciding what to set — kept out of a state updater so `close` (which
@@ -158,7 +191,29 @@ export function useShellLayout(
     return restored && (restored === main.id || panelsById[restored]) ? restored : main.id;
   });
 
-  const [sizes, setSizes] = useState<Record<string, number>>(() => persisted?.sizes ?? {});
+  const [sizes, setSizes] = useState<Record<string, number>>(() => restoredSizes(persisted));
+
+  // The store's scope changed (another project opened): apply its saved
+  // layout in place — the shell stays mounted, so panels (and their state,
+  // e.g. live terminals) survive the switch. Dynamic center panels keep
+  // their placements; the product re-adds/removes those itself.
+  const appliedRef = useRef(persisted);
+  const skipSaveRef = useRef(false);
+  useEffect(() => {
+    if (appliedRef.current === persisted) return;
+    appliedRef.current = persisted;
+    skipSaveRef.current = true;
+    const restored = restoredPlacements(persisted);
+    setPlacements((prev) => {
+      const next = { ...prev };
+      for (const [id, placement] of Object.entries(restored)) next[id] = placement;
+      return next;
+    });
+    setSizes(restoredSizes(persisted));
+    const active = persisted?.centerActiveId;
+    if (active && panelsById[active]) setCenterActive(active);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [persisted]);
 
   const anchorSize = useCallback(
     (panelId: string, anchor: ToolWindowAnchor, mode: SizeMode) => sizes[sizeKey(panelId, anchor, mode)] ?? DEFAULT_ANCHOR_SIZE[anchor],
@@ -337,9 +392,15 @@ export function useShellLayout(
   }, []);
 
   useEffect(() => {
-    if (!persistKey) return;
-    saveShellLayoutState(persistKey, { placements, sizes, centerActiveId });
-  }, [persistKey, placements, sizes, centerActiveId]);
+    if (!storeKey) return;
+    // The render that switched stores still holds the previous scope's
+    // layout — saving it would overwrite the new scope's before it's applied.
+    if (skipSaveRef.current) {
+      skipSaveRef.current = false;
+      return;
+    }
+    store.set(storeKey, { placements, sizes, centerActiveId } satisfies PersistedShellLayoutState);
+  }, [store, storeKey, placements, sizes, centerActiveId]);
 
   return {
     panelsById,

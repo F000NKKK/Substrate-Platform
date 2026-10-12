@@ -6,6 +6,7 @@ export interface PersistedShellLayoutState {
   centerActiveId?: string;
 }
 
+/** Where layouts lived before they moved into the `StateStore` — still read as a fallback (see `useShellLayout`), never written. */
 const STORAGE_PREFIX = "sp-shell-layout:";
 
 /** Best-effort read — a corrupt/missing entry (or `localStorage` being unavailable) just means "nothing to restore," never a thrown error. */
@@ -15,13 +16,5 @@ export function loadShellLayoutState(key: string): PersistedShellLayoutState | u
     return raw ? (JSON.parse(raw) as PersistedShellLayoutState) : undefined;
   } catch {
     return undefined;
-  }
-}
-
-export function saveShellLayoutState(key: string, state: PersistedShellLayoutState): void {
-  try {
-    localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(state));
-  } catch {
-    // Quota exceeded or unavailable — persistence is a nicety, not load-bearing.
   }
 }
