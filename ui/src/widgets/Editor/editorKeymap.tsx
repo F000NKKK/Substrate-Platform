@@ -3,6 +3,7 @@ import { gotoLine, openSearchPanel } from "@codemirror/search";
 import { EditorSelection, Prec, type Extension } from "@codemirror/state";
 import { EditorView, keymap, runScopeHandlers, type Command } from "@codemirror/view";
 import { eventKey } from "../../infra/keys";
+import { editorCopy, editorCut, editorPaste } from "./editorCommands";
 import { commentLines, toggleLineComments, uncommentLines } from "./lineComments";
 
 // Visual Studio's editing keys on top of CodeMirror's defaults (which
@@ -32,12 +33,34 @@ const layoutIndependentKeys = Prec.highest(
         altKey: e.altKey,
         shiftKey: e.shiftKey,
       });
-      if (!runScopeHandlers(view, synthetic, "editor")) return false;
+      if (!runScopeHandlers(view, synthetic, "editor") && !clipboardKey(view, synthetic)) return false;
       e.preventDefault();
       return true;
     },
   }),
 );
+
+/**
+ * Ctrl+C / Ctrl+X / Ctrl+V are the browser's own, not bindings, and the
+ * webview only recognizes them by the character typed — so under another
+ * layout they're done here, through the clipboard API.
+ */
+function clipboardKey(view: EditorView, e: KeyboardEvent): boolean {
+  if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return false;
+  const report = (err: unknown) => console.warn("clipboard:", err);
+  switch (e.key) {
+    case "c":
+      editorCopy(view).catch(report);
+      return true;
+    case "x":
+      if (!view.state.readOnly) editorCut(view).catch(report);
+      return true;
+    case "v":
+      if (!view.state.readOnly) editorPaste(view).catch(report);
+      return true;
+  }
+  return false;
+}
 
 function lineRanges(view: EditorView) {
   const { state } = view;

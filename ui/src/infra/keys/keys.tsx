@@ -243,3 +243,39 @@ export function keybindingLabel(id: string): string | undefined {
   const keys = r.binding.keys;
   return Array.isArray(keys) ? keys[0] : keys;
 }
+
+// -- Text fields -------------------------------------------------------------
+
+/**
+ * Plain `<input>`s and `<textarea>`s get their Ctrl+A/C/X/V/Z/Y from the
+ * webview, which matches them by the character typed — so under another
+ * layout (Ctrl+Ф, Ctrl+С, ...) they're done here instead. Code editors
+ * and terminals handle their own keys.
+ */
+function onTextFieldKeyDown(e: KeyboardEvent) {
+  if (e.defaultPrevented || !(e.ctrlKey || e.metaKey) || e.altKey) return;
+  const field = e.target;
+  if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement)) return;
+  if (field.closest(".cm-editor, [data-sp-native-keys]")) return;
+  const latin = eventKey(e);
+  if (latin.length !== 1 || latin === e.key.toLowerCase()) return;
+  const shift = e.shiftKey;
+  let done = true;
+  if (latin === "a" && !shift) field.select();
+  else if (latin === "c" && !shift) document.execCommand("copy");
+  else if (latin === "x" && !shift) document.execCommand("cut");
+  else if (latin === "v" && !shift) {
+    navigator.clipboard
+      .readText()
+      .then((text) => {
+        field.focus();
+        document.execCommand("insertText", false, text);
+      })
+      .catch(() => {});
+  } else if (latin === "z") document.execCommand(shift ? "redo" : "undo");
+  else if (latin === "y" && !shift) document.execCommand("redo");
+  else done = false;
+  if (done) e.preventDefault();
+}
+
+if (typeof window !== "undefined") window.addEventListener("keydown", onTextFieldKeyDown);
