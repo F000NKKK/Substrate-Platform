@@ -29,3 +29,6 @@ export { IconFormat } from "./IconFormat";
 export { IconHotReload } from "./IconHotReload";
 export { IconRestart } from "./IconRestart";
 export { IconStop } from "./IconStop";
+export { IconCategorized } from "./IconCategorized";
+export { IconAlphabetical } from "./IconAlphabetical";
+export { IconInfo } from "./IconInfo";

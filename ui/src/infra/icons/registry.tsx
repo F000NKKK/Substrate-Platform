@@ -37,6 +37,9 @@ const defaultIcons: Record<string, IconComponent> = {
   hotReload: glyphs.IconHotReload,
   restart: glyphs.IconRestart,
   stop: glyphs.IconStop,
+  categorized: glyphs.IconCategorized,
+  alphabetical: glyphs.IconAlphabetical,
+  info: glyphs.IconInfo,
 };
 
 const globalOverrides: Record<string, IconComponent> = {};

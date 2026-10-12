@@ -5,6 +5,7 @@ export * from "./infra/color";
 export * from "./infra/hooks";
 export * from "./infra/outline";
 export * from "./infra/state";
+export * from "./infra/selection";
 export * from "./shell";
 export * from "./widgets";
 export * from "./windows";
