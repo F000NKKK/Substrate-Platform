@@ -14,6 +14,8 @@ export { useContextMenu } from "./ContextMenu";
 export type { ContextMenuTarget } from "./ContextMenu";
 export { DataGrid } from "./DataGrid";
 export type { DataGridProps, DataGridColumn, DataGridSortState } from "./DataGrid";
+export { PropertyGrid } from "./PropertyGrid";
+export type { PropertyGridProps, PropertyDescriptor, PropertyKind, PropertyValue } from "./PropertyGrid";
 export { Tree } from "./Tree";
 export type { TreeNode, TreeMenuItem, TreeProps } from "./Tree";
 export { FileTree } from "./FileTree";

@@ -524,7 +524,12 @@ export function PropertyGrid({
                     >
                       <span className="sp-propgrid-name-text">{p.name}</span>
                       {/* The column splitter rides on every row's name/value boundary. */}
-                      <span className="sp-propgrid-splitter" onPointerDown={startSplitDrag} onClick={(e) => e.stopPropagation()} />
+                      <span
+                        className="sp-propgrid-splitter"
+                        onPointerDown={startSplitDrag}
+                        onClick={(e) => e.stopPropagation()}
+                        onDoubleClick={(e) => e.stopPropagation()}
+                      />
                     </div>
                     <div
                       className="sp-propgrid-value"
