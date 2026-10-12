@@ -3,6 +3,7 @@ import { Label } from "../../widgets/Label";
 import { TextField } from "../../widgets/TextField";
 import { Button } from "../../widgets/Button";
 import { useTheme } from "../../infra/theme";
+import { useT } from "../../infra/i18n";
 import "./EditorSettings.css";
 
 const LABELS = {
@@ -12,7 +13,7 @@ const LABELS = {
   wordWrap: "Word Wrap",
 } as const;
 
-/** Every setting label on this page — pass as the section's `keywords` so the Settings window's search finds the page by any of them. */
+/** Every setting label on this page (English; the Settings window's search also matches their translations) — pass as the section's `keywords` so the Settings window's search finds the page by any of them. */
 export const editorSettingsKeywords: readonly string[] = Object.values(LABELS);
 
 /**
@@ -42,32 +43,33 @@ function NumberSetting({ value, min, max, onCommit }: { value: number; min: numb
 
 /** The Settings window's "Editor" section — font, tab size and word wrap for every code editor, applied live (see `ThemeContextValue.editorPreferences`). */
 export function EditorSettings() {
+  const t = useT();
   const { editorPreferences: prefs, setEditorPreferences, resetEditorPreferences } = useTheme();
 
   return (
     <div className="sp-editor-settings">
-      <Label>{LABELS.fontFamily}</Label>
+      <Label>{t(LABELS.fontFamily)}</Label>
       <TextField
         value={prefs.fontFamily}
-        placeholder='Default monospace — or e.g. "JetBrains Mono", monospace'
+        placeholder={t('Default monospace — or e.g. "JetBrains Mono", monospace')}
         onChange={(e) => setEditorPreferences({ fontFamily: e.target.value })}
       />
 
-      <Label>{LABELS.fontSize}</Label>
+      <Label>{t(LABELS.fontSize)}</Label>
       <NumberSetting value={prefs.fontSize} min={8} max={40} onCommit={(fontSize) => setEditorPreferences({ fontSize })} />
 
-      <Label>{LABELS.tabSize}</Label>
+      <Label>{t(LABELS.tabSize)}</Label>
       <NumberSetting value={prefs.tabSize} min={1} max={16} onCommit={(tabSize) => setEditorPreferences({ tabSize })} />
 
       <label className="sp-editor-settings-check">
         <input type="checkbox" checked={prefs.wordWrap} onChange={(e) => setEditorPreferences({ wordWrap: e.target.checked })} />
-        {LABELS.wordWrap}
+        {t(LABELS.wordWrap)}
       </label>
 
       <div className="sp-editor-settings-divider" />
       <div>
         <Button variant="ghost" onClick={resetEditorPreferences}>
-          Reset to Defaults
+          {t("Reset to Defaults")}
         </Button>
       </div>
     </div>

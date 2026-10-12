@@ -5,9 +5,11 @@ import { getSearchQuery, SearchQuery, setSearchQuery } from "@codemirror/search"
 import { basicSetup, EditorView } from "codemirror";
 import { useTheme, type EditorPreferences } from "../../infra/theme";
 import { useStateStore } from "../../infra/state";
+import { useLocale } from "../../infra/i18n";
 import type { EditorProps } from "./EditorBase";
 import { minimalChange } from "./editorCommands";
 import { editorKeymap } from "./editorKeymap";
+import { editorPhrases } from "./editorPhrases";
 import { notifyEditorUpdate, registerEditorView } from "./editorRegistry";
 import { resolveEditorTheme } from "./editorThemes";
 import "./TextEditor.css";
@@ -59,6 +61,7 @@ export function TextEditor({
   const onViewReadyRef = useRef(onViewReady);
   onViewReadyRef.current = onViewReady;
   const { editorColors, editorPreferences } = useTheme();
+  const locale = useLocale();
   const store = useStateStore();
   const storeRef = useRef(store);
   storeRef.current = store;
@@ -72,6 +75,7 @@ export function TextEditor({
       readOnly: new Compartment(),
       theme: new Compartment(),
       preferences: new Compartment(),
+      phrases: new Compartment(),
       extra: new Compartment(),
     }),
     []
@@ -85,6 +89,7 @@ export function TextEditor({
       editorKeymap,
       compartments.theme.of(resolveEditorTheme(editorColors)),
       compartments.preferences.of(preferencesExtension(editorPreferences)),
+      compartments.phrases.of(editorPhrases()),
       compartments.language.of(language ?? []),
       compartments.readOnly.of(readOnlyExtension(readOnly)),
       compartments.extra.of(extraExtensions ?? []),
@@ -118,6 +123,8 @@ export function TextEditor({
   useReconfigure(viewRef, compartments.readOnly, useMemo(() => readOnlyExtension(readOnly), [readOnly]));
   useReconfigure(viewRef, compartments.theme, useMemo(() => resolveEditorTheme(editorColors), [editorColors]));
   useReconfigure(viewRef, compartments.preferences, useMemo(() => preferencesExtension(editorPreferences), [editorPreferences]));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useReconfigure(viewRef, compartments.phrases, useMemo(() => editorPhrases(), [locale]));
   useReconfigure(viewRef, compartments.extra, extraExtensions ?? EMPTY_EXTENSIONS);
 
   // Re-keyed on `path` so a renamed file's editor stays reachable under its

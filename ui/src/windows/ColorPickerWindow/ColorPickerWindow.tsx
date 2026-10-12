@@ -6,6 +6,7 @@ import { Swatch } from "../../widgets/Swatch";
 import { useDraggable } from "../../infra/hooks";
 import { sameColor, type HslColor } from "../../infra/color";
 import { IconClose } from "../../infra/icons";
+import { useT } from "../../infra/i18n";
 import "./ColorPickerWindow.css";
 
 export interface ColorPickerWindowProps {
@@ -22,14 +23,15 @@ export interface ColorPickerWindowProps {
  * (draggable, closable), not a cramped popover. Anything that needs to let
  * the user pick a color should open this rather than rolling its own.
  */
-export function ColorPickerWindow({ title = "Select Color", value, presets, defaultValue, onChange, onClose }: ColorPickerWindowProps) {
+export function ColorPickerWindow({ title, value, presets, defaultValue, onChange, onClose }: ColorPickerWindowProps) {
+  const t = useT();
   const { pos, handlers } = useDraggable({ x: 200, y: 140 });
 
   return (
     <div className="sp-color-picker" style={{ left: pos.x, top: pos.y }}>
       <div className="sp-color-picker-header" {...handlers}>
-        <Label>{title}</Label>
-        <IconButton size={24} aria-label="Close" onClick={onClose}>
+        <Label>{title ?? t("Select Color")}</Label>
+        <IconButton size={24} aria-label={t("Close")} onClick={onClose}>
           <IconClose size={20} />
         </IconButton>
       </div>
@@ -43,7 +45,7 @@ export function ColorPickerWindow({ title = "Select Color", value, presets, defa
         />
 
         <div className="sp-color-picker-field">
-          <Label>Lightness</Label>
+          <Label>{t("Lightness")}</Label>
           <input
             type="range"
             className="sp-color-picker-slider"
@@ -56,7 +58,7 @@ export function ColorPickerWindow({ title = "Select Color", value, presets, defa
 
         {presets && presets.length > 0 && (
           <div className="sp-color-picker-field">
-            <Label>Presets</Label>
+            <Label>{t("Presets")}</Label>
             <div className="sp-color-picker-swatches">
               {presets.map((preset) => (
                 <Swatch
@@ -72,7 +74,7 @@ export function ColorPickerWindow({ title = "Select Color", value, presets, defa
 
         {defaultValue && (
           <Button variant="ghost" onClick={() => onChange(defaultValue)}>
-            Reset to default
+            {t("Reset to default")}
           </Button>
         )}
       </div>

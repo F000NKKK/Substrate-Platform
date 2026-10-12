@@ -31,9 +31,9 @@ import {
 export interface EditorProvider {
   /** Stable, unique — what a host remembers as the user's chosen view. */
   id: string;
-  /** Shown on the view switcher (e.g. "Designer", "Code"). */
+  /** Shown on the view switcher (e.g. "Designer", "Code") — English, displayed through `t`. */
   label: string;
-  /** The editor's full name, for "Open With…" where every editor is listed (e.g. "Rust Editor"). Defaults to `label`. */
+  /** The editor's full name, for "Open With…" where every editor is listed (e.g. "Rust Editor"). Defaults to `label`. English, displayed through `t`. */
   name?: string;
   /** `Icon` name for the button that switches to this view (a host's editor title actions). Defaults by `kind`: `code` for text, `grid` for designers, `preview` for binary. */
   icon?: string;

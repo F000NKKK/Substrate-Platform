@@ -5,6 +5,7 @@ import { EditorColorField, editorColorLabels } from "../../widgets/EditorColorFi
 import { Button } from "../../widgets/Button";
 import { confirmDialog, promptDialog } from "../../widgets/Dialog";
 import { useTheme, editorColorKeys, isBuiltInProfile } from "../../infra/theme";
+import { useT } from "../../infra/i18n";
 import "./AppearanceSettings.css";
 
 /** Every setting label on the Appearance page (including each editor color) — pass as the section's `keywords` so the Settings window's search finds the page by any of them. */
@@ -22,6 +23,7 @@ export function AppearanceSettings() {
     exportEditorProfile,
     importEditorProfile,
   } = useTheme();
+  const t = useT();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
 
@@ -29,9 +31,9 @@ export function AppearanceSettings() {
 
   async function handleNewProfile() {
     const name = await promptDialog({
-      title: "New Color Profile",
-      label: "Profile name",
-      confirmLabel: "Create",
+      title: t("New Color Profile"),
+      label: t("Profile name"),
+      confirmLabel: t("Create"),
       validate: (value) => (value.trim() ? null : ""),
     });
     if (name) createEditorProfile(name.trim());
@@ -41,7 +43,11 @@ export function AppearanceSettings() {
     if (activeIsBuiltIn) return;
     const profile = editorProfiles.find((p) => p.id === editorTheme);
     if (!profile) return;
-    const confirmed = await confirmDialog({ title: "Delete Color Profile", message: `Delete profile "${profile.name}"?`, confirmLabel: "Delete" });
+    const confirmed = await confirmDialog({
+      title: t("Delete Color Profile"),
+      message: t('Delete profile "{name}"?', { name: profile.name }),
+      confirmLabel: t("Delete"),
+    });
     if (confirmed) deleteEditorProfile(profile.id);
   }
 
@@ -63,53 +69,53 @@ export function AppearanceSettings() {
     if (!file) return;
     file.text().then((json) => {
       const id = importEditorProfile(json);
-      setImportError(id ? null : "That file isn't a valid editor color profile.");
+      setImportError(id ? null : t("That file isn't a valid editor color profile."));
     });
   }
 
   return (
     <div className="sp-appearance-settings">
-      <Label>Accent Color</Label>
+      <Label>{t("Accent Color")}</Label>
       <AccentColorField />
 
       <div className="sp-appearance-settings-divider" />
 
-      <Label>Editor Color Profile</Label>
+      <Label>{t("Editor Color Profile")}</Label>
       <div className="sp-appearance-settings-row">
         <select className="sp-appearance-settings-select" value={editorTheme} onChange={(e) => setEditorTheme(e.target.value)}>
           {editorProfiles.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.name}
+              {p.builtIn ? t(p.name) : p.name}
             </option>
           ))}
         </select>
         <Button variant="ghost" onClick={handleNewProfile}>
-          New Profile…
+          {t("New Profile…")}
         </Button>
         {!activeIsBuiltIn && (
           <Button variant="ghost" onClick={handleDeleteProfile}>
-            Delete
+            {t("Delete")}
           </Button>
         )}
         {/* Reset only makes sense for a built-in profile — a custom one has no separate default to revert to. */}
         {activeIsBuiltIn && (
           <Button variant="ghost" onClick={resetEditorColors}>
-            Reset to Profile Defaults
+            {t("Reset to Profile Defaults")}
           </Button>
         )}
       </div>
       <div className="sp-appearance-settings-row">
         <Button variant="ghost" onClick={handleExportProfile}>
-          Export…
+          {t("Export…")}
         </Button>
         <Button variant="ghost" onClick={() => fileInputRef.current?.click()}>
-          Import…
+          {t("Import…")}
         </Button>
         <input ref={fileInputRef} type="file" accept="application/json" style={{ display: "none" }} onChange={handleImportFile} />
         {importError && <span className="sp-appearance-settings-error">{importError}</span>}
       </div>
 
-      <Label>Editor Colors</Label>
+      <Label>{t("Editor Colors")}</Label>
       <div className="sp-appearance-settings-colors">
         {editorColorKeys.map((key) => (
           <EditorColorField key={key} colorKey={key} />

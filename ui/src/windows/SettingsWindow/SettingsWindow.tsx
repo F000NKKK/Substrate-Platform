@@ -5,19 +5,21 @@ import { TextField } from "../../widgets/TextField";
 import { useDraggable } from "../../infra/hooks";
 import { useStoredState } from "../../infra/state";
 import { IconClose, IconSettings } from "../../infra/icons";
+import { t, useLocale } from "../../infra/i18n";
 import "./SettingsWindow.css";
 
 export interface SettingsSection {
   id: string;
   label: string;
   content: ReactNode;
-  /** The individual setting labels on this section (e.g. `editorSettingsKeywords`) — search matches these as well as `label`, so typing "tab size" finds the section that has it. */
+  /** The individual setting labels on this section (e.g. `editorSettingsKeywords`) — search matches these (in English and in the active language) as well as `label`, so typing "tab size" finds the section that has it. */
   keywords?: readonly string[];
 }
 
 function matches(section: SettingsSection, query: string): boolean {
   if (!query) return true;
-  return [section.label, ...(section.keywords ?? [])].some((text) => text.toLowerCase().includes(query));
+  const keywords = (section.keywords ?? []).flatMap((k) => [k, t(k)]);
+  return [section.label, ...keywords].some((text) => text.toLowerCase().includes(query));
 }
 
 export interface SettingsWindowProps {
@@ -35,6 +37,7 @@ export interface SettingsWindowProps {
  * (this window) is the one reusable piece.
  */
 export function SettingsWindow({ sections, initialSectionId, onClose }: SettingsWindowProps) {
+  const locale = useLocale();
   const { pos, handlers } = useDraggable({ x: 240, y: 100 });
   const [lastSectionId, setLastSectionId] = useStoredState<string | undefined>(
     "settings.section",
@@ -44,7 +47,7 @@ export function SettingsWindow({ sections, initialSectionId, onClose }: Settings
   const [selectedId, setSelectedId] = useState(initialSectionId ?? lastSectionId ?? sections[0]?.id);
   const [search, setSearch] = useState("");
 
-  const filtered = useMemo(() => sections.filter((s) => matches(s, search.trim().toLowerCase())), [sections, search]);
+  const filtered = useMemo(() => sections.filter((s) => matches(s, search.trim().toLowerCase())), [sections, search, locale]);
   // A search that filters out the selected section shows the first match
   // instead, rather than a page the list no longer offers.
   const selected = filtered.find((s) => s.id === selectedId) ?? filtered[0];
@@ -53,8 +56,8 @@ export function SettingsWindow({ sections, initialSectionId, onClose }: Settings
     <div className="sp-settings-window" style={{ left: pos.x, top: pos.y }}>
       <div className="sp-settings-header" {...handlers}>
         <IconSettings size={14} />
-        <span className="sp-settings-title">Options</span>
-        <IconButton size={24} aria-label="Close" onClick={onClose}>
+        <span className="sp-settings-title">{t("Options")}</span>
+        <IconButton size={24} aria-label={t("Close")} onClick={onClose}>
           <IconClose size={20} />
         </IconButton>
       </div>
@@ -62,7 +65,7 @@ export function SettingsWindow({ sections, initialSectionId, onClose }: Settings
       <div className="sp-settings-body">
         <div className="sp-settings-sidebar">
           <TextField
-            placeholder="Search Settings"
+            placeholder={t("Search Settings")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -83,7 +86,7 @@ export function SettingsWindow({ sections, initialSectionId, onClose }: Settings
           </div>
         </div>
         <div className="sp-settings-detail">
-          {selected ? selected.content : <p className="sp-settings-empty">No settings match "{search}".</p>}
+          {selected ? selected.content : <p className="sp-settings-empty">{t('No settings match "{query}".', { query: search })}</p>}
         </div>
       </div>
     </div>

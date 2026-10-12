@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Tab } from "../Tab";
+import { useT } from "../../infra/i18n";
 import type { EditorProps } from "./EditorBase";
 import type { EditorProvider } from "./registry";
 import "./MultiViewEditor.css";
@@ -30,6 +31,7 @@ export interface MultiViewEditorProps extends EditorProps {
  * With a single provider it renders just that editor, no switcher.
  */
 export function MultiViewEditor({ providers, view, onViewChange, renderView, showSwitcher = true, ...props }: MultiViewEditorProps) {
+  const t = useT();
   const active = providers.find((p) => p.id === view) ?? providers[0];
   const content = renderView ? renderView(active, props) : <active.component {...props} />;
   if (providers.length < 2 || !showSwitcher) return <>{content}</>;
@@ -39,7 +41,7 @@ export function MultiViewEditor({ providers, view, onViewChange, renderView, sho
       <div className="sp-multiview-editor-views" role="tablist">
         {providers.map((p) => (
           <Tab key={p.id} orientation="horizontal" active={p === active} onClick={() => onViewChange?.(p.id)}>
-            {p.label}
+            {t(p.label)}
           </Tab>
         ))}
       </div>

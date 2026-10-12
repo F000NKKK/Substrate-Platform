@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { DataGrid, type DataGridColumn } from "../DataGrid";
+import { t, useLocale } from "../../infra/i18n";
 import type { EditorProps } from "./EditorBase";
 
 interface PropertyRow {
@@ -80,10 +81,12 @@ function parseProperties(content: string): ParsedProperties {
   return { lines, eol, rows };
 }
 
-const columns: DataGridColumn<PropertyRow>[] = [
-  { key: "key", header: "Key", width: 220, sortable: true, editable: true, sortValue: (r) => r.key },
-  { key: "value", header: "Value", width: 260, editable: true },
-];
+function makeColumns(): DataGridColumn<PropertyRow>[] {
+  return [
+    { key: "key", header: t("Key"), width: 220, sortable: true, editable: true, sortValue: (r) => r.key },
+    { key: "value", header: t("Value"), width: 260, editable: true },
+  ];
+}
 
 /**
  * A sibling branch off `EditorBase`, like `ImageEditor` — not text-based
@@ -94,6 +97,9 @@ const columns: DataGridColumn<PropertyRow>[] = [
  */
 export function PropertiesGridEditor({ content, onChange, readOnly }: EditorProps) {
   const parsed = useMemo(() => parseProperties(content), [content]);
+  const locale = useLocale();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const columns = useMemo(makeColumns, [locale]);
 
   function commitEdit(row: PropertyRow, key: string, value: string) {
     if (readOnly) return;

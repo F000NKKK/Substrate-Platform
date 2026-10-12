@@ -3,9 +3,10 @@ import { Swatch } from "../Swatch";
 import { Button } from "../Button";
 import { ColorPickerWindow } from "../../windows/ColorPickerWindow";
 import { useTheme, colorSchemeFor, type EditorColorKey } from "../../infra/theme";
+import { useT } from "../../infra/i18n";
 import "./EditorColorField.css";
 
-/** Display name per color key — also what the Appearance page's settings search matches against. */
+/** Display name per color key (English; shown through `t`) — also what the Appearance page's settings search matches against. */
 export const editorColorLabels: Record<EditorColorKey, string> = {
   background: "Background",
   foreground: "Foreground",
@@ -29,21 +30,23 @@ export const editorColorLabels: Record<EditorColorKey, string> = {
  * one category it's bound to, never any other.
  */
 export function EditorColorField({ colorKey }: { colorKey: EditorColorKey }) {
+  const t = useT();
   const { editorColors, setEditorColor, editorTheme } = useTheme();
+  const label = t(editorColorLabels[colorKey]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const color = editorColors[colorKey];
 
   return (
     <div className="sp-editor-color-field">
-      <span className="sp-editor-color-field-label">{editorColorLabels[colorKey]}</span>
-      <Swatch color={color} onClick={() => setPickerOpen(true)} aria-label={`${editorColorLabels[colorKey]} color`} />
+      <span className="sp-editor-color-field-label">{label}</span>
+      <Swatch color={color} onClick={() => setPickerOpen(true)} aria-label={t("{name} color", { name: label })} />
       <Button variant="ghost" onClick={() => setPickerOpen(true)}>
-        Choose Color…
+        {t("Choose Color…")}
       </Button>
 
       {pickerOpen && (
         <ColorPickerWindow
-          title={editorColorLabels[colorKey]}
+          title={label}
           value={color}
           defaultValue={colorSchemeFor(editorTheme)[colorKey]}
           onChange={(next) => setEditorColor(colorKey, next)}
