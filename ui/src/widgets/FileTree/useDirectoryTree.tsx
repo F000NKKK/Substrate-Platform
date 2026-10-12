@@ -139,8 +139,10 @@ export function useDirectoryTree(
       if (restored.size > 0) setExpandedIds((prev) => new Set([...prev, ...restored]));
       restoredRef.current = true;
     })();
+    // Also re-run when the store switches (its saved state for this root
+    // only just became available, e.g. a workspace file finished loading).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rootPath]);
+  }, [rootPath, store]);
 
   useEffect(() => {
     if (!persistKey || !restoredRef.current) return;
