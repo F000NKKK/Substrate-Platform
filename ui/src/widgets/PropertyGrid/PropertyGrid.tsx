@@ -136,7 +136,7 @@ export function PropertyGrid({
   const [descriptionHeight, setDescriptionHeight] = useStoredState<number>(`${persistKey}.descriptionHeight`, 64, (v) => typeof v === "number");
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState<string | null>(null);
-  const [editing, setEditing] = useState<{ id: string; draft: string } | null>(null);
+  const [editing, setEditing] = useState<{ id: string; draft: string; session: number } | null>(null);
   const [error, setError] = useState<{ id: string; message: string } | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const rowsRef = useRef<HTMLDivElement>(null);
@@ -197,8 +197,7 @@ export function PropertyGrid({
       rowsRef.current?.querySelector<HTMLSelectElement>(`[data-property-id="${CSS.escape(p.id)}"] select`)?.focus();
       return;
     }
-    sessionRef.current++;
-    setEditing({ id: p.id, draft: draftOf(p) });
+    setEditing({ id: p.id, draft: draftOf(p), session: ++sessionRef.current });
   }
 
   function cancelEdit() {
@@ -382,20 +381,22 @@ export function PropertyGrid({
           readOnly={busy}
           onFocus={(e) => e.currentTarget.select()}
           onChange={(e) => {
-            setEditing({ id: p.id, draft: e.target.value });
+            setEditing({ ...editing, draft: e.target.value });
             if (invalid) setError(null);
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              void commitText(p, editing.draft, false);
+              if (!busy) void commitText(p, editing.draft, false);
             } else if (e.key === "Escape") {
               e.preventDefault();
               cancelEdit();
             }
           }}
           onBlur={() => {
-            if (busyId !== p.id) void commitText(p, editing.draft, true);
+            // Not while an Enter commit is in flight, nor once the session
+            // is over (the box unmounting after a commit can blur it).
+            if (!busy && editing.session === sessionRef.current) void commitText(p, editing.draft, true);
           }}
         />
       );
