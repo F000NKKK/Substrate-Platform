@@ -66,4 +66,4 @@ export type { SearchResultsProps, SearchResultGroup, SearchResultHit } from "./S
 export { FormPage, FormSection, FormField, CommitTextField, StringListField, CheckField, SelectField } from "./Form";
 export type { CommitResult, FormFieldProps, CommitTextFieldProps, StringListFieldProps, SelectOption } from "./Form";
 export { ComponentList } from "./ComponentList";
-export type { ComponentListProps, ComponentListItem, ComponentListAction, ComponentStatus } from "./ComponentList";
+export type { ComponentListProps, ComponentListItem, ComponentListAction, ComponentListSection, ComponentStatus } from "./ComponentList";

@@ -1,2 +1,2 @@
 export { ComponentList } from "./ComponentList";
-export type { ComponentListProps, ComponentListItem, ComponentListAction, ComponentStatus } from "./ComponentList";
+export type { ComponentListProps, ComponentListItem, ComponentListAction, ComponentListSection, ComponentStatus } from "./ComponentList";

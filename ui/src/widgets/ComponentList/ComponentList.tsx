@@ -37,8 +37,19 @@ export interface ComponentListItem {
   onSelectedChange?: (selected: boolean) => void;
 }
 
-export interface ComponentListProps {
+/** A titled group of components — Visual Studio Installer's workload categories. */
+export interface ComponentListSection {
+  id: string;
+  /** Already translated. */
+  title: string;
   items: ComponentListItem[];
+}
+
+export interface ComponentListProps {
+  /** One flat list; or */
+  items?: ComponentListItem[];
+  /** components under section headings (empty sections are skipped). */
+  sections?: ComponentListSection[];
   emptyLabel?: string;
 }
 
@@ -49,8 +60,23 @@ export interface ComponentListProps {
  * only while there's one. Product-neutral: the product decides what the
  * components are and what the actions do.
  */
-export function ComponentList({ items, emptyLabel }: ComponentListProps) {
-  if (items.length === 0 && emptyLabel) return <p className="sp-component-list-empty">{emptyLabel}</p>;
+export function ComponentList({ items, sections, emptyLabel }: ComponentListProps) {
+  const groups = (sections ?? [{ id: "", title: "", items: items ?? [] }]).filter((s) => s.items.length > 0);
+  if (groups.length === 0) return emptyLabel ? <p className="sp-component-list-empty">{emptyLabel}</p> : null;
+  if (!sections) return <Rows items={groups[0].items} />;
+  return (
+    <div className="sp-component-sections">
+      {groups.map((section) => (
+        <section key={section.id} className="sp-component-section">
+          <h3 className="sp-component-section-title">{section.title}</h3>
+          <Rows items={section.items} />
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function Rows({ items }: { items: ComponentListItem[] }) {
   return (
     <ul className="sp-component-list">
       {items.map((item) => (
