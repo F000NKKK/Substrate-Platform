@@ -2,9 +2,13 @@
 //! (e.g. a terminal panel's "new terminal" menu) can offer only real,
 //! spawnable choices instead of a hardcoded list that assumes a shell exists.
 
+use serde::Serialize;
+
 /// One shell the host can offer to spawn — `command` is what gets passed to
-/// [`crate::pty::PtySession::spawn`]'s `shell` argument.
-#[derive(Clone, Debug)]
+/// [`crate::pty::PtySession::spawn`]'s `shell` argument. Serializes with
+/// camelCase field names (`clearCommand`), ready to hand to a JS frontend.
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ShellInfo {
     pub id: String,
     pub label: String,
