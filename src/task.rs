@@ -7,8 +7,8 @@ use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc;
 use std::sync::{Arc, Condvar, Mutex};
-use std::thread::JoinHandle;
 use std::time::Duration;
 
 use crate::log::LogSink;
@@ -107,8 +107,8 @@ struct TaskShared {
 /// (or [`Self::exit_status`]) from the UI thread, or block on [`Self::wait`]
 /// from a background one; output arrives in the [`LogSink`] passed to
 /// [`spawn`]. The final "(process exited ...)" line is only pushed after
-/// both output streams have been fully drained, so no output line can ever
-/// arrive after it.
+/// both output streams have been drained, so output can't arrive after it
+/// (barring a grandchild holding the pipes open — see [`READER_GRACE`]).
 #[derive(Clone)]
 pub struct TaskHandle {
     shared: Arc<TaskShared>,
@@ -143,10 +143,21 @@ impl TaskHandle {
 /// waiting is a `try_wait` poll instead.
 const POLL_INTERVAL: Duration = Duration::from_millis(20);
 
+/// How long to wait, once the child itself has exited, for its output
+/// streams to reach EOF. Normally instant — but a grandchild that inherited
+/// the pipes (a build daemon, or the real process behind a killed `sh -c`
+/// wrapper) can hold them open indefinitely, and the task must still finish.
+/// Lines arriving after this grace period may trail the exit line.
+const READER_GRACE: Duration = Duration::from_secs(2);
+/// Shorter grace after a cancel — the user asked for it to stop now.
+const READER_GRACE_CANCELLED: Duration = Duration::from_millis(250);
+
 /// A spawned child plus the threads streaming its stdout/stderr.
 struct StreamingChild {
     child: Child,
-    readers: Vec<JoinHandle<()>>,
+    /// Disconnects once every reader thread has finished (each holds a
+    /// sender; nothing is ever sent).
+    readers_done: mpsc::Receiver<()>,
 }
 
 /// Builds and spawns `program`, attaching reader threads that stream its
@@ -173,29 +184,36 @@ fn spawn_streaming(
     sink.info(format!("$ {} {}", program, args.join(" ")));
     let mut child = cmd.spawn()?;
 
-    let mut readers = Vec::new();
+    let (done_tx, readers_done) = mpsc::channel();
     if let Some(stdout) = child.stdout.take() {
         let sink = sink.clone();
-        readers.push(std::thread::spawn(move || {
+        let done = done_tx.clone();
+        std::thread::spawn(move || {
+            let _done = done;
             for line in BufReader::new(stdout).lines().map_while(Result::ok) {
                 sink.info(line);
             }
-        }));
+        });
     }
     if let Some(stderr) = child.stderr.take() {
         let sink = sink.clone();
-        readers.push(std::thread::spawn(move || {
+        let done = done_tx;
+        std::thread::spawn(move || {
+            let _done = done;
             for line in BufReader::new(stderr).lines().map_while(Result::ok) {
                 sink.warn(line);
             }
-        }));
+        });
     }
 
-    Ok(StreamingChild { child, readers })
+    Ok(StreamingChild {
+        child,
+        readers_done,
+    })
 }
 
 /// Waits for `running` to exit (killing it if `cancel` gets set meanwhile),
-/// joins its reader threads, then reports the "(process exited ...)" line
+/// waits for its reader threads to drain (see [`READER_GRACE`]), then reports the "(process exited ...)" line
 /// into `sink` — strictly after every output line.
 fn finish_streamed(mut running: StreamingChild, cancel: &AtomicBool, sink: &LogSink) -> TaskExit {
     let mut cancelled = false;
@@ -213,9 +231,13 @@ fn finish_streamed(mut running: StreamingChild, cancel: &AtomicBool, sink: &LogS
         std::thread::sleep(POLL_INTERVAL);
     };
 
-    for reader in running.readers {
-        let _ = reader.join();
-    }
+    let grace = if cancelled {
+        READER_GRACE_CANCELLED
+    } else {
+        READER_GRACE
+    };
+    // Only ever returns Disconnected (all readers done) or Timeout.
+    let _ = running.readers_done.recv_timeout(grace);
 
     match status {
         _ if cancelled => {
