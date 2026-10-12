@@ -74,3 +74,9 @@
   margin: 0;
   color: var(--sp-text-faint);
 }
+
+.sp-settings-header-extra {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-xs);
+}

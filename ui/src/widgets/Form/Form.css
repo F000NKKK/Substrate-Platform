@@ -1,0 +1,174 @@
+.sp-form-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-lg);
+  max-width: 720px;
+}
+
+.sp-form-page-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-md);
+}
+
+.sp-form-page-title {
+  flex: 1;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--sp-text);
+}
+
+.sp-form-page-actions,
+.sp-form-section-actions {
+  display: flex;
+  gap: var(--sp-space-xs);
+}
+
+.sp-form-page-description,
+.sp-form-section-description {
+  margin: 0;
+  color: var(--sp-text-muted);
+  font-size: var(--sp-font-size);
+  line-height: 1.45;
+}
+
+.sp-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-sm);
+}
+
+.sp-form-section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-sm);
+  padding-bottom: var(--sp-space-xs);
+  border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-form-section-title {
+  flex: 1;
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sp-text-muted);
+}
+
+.sp-form-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-sm);
+}
+
+.sp-form-field {
+  display: grid;
+  grid-template-columns: minmax(140px, 200px) minmax(0, 1fr);
+  gap: var(--sp-space-md);
+  align-items: start;
+}
+
+.sp-form-field-label {
+  padding-top: 5px;
+  color: var(--sp-text);
+  font-size: var(--sp-font-size);
+}
+
+.sp-form-field-required {
+  color: var(--sp-danger);
+}
+
+.sp-form-field-control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-xs);
+  min-width: 0;
+}
+
+.sp-form-field-hint {
+  color: var(--sp-text-faint);
+  font-size: 0.85em;
+  line-height: 1.4;
+}
+
+.sp-form-field-error {
+  color: var(--sp-danger);
+  font-size: 0.85em;
+  line-height: 1.4;
+}
+
+.sp-form-input-wrap {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sp-form-input.is-mono {
+  font-family: var(--sp-font-mono);
+}
+
+.sp-form-input.is-invalid,
+.sp-form-input.is-invalid:focus {
+  border-color: var(--sp-danger);
+  box-shadow: none;
+}
+
+.sp-form-textarea {
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.sp-form-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-xs);
+}
+
+.sp-form-list-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-space-xs);
+}
+
+.sp-form-list-add {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-space-xs);
+}
+
+.sp-form-check {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-sm);
+  color: var(--sp-text);
+  font-size: var(--sp-font-size);
+  cursor: pointer;
+}
+
+.sp-form-check.is-disabled {
+  color: var(--sp-text-faint);
+  cursor: default;
+}
+
+.sp-form-select {
+  height: 28px;
+  box-sizing: border-box;
+  padding: 0 var(--sp-space-sm);
+  border: 1px solid var(--sp-border-strong);
+  border-radius: var(--sp-radius-sm);
+  background: var(--sp-surface-2);
+  color: var(--sp-text);
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+  align-self: flex-start;
+  max-width: 100%;
+}
+
+.sp-form-select:focus {
+  outline: none;
+  border-color: var(--sp-accent);
+}

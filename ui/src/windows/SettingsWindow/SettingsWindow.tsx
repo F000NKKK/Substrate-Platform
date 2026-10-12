@@ -27,6 +27,14 @@ export interface SettingsWindowProps {
   /** Opens on this section — otherwise on the one last viewed (remembered in the current `StateStore`), or the first. */
   initialSectionId?: string;
   onClose: () => void;
+  /** The title bar's text — "Options" by default (a project's property pages pass "{name} Properties"). */
+  title?: string;
+  /** Extra controls in the title bar, before the close button (e.g. "View Code"). */
+  headerExtra?: ReactNode;
+  /** Where the last viewed section is remembered — give each kind of window its own key. */
+  sectionStateKey?: string;
+  /** Hides the search box — for windows with a handful of fixed pages. */
+  hideSearch?: boolean;
 }
 
 /**
@@ -36,11 +44,11 @@ export interface SettingsWindowProps {
  * right. Any product wires its own sections in; the shell
  * (this window) is the one reusable piece.
  */
-export function SettingsWindow({ sections, initialSectionId, onClose }: SettingsWindowProps) {
+export function SettingsWindow({ sections, initialSectionId, onClose, title, headerExtra, sectionStateKey = "settings.section", hideSearch }: SettingsWindowProps) {
   const locale = useLocale();
   const { pos, handlers } = useDraggable({ x: 240, y: 100 });
   const [lastSectionId, setLastSectionId] = useStoredState<string | undefined>(
-    "settings.section",
+    sectionStateKey,
     undefined,
     (v) => typeof v === "string"
   );
@@ -56,7 +64,12 @@ export function SettingsWindow({ sections, initialSectionId, onClose }: Settings
     <div className="sp-settings-window" style={{ left: pos.x, top: pos.y }}>
       <div className="sp-settings-header" {...handlers}>
         <IconSettings size={14} />
-        <span className="sp-settings-title">{t("Options")}</span>
+        <span className="sp-settings-title">{title ?? t("Options")}</span>
+        {headerExtra && (
+          <div className="sp-settings-header-extra" onPointerDown={(e) => e.stopPropagation()}>
+            {headerExtra}
+          </div>
+        )}
         <IconButton size={24} aria-label={t("Close")} onClick={onClose}>
           <IconClose size={20} />
         </IconButton>
@@ -64,11 +77,13 @@ export function SettingsWindow({ sections, initialSectionId, onClose }: Settings
 
       <div className="sp-settings-body">
         <div className="sp-settings-sidebar">
-          <TextField
+          {!hideSearch && (
+            <TextField
             placeholder={t("Search Settings")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-          />
+            />
+          )}
           <div className="sp-settings-categories">
             {filtered.map((section) => (
               <Tab

@@ -212,3 +212,9 @@ registerTranslations(
     "Line number (1 - {lines}):": "Номер строки (1 - {lines}):",
   },
 );
+
+// Form and component-list widgets.
+registerTranslations("ru", {
+  Add: "Добавить",
+  Remove: "Удалить",
+});

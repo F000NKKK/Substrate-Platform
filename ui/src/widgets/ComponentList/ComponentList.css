@@ -1,0 +1,153 @@
+.sp-component-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius-sm);
+}
+
+.sp-component-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-space-md);
+  padding: var(--sp-space-sm) var(--sp-space-md);
+  border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-component-row:last-child {
+  border-bottom: none;
+}
+
+.sp-component-row:hover {
+  background: var(--sp-surface-2);
+}
+
+.sp-component-row.is-optional .sp-component-name,
+.sp-component-row.is-optional .sp-component-description {
+  color: var(--sp-text-faint);
+}
+
+.sp-component-select {
+  margin-top: 3px;
+}
+
+.sp-component-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sp-component-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-space-sm);
+}
+
+.sp-component-name {
+  color: var(--sp-text);
+  font-weight: 600;
+}
+
+.sp-component-version {
+  color: var(--sp-text-muted);
+  font-family: var(--sp-font-mono);
+  font-size: 0.9em;
+}
+
+.sp-component-status {
+  padding: 0 6px;
+  border-radius: var(--sp-radius-xs);
+  font-size: 11px;
+  line-height: 17px;
+  background: var(--sp-surface-3);
+  color: var(--sp-text-muted);
+}
+
+.sp-component-status.is-installed {
+  color: var(--sp-accent);
+  background: var(--sp-accent-soft);
+}
+
+.sp-component-status.is-missing,
+.sp-component-status.is-failed {
+  color: var(--sp-danger);
+  background: color-mix(in srgb, var(--sp-danger) 14%, transparent);
+}
+
+.sp-component-status.is-outdated,
+.sp-component-status.is-partial {
+  color: var(--sp-warning);
+  background: color-mix(in srgb, var(--sp-warning) 14%, transparent);
+}
+
+.sp-component-description {
+  color: var(--sp-text-muted);
+  font-size: 0.92em;
+  line-height: 1.4;
+}
+
+.sp-component-detail {
+  color: var(--sp-text-faint);
+  font-family: var(--sp-font-mono);
+  font-size: 0.85em;
+  overflow-wrap: anywhere;
+}
+
+.sp-component-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-sm);
+  margin-top: var(--sp-space-xs);
+}
+
+.sp-component-progress-bar {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--sp-surface-3);
+}
+
+.sp-component-progress-fill {
+  height: 100%;
+  background: var(--sp-accent);
+  transition: width var(--sp-duration-base) var(--sp-easing);
+}
+
+.sp-component-progress-bar.is-indeterminate .sp-component-progress-fill {
+  position: absolute;
+  width: 30%;
+  animation: sp-component-indeterminate 1.2s var(--sp-easing) infinite;
+}
+
+@keyframes sp-component-indeterminate {
+  from {
+    left: -30%;
+  }
+  to {
+    left: 100%;
+  }
+}
+
+.sp-component-progress-label {
+  color: var(--sp-text-muted);
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+
+.sp-component-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--sp-space-xs);
+}
+
+.sp-component-list-empty {
+  margin: 0;
+  color: var(--sp-text-faint);
+}
