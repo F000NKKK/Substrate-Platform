@@ -1,7 +1,9 @@
-import type { InputHTMLAttributes } from "react";
+import type { InputHTMLAttributes, Ref } from "react";
 import "./TextField.css";
 
-export interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {}
+export interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
+  ref?: Ref<HTMLInputElement>;
+}
 
 /** The platform's one styled text input — any search box or settings field should use this rather than a bare `<input>`. */
 export function TextField({ className, ...props }: TextFieldProps) {

@@ -79,3 +79,9 @@
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+/* Trailing indicators sit right after the stage text, not pushed apart. */
+.sp-status-bar-button {
+  margin-left: 2px;
+  white-space: nowrap;
+}
