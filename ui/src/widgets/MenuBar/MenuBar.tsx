@@ -6,7 +6,7 @@ export interface MenuBarProps {
   title?: string;
   /** Menu entries — typically a row of <MenuBarItem>. */
   children?: ReactNode;
-  /** Right-aligned slot — e.g. a <PalettePicker>. */
+  /** Right-aligned slot — e.g. a settings or accent-color button. */
   actions?: ReactNode;
   /** Furthest-right slot — typically a <WindowControls> for a `decorations: false` window. */
   windowControls?: ReactNode;

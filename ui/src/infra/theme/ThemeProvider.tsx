@@ -31,7 +31,7 @@ function randomId(): string {
 
 export interface ThemeProviderProps {
   children: ReactNode;
-  /** Overrides the shipped default (studio purple) for products that want their own initial accent. */
+  /** Overrides the shipped default (`defaultAccent`, emerald) for products that want their own initial accent. */
   initialAccent?: AccentColor;
 }
 
