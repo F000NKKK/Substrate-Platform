@@ -18,7 +18,12 @@ export {
   GroovyEditor,
   PythonEditor,
   languageForPath,
+  xmlSchemaLanguage,
 } from "./languageEditors";
+export type { XmlSchema } from "./languageEditors";
+export { editorSyncListener, editorApplyText, editorRevealRange, editorSetLinkedRange, linkedRangeHighlight } from "./editorSync";
+export type { EditorSyncUpdate } from "./editorSync";
+export type { EditorView } from "@codemirror/view";
 export { changeGutter, setChangeBaseline } from "./changeGutter";
 export { ImageEditor } from "./ImageEditor";
 export type { ImageEditorProps } from "./ImageEditor";

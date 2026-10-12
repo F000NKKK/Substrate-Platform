@@ -7,6 +7,8 @@ export interface FileTreeNode {
   name: string;
   kind: "folder" | "file";
   children?: FileTreeNode[];
+  /** A file's dependent files, shown under it (see `nestFiles`). */
+  nested?: FileTreeNode[];
   /** Overrides the default folder/folderOpen/file glyph for this node. */
   icon?: ReactNode;
 }
@@ -54,8 +56,36 @@ function toTreeNodes(nodes: FileTreeNode[]): TreeNode<FileTreeNode>[] {
     id: node.id,
     label: node.name,
     data: node,
-    children: node.kind === "folder" ? toTreeNodes(node.children ?? []) : undefined,
+    children: node.kind === "folder" ? toTreeNodes(node.children ?? []) : node.nested?.length ? toTreeNodes(node.nested) : undefined,
+    openable: node.kind === "file" && !!node.nested?.length,
   }));
+}
+
+/**
+ * File nesting, as Visual Studio does for `Form1.cs` ▸ `Form1.Designer.cs`
+ * and `Form1.resx`: every file `parentOf` names a sibling for (by name —
+ * `parentOf(name, siblings)`, `siblings` lowercased) moves under that file's
+ * `nested`. Folders are left alone; recurses into their children.
+ */
+export function nestFiles(nodes: FileTreeNode[], parentOf: (name: string, siblings: Set<string>) => string | null): FileTreeNode[] {
+  const files = new Map(nodes.filter((n) => n.kind === "file").map((n) => [n.name.toLowerCase(), n]));
+  const siblings = new Set(files.keys());
+  const nestedUnder = new Map<string, FileTreeNode[]>();
+  const top: FileTreeNode[] = [];
+  for (const node of nodes) {
+    if (node.kind === "folder") {
+      top.push(node.children ? { ...node, children: nestFiles(node.children, parentOf) } : node);
+      continue;
+    }
+    const parent = parentOf(node.name, siblings)?.toLowerCase();
+    if (parent && parent !== node.name.toLowerCase() && files.has(parent)) {
+      nestedUnder.set(parent, [...(nestedUnder.get(parent) ?? []), node]);
+    } else top.push(node);
+  }
+  return top.map((node) => {
+    const nested = node.kind === "file" ? nestedUnder.get(node.name.toLowerCase()) : undefined;
+    return nested ? { ...node, nested } : node;
+  });
 }
 
 /** `Tree` configured for a file explorer: folder/file (open/closed) icons on top of its generic expand/collapse, selection, and context-menu behavior. */
@@ -75,6 +105,7 @@ export function FileTree({ nodes, onActivate, getMenuItems, onDropNodes, canDrag
       }
       onDropNodes={onDropNodes && ((ids, target, copy) => onDropNodes(ids, target.data, copy))}
       canDrag={canDrag && ((node) => canDrag(node.data))}
+      canDropInto={(node) => node.data.kind === "folder"}
       {...rest}
     />
   );

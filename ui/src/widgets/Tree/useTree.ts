@@ -102,7 +102,7 @@ export function useTree<T>({
   function handleRowClick(node: TreeNode<T>, e: ReactMouseEvent) {
     setActiveId(node.id);
     selectNode(node, { toggle: e.metaKey || e.ctrlKey, range: e.shiftKey });
-    if (node.children) toggleExpanded(node.id);
+    if (node.children && !node.openable) toggleExpanded(node.id);
   }
 
   function handleKeyDown(e: KeyboardEvent, entry: FlatEntry<T>) {
@@ -137,7 +137,7 @@ export function useTree<T>({
         break;
       case "Enter":
         e.preventDefault();
-        if (entry.node.children) toggleExpanded(entry.node.id);
+        if (entry.node.children && !entry.node.openable) toggleExpanded(entry.node.id);
         else onActivate?.(entry.node);
         break;
       case " ":

@@ -19,6 +19,12 @@ export interface DocumentCommands {
   paste: () => void;
   selectAll: () => void;
   delete?: () => void;
+  /**
+   * For a designer sharing its file with a text view in the same tab (a
+   * split view): whether the Edit menu should act on the designer rather
+   * than the text — it was focused last. Without it the text view wins.
+   */
+  preferred?: () => boolean;
 }
 
 const commands = new Map<string, DocumentCommands>();

@@ -1,0 +1,99 @@
+.sp-split-pane {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sp-split-pane--column {
+  flex-direction: column;
+}
+
+.sp-split-pane-first,
+.sp-split-pane-second {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* A collapsed pane stays mounted (editor state survives), just out of the layout. */
+.sp-split-pane--only-first .sp-split-pane-second,
+.sp-split-pane--only-second .sp-split-pane-first {
+  display: none;
+}
+
+.sp-split-pane--only-first .sp-split-pane-first,
+.sp-split-pane--only-second .sp-split-pane-second {
+  flex: 1 1 0 !important;
+}
+
+.sp-split-pane-handle {
+  flex: 0 0 auto;
+  position: relative;
+  background: var(--sp-border);
+  outline: none;
+}
+
+.sp-split-pane--row > .sp-split-pane-handle {
+  width: 1px;
+  cursor: col-resize;
+}
+
+.sp-split-pane--column > .sp-split-pane-handle {
+  height: 1px;
+  cursor: row-resize;
+}
+
+/* A wider grab area around the thin line. */
+.sp-split-pane-handle:not(.sp-split-pane-handle--bar)::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  z-index: 1;
+}
+
+.sp-split-pane-handle--bar {
+  display: flex;
+  align-items: center;
+  width: auto !important;
+  height: auto !important;
+  background: var(--sp-surface-1);
+  border: 0 solid var(--sp-border);
+}
+
+.sp-split-pane--column > .sp-split-pane-handle--bar {
+  border-width: 1px 0;
+}
+
+.sp-split-pane--row > .sp-split-pane-handle--bar {
+  flex-direction: column;
+  border-width: 0 1px;
+}
+
+.sp-split-pane--only-first > .sp-split-pane-handle,
+.sp-split-pane--only-second > .sp-split-pane-handle {
+  cursor: default;
+}
+
+.sp-split-pane--only-first > .sp-split-pane-handle:not(.sp-split-pane-handle--bar),
+.sp-split-pane--only-second > .sp-split-pane-handle:not(.sp-split-pane-handle--bar) {
+  display: none;
+}
+
+.sp-split-pane-handle:focus-visible,
+.sp-split-pane--dragging > .sp-split-pane-handle:not(.sp-split-pane-handle--bar) {
+  background: var(--sp-accent);
+}
+
+/* While dragging, panes mustn't swallow the pointer (iframes, editors). */
+.sp-split-pane--dragging {
+  user-select: none;
+}
+
+.sp-split-pane--dragging > .sp-split-pane-first,
+.sp-split-pane--dragging > .sp-split-pane-second {
+  pointer-events: none;
+}

@@ -1,6 +1,6 @@
 import { json } from "@codemirror/lang-json";
 import { rust } from "@codemirror/lang-rust";
-import { xml } from "@codemirror/lang-xml";
+import { xml, type AttrSpec, type ElementSpec } from "@codemirror/lang-xml";
 import { java } from "@codemirror/lang-java";
 import { markdown } from "@codemirror/lang-markdown";
 import { StreamLanguage } from "@codemirror/language";
@@ -90,6 +90,22 @@ export function GroovyEditor(props: CodeEditorProps) {
 
 export function PythonEditor(props: CodeEditorProps) {
   return <CodeEditor {...props} language={pythonLanguage} />;
+}
+
+/** An XML vocabulary — its elements and their attributes (with values to offer, for enums) — for completion. */
+export interface XmlSchema {
+  elements: readonly ElementSpec[];
+  /** Attributes the elements refer to by name; `global: true` ones are offered on every element. */
+  attributes?: readonly AttrSpec[];
+}
+
+/**
+ * XML highlighting with completion of `schema`'s element and attribute names
+ * and attribute values, and auto-closed tags — for an editor of one XML
+ * dialect. Build it once (module level or `useMemo`), like the languages above.
+ */
+export function xmlSchemaLanguage(schema: XmlSchema): Extension {
+  return xml({ elements: schema.elements, attributes: schema.attributes, autoCloseTags: true });
 }
 
 const LANGUAGES_BY_EXTENSION: Record<string, Extension> = {

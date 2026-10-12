@@ -11,6 +11,13 @@ export interface TreeNode<T> {
   label: ReactNode;
   /** Present (even as `[]`) marks this node as an expandable branch; omit for a leaf. */
   children?: TreeNode<T>[];
+  /**
+   * A branch that's also an item of its own — a file with files nested under
+   * it (Visual Studio's `Form1.cs` ▸ `Form1.Designer.cs`): a click selects
+   * it rather than toggling, the chevron expands it, and double-click/Enter
+   * activate it like a leaf.
+   */
+  openable?: boolean;
   data: T;
 }
 
@@ -58,6 +65,8 @@ export interface TreeProps<T> {
   onDropNodes?: (ids: string[], target: TreeNode<T>, copy: boolean) => void;
   /** Whether a row can be dragged at all (default: every row). */
   canDrag?: (node: TreeNode<T>) => boolean;
+  /** Whether a drop can go into a branch (default: every non-`openable` branch); a drop elsewhere goes to the nearest ancestor that can take it. */
+  canDropInto?: (node: TreeNode<T>) => boolean;
   className?: string;
 }
 
@@ -91,11 +100,13 @@ function findTreeNode<T>(nodes: TreeNode<T>[], id: string): TreeNode<T> | null {
   return null;
 }
 
-/** The branch a drop on `id` means — the node itself, or a leaf's parent. */
-function dropBranch<T>(nodes: TreeNode<T>[], id: string): TreeNode<T> | null {
-  const node = findTreeNode(nodes, id);
-  if (!node) return null;
-  return node.children ? node : findParent(nodes, id);
+const defaultCanDropInto = <T,>(node: TreeNode<T>) => !!node.children && !node.openable;
+
+/** The branch a drop on `id` means — the node itself, or its nearest ancestor that takes drops. */
+function dropBranch<T>(nodes: TreeNode<T>[], id: string, canDropInto: (node: TreeNode<T>) => boolean): TreeNode<T> | null {
+  let node = findTreeNode(nodes, id);
+  while (node && !canDropInto(node)) node = findParent(nodes, node.id);
+  return node;
 }
 
 function findParent<T>(nodes: TreeNode<T>[], id: string): TreeNode<T> | null {
@@ -121,7 +132,7 @@ const INDENT = 16;
  * a listing in the tens of thousands. `FileTree` is a thin config layer on
  * top of this one.
  */
-export function Tree<T>({ nodes, renderIcon, getMenuItems, onDropNodes, canDrag, className, ...rest }: TreeProps<T>) {
+export function Tree<T>({ nodes, renderIcon, getMenuItems, onDropNodes, canDrag, canDropInto = defaultCanDropInto, className, ...rest }: TreeProps<T>) {
   const tree = useTree({ nodes, getMenuItems, ...rest });
   const [drag, setDrag] = useState<TreeDrag | null>(null);
   const dragRef = useRef<TreeDrag | null>(null);
@@ -151,11 +162,11 @@ export function Tree<T>({ nodes, renderIcon, getMenuItems, onDropNodes, canDrag,
 
     function targetAt(x: number, y: number): string | null {
       const row = document.elementFromPoint(x, y)?.closest<HTMLElement>(".sp-tree-row[data-node-id]");
-      const branch = row ? dropBranch(nodes, row.dataset.nodeId!) : null;
+      const branch = row ? dropBranch(nodes, row.dataset.nodeId!, canDropInto) : null;
       if (!branch) return null;
       // Not into itself or its own subtree, and not where it already is.
       if (ids.some((id) => subtreeContains(nodes, id, branch.id))) return null;
-      if (ids.every((id) => findParent(nodes, id)?.id === branch.id)) return null;
+      if (ids.every((id) => dropBranch(nodes, findParent(nodes, id)?.id ?? "", canDropInto)?.id === branch.id)) return null;
       return branch.id;
     }
     function onMove(ev: PointerEvent) {
@@ -213,12 +224,25 @@ export function Tree<T>({ nodes, renderIcon, getMenuItems, onDropNodes, canDrag,
               if (!suppressClickRef.current) tree.handleRowClick(node, e);
             }}
             onDoubleClick={() => {
-              if (!node.children) rest.onActivate?.(node);
+              if (!node.children || node.openable) rest.onActivate?.(node);
             }}
             onContextMenu={(e) => tree.openContextMenu(node, e)}
           >
             {node.children ? (
-              <span className="sp-tree-chevron" data-expanded={expanded || undefined}>
+              <span
+                className="sp-tree-chevron"
+                data-expanded={expanded || undefined}
+                onClick={
+                  node.openable
+                    ? (e) => {
+                        // The row's own click only selects an openable node; its chevron expands it.
+                        e.stopPropagation();
+                        tree.toggleExpanded(node.id);
+                      }
+                    : undefined
+                }
+                onDoubleClick={node.openable ? (e) => e.stopPropagation() : undefined}
+              >
                 <Icon name="chevronRight" size={13} />
               </span>
             ) : (

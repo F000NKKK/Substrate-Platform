@@ -164,10 +164,11 @@ export function useDirectoryTree(
     (next: Set<string>) => {
       setExpandedIds(next);
       for (const id of next) {
-        if (!loadedIds.has(id)) loadFolder(id);
+        // A file can be expanded too — to show the files nested under it.
+        if (!loadedIds.has(id) && kindOf(nodes, id) !== "file") loadFolder(id);
       }
     },
-    [loadedIds, loadFolder]
+    [loadedIds, loadFolder, nodes]
   );
 
   /** Forgets everything known about `id`'s subtree — its path no longer exists (removed, or renamed away). */
@@ -216,6 +217,15 @@ export function useDirectoryTree(
     removeNode,
     reload: (id: string) => loadFolder(id).then(() => {}),
   };
+}
+
+function kindOf(nodes: FileTreeNode[], id: string): FileTreeNode["kind"] | undefined {
+  for (const node of nodes) {
+    if (node.id === id) return node.kind;
+    const inner = node.children ? kindOf(node.children, id) : undefined;
+    if (inner) return inner;
+  }
+  return undefined;
 }
 
 function defaultOnError(error: unknown, path: string) {
