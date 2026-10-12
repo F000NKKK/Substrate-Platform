@@ -1,5 +1,5 @@
-import MarkdownIt from "markdown-it";
-import type Token from "markdown-it/lib/token.mjs";
+/// <reference path="./markdown-it-footnote.d.ts" />
+import markdownIt, { type MarkdownIt, type Token } from "markdown-it";
 import footnote from "markdown-it-footnote";
 import githubAlerts from "markdown-it-github-alerts";
 import katexPlugin from "@vscode/markdown-it-katex";
@@ -71,7 +71,7 @@ function sourceLines(md: MarkdownIt) {
   });
 }
 
-const md: MarkdownIt = new MarkdownIt({
+const md: MarkdownIt = markdownIt({
   html: true,
   linkify: true,
   highlight(code, lang) {
