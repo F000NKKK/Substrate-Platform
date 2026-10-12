@@ -5,9 +5,11 @@
 
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
-use std::process::{Child, Command, ExitStatus, Stdio};
+use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, Condvar, Mutex};
+use std::thread::JoinHandle;
+use std::time::Duration;
 
 use crate::log::LogSink;
 
@@ -50,31 +52,112 @@ impl Task {
     }
 }
 
+/// How a [`Task`] (or one workflow step) ended.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TaskExit {
+    /// Exited with status 0 (and wasn't cancelled).
+    pub success: bool,
+    /// The process's exit code — `None` if it was killed by a signal, was
+    /// cancelled, or couldn't be waited on at all.
+    pub code: Option<i32>,
+    /// Ended because [`TaskHandle::cancel`] killed it.
+    pub cancelled: bool,
+}
+
+/// A value set once from a background thread and waited on from any other.
+pub(crate) struct Completion<T> {
+    value: Mutex<Option<T>>,
+    ready: Condvar,
+}
+
+impl<T: Clone> Completion<T> {
+    pub(crate) fn new() -> Self {
+        Self { value: Mutex::new(None), ready: Condvar::new() }
+    }
+
+    pub(crate) fn set(&self, value: T) {
+        *self.value.lock().unwrap_or_else(|e| e.into_inner()) = Some(value);
+        self.ready.notify_all();
+    }
+
+    pub(crate) fn get(&self) -> Option<T> {
+        self.value.lock().unwrap_or_else(|e| e.into_inner()).clone()
+    }
+
+    pub(crate) fn wait(&self) -> T {
+        let mut guard = self.value.lock().unwrap_or_else(|e| e.into_inner());
+        loop {
+            if let Some(value) = guard.as_ref() {
+                return value.clone();
+            }
+            guard = self.ready.wait(guard).unwrap_or_else(|e| e.into_inner());
+        }
+    }
+}
+
+struct TaskShared {
+    cancel: AtomicBool,
+    exit: Completion<TaskExit>,
+}
+
 /// A handle to a running (or finished) [`Task`] — poll [`Self::is_running`]
-/// from the UI thread; output arrives in the [`LogSink`] passed to [`spawn`].
+/// (or [`Self::exit_status`]) from the UI thread, or block on [`Self::wait`]
+/// from a background one; output arrives in the [`LogSink`] passed to
+/// [`spawn`]. The final "(process exited ...)" line is only pushed after
+/// both output streams have been fully drained, so no output line can ever
+/// arrive after it.
 #[derive(Clone)]
 pub struct TaskHandle {
-    running: Arc<AtomicBool>,
+    shared: Arc<TaskShared>,
 }
 
 impl TaskHandle {
     pub fn is_running(&self) -> bool {
-        self.running.load(Ordering::Acquire)
+        self.shared.exit.get().is_none()
     }
+
+    /// `None` while still running.
+    pub fn exit_status(&self) -> Option<TaskExit> {
+        self.shared.exit.get()
+    }
+
+    /// Blocks until the task has finished (output fully drained included).
+    pub fn wait(&self) -> TaskExit {
+        self.shared.exit.wait()
+    }
+
+    /// Requests the process be killed — asynchronous: it dies within one
+    /// poll interval (a few tens of milliseconds), after which
+    /// [`Self::exit_status`] reports `cancelled: true`. A no-op once the
+    /// task has already finished.
+    pub fn cancel(&self) {
+        self.shared.cancel.store(true, Ordering::Release);
+    }
+}
+
+/// How often a waiting thread checks whether its child has exited or been
+/// cancelled — `Child::wait` can't be interrupted to kill the child, so
+/// waiting is a `try_wait` poll instead.
+const POLL_INTERVAL: Duration = Duration::from_millis(20);
+
+/// A spawned child plus the threads streaming its stdout/stderr.
+struct StreamingChild {
+    child: Child,
+    readers: Vec<JoinHandle<()>>,
 }
 
 /// Builds and spawns `program`, attaching reader threads that stream its
 /// stdout/stderr into `sink` line-by-line as they arrive. Returns immediately
 /// once the child is spawned (or the spawn itself fails) — the caller decides
-/// whether to wait on the returned [`Child`] synchronously ([`run_streamed`])
-/// or hand it off to its own background thread ([`spawn`]).
+/// whether to wait on it synchronously ([`run_streamed`]) or hand it off to
+/// its own background thread ([`spawn`]).
 fn spawn_streaming(
     program: &str,
     args: &[String],
     cwd: Option<&Path>,
     envs: &[(String, String)],
     sink: &LogSink,
-) -> std::io::Result<Child> {
+) -> std::io::Result<StreamingChild> {
     let mut cmd = Command::new(program);
     cmd.args(args).stdout(Stdio::piped()).stderr(Stdio::piped());
     if let Some(cwd) = cwd {
@@ -87,64 +170,99 @@ fn spawn_streaming(
     sink.info(format!("$ {} {}", program, args.join(" ")));
     let mut child = cmd.spawn()?;
 
+    let mut readers = Vec::new();
     if let Some(stdout) = child.stdout.take() {
         let sink = sink.clone();
-        std::thread::spawn(move || {
+        readers.push(std::thread::spawn(move || {
             for line in BufReader::new(stdout).lines().map_while(Result::ok) {
                 sink.info(line);
             }
-        });
+        }));
     }
     if let Some(stderr) = child.stderr.take() {
         let sink = sink.clone();
-        std::thread::spawn(move || {
+        readers.push(std::thread::spawn(move || {
             for line in BufReader::new(stderr).lines().map_while(Result::ok) {
                 sink.warn(line);
             }
-        });
+        }));
     }
 
-    Ok(child)
+    Ok(StreamingChild { child, readers })
+}
+
+/// Waits for `running` to exit (killing it if `cancel` gets set meanwhile),
+/// joins its reader threads, then reports the "(process exited ...)" line
+/// into `sink` — strictly after every output line.
+fn finish_streamed(mut running: StreamingChild, cancel: &AtomicBool, sink: &LogSink) -> TaskExit {
+    let mut cancelled = false;
+    let status = loop {
+        match running.child.try_wait() {
+            Ok(Some(status)) => break Ok(status),
+            Ok(None) => {}
+            Err(err) => break Err(err),
+        }
+        if !cancelled && cancel.load(Ordering::Acquire) {
+            cancelled = true;
+            // Errors here mean it already exited, which the next try_wait sees.
+            let _ = running.child.kill();
+        }
+        std::thread::sleep(POLL_INTERVAL);
+    };
+
+    for reader in running.readers {
+        let _ = reader.join();
+    }
+
+    match status {
+        _ if cancelled => {
+            sink.warn("(process cancelled)");
+            TaskExit { success: false, code: None, cancelled: true }
+        }
+        Ok(status) if status.success() => {
+            sink.info("(process exited successfully)");
+            TaskExit { success: true, code: status.code(), cancelled: false }
+        }
+        Ok(status) => {
+            sink.error(format!("(process exited with {status})"));
+            TaskExit { success: false, code: status.code(), cancelled: false }
+        }
+        Err(err) => {
+            sink.error(format!("(failed to wait on process: {err})"));
+            TaskExit { success: false, code: None, cancelled: false }
+        }
+    }
 }
 
 /// Blocking: spawn `program`, stream its output into `sink`, and wait for it
 /// to exit before returning — [`crate::workflow`]'s executor uses this to run
 /// a chain of steps strictly one after another instead of firing them all in
 /// parallel like [`spawn`] does. Reports its own "exited with ..." line into
-/// `sink`, same as [`spawn`].
+/// `sink`, same as [`spawn`]; setting `cancel` kills the child early.
 pub(crate) fn run_streamed(
     program: &str,
     args: &[String],
     cwd: Option<&Path>,
     envs: &[(String, String)],
     sink: &LogSink,
-) -> std::io::Result<ExitStatus> {
-    let mut child = spawn_streaming(program, args, cwd, envs, sink)?;
-    let status = child.wait()?;
-    match status {
-        s if s.success() => sink.info("(process exited successfully)"),
-        s => sink.error(format!("(process exited with {s})")),
-    }
-    Ok(status)
+    cancel: &AtomicBool,
+) -> std::io::Result<TaskExit> {
+    let running = spawn_streaming(program, args, cwd, envs, sink)?;
+    Ok(finish_streamed(running, cancel, sink))
 }
 
 /// Spawn `task` in the background (non-blocking) — stdout/stderr are
 /// streamed line-by-line into `sink` as they arrive, from dedicated reader
 /// threads, so the UI thread is never blocked waiting on the child process.
 pub fn spawn(task: Task, sink: LogSink) -> std::io::Result<TaskHandle> {
-    let mut child = spawn_streaming(&task.program, &task.args, task.cwd.as_deref(), &task.envs, &sink)?;
-    let running = Arc::new(AtomicBool::new(true));
+    let running = spawn_streaming(&task.program, &task.args, task.cwd.as_deref(), &task.envs, &sink)?;
+    let shared = Arc::new(TaskShared { cancel: AtomicBool::new(false), exit: Completion::new() });
 
-    let handle_running = running.clone();
+    let thread_shared = shared.clone();
     std::thread::spawn(move || {
-        let status = child.wait();
-        handle_running.store(false, Ordering::Release);
-        match status {
-            Ok(status) if status.success() => sink.info("(process exited successfully)"),
-            Ok(status) => sink.error(format!("(process exited with {status})")),
-            Err(err) => sink.error(format!("(failed to wait on process: {err})")),
-        }
+        let exit = finish_streamed(running, &thread_shared.cancel, &sink);
+        thread_shared.exit.set(exit);
     });
 
-    Ok(TaskHandle { running })
+    Ok(TaskHandle { shared })
 }

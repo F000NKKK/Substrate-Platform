@@ -14,7 +14,7 @@ use std::sync::Arc;
 use serde::{Deserialize, Serialize};
 
 use crate::log::LogSink;
-use crate::task::run_streamed;
+use crate::task::{run_streamed, Completion};
 
 /// One `workflow.toml`'s worth of named flows.
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -63,16 +63,55 @@ fn substitute(input: &str, vars: &HashMap<String, String>) -> String {
     out
 }
 
+/// How a whole workflow run ended.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum WorkflowResult {
+    /// Every step succeeded.
+    Succeeded,
+    /// A step failed (or the workflow couldn't run at all) — see the log.
+    Failed,
+    /// [`WorkflowHandle::cancel`] stopped it.
+    Cancelled,
+}
+
+impl WorkflowResult {
+    pub fn is_success(self) -> bool {
+        self == WorkflowResult::Succeeded
+    }
+}
+
+struct WorkflowShared {
+    cancel: AtomicBool,
+    result: Completion<WorkflowResult>,
+}
+
 /// Mirrors [`crate::task::TaskHandle`]'s shape — poll [`Self::is_running`]
-/// from the UI thread; output arrives in the [`LogSink`] passed to [`run`].
+/// (or [`Self::result`]) from the UI thread, or block on [`Self::wait`];
+/// output arrives in the [`LogSink`] passed to [`run`].
 #[derive(Clone)]
 pub struct WorkflowHandle {
-    running: Arc<AtomicBool>,
+    shared: Arc<WorkflowShared>,
 }
 
 impl WorkflowHandle {
     pub fn is_running(&self) -> bool {
-        self.running.load(Ordering::Acquire)
+        self.shared.result.get().is_none()
+    }
+
+    /// `None` while still running.
+    pub fn result(&self) -> Option<WorkflowResult> {
+        self.shared.result.get()
+    }
+
+    /// Blocks until every step has finished (or the run stopped early).
+    pub fn wait(&self) -> WorkflowResult {
+        self.shared.result.wait()
+    }
+
+    /// Kills the currently-running step and skips every remaining one —
+    /// asynchronous, like [`crate::task::TaskHandle::cancel`].
+    pub fn cancel(&self) {
+        self.shared.cancel.store(true, Ordering::Release);
     }
 }
 
@@ -81,7 +120,15 @@ impl WorkflowHandle {
 /// non-zero exit, or a `Compose` cycle. `chain` tracks the in-progress
 /// composition path so `a` composing `b` composing `a` is caught instead of
 /// recursing forever.
-fn run_named(file: &WorkflowFile, name: &str, vars: &HashMap<String, String>, cwd: &Path, sink: &LogSink, chain: &mut Vec<String>) -> bool {
+fn run_named(
+    file: &WorkflowFile,
+    name: &str,
+    vars: &HashMap<String, String>,
+    cwd: &Path,
+    sink: &LogSink,
+    cancel: &AtomicBool,
+    chain: &mut Vec<String>,
+) -> bool {
     if chain.iter().any(|n| n == name) {
         sink.error(format!("workflow '{name}' composes itself (chain: {} -> {name})", chain.join(" -> ")));
         return false;
@@ -93,6 +140,10 @@ fn run_named(file: &WorkflowFile, name: &str, vars: &HashMap<String, String>, cw
 
     chain.push(name.to_string());
     for step in &def.steps {
+        if cancel.load(Ordering::Acquire) {
+            chain.pop();
+            return false;
+        }
         let ok = match step {
             WorkflowStep::Run { run, args, cwd: step_cwd, env } => {
                 let program = substitute(run, vars);
@@ -103,15 +154,15 @@ fn run_named(file: &WorkflowFile, name: &str, vars: &HashMap<String, String>, cw
                     .unwrap_or_else(|| cwd.to_path_buf());
                 let envs: Vec<(String, String)> = env.iter().map(|(k, v)| (k.clone(), substitute(v, vars))).collect();
 
-                match run_streamed(&program, &args, Some(&resolved_cwd), &envs, sink) {
-                    Ok(status) => status.success(),
+                match run_streamed(&program, &args, Some(&resolved_cwd), &envs, sink, cancel) {
+                    Ok(exit) => exit.success,
                     Err(err) => {
                         sink.error(format!("failed to run '{program}': {err}"));
                         false
                     }
                 }
             }
-            WorkflowStep::Compose { workflow } => run_named(file, workflow, vars, cwd, sink, chain),
+            WorkflowStep::Compose { workflow } => run_named(file, workflow, vars, cwd, sink, cancel, chain),
         };
         if !ok {
             chain.pop();
@@ -129,13 +180,21 @@ fn run_named(file: &WorkflowFile, name: &str, vars: &HashMap<String, String>, cw
 pub fn run(file: WorkflowFile, name: impl Into<String>, vars: HashMap<String, String>, cwd: impl Into<PathBuf>, sink: LogSink) -> WorkflowHandle {
     let name = name.into();
     let cwd = cwd.into();
-    let running = Arc::new(AtomicBool::new(true));
-    let handle_running = running.clone();
+    let shared = Arc::new(WorkflowShared { cancel: AtomicBool::new(false), result: Completion::new() });
+    let thread_shared = shared.clone();
 
     std::thread::spawn(move || {
-        run_named(&file, &name, &vars, &cwd, &sink, &mut Vec::new());
-        handle_running.store(false, Ordering::Release);
+        let ok = run_named(&file, &name, &vars, &cwd, &sink, &thread_shared.cancel, &mut Vec::new());
+        let result = if thread_shared.cancel.load(Ordering::Acquire) {
+            sink.warn(format!("workflow '{name}' cancelled"));
+            WorkflowResult::Cancelled
+        } else if ok {
+            WorkflowResult::Succeeded
+        } else {
+            WorkflowResult::Failed
+        };
+        thread_shared.result.set(result);
     });
 
-    WorkflowHandle { running }
+    WorkflowHandle { shared }
 }
