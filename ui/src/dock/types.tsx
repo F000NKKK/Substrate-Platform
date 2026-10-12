@@ -19,6 +19,19 @@ export interface PanelDef {
   onUnpin?: () => void;
   /** Items for the tab's right-click menu — `centerIds` is the center strip's tab order as shown, for "Close Tabs to the Right" and the like. */
   contextMenu?: (context: TabMenuContext) => ContextMenuItem[];
+  /** Buttons at the right end of the center tab strip while this panel is the active tab — VS Code's editor title actions ("Open Preview to the Side", ...). */
+  actions?: PanelAction[];
+}
+
+export interface PanelAction {
+  id: string;
+  /** An `Icon` name. */
+  icon: string;
+  /** Tooltip — include the shortcut, if any. */
+  title: string;
+  /** Drawn pressed (e.g. the view currently shown). */
+  active?: boolean;
+  onClick: () => void;
 }
 
 export interface TabMenuContext {

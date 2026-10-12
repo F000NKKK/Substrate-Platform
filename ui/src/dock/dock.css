@@ -16,6 +16,19 @@
   transition: background var(--sp-duration-fast) var(--sp-easing);
 }
 
+.sp-center-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  padding: 0 var(--sp-space-xs) var(--sp-space-xs);
+}
+
+.sp-center-actions .sp-icon-btn[aria-pressed="true"] {
+  background: var(--sp-accent-soft);
+  color: var(--sp-text);
+}
+
 .sp-center-tabs[data-drag-over="true"] {
   background: var(--sp-accent-soft);
 }

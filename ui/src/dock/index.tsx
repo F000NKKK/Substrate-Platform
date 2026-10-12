@@ -8,5 +8,5 @@ export { useShellLayout } from "./hooks/useShellLayout";
 export type { ShellLayout } from "./hooks/useShellLayout";
 export { startPanelDrag, endPanelDrag, readPanelDrag, zoneFromPoint, PANEL_DRAG_MIME } from "./dnd";
 export type { DropZone } from "./dnd";
-export type { PanelDef, TabMenuContext, ToolWindowAnchor, DockAnchor, DockMode, PanelPlacement } from "./types";
+export type { PanelDef, PanelAction, TabMenuContext, ToolWindowAnchor, DockAnchor, DockMode, PanelPlacement } from "./types";
 export { isFloating } from "./types";

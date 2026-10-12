@@ -40,6 +40,9 @@ const defaultIcons: Record<string, IconComponent> = {
   categorized: glyphs.IconCategorized,
   alphabetical: glyphs.IconAlphabetical,
   info: glyphs.IconInfo,
+  preview: glyphs.IconPreview,
+  previewSide: glyphs.IconPreviewSide,
+  code: glyphs.IconCode,
 };
 
 const globalOverrides: Record<string, IconComponent> = {};

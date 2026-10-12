@@ -1,4 +1,6 @@
 import { Tab } from "../../widgets/Tab";
+import { IconButton } from "../../widgets/IconButton";
+import { Icon } from "../../infra/icons";
 import { ContextMenu, useContextMenu } from "../../widgets/ContextMenu";
 import { startPanelDrag, endPanelDrag } from "../dnd";
 import { useDropTarget } from "../hooks/useDropTarget";
@@ -26,6 +28,7 @@ export function CenterDock({ layout }: CenterDockProps) {
   const isPinned = (id: string) => !!layout.panelsById[id]?.pinned;
   const orderedIds = [...shownIds.filter(isPinned), ...shownIds.filter((id) => !isPinned(id))];
   const menuPanel = menu.target ? layout.panelsById[menu.target.node] : undefined;
+  const actions = (layout.centerActiveId && layout.panelsById[layout.centerActiveId]?.actions) || [];
 
   return (
     <div className="sp-center-dock">
@@ -58,6 +61,15 @@ export function CenterDock({ layout }: CenterDockProps) {
             </Tab>
           );
         })}
+        {actions.length > 0 && (
+          <div className="sp-center-actions">
+            {actions.map((action) => (
+              <IconButton key={action.id} size={24} title={action.title} aria-label={action.title} aria-pressed={action.active} onClick={action.onClick}>
+                <Icon name={action.icon} size={16} />
+              </IconButton>
+            ))}
+          </div>
+        )}
       </div>
       {menuPanel?.contextMenu && (
         <ContextMenu

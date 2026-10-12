@@ -16,6 +16,8 @@ export interface MultiViewEditorProps extends EditorProps {
    * `provider.component` with the editor props as-is.
    */
   renderView?: (provider: EditorProvider, props: EditorProps) => ReactNode;
+  /** Set `false` when the host offers the views elsewhere (buttons in the tab strip). Default `true`. */
+  showSwitcher?: boolean;
 }
 
 /**
@@ -27,10 +29,10 @@ export interface MultiViewEditorProps extends EditorProps {
  *
  * With a single provider it renders just that editor, no switcher.
  */
-export function MultiViewEditor({ providers, view, onViewChange, renderView, ...props }: MultiViewEditorProps) {
+export function MultiViewEditor({ providers, view, onViewChange, renderView, showSwitcher = true, ...props }: MultiViewEditorProps) {
   const active = providers.find((p) => p.id === view) ?? providers[0];
   const content = renderView ? renderView(active, props) : <active.component {...props} />;
-  if (providers.length < 2) return <>{content}</>;
+  if (providers.length < 2 || !showSwitcher) return <>{content}</>;
   return (
     <div className="sp-multiview-editor">
       <div className="sp-multiview-editor-body">{content}</div>

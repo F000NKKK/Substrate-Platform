@@ -32,3 +32,6 @@ export { IconStop } from "./IconStop";
 export { IconCategorized } from "./IconCategorized";
 export { IconAlphabetical } from "./IconAlphabetical";
 export { IconInfo } from "./IconInfo";
+export { IconPreview } from "./IconPreview";
+export { IconPreviewSide } from "./IconPreviewSide";
+export { IconCode } from "./IconCode";

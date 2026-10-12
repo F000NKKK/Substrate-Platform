@@ -35,6 +35,8 @@ export interface EditorProvider {
   label: string;
   /** The editor's full name, for "Open With…" where every editor is listed (e.g. "Rust Editor"). Defaults to `label`. */
   name?: string;
+  /** `Icon` name for the button that switches to this view (a host's editor title actions). Defaults by `kind`: `code` for text, `grid` for designers, `preview` for binary. */
+  icon?: string;
   /** Lowercase extensions without the dot this applies to. */
   extensions?: string[];
   /** Finer matching than extensions (e.g. only `lang/*.json`) — checked on the absolute path; when both are set, both must match. */
@@ -140,6 +142,11 @@ export function resolveEditor(filename: string): EditorComponent {
  * content) and pass an empty `content` instead. An SVG isn't: its preview
  * is binary, but its source view needs the text.
  */
+/** The provider's `icon`, or the default for its kind. */
+export function editorProviderIcon(provider: EditorProvider): string {
+  return provider.icon ?? (provider.kind === "text" ? "code" : provider.kind === "designer" ? "grid" : "preview");
+}
+
 export function isBinaryFile(filename: string): boolean {
   return editorProvidersFor(filename).every((p) => p.kind === "binary");
 }
@@ -151,13 +158,14 @@ const builtIns: EditorProvider[] = [
   { id: "substrate.rust", name: "Rust Editor", label: "Code", extensions: ["rs"], component: RustEditor, kind: "text" },
   { id: "substrate.xml", name: "XML Editor", label: "Code", extensions: ["xml", "svg"], component: XmlEditor, kind: "text" },
   { id: "substrate.java", name: "Java Editor", label: "Code", extensions: ["java"], component: JavaEditor, kind: "text" },
-  { id: "substrate.markdown", name: "Markdown Editor", label: "Code", extensions: ["md", "markdown"], component: MarkdownEditor, kind: "text" },
+  { id: "substrate.markdown", name: "Markdown Editor", label: "Source", extensions: ["md", "markdown"], component: MarkdownEditor, kind: "text" },
   // Source stays the default, as in VS Code; the preview is a view away.
-  { id: "substrate.markdown.preview", name: "Markdown Preview", label: "Preview", extensions: ["md", "markdown"], component: MarkdownPreview, priority: -1, kind: "designer" },
+  { id: "substrate.markdown.preview", name: "Markdown Preview", label: "Preview", icon: "preview", extensions: ["md", "markdown"], component: MarkdownPreview, priority: -1, kind: "designer" },
   {
     id: "substrate.markdown.split",
     name: "Markdown Editor + Preview",
-    label: "Split",
+    label: "Preview to the Side",
+    icon: "previewSide",
     extensions: ["md", "markdown"],
     component: MarkdownSplitEditor,
     priority: -2,
