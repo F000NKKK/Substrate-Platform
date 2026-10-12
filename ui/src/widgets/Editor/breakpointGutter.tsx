@@ -1,4 +1,4 @@
-import { RangeSet, StateEffect, StateField } from "@codemirror/state";
+import { Prec, RangeSet, StateEffect, StateField } from "@codemirror/state";
 import { Decoration, EditorView, gutter, GutterMarker } from "@codemirror/view";
 
 /** Dispatched to replace the live breakpoint set without touching the document/undo history — see `TextEditor`'s second effect, which reacts to the `breakpoints` prop by dispatching this into the already-mounted view instead of recreating it. */
@@ -53,9 +53,11 @@ class BreakpointMarker extends GutterMarker {
       cell.appendChild(dot);
     }
     if (this.executing) {
-      const arrow = document.createElement("div");
-      arrow.className = "sp-execution-arrow";
-      cell.appendChild(arrow);
+      // VS's current-statement arrow: yellow, outlined so it reads on top of a breakpoint dot.
+      cell.insertAdjacentHTML(
+        "beforeend",
+        '<svg class="sp-execution-arrow" viewBox="0 0 14 12" aria-hidden="true"><path d="M1 3.5h6V1l6 5-6 5V8.5H1z" /></svg>'
+      );
     }
     return cell;
   }
@@ -76,7 +78,9 @@ export function breakpointGutter(onToggle: (line: number) => void) {
   return [
     breakpointState,
     executionLineState,
-    gutter({
+    // Highest precedence puts it first — the leftmost column, before the
+    // line numbers and fold markers, where a debugger's margin belongs.
+    Prec.highest(gutter({
       class: "sp-breakpoint-gutter",
       markers(view) {
         const set = view.state.field(breakpointState);
@@ -115,7 +119,7 @@ export function breakpointGutter(onToggle: (line: number) => void) {
           return true;
         },
       },
-    }),
+    })),
   ];
 }
 
