@@ -132,7 +132,6 @@ export function PropertyGrid({ objectName, objectType, objectKey, properties, em
   const [error, setError] = useState<{ id: string; message: string } | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const rowsRef = useRef<HTMLDivElement>(null);
-  const bodyRef = useRef<HTMLDivElement>(null);
   // Which text-box session is live — a blur arriving after Enter/Esc
   // already ended it (or after the object changed) must not commit again.
   const sessionRef = useRef(0);
@@ -295,14 +294,16 @@ export function PropertyGrid({ objectName, objectType, objectKey, properties, em
   }
 
   /** Drags the name/value splitter — the split is a fraction of the grid's width, so it survives resizing the tool window. */
-  function startSplitDrag(e: ReactPointerEvent<HTMLDivElement>) {
-    const body = bodyRef.current;
-    if (!body || e.button !== 0) return;
+  function startSplitDrag(e: ReactPointerEvent<HTMLSpanElement>) {
+    const rows = rowsRef.current;
+    if (!rows || e.button !== 0) return;
     e.preventDefault();
+    e.stopPropagation();
     const target = e.currentTarget;
     target.setPointerCapture(e.pointerId);
-    const rect = body.getBoundingClientRect();
-    const onMove = (ev: PointerEvent) => setSplit(Math.max(MIN_SPLIT, Math.min(MAX_SPLIT, (ev.clientX - rect.left) / rect.width)));
+    const left = rows.getBoundingClientRect().left;
+    const width = rows.clientWidth;
+    const onMove = (ev: PointerEvent) => setSplit(Math.max(MIN_SPLIT, Math.min(MAX_SPLIT, (ev.clientX - left) / width)));
     const onUp = () => {
       target.removeEventListener("pointermove", onMove);
       target.removeEventListener("pointerup", onUp);
@@ -311,6 +312,7 @@ export function PropertyGrid({ objectName, objectType, objectKey, properties, em
     target.addEventListener("pointerup", onUp);
   }
 
+  /** Drags the description pane's top edge — taller upward. */
   function startDescriptionDrag(e: ReactPointerEvent<HTMLDivElement>) {
     if (e.button !== 0) return;
     e.preventDefault();
@@ -369,7 +371,8 @@ export function PropertyGrid({ objectName, objectType, objectKey, properties, em
           autoFocus
           spellCheck={false}
           value={editing.draft}
-          disabled={busy}
+          // Not `disabled`: that would drop focus, and a rejected edit keeps typing.
+          readOnly={busy}
           onFocus={(e) => e.currentTarget.select()}
           onChange={(e) => {
             setEditing({ id: p.id, draft: e.target.value });
@@ -448,12 +451,11 @@ export function PropertyGrid({ objectName, objectType, objectKey, properties, em
           <Icon name="info" size={14} />
         </IconButton>
       </div>
-      <div className="sp-propgrid-body" ref={bodyRef} style={{ ["--sp-propgrid-split" as string]: `${split * 100}%` }}>
+      <div className="sp-propgrid-body" style={{ ["--sp-propgrid-split" as string]: `${split * 100}%` }}>
         {objectName === undefined ? (
           <div className="sp-propgrid-empty">{emptyLabel}</div>
         ) : (
-          <>
-            <div
+          <div
               className="sp-propgrid-rows"
               ref={rowsRef}
               role="grid"
@@ -514,6 +516,7 @@ export function PropertyGrid({ objectName, objectType, objectKey, properties, em
                         onDoubleClick={() => (kindOf(p) === "bool" || kindOf(p) === "enum" ? cycle(p) : beginEdit(p))}
                       >
                         {p.name}
+                        <span className="sp-propgrid-splitter" onPointerDown={startSplitDrag} onClick={(e) => e.stopPropagation()} />
                       </div>
                       <div
                         className="sp-propgrid-value"
@@ -535,9 +538,7 @@ export function PropertyGrid({ objectName, objectType, objectKey, properties, em
                   </div>
                 );
               })}
-            </div>
-            <div className="sp-propgrid-splitter" onPointerDown={startSplitDrag} />
-          </>
+          </div>
         )}
       </div>
       {descriptionVisible && (
