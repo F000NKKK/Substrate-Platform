@@ -147,10 +147,10 @@ function stepsOf(binding: Keybinding): string[][] {
 }
 
 /**
- * Inside an element marked `data-sp-native-keys` (a terminal), plain
+ * Inside an element marked `data-sp-native-keys` (a terminal),
  * Ctrl+<character> steps go to it rather than to keybindings — the shell
- * owns Ctrl+W, Ctrl+S, Ctrl+K — while function keys and Ctrl+Shift
- * combinations still reach the IDE, as in VS Code's terminal.
+ * owns Ctrl+W and Ctrl+K, the terminal Ctrl+Shift+C/V — while function
+ * keys (F5, Ctrl+F4, ...) still reach the IDE, as in VS Code's terminal.
  */
 function inNativeKeys(e: KeyboardEvent): boolean {
   return e.target instanceof Element && !!e.target.closest("[data-sp-native-keys]");
@@ -173,7 +173,7 @@ function onKeyDown(e: KeyboardEvent) {
     }
     return false;
   };
-  if (inNativeKeys(e) && /^(ctrl\+|ctrl\+alt\+)[^+]$/.test(step)) return;
+  if (inNativeKeys(e) && /^ctrl\+(alt\+)?(shift\+)?[^+]$/.test(step)) return;
   if (prefix) {
     if (run([prefix, step])) return;
     // An unbound second step falls through as an ordinary key press.
