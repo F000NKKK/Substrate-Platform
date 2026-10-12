@@ -15,14 +15,17 @@ export interface ComponentListAction {
 export interface ComponentListItem {
   id: string;
   name: string;
-  description?: ReactNode;
+  /** What it is — shown as the row's tooltip, so the list stays one line per component. */
+  description?: string;
   status: ComponentStatus;
   /** The badge's text (already translated) — e.g. "Installed", "Update available". */
   statusLabel: string;
   /** e.g. "1.99.0" or "1.99.0 → 1.100.0". */
   version?: string;
-  /** A muted second line — where it was found, what's missing. */
-  detail?: ReactNode;
+  /** Where it was found — part of the tooltip. */
+  detail?: string;
+  /** Why the last action failed — the one thing shown under the row. */
+  error?: ReactNode;
   /** While `status` is `"working"`: 0..1, or `null` for indeterminate. */
   progress?: number | null;
   progressLabel?: string;
@@ -40,17 +43,22 @@ export interface ComponentListProps {
 }
 
 /**
- * An installer-style list of components — each with its status badge,
- * version, detail line, a progress bar while something is being done to
- * it, and its actions (Install / Update / ...). Product-neutral: the product
- * decides what the components are and what the actions do.
+ * An installer-style list of components — one line each: name, version,
+ * status and its actions (Install / Update / ...), with what it is and
+ * where it lives in the tooltip, and a progress bar or an error under it
+ * only while there's one. Product-neutral: the product decides what the
+ * components are and what the actions do.
  */
 export function ComponentList({ items, emptyLabel }: ComponentListProps) {
   if (items.length === 0 && emptyLabel) return <p className="sp-component-list-empty">{emptyLabel}</p>;
   return (
     <ul className="sp-component-list">
       {items.map((item) => (
-        <li key={item.id} className={`sp-component-row${item.optional ? " is-optional" : ""}`}>
+        <li
+          key={item.id}
+          className={`sp-component-row${item.optional ? " is-optional" : ""}`}
+          title={[item.description, item.detail].filter(Boolean).join("\n") || undefined}
+        >
           {item.onSelectedChange && (
             <input
               type="checkbox"
@@ -63,11 +71,10 @@ export function ComponentList({ items, emptyLabel }: ComponentListProps) {
           <div className="sp-component-main">
             <div className="sp-component-title">
               <span className="sp-component-name">{item.name}</span>
-              <span className={`sp-component-status is-${item.status}`}>{item.statusLabel}</span>
               {item.version && <span className="sp-component-version">{item.version}</span>}
+              <span className={`sp-component-status is-${item.status}`}>{item.statusLabel}</span>
             </div>
-            {item.description && <div className="sp-component-description">{item.description}</div>}
-            {item.detail && <div className="sp-component-detail">{item.detail}</div>}
+            {item.error && <div className="sp-component-error">{item.error}</div>}
             {item.status === "working" && (
               <div className="sp-component-progress">
                 <div

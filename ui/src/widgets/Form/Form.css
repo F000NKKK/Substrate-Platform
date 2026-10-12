@@ -72,6 +72,7 @@
 
 .sp-form-field-label {
   padding-top: 5px;
+  cursor: default;
   color: var(--sp-text);
   font-size: var(--sp-font-size);
 }
@@ -87,10 +88,16 @@
   min-width: 0;
 }
 
+/* Help stays out of the way — it shows while the field is being edited (and as the label's tooltip). */
 .sp-form-field-hint {
+  display: none;
   color: var(--sp-text-faint);
   font-size: 0.85em;
   line-height: 1.4;
+}
+
+.sp-form-field:focus-within .sp-form-field-hint {
+  display: block;
 }
 
 .sp-form-field-error {
@@ -109,6 +116,10 @@
 
 .sp-form-input.is-mono {
   font-family: var(--sp-font-mono);
+}
+
+.sp-form-input.is-mono::placeholder {
+  font-family: var(--sp-font-ui);
 }
 
 .sp-form-input.is-invalid,
@@ -155,6 +166,8 @@
 }
 
 .sp-form-select {
+  flex: 1;
+  min-width: 0;
   height: 28px;
   box-sizing: border-box;
   padding: 0 var(--sp-space-sm);

@@ -47,7 +47,7 @@ export function FormSection({ title, description, actions, children }: { title: 
 
 export interface FormFieldProps {
   label: string;
-  /** Muted help under the control. */
+  /** Help for the field — the label's tooltip, and shown under the control while it's being edited. */
   hint?: ReactNode;
   /** Shown under the control in the danger color (replaces nothing — the hint stays). */
   error?: string | null;
@@ -60,7 +60,7 @@ export interface FormFieldProps {
 export function FormField({ label, hint, error, required, children }: FormFieldProps) {
   return (
     <div className={`sp-form-field${error ? " has-error" : ""}`}>
-      <div className="sp-form-field-label">
+      <div className="sp-form-field-label" title={typeof hint === "string" ? hint : undefined}>
         {label}
         {required && <span className="sp-form-field-required"> *</span>}
       </div>

@@ -10,9 +10,10 @@
 
 .sp-component-row {
   display: flex;
-  align-items: flex-start;
-  gap: var(--sp-space-md);
-  padding: var(--sp-space-sm) var(--sp-space-md);
+  align-items: center;
+  gap: var(--sp-space-sm);
+  min-height: 32px;
+  padding: 2px var(--sp-space-sm);
   border-bottom: 1px solid var(--sp-border);
 }
 
@@ -24,13 +25,13 @@
   background: var(--sp-surface-2);
 }
 
-.sp-component-row.is-optional .sp-component-name,
-.sp-component-row.is-optional .sp-component-description {
-  color: var(--sp-text-faint);
+.sp-component-row.is-optional .sp-component-name {
+  color: var(--sp-text-muted);
+  font-weight: 400;
 }
 
 .sp-component-select {
-  margin-top: 3px;
+  margin: 0;
 }
 
 .sp-component-main {
@@ -43,57 +44,67 @@
 
 .sp-component-title {
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
   gap: var(--sp-space-sm);
+  min-width: 0;
 }
 
 .sp-component-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--sp-text);
-  font-weight: 600;
 }
 
 .sp-component-version {
-  color: var(--sp-text-muted);
-  font-family: var(--sp-font-mono);
-  font-size: 0.9em;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--sp-text-faint);
+  font-size: 0.92em;
 }
 
+/* Plain colored text with a dot — the color carries the state, no badge box. */
 .sp-component-status {
-  padding: 0 6px;
-  border-radius: var(--sp-radius-xs);
-  font-size: 11px;
-  line-height: 17px;
-  background: var(--sp-surface-3);
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
   color: var(--sp-text-muted);
+  font-size: 0.92em;
+  white-space: nowrap;
+}
+
+.sp-component-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .sp-component-status.is-installed {
-  color: var(--sp-accent);
-  background: var(--sp-accent-soft);
+  color: var(--sp-text-faint);
+}
+
+.sp-component-status.is-installed::before {
+  background: var(--sp-accent);
 }
 
 .sp-component-status.is-missing,
 .sp-component-status.is-failed {
   color: var(--sp-danger);
-  background: color-mix(in srgb, var(--sp-danger) 14%, transparent);
 }
 
 .sp-component-status.is-outdated,
 .sp-component-status.is-partial {
   color: var(--sp-warning);
-  background: color-mix(in srgb, var(--sp-warning) 14%, transparent);
 }
 
-.sp-component-description {
-  color: var(--sp-text-muted);
-  font-size: 0.92em;
-  line-height: 1.4;
-}
-
-.sp-component-detail {
-  color: var(--sp-text-faint);
-  font-family: var(--sp-font-mono);
+.sp-component-error {
+  color: var(--sp-danger);
   font-size: 0.85em;
   overflow-wrap: anywhere;
 }
