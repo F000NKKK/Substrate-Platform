@@ -50,3 +50,5 @@ export {
   editorSetText,
   revealLine,
 } from "./editorCommands";
+export { registerDocumentCommands, useDocumentCommands, notifyDocumentCommands } from "./documentCommands";
+export type { DocumentCommands } from "./documentCommands";

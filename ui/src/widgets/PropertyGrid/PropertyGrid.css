@@ -170,6 +170,18 @@
   user-select: text;
 }
 
+.sp-propgrid-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: var(--sp-space-xs);
+  vertical-align: -2px;
+  border: 1px solid var(--sp-border-strong);
+  /* A checkerboard behind translucent colors. */
+  background-image: conic-gradient(var(--sp-surface-3) 25%, var(--sp-text-faint) 0 50%, var(--sp-surface-3) 0 75%, var(--sp-text-faint) 0);
+  background-size: 6px 6px;
+}
+
 .sp-propgrid-row[data-readonly] .sp-propgrid-value-text {
   color: var(--sp-text-muted);
 }

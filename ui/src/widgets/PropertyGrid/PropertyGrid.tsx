@@ -27,6 +27,8 @@ export interface PropertyDescriptor {
   value: PropertyValue | null;
   /** Text shown instead of the raw value when not editing (e.g. `"1.2 KB (1,234 bytes)"`); editing still starts from `value`. */
   displayValue?: string;
+  /** A CSS color drawn as a small swatch before the value (Visual Studio's Color properties) — edited as text. */
+  swatch?: string;
   /** How it's edited — default inferred from `value`'s type (`"enum"` when `options` is given). */
   kind?: PropertyKind;
   /** The choices of an `"enum"` property. */
@@ -403,7 +405,12 @@ export function PropertyGrid({
         />
       );
     }
-    return <span className="sp-propgrid-value-text">{displayText(p)}</span>;
+    return (
+      <span className="sp-propgrid-value-text">
+        {p.swatch && <span className="sp-propgrid-swatch" style={{ boxShadow: `inset 0 0 0 12px ${p.swatch}` }} />}
+        {displayText(p)}
+      </span>
+    );
   }
 
   const selectedProperty = current?.type === "property" ? current.property : null;

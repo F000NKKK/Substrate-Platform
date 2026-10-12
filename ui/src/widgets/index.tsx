@@ -60,6 +60,8 @@ export type { SearchFieldProps, SearchOptions } from "./SearchField";
 export { QuickPick } from "./QuickPick";
 export type { QuickPickProps, QuickPickItem, QuickPickFilter } from "./QuickPick";
 export { SearchResults } from "./SearchResults";
+export { DesignSurface } from "./DesignSurface";
+export type { DesignSurfaceProps, DesignItem, DesignRect, DesignPoint, DesignHandle, DesignChange, DesignMove, DesignResize } from "./DesignSurface";
 export type { SearchResultsProps, SearchResultGroup, SearchResultHit } from "./SearchResults";
 export { FormPage, FormSection, FormField, CommitTextField, StringListField, CheckField, SelectField } from "./Form";
 export type { CommitResult, FormFieldProps, CommitTextFieldProps, StringListFieldProps, SelectOption } from "./Form";

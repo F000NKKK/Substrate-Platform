@@ -1,0 +1,114 @@
+/* DesignSurface — a scrollable design page with selection adornments on top. */
+.sp-design-surface {
+  position: relative;
+  overflow: auto;
+  height: 100%;
+  min-height: 0;
+  background: var(--sp-surface-0);
+  outline: none;
+  user-select: none;
+  touch-action: none;
+}
+
+.sp-design-surface-canvas {
+  position: relative;
+}
+
+.sp-design-surface-page {
+  position: absolute;
+  box-shadow: var(--sp-shadow-md);
+}
+
+.sp-design-surface-content {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.sp-design-surface-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--sp-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--sp-border) 1px, transparent 1px);
+  background-size: var(--sp-design-grid) var(--sp-design-grid);
+}
+
+.sp-design-surface-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sp-design-surface-overlay > * {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.sp-design-surface-hover {
+  border: 1px dotted var(--sp-border-strong);
+}
+
+.sp-design-surface-frame {
+  border: 1px dashed var(--sp-text-muted);
+}
+
+.sp-design-surface-frame.primary {
+  border: 1px solid var(--sp-accent-strong);
+}
+
+.sp-design-surface-target {
+  border: 2px solid var(--sp-accent);
+  background: var(--sp-accent-soft);
+}
+
+.sp-design-surface-ghost {
+  border: 1px dashed var(--sp-accent-strong);
+  background: var(--sp-accent-soft);
+}
+
+.sp-design-surface-handle {
+  width: 7px;
+  height: 7px;
+  margin: -4px 0 0 -4px;
+  background: var(--sp-surface-0);
+  border: 1px solid var(--sp-accent-strong);
+  pointer-events: auto;
+}
+
+.sp-design-surface-handle-n,
+.sp-design-surface-handle-s {
+  cursor: ns-resize;
+}
+.sp-design-surface-handle-e,
+.sp-design-surface-handle-w {
+  cursor: ew-resize;
+}
+.sp-design-surface-handle-nw,
+.sp-design-surface-handle-se {
+  cursor: nwse-resize;
+}
+.sp-design-surface-handle-ne,
+.sp-design-surface-handle-sw {
+  cursor: nesw-resize;
+}
+
+.sp-design-surface-guide {
+  background: var(--sp-accent-strong);
+}
+
+.sp-design-surface-marquee {
+  border: 1px dashed var(--sp-accent-strong);
+  background: var(--sp-accent-soft);
+}
+
+.sp-design-surface-badge {
+  padding: 1px var(--sp-space-xs);
+  border-radius: var(--sp-radius-xs);
+  background: var(--sp-surface-3);
+  color: var(--sp-text);
+  font: 11px var(--sp-font-ui);
+  white-space: nowrap;
+}
