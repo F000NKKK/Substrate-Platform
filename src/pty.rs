@@ -1,7 +1,7 @@
 //! A real, cross-platform PTY session (Windows/Linux/macOS) via
 //! `portable-pty`. Generic: knows nothing about how output is displayed —
-//! a product wires `on_output` to however it ships bytes to its own UI (for
-//! Yog-IDLE: a Tauri event to an xterm.js instance).
+//! a product wires `on_output` to however it ships bytes to its own UI (e.g.
+//! a Tauri event to an xterm.js instance).
 
 use std::io::{Read, Write};
 use std::path::PathBuf;

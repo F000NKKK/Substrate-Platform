@@ -1,6 +1,6 @@
 //! Generic external-process runner — "run this command, stream its output
 //! somewhere, tell me when it's done." A product wires this up to whatever
-//! its own build/run tool is (for Yog-IDLE: `yog build`, `yog run <config>`);
+//! its own build/run tool is (`cargo build`, `make`, `npm run dev`, ...);
 //! this crate has no idea what command it's running.
 
 use std::io::{BufRead, BufReader};

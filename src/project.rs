@@ -2,7 +2,8 @@
 //! "standard" (what kind of thing lives there), and a "solution" groups one
 //! or more projects, the same shape as an IDE's own solution/workspace
 //! concept. No concrete standards ship here — only the generic machinery a
-//! host uses to define its own (e.g. Yog-IDLE's "yog-rust-mod" standard).
+//! host uses to define its own (e.g. a "rust-crate" standard detected by a
+//! `Cargo.toml`).
 
 use std::path::{Path, PathBuf};
 
@@ -50,7 +51,8 @@ pub struct Solution {
     pub projects: Vec<Project>,
 }
 
-/// On-disk `.yogsln` shape — distinct from [`Solution`] because `path` is
+/// On-disk solution file shape (TOML; the file name/extension is the host's
+/// choice — [`Solution::load`]/[`Solution::save`] take any path) — distinct from [`Solution`] because `path` is
 /// stored relative to the file itself, not resolved to an absolute [`Project::root`].
 #[derive(Debug, Clone, Deserialize, Serialize)]
 struct SolutionFile {

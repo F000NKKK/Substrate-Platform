@@ -6,11 +6,10 @@
 //! ([`workflow`]), an append-only log sink ([`log`]), a real cross-platform
 //! PTY session ([`pty`]), directory browsing/mutation ([`dir`]), and a
 //! project/solution model ([`project`]). Nothing here knows about any
-//! specific product (no Minecraft/Yog concepts, no UI framework, and no
-//! concrete project standards) — that's the whole point: a product like
-//! Yog-IDLE depends on this crate the same way any future, unrelated IDE
-//! product would, and brings its own UI (Yog-IDLE's is a Tauri + React
-//! frontend) and its own project standards/workflow templates.
+//! specific product (no product or domain concepts, no UI framework, and no
+//! concrete project standards) — that's the whole point: every IDE product
+//! depends on this crate the same way, and brings its own UI (e.g. a Tauri +
+//! React frontend) and its own project standards/workflow templates.
 
 pub mod dir;
 pub mod log;

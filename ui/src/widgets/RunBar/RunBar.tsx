@@ -6,7 +6,7 @@ import "./RunBar.css";
 
 export interface RunTarget {
   name: string;
-  /** Human-readable label (e.g. a mod's `name = "..."` inside `[run.X]`), preferred over `name`/`description` for display when present. */
+  /** Human-readable label (e.g. a friendly name from the target's own config), preferred over `name`/`description` for display when present. */
   displayName?: string;
   description?: string;
 }
@@ -39,7 +39,7 @@ export interface RunBarProps {
  * A Visual Studio-style run-target picker: choose a target from a dropdown,
  * then hit the solid green Start arrow to launch it — purely presentational,
  * the product supplies `targets`/`running`/`onRun` from whatever actually
- * resolves and executes them (a workflow engine, `yog run <name>`, anything).
+ * resolves and executes them (a workflow engine, a CLI's `run <name>`, anything).
  * Owns its own state/behavior entirely separately from `Toolbar`; meant to
  * be composed into one via its `leading` slot rather than merged into it,
  * mirroring VS's startup-item selector + Start button sitting in the same

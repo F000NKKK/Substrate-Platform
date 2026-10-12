@@ -15,7 +15,7 @@
      look no amount of our own CSS can reach into and override. */
   color-scheme: dark;
 
-  /* accent — Yog's default brand emerald; user-configurable at runtime */
+  /* accent — default emerald (see `defaultAccent`); user-configurable at runtime */
   --sp-accent-h: 152;
   --sp-accent-s: 45%;
   --sp-accent-l: 42%;
