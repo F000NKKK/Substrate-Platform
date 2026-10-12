@@ -1,1 +1,1 @@
-export { AppearanceSettings } from "./AppearanceSettings";
+export { AppearanceSettings, appearanceSettingsKeywords } from "./AppearanceSettings";

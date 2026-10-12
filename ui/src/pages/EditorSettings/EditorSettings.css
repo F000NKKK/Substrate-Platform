@@ -1,0 +1,26 @@
+.sp-editor-settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-sm);
+  max-width: 420px;
+}
+
+.sp-editor-settings-number {
+  width: 96px;
+}
+
+.sp-editor-settings-check {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-sm);
+  margin-top: var(--sp-space-xs);
+  color: var(--sp-text);
+  font-size: var(--sp-font-size);
+  cursor: pointer;
+}
+
+.sp-editor-settings-divider {
+  height: 1px;
+  margin: var(--sp-space-sm) 0;
+  background: var(--sp-border);
+}

@@ -1,11 +1,14 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { Label } from "../../widgets/Label";
 import { AccentColorField } from "../../widgets/AccentColorField";
-import { EditorColorField } from "../../widgets/EditorColorField";
+import { EditorColorField, editorColorLabels } from "../../widgets/EditorColorField/EditorColorField";
 import { Button } from "../../widgets/Button";
 import { confirmDialog, promptDialog } from "../../widgets/Dialog";
 import { useTheme, editorColorKeys, isBuiltInProfile } from "../../infra/theme";
 import "./AppearanceSettings.css";
+
+/** Every setting label on the Appearance page (including each editor color) — pass as the section's `keywords` so the Settings window's search finds the page by any of them. */
+export const appearanceSettingsKeywords: readonly string[] = ["Accent Color", "Editor Color Profile", "Editor Colors", ...Object.values(editorColorLabels)];
 
 /** The Settings window's "Appearance" section — the UI's accent color, and the code editor's own color scheme (a profile picker plus a fully independent color per syntax category, VS's "Fonts and Colors" model), including creating/deleting/exporting/importing custom profiles so users can share them. */
 export function AppearanceSettings() {

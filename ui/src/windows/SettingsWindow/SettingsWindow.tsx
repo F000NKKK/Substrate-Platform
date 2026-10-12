@@ -10,6 +10,13 @@ export interface SettingsSection {
   id: string;
   label: string;
   content: ReactNode;
+  /** The individual setting labels on this section (e.g. `editorSettingsKeywords`) — search matches these as well as `label`, so typing "tab size" finds the section that has it. */
+  keywords?: readonly string[];
+}
+
+function matches(section: SettingsSection, query: string): boolean {
+  if (!query) return true;
+  return [section.label, ...(section.keywords ?? [])].some((text) => text.toLowerCase().includes(query));
 }
 
 export interface SettingsWindowProps {
@@ -20,8 +27,9 @@ export interface SettingsWindowProps {
 
 /**
  * A real Options-style window — its own title bar (draggable, closable),
- * a searchable category list on the left, and the selected category's
- * settings on the right. Any product wires its own sections in; the shell
+ * a searchable category list on the left (search matches a section's name
+ * or any of its `keywords`), and the selected category's settings on the
+ * right. Any product wires its own sections in; the shell
  * (this window) is the one reusable piece.
  */
 export function SettingsWindow({ sections, initialSectionId, onClose }: SettingsWindowProps) {
@@ -29,11 +37,10 @@ export function SettingsWindow({ sections, initialSectionId, onClose }: Settings
   const [selectedId, setSelectedId] = useState(initialSectionId ?? sections[0]?.id);
   const [search, setSearch] = useState("");
 
-  const filtered = useMemo(
-    () => sections.filter((s) => s.label.toLowerCase().includes(search.toLowerCase())),
-    [sections, search]
-  );
-  const selected = sections.find((s) => s.id === selectedId) ?? filtered[0];
+  const filtered = useMemo(() => sections.filter((s) => matches(s, search.trim().toLowerCase())), [sections, search]);
+  // A search that filters out the selected section shows the first match
+  // instead, rather than a page the list no longer offers.
+  const selected = filtered.find((s) => s.id === selectedId) ?? filtered[0];
 
   return (
     <div className="sp-settings-window" style={{ left: pos.x, top: pos.y }}>
@@ -65,7 +72,9 @@ export function SettingsWindow({ sections, initialSectionId, onClose }: Settings
             ))}
           </div>
         </div>
-        <div className="sp-settings-detail">{selected?.content}</div>
+        <div className="sp-settings-detail">
+          {selected ? selected.content : <p className="sp-settings-empty">No settings match "{search}".</p>}
+        </div>
       </div>
     </div>
   );

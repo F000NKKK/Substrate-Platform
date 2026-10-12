@@ -5,7 +5,8 @@ import { ColorPickerWindow } from "../../windows/ColorPickerWindow";
 import { useTheme, colorSchemeFor, type EditorColorKey } from "../../infra/theme";
 import "./EditorColorField.css";
 
-const LABELS: Record<EditorColorKey, string> = {
+/** Display name per color key — also what the Appearance page's settings search matches against. */
+export const editorColorLabels: Record<EditorColorKey, string> = {
   background: "Background",
   foreground: "Foreground",
   selection: "Selection",
@@ -34,15 +35,15 @@ export function EditorColorField({ colorKey }: { colorKey: EditorColorKey }) {
 
   return (
     <div className="sp-editor-color-field">
-      <span className="sp-editor-color-field-label">{LABELS[colorKey]}</span>
-      <Swatch color={color} onClick={() => setPickerOpen(true)} aria-label={`${LABELS[colorKey]} color`} />
+      <span className="sp-editor-color-field-label">{editorColorLabels[colorKey]}</span>
+      <Swatch color={color} onClick={() => setPickerOpen(true)} aria-label={`${editorColorLabels[colorKey]} color`} />
       <Button variant="ghost" onClick={() => setPickerOpen(true)}>
         Choose Color…
       </Button>
 
       {pickerOpen && (
         <ColorPickerWindow
-          title={LABELS[colorKey]}
+          title={editorColorLabels[colorKey]}
           value={color}
           defaultValue={colorSchemeFor(editorTheme)[colorKey]}
           onChange={(next) => setEditorColor(colorKey, next)}
