@@ -22,6 +22,8 @@ export interface TreeMenuItem<T> {
   checked?: boolean;
   separatorBefore?: boolean;
   submenu?: TreeMenuItem<T>[];
+  /** A keybinding hint shown in the row — display only. */
+  shortcut?: string;
 }
 
 function toContextMenuItems<T>(items: TreeMenuItem<T>[], node: TreeNode<T>): ContextMenuItem[] {

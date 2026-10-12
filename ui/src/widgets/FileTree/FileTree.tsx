@@ -20,6 +20,8 @@ export interface FileTreeMenuItem {
   checked?: boolean;
   separatorBefore?: boolean;
   submenu?: FileTreeMenuItem[];
+  /** A keybinding hint shown in the row — display only. */
+  shortcut?: string;
 }
 
 function toTreeMenuItems(items: FileTreeMenuItem[]): TreeMenuItem<FileTreeNode>[] {
