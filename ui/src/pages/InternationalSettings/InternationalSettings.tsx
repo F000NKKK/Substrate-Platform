@@ -17,7 +17,9 @@ export function InternationalSettings() {
   const t = useT();
   const locales = availableLocales();
   const shown = resolvedLocale();
-  const shownName = locales.find((l) => l.id === shown)?.name ?? shown;
+  // What "system" resolves to — the system language if translated, else English.
+  const system = typeof navigator !== "undefined" ? navigator.language : "en";
+  const systemName = (locales.find((l) => l.id === system) ?? locales.find((l) => l.id === system.split("-")[0]) ?? locales[0])?.name;
 
   return (
     <div className="sp-international-settings">
@@ -27,7 +29,7 @@ export function InternationalSettings() {
         value={localeFollowsSystem() ? SYSTEM : shown}
         onChange={(e) => setLocale(e.target.value === SYSTEM ? null : e.target.value)}
       >
-        <option value={SYSTEM}>{t("Same as system ({language})", { language: shownName })}</option>
+        <option value={SYSTEM}>{t("Same as system ({language})", { language: systemName })}</option>
         {locales.map((l) => (
           <option key={l.id} value={l.id}>
             {l.name}
