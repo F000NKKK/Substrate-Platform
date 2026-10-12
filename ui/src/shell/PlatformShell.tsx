@@ -5,6 +5,7 @@ import { CenterDock } from "../dock/CenterDock/CenterDock";
 import { FloatingPanel } from "../dock/FloatingPanel/FloatingPanel";
 import { useShellLayout } from "../dock/hooks/useShellLayout";
 import { readPanelDrag, zoneFromPoint, type DropZone } from "../dock/dnd";
+import type { ToolWindowAnchor } from "../dock/types";
 import type { PlatformShellProps } from "./types";
 import "../dock/dock.css";
 import "./shell.css";
@@ -37,9 +38,18 @@ export function PlatformShell({
   const layout = useShellLayout(main, toolWindows, defaultPinned, persistKey, extraCenterPanels, onCloseDynamicPanel);
   const [dropZone, setDropZone] = useState<DropZone | null>(null);
 
+  // An edge gets a dock if the product declared tool windows for it, OR if
+  // any panel has since been dragged (or restored from a persisted layout)
+  // onto it — otherwise a panel dropped on an undeclared edge would have
+  // nowhere to render and simply vanish.
+  const hasDock = (anchor: ToolWindowAnchor) => !!toolWindows[anchor] || layout.idsByAnchor(anchor).length > 0;
+  const hasLeft = hasDock("left");
+  const hasRight = hasDock("right");
+  const hasBottom = hasDock("bottom");
+
   const bottomInsetStyle: CSSProperties = {
-    marginLeft: toolWindows.left ? "calc(var(--sp-toolwindow-strip) + var(--sp-space-xs))" : undefined,
-    marginRight: toolWindows.right ? "calc(var(--sp-toolwindow-strip) + var(--sp-space-xs))" : undefined,
+    marginLeft: hasLeft ? "calc(var(--sp-toolwindow-strip) + var(--sp-space-xs))" : undefined,
+    marginRight: hasRight ? "calc(var(--sp-toolwindow-strip) + var(--sp-space-xs))" : undefined,
   };
 
   function handleMainDragOver(e: DragEvent) {
@@ -66,7 +76,7 @@ export function PlatformShell({
       {menu && <div className="sp-shell-menu">{menu}</div>}
       <div className="sp-shell-body">
         <div className="sp-shell-upper">
-          {toolWindows.left && <ToolWindowDock anchor="left" layout={layout} />}
+          {hasLeft && <ToolWindowDock anchor="left" layout={layout} />}
 
           <div
             className="sp-shell-main"
@@ -78,10 +88,10 @@ export function PlatformShell({
             {dropZone && <div className={`sp-dock-guide sp-dock-guide--${dropZone}`} />}
           </div>
 
-          {toolWindows.right && <ToolWindowDock anchor="right" layout={layout} />}
+          {hasRight && <ToolWindowDock anchor="right" layout={layout} />}
         </div>
 
-        {toolWindows.bottom && (
+        {hasBottom && (
           <div className="sp-shell-bottom-inset" style={bottomInsetStyle}>
             <ToolWindowDock anchor="bottom" layout={layout} />
           </div>
