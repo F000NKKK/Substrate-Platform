@@ -111,6 +111,7 @@ export function PlatformShell({
               h={placement.h}
               onDock={() => layout.dockTo(id, layout.homeAnchor[id] ?? "bottom")}
               onClose={() => layout.close(id)}
+              onResize={(w, h) => layout.resizeFloat(id, w, h)}
             />
           );
         })}

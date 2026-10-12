@@ -58,6 +58,8 @@ export interface ShellLayout {
   close: (id: string) => void;
   dockTo: (id: string, anchor: DockAnchor) => void;
   floatAt: (id: string, x: number, y: number) => void;
+  /** Remembers a floating panel's new size (no-op for a panel that isn't floating) — persisted along with every other placement. */
+  resizeFloat: (id: string, w: number, h: number) => void;
   /**
    * A panel's own remembered width (left/right) or height (bottom) — tracked
    * per panel, per anchor, AND per pinned/flyout mode (6 independent slots
@@ -283,6 +285,14 @@ export function useShellLayout(
     [main.id]
   );
 
+  const resizeFloat = useCallback((id: string, w: number, h: number) => {
+    setPlacements((prev) => {
+      const cur = prev[id];
+      if (cur?.anchor !== "float" || (cur.w === w && cur.h === h)) return prev;
+      return { ...prev, [id]: { ...cur, w, h } };
+    });
+  }, []);
+
   useEffect(() => {
     if (!persistKey) return;
     saveShellLayoutState(persistKey, { placements, sizes, centerActiveId });
@@ -306,6 +316,7 @@ export function useShellLayout(
     close,
     dockTo,
     floatAt,
+    resizeFloat,
     anchorSize,
     setAnchorSize,
   };
