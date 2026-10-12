@@ -23,7 +23,7 @@ pub mod workflow;
 pub use dir::{DirEntryInfo, EntryKind};
 pub use log::{Level, LogLine, LogSink};
 pub use project::{Project, ProjectStandard, Solution};
-pub use pty::PtySession;
+pub use pty::{PtyOptions, PtySession, Utf8Chunker};
 pub use shell::{detect_shells, ShellInfo};
 pub use task::{spawn as spawn_task, Task, TaskHandle};
 pub use workflow::{run as run_workflow, WorkflowDef, WorkflowFile, WorkflowHandle, WorkflowStep};
