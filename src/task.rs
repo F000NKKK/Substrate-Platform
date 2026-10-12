@@ -108,7 +108,8 @@ struct TaskShared {
 /// from a background one; output arrives in the [`LogSink`] passed to
 /// [`spawn`]. The final "(process exited ...)" line is only pushed after
 /// both output streams have been drained, so output can't arrive after it
-/// (barring a grandchild holding the pipes open — see [`READER_GRACE`]).
+/// (barring a grandchild holding the pipes open for more than a 2s grace
+/// period).
 #[derive(Clone)]
 pub struct TaskHandle {
     shared: Arc<TaskShared>,
