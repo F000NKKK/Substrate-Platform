@@ -363,6 +363,75 @@
   border-radius: inherit;
 }
 
+/* Moving: no text selection, and the panel lets the dock guides under the pointer show through. */
+.sp-floating-panel[data-dragging] {
+  opacity: 0.85;
+  user-select: none;
+}
+
+/* Visual Studio's docking guides — shown over the main area while a floating panel is dragged by its title bar. */
+.sp-dock-guides {
+  position: fixed;
+  z-index: 90;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.sp-dock-guide-button {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid var(--sp-border-strong);
+  border-radius: var(--sp-radius-sm);
+  background: var(--sp-surface-2);
+  box-shadow: var(--sp-shadow-md);
+}
+
+/* A miniature of the target: the accent-filled part is where the panel goes. */
+.sp-dock-guide-button::after {
+  content: "";
+  position: absolute;
+  background: var(--sp-accent);
+  border-radius: 2px;
+  opacity: 0.75;
+}
+
+.sp-dock-guide-button--center::after {
+  inset: 6px;
+  border-top: 4px solid var(--sp-accent-strong);
+}
+
+.sp-dock-guide-button--left::after {
+  inset: 6px 18px 6px 6px;
+}
+
+.sp-dock-guide-button--right::after {
+  inset: 6px 6px 6px 18px;
+}
+
+.sp-dock-guide-button--bottom::after {
+  inset: 18px 6px 6px 6px;
+}
+
+.sp-dock-guide-button[data-hover] {
+  border-color: var(--sp-accent);
+  background: var(--sp-surface-3);
+}
+
+.sp-dock-guide-button[data-hover]::after {
+  opacity: 1;
+}
+
+.sp-dock-preview {
+  position: fixed;
+  z-index: 85;
+  box-sizing: border-box;
+  pointer-events: none;
+  background: var(--sp-accent-soft);
+  border: 2px solid var(--sp-accent);
+  border-radius: var(--sp-radius-sm);
+}
+
 /* drop-zone guide — shown over the main area while dragging any panel, follows the cursor */
 
 .sp-dock-guide {

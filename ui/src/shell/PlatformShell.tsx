@@ -53,10 +53,11 @@ export function PlatformShell({
       isToolWindowVisible: layout.isVisible,
       showToolWindow: layout.show,
       hideToolWindow: layout.hide,
+      isToolWindowFloating: (id) => layout.placements[id]?.anchor === "float",
       activeCenterId: layout.centerActiveId,
       activateCenterPanel: layout.setCenterActive,
     }),
-    [toolWindows, layout.isVisible, layout.show, layout.hide, layout.centerActiveId, layout.setCenterActive]
+    [toolWindows, layout.isVisible, layout.show, layout.hide, layout.placements, layout.centerActiveId, layout.setCenterActive]
   );
 
   // An edge gets a dock if the product declared tool windows for it, OR if
@@ -134,6 +135,8 @@ export function PlatformShell({
                 onDock={() => layout.dockTo(id, layout.homeAnchor[id] ?? "bottom")}
                 onClose={() => layout.close(id)}
                 onResize={(w, h) => layout.resizeFloat(id, w, h)}
+                onMove={(x, y) => layout.moveFloat(id, x, y)}
+                onDockTo={(anchor) => layout.dockTo(id, anchor)}
               />
             );
           })}

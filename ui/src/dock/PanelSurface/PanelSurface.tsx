@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, PointerEvent, ReactNode } from "react";
 import { IconButton } from "../../widgets/IconButton";
 import { IconPin, IconPinOff, IconClose, IconFloat } from "../../infra/icons";
 import { Outline } from "../../infra/outline";
@@ -19,6 +19,8 @@ export interface PanelSurfaceProps {
   outline?: boolean;
   /** Bump whenever a driven resize changes the panel's size (e.g. the pinned size a drag handle is changing) so the outline recomputes synchronously, with no ResizeObserver-frame lag. */
   outlineRevision?: unknown;
+  /** Takes over the title bar's dragging (a floating panel moves itself with the pointer) instead of the drag-and-drop that redocks. */
+  onHeaderPointerDown?: (e: PointerEvent<HTMLDivElement>) => void;
   children: ReactNode;
 }
 
@@ -34,15 +36,16 @@ export interface PanelSurfaceProps {
  * (`outline={false}`) because its outline must also wrap its detached strip
  * tab, which only a region-mode outline drawn one level up can do.
  */
-export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onFloat, style, outline = true, outlineRevision, children }: PanelSurfaceProps) {
+export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onFloat, style, outline = true, outlineRevision, onHeaderPointerDown, children }: PanelSurfaceProps) {
   const t = useT();
   return (
     <div className="sp-panel-surface" style={style}>
       <div
         className="sp-panel-surface-header"
-        draggable
-        onDragStart={(e) => startPanelDrag(e, panelId)}
-        onDragEnd={endPanelDrag}
+        draggable={!onHeaderPointerDown}
+        onDragStart={onHeaderPointerDown ? undefined : (e) => startPanelDrag(e, panelId)}
+        onDragEnd={onHeaderPointerDown ? undefined : endPanelDrag}
+        onPointerDown={onHeaderPointerDown}
       >
         <span className="sp-panel-surface-title">{title}</span>
         <div className="sp-panel-surface-actions">

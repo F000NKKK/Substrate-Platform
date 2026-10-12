@@ -14,10 +14,12 @@ export interface ShellController {
   /** Every tool window the product declared, in declaration order (left, right, then bottom). */
   toolWindows: readonly ShellToolWindow[];
   isToolWindowVisible: (id: string) => boolean;
-  /** Pins a hidden tool window open on its edge, or activates its tab if it's docked in the center. */
+  /** Pins a hidden tool window open on its edge, activates its tab if it's docked in the center, or reopens a closed transient one where it last was. */
   showToolWindow: (id: string) => void;
-  /** Collapses a tool window back to its edge's strip. */
+  /** Collapses a tool window back to its edge's strip — or, for a transient one (`PanelDef.floatSize`), closes it. */
   hideToolWindow: (id: string) => void;
+  /** Whether the tool window is currently floating free of every dock. */
+  isToolWindowFloating: (id: string) => boolean;
   /** The center dock's active tab — `main`'s id when nothing else is. */
   activeCenterId: string;
   /** Makes a center panel (e.g. an open file's tab) the active one. */

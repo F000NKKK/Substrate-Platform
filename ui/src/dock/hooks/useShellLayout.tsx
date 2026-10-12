@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { DockAnchor, PanelDef, PanelPlacement, ToolWindowAnchor } from "../types";
+import type { DockAnchor, PanelDef, PanelPlacement, ReopenPlacement, ToolWindowAnchor } from "../types";
 import { useStateStore } from "../../infra/state";
 import { loadShellLayoutState, type PersistedShellLayoutState } from "./shellLayoutPersistence";
 
@@ -32,7 +32,13 @@ function isSanePlacement(p: unknown): p is PanelPlacement {
     const inRange = (n: unknown, min: number, max: number) => typeof n === "number" && Number.isFinite(n) && n >= min && n <= max;
     return inRange(v.x, -10_000, 10_000) && inRange(v.y, -10_000, 10_000) && inRange(v.w, 120, 4000) && inRange(v.h, 80, 4000);
   }
-  return ["left", "right", "bottom", "center"].includes(v.anchor as string) && ["hidden", "flyout", "pinned"].includes(v.mode as string);
+  return ["left", "right", "bottom", "center"].includes(v.anchor as string) && ["hidden", "flyout", "pinned", "closed"].includes(v.mode as string);
+}
+
+/** A transient panel's first floating spot: its own size, centered horizontally near the top of the shell. */
+function initialFloat(size: { w: number; h: number }): ReopenPlacement {
+  const width = typeof window === "undefined" ? 1280 : window.innerWidth;
+  return { anchor: "float", x: Math.max(8, Math.round((width - size.w) / 2)), y: 48, ...size };
 }
 
 /** Only one flyout may peek open per anchor at a time — pinned panels are untouched by this (several can be pinned side by side). */
@@ -76,6 +82,8 @@ export interface ShellLayout {
   isVisible: (id: string) => boolean;
   dockTo: (id: string, anchor: DockAnchor) => void;
   floatAt: (id: string, x: number, y: number) => void;
+  /** Moves a floating panel (no-op for one that isn't floating). */
+  moveFloat: (id: string, x: number, y: number) => void;
   /** Remembers a floating panel's new size (no-op for a panel that isn't floating) — persisted along with every other placement. */
   resizeFloat: (id: string, w: number, h: number) => void;
   /**
@@ -159,7 +167,9 @@ export function useShellLayout(
     const initial: Record<string, PanelPlacement> = { [main.id]: { anchor: "center", mode: "pinned" } };
     for (const anchor of ANCHORS) {
       for (const panel of toolWindows[anchor] ?? []) {
-        initial[panel.id] = { anchor, mode: defaultPinned?.[anchor] === panel.id ? "pinned" : "hidden" };
+        initial[panel.id] = panel.floatSize
+          ? { anchor, mode: "closed", reopen: initialFloat(panel.floatSize) }
+          : { anchor, mode: defaultPinned?.[anchor] === panel.id ? "pinned" : "hidden" };
       }
     }
     // The center's original tab is always center/pinned (see `close` above) —
@@ -227,7 +237,10 @@ export function useShellLayout(
   }, []);
 
   const idsByAnchor = useCallback(
-    (anchor: ToolWindowAnchor) => Object.entries(placements).filter(([, p]) => p.anchor === anchor).map(([id]) => id),
+    (anchor: ToolWindowAnchor) =>
+      Object.entries(placements)
+        .filter(([, p]) => p.anchor === anchor && p.mode !== "closed")
+        .map(([id]) => id),
     [placements]
   );
 
@@ -289,10 +302,23 @@ export function useShellLayout(
         onCloseDynamicPanel?.(id);
         return;
       }
-      setPlacements((prev) => ({ ...prev, [id]: { anchor: homeAnchor[id] ?? "bottom", mode: "hidden" } }));
+      const home = homeAnchor[id] ?? "bottom";
+      if (panelsById[id]?.floatSize) {
+        // A transient panel leaves every dock, remembering where it was.
+        setPlacements((prev) => {
+          const cur = prev[id];
+          let closed: PanelPlacement = { anchor: home, mode: "closed" };
+          if (cur?.anchor === "float") closed = { anchor: home, mode: "closed", reopen: { ...cur } };
+          else if (cur?.anchor === "center") closed = { anchor: home, mode: "closed", reopen: { anchor: "center" } };
+          else if (cur) closed = { anchor: cur.anchor, mode: "closed" };
+          return { ...prev, [id]: closed };
+        });
+      } else {
+        setPlacements((prev) => ({ ...prev, [id]: { anchor: home, mode: "hidden" } }));
+      }
       setCenterActive((cur) => (cur === id ? main.id : cur));
     },
-    [homeAnchor, main.id, onCloseDynamicPanel]
+    [homeAnchor, panelsById, main.id, onCloseDynamicPanel]
   );
 
   const show = useCallback((id: string) => {
@@ -302,26 +328,34 @@ export function useShellLayout(
       setCenterActive(id);
       return;
     }
-    if (cur.mode === "hidden") setPlacements((prev) => ({ ...prev, [id]: { anchor: cur.anchor, mode: "pinned" } }));
+    if (cur.mode === "closed" && cur.reopen?.anchor === "center") {
+      setPlacements((prev) => ({ ...prev, [id]: { anchor: "center", mode: "pinned" } }));
+      setCenterActive(id);
+    } else if (cur.mode === "closed" && cur.reopen?.anchor === "float") {
+      const { x, y, w, h } = cur.reopen;
+      setPlacements((prev) => ({ ...prev, [id]: { anchor: "float", x, y, w, h } }));
+    } else if (cur.mode === "hidden" || cur.mode === "closed") {
+      setPlacements((prev) => ({ ...prev, [id]: { anchor: cur.anchor, mode: "pinned" } }));
+    }
   }, []);
 
   const hide = useCallback(
     (id: string) => {
       const cur = placementsRef.current[id];
       if (!cur) return;
-      if (cur.anchor === "float" || cur.anchor === "center") {
+      if (cur.anchor === "float" || cur.anchor === "center" || panelsById[id]?.floatSize) {
         close(id);
         return;
       }
       setPlacements((prev) => ({ ...prev, [id]: { anchor: cur.anchor, mode: "hidden" } }));
     },
-    [close]
+    [close, panelsById]
   );
 
   const isVisible = useCallback(
     (id: string) => {
       const p = placements[id];
-      return !!p && (p.anchor === "float" || p.anchor === "center" || p.mode !== "hidden");
+      return !!p && (p.anchor === "float" || p.anchor === "center" || (p.mode !== "hidden" && p.mode !== "closed"));
     },
     [placements]
   );
@@ -375,13 +409,21 @@ export function useShellLayout(
     (id: string, x: number, y: number) => {
       setPlacements((prev) => {
         const cur = prev[id];
-        const size = cur?.anchor === "float" ? { w: cur.w, h: cur.h } : DEFAULT_FLOAT_SIZE;
+        const size = cur?.anchor === "float" ? { w: cur.w, h: cur.h } : (panelsById[id]?.floatSize ?? DEFAULT_FLOAT_SIZE);
         return { ...prev, [id]: { anchor: "float", x, y, ...size } };
       });
       setCenterActive((activeCur) => (activeCur === id ? main.id : activeCur));
     },
-    [main.id]
+    [main.id, panelsById]
   );
+
+  const moveFloat = useCallback((id: string, x: number, y: number) => {
+    setPlacements((prev) => {
+      const cur = prev[id];
+      if (cur?.anchor !== "float" || (cur.x === x && cur.y === y)) return prev;
+      return { ...prev, [id]: { ...cur, x, y } };
+    });
+  }, []);
 
   const resizeFloat = useCallback((id: string, w: number, h: number) => {
     setPlacements((prev) => {
@@ -423,6 +465,7 @@ export function useShellLayout(
     isVisible,
     dockTo,
     floatAt,
+    moveFloat,
     resizeFloat,
     anchorSize,
     setAnchorSize,

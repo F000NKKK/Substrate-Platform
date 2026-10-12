@@ -21,6 +21,14 @@ export interface PanelDef {
   contextMenu?: (context: TabMenuContext) => ContextMenuItem[];
   /** Buttons at the right end of the center tab strip while this panel is the active tab — VS Code's editor title actions ("Open Preview to the Side", ...). */
   actions?: PanelAction[];
+  /**
+   * A transient tool window, like Visual Studio's Find and Replace or Code
+   * Search: the first time it's shown it opens floating at this size (centered
+   * near the top), and closing it takes it off every dock — no tab is left in
+   * an edge strip. Docked somewhere (an edge, or the center as a tab), it
+   * reopens there; closed while floating, it reopens where it floated.
+   */
+  floatSize?: { w: number; h: number };
 }
 
 export interface PanelAction {
@@ -38,12 +46,23 @@ export interface TabMenuContext {
   centerIds: string[];
 }
 
-export type DockMode = "hidden" | "flyout" | "pinned";
+/** `closed` — a transient panel (`PanelDef.floatSize`) that isn't on screen anywhere, not even as a strip tab. */
+export type DockMode = "hidden" | "flyout" | "pinned" | "closed";
+
+export interface FloatRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/** Where a closed transient panel comes back when shown again, if not its `anchor`. */
+export type ReopenPlacement = { anchor: "center" } | ({ anchor: "float" } & FloatRect);
 
 /** Where a panel currently lives — dragged freely between any dock, the center tab group, or out into a floating panel. */
 export type PanelPlacement =
-  | { anchor: DockAnchor; mode: DockMode }
-  | { anchor: "float"; x: number; y: number; w: number; h: number };
+  | { anchor: DockAnchor; mode: DockMode; reopen?: ReopenPlacement }
+  | ({ anchor: "float" } & FloatRect);
 
 export function isFloating(p: PanelPlacement): p is Extract<PanelPlacement, { anchor: "float" }> {
   return p.anchor === "float";
