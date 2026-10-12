@@ -44,6 +44,10 @@
   --sp-text-muted: #9b9b9e;
   --sp-text-faint: #6c6c6f;
 
+  /* status — log/diagnostic severity, independent of the accent */
+  --sp-warning: #d7ba7d;
+  --sp-danger: #f48771;
+
   /* elevation */
   --sp-shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.35);
   --sp-shadow-md: 0 8px 24px hsl(0 0% 0% / 0.45);

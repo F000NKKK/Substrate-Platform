@@ -19,3 +19,11 @@
   white-space: pre-wrap;
   line-height: 1.5;
 }
+
+.sp-output-panel-line--warn {
+  color: var(--sp-warning);
+}
+
+.sp-output-panel-line--error {
+  color: var(--sp-danger);
+}
