@@ -18,5 +18,6 @@ export {
   PythonEditor,
 } from "./languageEditors";
 export { ImageEditor } from "./ImageEditor";
+export type { ImageEditorProps } from "./ImageEditor";
 export { PropertiesGridEditor } from "./PropertiesGridEditor";
-export { resolveEditor } from "./registry";
+export { resolveEditor, isBinaryFile } from "./registry";

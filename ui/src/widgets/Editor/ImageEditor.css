@@ -12,3 +12,8 @@
   max-height: 100%;
   object-fit: contain;
 }
+
+.sp-image-editor-error {
+  color: var(--sp-text-faint);
+  font-family: var(--sp-font-ui);
+}
