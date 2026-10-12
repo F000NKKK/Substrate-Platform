@@ -140,3 +140,56 @@ fn trim(state: &mut LogSinkState) {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn retained_lines_are_capped_oldest_first() {
+        let sink = LogSink::new();
+        sink.set_max_lines(Some(2));
+        sink.info("one");
+        sink.warn("two");
+        sink.error("three");
+
+        let lines = sink.drain();
+        assert_eq!(
+            lines.iter().map(|l| l.text.as_str()).collect::<Vec<_>>(),
+            ["two", "three"]
+        );
+        assert_eq!(lines[1].level, Level::Error);
+        assert!(sink.lines().is_empty());
+    }
+
+    #[test]
+    fn streaming_sink_does_not_retain_lines() {
+        let sink = LogSink::new();
+        sink.info("before");
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        let seen_cb = seen.clone();
+        sink.on_push(move |line| seen_cb.lock().unwrap().push(line.text.clone()));
+        sink.info("after");
+
+        assert_eq!(*seen.lock().unwrap(), ["after"]);
+        assert_eq!(
+            sink.lines()
+                .iter()
+                .map(|l| l.text.as_str())
+                .collect::<Vec<_>>(),
+            ["before"]
+        );
+    }
+
+    #[test]
+    fn level_serializes_lowercase() {
+        let line = LogLine {
+            level: Level::Warn,
+            text: "x".to_string(),
+        };
+        assert_eq!(
+            toml::to_string(&line).unwrap(),
+            "level = \"warn\"\ntext = \"x\"\n"
+        );
+    }
+}

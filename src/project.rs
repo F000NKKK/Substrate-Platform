@@ -117,3 +117,96 @@ impl Solution {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn temp_dir(name: &str) -> PathBuf {
+        let dir =
+            std::env::temp_dir().join(format!("substrate-project-{name}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    fn standard(id: &str, files: &[&str]) -> ProjectStandard {
+        ProjectStandard {
+            id: id.to_string(),
+            detect_files: files.iter().map(|f| f.to_string()).collect(),
+        }
+    }
+
+    #[test]
+    fn detect_returns_first_standard_whose_files_all_exist() {
+        let root = temp_dir("detect");
+        std::fs::write(root.join("Cargo.toml"), "").unwrap();
+        std::fs::write(root.join("package.json"), "").unwrap();
+
+        let standards = [
+            standard("needs-both", &["Cargo.toml", "missing.txt"]),
+            standard("rust", &["Cargo.toml"]),
+            standard("node", &["package.json"]),
+        ];
+        assert_eq!(
+            ProjectStandard::detect(&root, &standards).as_deref(),
+            Some("rust")
+        );
+        assert_eq!(ProjectStandard::detect(&root, &standards[..1]), None);
+        std::fs::remove_dir_all(&root).unwrap();
+    }
+
+    #[test]
+    fn solution_round_trips_through_save_and_load() {
+        let dir = temp_dir("solution");
+        let path = dir.join("app.sln.toml");
+        let solution = Solution {
+            name: "App".to_string(),
+            projects: vec![
+                Project {
+                    name: "core".to_string(),
+                    root: dir.join("core"),
+                    kind: Some("rust".to_string()),
+                },
+                Project {
+                    name: "docs".to_string(),
+                    root: dir.join("docs"),
+                    kind: None,
+                },
+            ],
+        };
+        solution.save(&path).unwrap();
+
+        let loaded = Solution::load(&path).unwrap();
+        assert_eq!(loaded.name, "App");
+        let projects: Vec<_> = loaded
+            .projects
+            .iter()
+            .map(|p| (p.name.as_str(), p.root.clone(), p.kind.clone()))
+            .collect();
+        assert_eq!(
+            projects,
+            vec![
+                ("core", dir.join("core"), Some("rust".to_string())),
+                ("docs", dir.join("docs"), None),
+            ]
+        );
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn solution_load_resolves_relative_paths_against_the_file() {
+        let dir = temp_dir("relative");
+        let path = dir.join("app.sln.toml");
+        std::fs::write(
+            &path,
+            "[solution]\nname = \"App\"\n\n[[project]]\nname = \"core\"\npath = \"crates/core\"\n",
+        )
+        .unwrap();
+
+        let loaded = Solution::load(&path).unwrap();
+        assert_eq!(loaded.projects[0].root, dir.join("crates/core"));
+        assert_eq!(loaded.projects[0].kind, None);
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+}

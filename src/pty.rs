@@ -251,3 +251,44 @@ impl PtySession {
         self.child.try_wait()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn utf8_chunker_carries_split_characters_to_the_next_chunk() {
+        let text = "héllo → 世界 🦀";
+        let bytes = text.as_bytes();
+        // Every possible single split point, including mid-character ones.
+        for split in 0..=bytes.len() {
+            let mut chunker = Utf8Chunker::new();
+            let mut out = chunker.push(&bytes[..split]);
+            out.push_str(&chunker.push(&bytes[split..]));
+            out.push_str(&chunker.finish());
+            assert_eq!(out, text, "split at {split}");
+        }
+    }
+
+    #[test]
+    fn utf8_chunker_byte_at_a_time() {
+        let text = "a€b🦀c";
+        let mut chunker = Utf8Chunker::new();
+        let out: String = text
+            .as_bytes()
+            .iter()
+            .map(|b| chunker.push(&[*b]))
+            .collect();
+        assert_eq!(out, text);
+    }
+
+    #[test]
+    fn utf8_chunker_replaces_invalid_bytes() {
+        let mut chunker = Utf8Chunker::new();
+        assert_eq!(chunker.push(b"a\xffb"), "a\u{FFFD}b");
+        // A truncated sequence is held back, then flushed lossily at the end.
+        assert_eq!(chunker.push(b"c\xe2\x82"), "c");
+        assert_eq!(chunker.finish(), "\u{FFFD}");
+        assert_eq!(chunker.finish(), "");
+    }
+}

@@ -97,3 +97,58 @@ pub fn write_file(path: &Path, contents: &str) -> io::Result<()> {
 pub fn write_file_bytes(path: &Path, contents: &[u8]) -> io::Result<()> {
     std::fs::write(path, contents)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn temp_dir(name: &str) -> PathBuf {
+        let dir = std::env::temp_dir().join(format!("substrate-dir-{name}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    #[test]
+    fn list_dir_puts_dirs_first_then_sorts_case_insensitively() {
+        let dir = temp_dir("list");
+        for file in ["b.txt", "A.txt", "c.txt"] {
+            create_file(&dir.join(file)).unwrap();
+        }
+        for sub in ["zeta", "Alpha"] {
+            create_dir(&dir.join(sub)).unwrap();
+        }
+
+        let names: Vec<_> = list_dir(&dir)
+            .unwrap()
+            .into_iter()
+            .map(|e| (e.name, e.kind))
+            .collect();
+        assert_eq!(
+            names,
+            vec![
+                ("Alpha".to_string(), EntryKind::Dir),
+                ("zeta".to_string(), EntryKind::Dir),
+                ("A.txt".to_string(), EntryKind::File),
+                ("b.txt".to_string(), EntryKind::File),
+                ("c.txt".to_string(), EntryKind::File),
+            ]
+        );
+        remove(&dir).unwrap();
+    }
+
+    #[test]
+    fn binary_files_round_trip_but_fail_as_text() {
+        let dir = temp_dir("bytes");
+        let path = dir.join("image.png");
+        let bytes = [0x89, b'P', b'N', b'G', 0xff, 0x00, 0xfe];
+        write_file_bytes(&path, &bytes).unwrap();
+
+        assert_eq!(read_file_bytes(&path).unwrap(), bytes);
+        assert_eq!(
+            read_file(&path).unwrap_err().kind(),
+            io::ErrorKind::InvalidData
+        );
+        remove(&dir).unwrap();
+    }
+}

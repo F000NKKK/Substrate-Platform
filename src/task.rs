@@ -316,3 +316,66 @@ pub fn spawn(task: Task, sink: LogSink) -> std::io::Result<TaskHandle> {
 
     Ok(TaskHandle { shared })
 }
+
+#[cfg(all(test, unix))]
+mod tests {
+    use super::*;
+
+    fn texts(sink: &LogSink) -> Vec<String> {
+        sink.lines().into_iter().map(|l| l.text).collect()
+    }
+
+    #[test]
+    fn reports_success_and_exit_line_after_all_output() {
+        let sink = LogSink::new();
+        let script = "for i in 1 2 3 4 5; do echo out$i; echo err$i >&2; done";
+        let handle = spawn(Task::new("sh").args(["-c", script]), sink.clone()).unwrap();
+
+        let exit = handle.wait();
+        assert_eq!(
+            exit,
+            TaskExit {
+                success: true,
+                code: Some(0),
+                cancelled: false
+            }
+        );
+        assert!(!handle.is_running());
+        assert_eq!(handle.exit_status(), Some(exit));
+
+        let lines = texts(&sink);
+        assert_eq!(lines.len(), 1 + 10 + 1, "{lines:?}");
+        assert_eq!(lines.last().unwrap(), "(process exited successfully)");
+    }
+
+    #[test]
+    fn reports_failure_exit_code() {
+        let sink = LogSink::new();
+        let handle = spawn(Task::new("sh").args(["-c", "exit 3"]), sink.clone()).unwrap();
+        assert_eq!(
+            handle.wait(),
+            TaskExit {
+                success: false,
+                code: Some(3),
+                cancelled: false
+            }
+        );
+    }
+
+    #[test]
+    fn cancel_kills_the_process() {
+        let sink = LogSink::new();
+        let handle = spawn(Task::new("sleep").arg("30"), sink.clone()).unwrap();
+        assert!(handle.is_running());
+        handle.cancel();
+
+        let exit = handle.wait();
+        assert!(exit.cancelled && !exit.success);
+        assert_eq!(texts(&sink).last().unwrap(), "(process cancelled)");
+    }
+
+    #[test]
+    fn spawn_failure_is_an_error() {
+        assert!(spawn(Task::new("/nonexistent/program"), LogSink::new()).is_err());
+    }
+}
