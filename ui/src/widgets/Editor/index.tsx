@@ -36,6 +36,7 @@ export {
   editorCanToggleComment,
   editorToggleComment,
   editorFind,
+  editorReplace,
   editorCommentSelection,
   editorUncommentSelection,
   editorSelectAll,

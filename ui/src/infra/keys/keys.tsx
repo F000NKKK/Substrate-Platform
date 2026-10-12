@@ -250,13 +250,13 @@ export function keybindingLabel(id: string): string | undefined {
  * Plain `<input>`s and `<textarea>`s get their Ctrl+A/C/X/V/Z/Y from the
  * webview, which matches them by the character typed — so under another
  * layout (Ctrl+Ф, Ctrl+С, ...) they're done here instead. Code editors
- * and terminals handle their own keys.
+ * (contenteditable, not inputs) and terminals handle their own keys.
  */
 function onTextFieldKeyDown(e: KeyboardEvent) {
   if (e.defaultPrevented || !(e.ctrlKey || e.metaKey) || e.altKey) return;
   const field = e.target;
   if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement)) return;
-  if (field.closest(".cm-editor, [data-sp-native-keys]")) return;
+  if (field.closest("[data-sp-native-keys]")) return;
   const latin = eventKey(e);
   if (latin.length !== 1 || latin === e.key.toLowerCase()) return;
   const shift = e.shiftKey;

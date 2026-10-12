@@ -1,8 +1,8 @@
 import { redo, redoDepth, selectAll, undo, undoDepth } from "@codemirror/commands";
-import { gotoLine, openSearchPanel } from "@codemirror/search";
 import { EditorSelection } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { changeCase } from "./editorKeymap";
+import { goToLineDialog, openQuickFind } from "./findWidget";
 import { commentLines, toggleLineComments, uncommentLines } from "./lineComments";
 
 // Plain functions over a live `EditorView` (see `useEditorView`) — what a
@@ -52,9 +52,9 @@ export function editorSelectAll(view: EditorView): void {
   view.focus();
 }
 
-/** Opens CodeMirror's go-to-line prompt (Ctrl+G). */
+/** Visual Studio's Go To Line dialog (Ctrl+G). */
 export function editorGoToLine(view: EditorView): void {
-  gotoLine(view);
+  void goToLineDialog(view);
 }
 
 /** The selection to lower (`upper: false`) or upper case. */
@@ -63,9 +63,14 @@ export function editorChangeCase(view: EditorView, upper: boolean): void {
   view.focus();
 }
 
-/** Opens CodeMirror's search/replace panel (the same one Ctrl+F opens). */
+/** Opens Quick Find (Ctrl+F), seeded with the selection. */
 export function editorFind(view: EditorView): void {
-  openSearchPanel(view);
+  openQuickFind(view);
+}
+
+/** Opens Quick Replace (Ctrl+H). */
+export function editorReplace(view: EditorView): void {
+  openQuickFind(view, true);
 }
 
 export function editorHasSelection(view: EditorView): boolean {

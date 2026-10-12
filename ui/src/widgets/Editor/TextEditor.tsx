@@ -9,6 +9,7 @@ import { useLocale } from "../../infra/i18n";
 import type { EditorProps } from "./EditorBase";
 import { minimalChange } from "./editorCommands";
 import { editorKeymap } from "./editorKeymap";
+import { quickFind } from "./findWidget";
 import { editorPhrases } from "./editorPhrases";
 import { notifyEditorUpdate, registerEditorView } from "./editorRegistry";
 import { resolveEditorTheme } from "./editorThemes";
@@ -87,6 +88,7 @@ export function TextEditor({
     const extensions: Extension[] = [
       basicSetup,
       editorKeymap,
+      quickFind,
       compartments.theme.of(resolveEditorTheme(editorColors)),
       compartments.preferences.of(preferencesExtension(editorPreferences)),
       compartments.phrases.of(editorPhrases()),

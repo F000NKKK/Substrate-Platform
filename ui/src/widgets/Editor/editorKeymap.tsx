@@ -1,8 +1,8 @@
 import { redo } from "@codemirror/commands";
-import { gotoLine, openSearchPanel } from "@codemirror/search";
 import { EditorSelection, Prec, type Extension } from "@codemirror/state";
 import { EditorView, keymap, runScopeHandlers, type Command } from "@codemirror/view";
 import { eventKey } from "../../infra/keys";
+import { goToLineDialog, openQuickFind } from "./findWidget";
 import { editorCopy, editorCut, editorPaste } from "./editorCommands";
 import { commentLines, toggleLineComments, uncommentLines } from "./lineComments";
 
@@ -130,8 +130,9 @@ const visualStudioKeys = Prec.high(
     { key: "Mod-k Mod-c", run: commentLines, preventDefault: true },
     { key: "Mod-k Mod-u", run: uncommentLines, preventDefault: true },
     { key: "Mod-Shift-z", run: redo, preventDefault: true },
-    { key: "Mod-g", run: gotoLine, preventDefault: true },
-    { key: "Mod-h", run: openSearchPanel, preventDefault: true },
+    { key: "Mod-f", run: (view) => openQuickFind(view), preventDefault: true },
+    { key: "Mod-h", run: (view) => openQuickFind(view, true), preventDefault: true },
+    { key: "Mod-g", run: (view) => (void goToLineDialog(view), true), preventDefault: true },
     { key: "Mod-c", run: copyLine },
     { key: "Mod-x", run: cutLine },
     { key: "Mod-u", run: changeCase(false), preventDefault: true },

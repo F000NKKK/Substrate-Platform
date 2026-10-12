@@ -1,0 +1,203 @@
+/* Quick Find floats over the editor's top-right corner, clear of the
+   scrollbar, instead of CodeMirror's full-width bar pushing the text down. */
+.sp-text-editor .cm-editor .cm-panels.cm-panels-top {
+  position: absolute;
+  top: 0;
+  left: auto;
+  right: 18px;
+  border: none;
+  background: transparent;
+  z-index: 20;
+}
+
+.sp-find {
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 4px 6px 4px 2px;
+  background: var(--sp-surface-2);
+  border: 1px solid var(--sp-border-strong);
+  border-top: none;
+  border-radius: 0 0 var(--sp-radius-md) var(--sp-radius-md);
+  box-shadow: var(--sp-shadow-md);
+  font-family: var(--sp-font-ui);
+  font-size: 12px;
+  color: var(--sp-text);
+  animation: sp-find-in var(--sp-duration-fast, 120ms) var(--sp-easing, ease-out);
+}
+
+@keyframes sp-find-in {
+  from {
+    transform: translateY(-6px);
+    opacity: 0;
+  }
+}
+
+.sp-find-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sp-find-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.sp-find-expand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--sp-radius-sm);
+  background: transparent;
+  color: var(--sp-text-muted);
+  cursor: pointer;
+}
+
+.sp-find[data-expanded] .sp-find-expand {
+  height: 52px;
+}
+
+.sp-find-expand svg {
+  transition: transform var(--sp-duration-fast, 120ms) var(--sp-easing, ease-out);
+}
+
+.sp-find-expand[aria-expanded="true"] svg {
+  transform: rotate(90deg);
+}
+
+.sp-find-expand:hover:not(:disabled) {
+  background: var(--sp-surface-3);
+  color: var(--sp-text);
+}
+
+.sp-find-expand:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.sp-find-field {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  width: 260px;
+  height: 24px;
+  padding: 0 2px 0 6px;
+  box-sizing: border-box;
+  background: var(--sp-surface-0);
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius-sm);
+  margin-right: 4px;
+}
+
+.sp-find-field:focus-within {
+  border-color: var(--sp-accent);
+  box-shadow: 0 0 0 1px var(--sp-accent-soft);
+}
+
+.sp-find-field[data-empty]:not(:focus-within),
+.sp-find-field[data-invalid] {
+  border-color: var(--sp-danger);
+}
+
+.sp-find-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--sp-text);
+  font: inherit;
+}
+
+.sp-find-input::placeholder {
+  color: var(--sp-text-faint);
+}
+
+.sp-find-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 3px;
+  border: 1px solid transparent;
+  border-radius: var(--sp-radius-xs);
+  background: transparent;
+  color: var(--sp-text-muted);
+  font-family: var(--sp-font-mono);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sp-find-toggle:hover {
+  background: var(--sp-surface-3);
+  color: var(--sp-text);
+}
+
+.sp-find-toggle[data-on] {
+  background: var(--sp-accent-soft);
+  border-color: var(--sp-accent);
+  color: var(--sp-text);
+}
+
+.sp-find-word {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sp-find-status {
+  min-width: 68px;
+  padding: 0 4px;
+  color: var(--sp-text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.sp-find-status[data-empty] {
+  color: var(--sp-danger);
+}
+
+.sp-find-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--sp-radius-sm);
+  background: transparent;
+  color: var(--sp-text-muted);
+  cursor: pointer;
+}
+
+.sp-find-action:hover:not(:disabled) {
+  background: var(--sp-surface-3);
+  color: var(--sp-text);
+}
+
+.sp-find-action:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Matches while the box is open: all of them tinted, the current one
+   outlined — on top of the editor theme's own selection color. */
+.sp-text-editor .cm-searchMatch {
+  background: color-mix(in srgb, var(--sp-warning) 28%, transparent);
+  border-radius: 2px;
+}
+
+.sp-text-editor .cm-searchMatch.cm-searchMatch-selected {
+  background: color-mix(in srgb, var(--sp-accent) 40%, transparent);
+  outline: 1px solid var(--sp-accent);
+}
