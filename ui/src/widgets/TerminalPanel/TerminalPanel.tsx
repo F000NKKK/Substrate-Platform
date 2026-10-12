@@ -397,7 +397,7 @@ function TerminalInstance({ id, shell, clearCommand, active, focused, commands, 
     // clipboard shortcuts live one modifier over, same as VS Code's terminal.
     term.attachCustomKeyEventHandler((e) => {
       if (e.type !== "keydown" || !e.ctrlKey || !e.shiftKey) return true;
-      const key = e.key.toLowerCase();
+      const key = eventKey(e);
       if (key === "c") {
         const selection = term.getSelection();
         if (selection) navigator.clipboard.writeText(selection).catch(() => {});

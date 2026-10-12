@@ -6,6 +6,7 @@ export * from "./infra/hooks";
 export * from "./infra/outline";
 export * from "./infra/state";
 export * from "./infra/selection";
+export * from "./infra/keys";
 export * from "./shell";
 export * from "./widgets";
 export * from "./windows";
