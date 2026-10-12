@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useRef, type RefObject } from "react";
-import { Compartment, EditorState, type Extension } from "@codemirror/state";
+import { useEffect, useMemo, useRef, type CSSProperties, type RefObject } from "react";
+import { Annotation, Compartment, EditorSelection, EditorState, type Extension } from "@codemirror/state";
+import { indentUnit } from "@codemirror/language";
 import { basicSetup, EditorView } from "codemirror";
-import { useTheme } from "../../infra/theme";
+import { useTheme, type EditorPreferences } from "../../infra/theme";
 import type { EditorProps } from "./EditorBase";
+import { minimalChange } from "./editorCommands";
+import { notifyEditorUpdate, registerEditorView } from "./editorRegistry";
 import { resolveEditorTheme } from "./editorThemes";
 import "./TextEditor.css";
 
@@ -20,29 +23,49 @@ export interface TextEditorProps extends EditorProps {
  * editor — a CodeMirror 6 instance. `content` seeds the document once at
  * mount; further changes flow *out* via `onChange` as the user types, never
  * back in as a prop (re-syncing from outside would fight the user's cursor
- * position) — each open file tab mounts its own `TextEditor` instance, so
- * there's never a need to re-point one instance at a different file's
- * content.
+ * position) — except when the host bumps `contentVersion` (the file changed
+ * on disk), which replaces the document with `content` once. Each open file
+ * tab mounts its own `TextEditor` instance, so there's never a need to
+ * re-point one instance at a different file's content.
+ *
+ * The live view is registered under `path` (see `useEditorView`), which is
+ * how a host's menus/toolbar reach the active editor; font, tab size and
+ * word wrap follow the theme's `editorPreferences` live.
  *
  * Deliberately knows nothing about breakpoints or any other code-editing
  * concern beyond plain text + syntax highlighting — see `CodeEditor`, which
  * composes this via `extensions`/`onViewReady` rather than this component
  * growing that logic itself.
  */
-export function TextEditor({ content, onChange, language, readOnly, extensions: extraExtensions, onViewReady }: TextEditorProps) {
+export function TextEditor({
+  path,
+  content,
+  contentVersion,
+  onChange,
+  language,
+  readOnly,
+  extensions: extraExtensions,
+  onViewReady,
+}: TextEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
   const onViewReadyRef = useRef(onViewReady);
   onViewReadyRef.current = onViewReady;
-  const { editorColors } = useTheme();
+  const { editorColors, editorPreferences } = useTheme();
 
   // One compartment per prop that can change after mount — each is swapped
   // in place via `reconfigure` rather than recreating the view, which would
   // throw away undo history, selection and scroll position.
   const compartments = useMemo(
-    () => ({ language: new Compartment(), readOnly: new Compartment(), theme: new Compartment(), extra: new Compartment() }),
+    () => ({
+      language: new Compartment(),
+      readOnly: new Compartment(),
+      theme: new Compartment(),
+      preferences: new Compartment(),
+      extra: new Compartment(),
+    }),
     []
   );
 
@@ -51,13 +74,15 @@ export function TextEditor({ content, onChange, language, readOnly, extensions: 
 
     const extensions: Extension[] = [
       basicSetup,
-      EditorView.lineWrapping,
       compartments.theme.of(resolveEditorTheme(editorColors)),
+      compartments.preferences.of(preferencesExtension(editorPreferences)),
       compartments.language.of(language ?? []),
       compartments.readOnly.of(readOnlyExtension(readOnly)),
       compartments.extra.of(extraExtensions ?? []),
       EditorView.updateListener.of((update) => {
-        if (update.docChanged) onChangeRef.current(update.state.doc.toString());
+        const external = update.transactions.some((tr) => tr.annotation(externalContent));
+        if (update.docChanged && !external) onChangeRef.current(update.state.doc.toString());
+        if (update.docChanged || update.selectionSet || update.transactions.some((tr) => tr.reconfigured)) notifyEditorUpdate();
       }),
     ];
 
@@ -79,9 +104,58 @@ export function TextEditor({ content, onChange, language, readOnly, extensions: 
   useReconfigure(viewRef, compartments.language, language ?? EMPTY_EXTENSIONS);
   useReconfigure(viewRef, compartments.readOnly, useMemo(() => readOnlyExtension(readOnly), [readOnly]));
   useReconfigure(viewRef, compartments.theme, useMemo(() => resolveEditorTheme(editorColors), [editorColors]));
+  useReconfigure(viewRef, compartments.preferences, useMemo(() => preferencesExtension(editorPreferences), [editorPreferences]));
   useReconfigure(viewRef, compartments.extra, extraExtensions ?? EMPTY_EXTENSIONS);
 
-  return <div ref={containerRef} className="sp-text-editor" />;
+  // Re-keyed on `path` so a renamed file's editor stays reachable under its
+  // new path (the view itself lives on, undo history included).
+  useEffect(() => {
+    if (!viewRef.current) return;
+    return registerEditorView(path, viewRef.current);
+  }, [path]);
+
+  const loadedVersion = useRef(contentVersion);
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view || contentVersion === loadedVersion.current) return;
+    loadedVersion.current = contentVersion;
+    const current = view.state.doc.toString();
+    if (current === content) return;
+    // Only the differing middle is replaced, and the cursor stays put
+    // (clamped), so a reload of a file that changed in one place doesn't
+    // throw the user back to the top. Undoable, like VS Code's reload.
+    const head = Math.min(view.state.selection.main.head, content.length);
+    view.dispatch({
+      changes: minimalChange(current, content),
+      selection: EditorSelection.cursor(head),
+      annotations: externalContent.of(true),
+    });
+  }, [contentVersion, content]);
+
+  // Font changes resize every line — CodeMirror only notices on its next
+  // measure, so ask for one.
+  useEffect(() => {
+    viewRef.current?.requestMeasure();
+  }, [editorPreferences.fontFamily, editorPreferences.fontSize]);
+
+  const fontStyle = {
+    "--sp-editor-font-size": `${editorPreferences.fontSize}px`,
+    "--sp-editor-font-family": editorPreferences.fontFamily || undefined,
+  } as CSSProperties;
+
+  return <div ref={containerRef} className="sp-text-editor" style={fontStyle} />;
+}
+
+/** Marks a transaction as a reload from outside (`contentVersion`) rather than a user edit — the update listener doesn't report it through `onChange`. */
+const externalContent = Annotation.define<boolean>();
+
+/** Tab size (and the matching indent unit) and word wrap — font family/size are CSS variables on the container instead (see TextEditor.css), since they don't need CodeMirror's involvement beyond a re-measure. */
+function preferencesExtension(preferences: EditorPreferences): Extension {
+  return [
+    EditorState.tabSize.of(preferences.tabSize),
+    indentUnit.of(" ".repeat(preferences.tabSize)),
+    preferences.wordWrap ? EditorView.lineWrapping : [],
+  ];
 }
 
 const EMPTY_EXTENSIONS: Extension[] = [];

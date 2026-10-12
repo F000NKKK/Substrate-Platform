@@ -1,11 +1,12 @@
 import type { HslColor } from "../color";
-import type { AccentColor, EditorColorScheme, EditorThemeId } from "./types";
-import { editorColorKeys } from "./presets";
+import type { AccentColor, EditorColorScheme, EditorPreferences, EditorThemeId } from "./types";
+import { clampEditorPreferences, defaultEditorPreferences, editorColorKeys } from "./presets";
 
 const ACCENT_KEY = "substrate-platform:accent";
 const EDITOR_THEME_KEY = "substrate-platform:editor-theme";
 const EDITOR_COLORS_KEY = "substrate-platform:editor-colors";
 const CUSTOM_PROFILES_KEY = "substrate-platform:editor-custom-profiles";
+const EDITOR_PREFERENCES_KEY = "substrate-platform:editor-preferences";
 
 function isHslColor(value: unknown): value is HslColor {
   const v = value as Record<string, unknown> | null;
@@ -98,5 +99,33 @@ export function storeCustomProfiles(profiles: StoredCustomProfile[]): void {
     localStorage.setItem(CUSTOM_PROFILES_KEY, JSON.stringify(profiles));
   } catch {
     // storage unavailable — custom profiles just won't persist
+  }
+}
+
+/** Stored preferences, field by field — a missing or mistyped field falls back to its default rather than discarding the rest (so a preference added later doesn't reset the others). */
+export function loadEditorPreferences(): EditorPreferences | null {
+  try {
+    const raw = localStorage.getItem(EDITOR_PREFERENCES_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Record<string, unknown> | null;
+    if (!parsed || typeof parsed !== "object") return null;
+    const pick = <K extends keyof EditorPreferences>(key: K, type: string): EditorPreferences[K] =>
+      typeof parsed[key] === type ? (parsed[key] as EditorPreferences[K]) : defaultEditorPreferences[key];
+    return clampEditorPreferences({
+      fontFamily: pick("fontFamily", "string"),
+      fontSize: pick("fontSize", "number"),
+      tabSize: pick("tabSize", "number"),
+      wordWrap: pick("wordWrap", "boolean"),
+    });
+  } catch {
+    return null;
+  }
+}
+
+export function storeEditorPreferences(preferences: EditorPreferences): void {
+  try {
+    localStorage.setItem(EDITOR_PREFERENCES_KEY, JSON.stringify(preferences));
+  } catch {
+    // storage unavailable — preferences just won't persist
   }
 }

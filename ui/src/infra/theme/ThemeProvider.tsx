@@ -1,17 +1,28 @@
 import { createContext, useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import type { HslColor } from "../color";
 import { tokens } from "../tokens";
-import type { AccentColor, EditorColorKey, EditorColorProfile, EditorColorScheme, EditorThemeId, ThemeContextValue } from "./types";
-import { accentPresets, builtInProfiles, colorSchemeFor, defaultAccent, defaultEditorTheme, isBuiltInProfile } from "./presets";
+import type { AccentColor, EditorColorKey, EditorColorProfile, EditorColorScheme, EditorPreferences, EditorThemeId, ThemeContextValue } from "./types";
+import {
+  accentPresets,
+  builtInProfiles,
+  clampEditorPreferences,
+  colorSchemeFor,
+  defaultAccent,
+  defaultEditorPreferences,
+  defaultEditorTheme,
+  isBuiltInProfile,
+} from "./presets";
 import {
   isEditorColorScheme,
   loadCustomProfiles,
+  loadEditorPreferences,
   loadStoredAccent,
   loadStoredEditorColors,
   loadStoredEditorTheme,
   storeAccent,
   storeCustomProfiles,
   storeEditorColors,
+  storeEditorPreferences,
   storeEditorTheme,
   type StoredCustomProfile,
 } from "./storage";
@@ -40,8 +51,9 @@ export interface ThemeProviderProps {
  * editor's full per-category color scheme (background/foreground/selection/
  * cursor plus one entry per syntax token kind), across both built-in
  * profiles (VS Dark, Classic) and any number of user-created or imported
- * custom ones — mirrors the accent onto CSS custom properties, hands the
- * editor scheme to consumers directly, and persists edits across sessions.
+ * custom ones — plus the editor's font/tab size/word wrap preferences —
+ * mirrors the accent onto CSS custom properties, hands the editor scheme
+ * and preferences to consumers directly, and persists edits across sessions.
  * The editor scheme and the UI accent are deliberately independent: a code
  * editor's palette and a brand accent serve different purposes, the same
  * way Visual Studio's own "Fonts and Colors" page has nothing to do with its
@@ -65,6 +77,21 @@ export function ThemeProvider({ children, initialAccent }: ThemeProviderProps) {
 
   const [editorTheme, setEditorThemeState] = useState<EditorThemeId>(() => loadStoredEditorTheme() ?? defaultEditorTheme);
   const [editorColors, setEditorColorsState] = useState<EditorColorScheme>(() => loadStoredEditorColors() ?? schemeForId(editorTheme));
+
+  const [editorPreferences, setEditorPreferencesState] = useState<EditorPreferences>(() => loadEditorPreferences() ?? defaultEditorPreferences);
+
+  const setEditorPreferences = useCallback((patch: Partial<EditorPreferences>) => {
+    setEditorPreferencesState((prev) => {
+      const next = clampEditorPreferences({ ...prev, ...patch });
+      storeEditorPreferences(next);
+      return next;
+    });
+  }, []);
+
+  const resetEditorPreferences = useCallback(() => {
+    storeEditorPreferences(defaultEditorPreferences);
+    setEditorPreferencesState(defaultEditorPreferences);
+  }, []);
 
   const setAccent = useCallback((next: AccentColor) => {
     applyAccent(next);
@@ -190,6 +217,9 @@ export function ThemeProvider({ children, initialAccent }: ThemeProviderProps) {
       deleteEditorProfile,
       exportEditorProfile,
       importEditorProfile,
+      editorPreferences,
+      setEditorPreferences,
+      resetEditorPreferences,
     }),
     [
       accent,
@@ -204,6 +234,9 @@ export function ThemeProvider({ children, initialAccent }: ThemeProviderProps) {
       deleteEditorProfile,
       exportEditorProfile,
       importEditorProfile,
+      editorPreferences,
+      setEditorPreferences,
+      resetEditorPreferences,
     ]
   );
 

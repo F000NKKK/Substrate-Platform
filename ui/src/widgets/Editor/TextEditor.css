@@ -3,9 +3,11 @@
   overflow: hidden;
 }
 
+/* `--sp-editor-font-*` are set inline by `TextEditor` from the user's editor
+   preferences. */
 .sp-text-editor .cm-editor {
   height: 100%;
-  font-size: 13px;
+  font-size: var(--sp-editor-font-size, 13px);
 }
 
 .sp-text-editor .cm-editor.cm-focused {
@@ -13,7 +15,7 @@
 }
 
 .sp-text-editor .cm-scroller {
-  font-family: var(--sp-font-mono);
+  font-family: var(--sp-editor-font-family, var(--sp-font-mono));
 }
 
 .sp-breakpoint-gutter {

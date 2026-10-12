@@ -21,3 +21,19 @@ export { ImageEditor } from "./ImageEditor";
 export type { ImageEditorProps } from "./ImageEditor";
 export { PropertiesGridEditor } from "./PropertiesGridEditor";
 export { resolveEditor, isBinaryFile } from "./registry";
+export { getEditorView, useEditorView } from "./editorRegistry";
+export {
+  editorCanUndo,
+  editorCanRedo,
+  editorUndo,
+  editorRedo,
+  editorCanToggleComment,
+  editorToggleComment,
+  editorFind,
+  editorHasSelection,
+  editorCopy,
+  editorCut,
+  editorPaste,
+  editorSetText,
+  revealLine,
+} from "./editorCommands";

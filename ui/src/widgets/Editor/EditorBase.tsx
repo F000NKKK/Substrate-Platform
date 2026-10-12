@@ -14,6 +14,14 @@ export interface EditorProps {
   /** Called with the new content whenever the user changes it — the host owns deciding when/whether to persist it. */
   onChange: (next: string) => void;
   readOnly?: boolean;
+  /**
+   * Bump to make the editor take `content` as its new document — for when
+   * the file changed underneath it (reloaded from disk). Without a bump,
+   * `content` only seeds the editor at mount; later values are just the
+   * editor's own edits flowing back through the host, and are ignored. The
+   * reload itself does not fire `onChange`.
+   */
+  contentVersion?: number;
 }
 
 export type EditorComponent = ComponentType<EditorProps>;

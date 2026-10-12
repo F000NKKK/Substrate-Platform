@@ -37,6 +37,18 @@ export interface EditorColorProfile {
   colors: EditorColorScheme;
 }
 
+/** The code editor's non-color preferences — shared by every open editor and applied live, the same as the color scheme. */
+export interface EditorPreferences {
+  /** A CSS `font-family` list; empty for the platform's own monospace stack (`--sp-font-mono`). */
+  fontFamily: string;
+  /** In px. */
+  fontSize: number;
+  /** Width of a tab character, and of one indentation level (indenting inserts this many spaces). */
+  tabSize: number;
+  /** Wrap long lines at the editor's edge instead of scrolling horizontally. */
+  wordWrap: boolean;
+}
+
 export interface ThemeContextValue {
   accent: AccentColor;
   setAccent: (accent: AccentColor) => void;
@@ -59,4 +71,9 @@ export interface ThemeContextValue {
   exportEditorProfile: (id: EditorThemeId) => string;
   /** Parses a previously-exported JSON string into a new custom profile (renamed to avoid colliding with an existing name) and switches to it; returns the new id, or `null` if the JSON was invalid. */
   importEditorProfile: (json: string) => EditorThemeId | null;
+  /** Font, tab size and word wrap for every code editor. */
+  editorPreferences: EditorPreferences;
+  /** Merges `patch` into the current preferences (out-of-range values are clamped) and persists the result. */
+  setEditorPreferences: (patch: Partial<EditorPreferences>) => void;
+  resetEditorPreferences: () => void;
 }

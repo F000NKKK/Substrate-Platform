@@ -1,4 +1,4 @@
-import type { AccentColor, EditorColorKey, EditorColorProfile, EditorColorScheme, EditorThemeId } from "./types";
+import type { AccentColor, EditorColorKey, EditorColorProfile, EditorColorScheme, EditorPreferences, EditorThemeId } from "./types";
 
 /** Named accent swatches offered by the color picker, alongside the free color wheel. */
 export const accentPresets: readonly AccentColor[] = [
@@ -14,6 +14,20 @@ export const defaultAccent: AccentColor = accentPresets[0];
 export const editorThemePresets: readonly EditorThemeId[] = ["vs-dark", "classic"];
 
 export const defaultEditorTheme: EditorThemeId = "vs-dark";
+
+export const defaultEditorPreferences: EditorPreferences = { fontFamily: "", fontSize: 13, tabSize: 4, wordWrap: true };
+
+/** Brings every field into a usable range — applied to anything stored or set, so a typo'd font size of 0 or 400 can't make the editor unusable. */
+export function clampEditorPreferences(p: EditorPreferences): EditorPreferences {
+  const clamp = (n: number, min: number, max: number, fallback: number) =>
+    Number.isFinite(n) ? Math.min(max, Math.max(min, Math.round(n))) : fallback;
+  return {
+    fontFamily: p.fontFamily.trim(),
+    fontSize: clamp(p.fontSize, 8, 40, defaultEditorPreferences.fontSize),
+    tabSize: clamp(p.tabSize, 1, 16, defaultEditorPreferences.tabSize),
+    wordWrap: p.wordWrap,
+  };
+}
 
 /** Every color key a settings page should list, in the order it should list them — background/foreground/selection/cursor first (the "shared chrome" of the editor), then one row per syntax category. */
 export const editorColorKeys: readonly EditorColorKey[] = [
