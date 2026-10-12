@@ -211,6 +211,7 @@ name = "substrate-platform"
 version = "0.2.0"
 dependencies = [
  "anyhow",
+ "libc",
  "portable-pty",
  "serde",
  "toml",

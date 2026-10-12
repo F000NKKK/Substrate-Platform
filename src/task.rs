@@ -175,6 +175,10 @@ fn spawn_streaming(
 ) -> std::io::Result<StreamingChild> {
     let mut cmd = Command::new(program);
     cmd.args(args).stdout(Stdio::piped()).stderr(Stdio::piped());
+    // Its own process group (pgid = its pid), so cancelling can take down
+    // everything it spawned too — see `kill_tree`.
+    #[cfg(unix)]
+    std::os::unix::process::CommandExt::process_group(&mut cmd, 0);
     if let Some(cwd) = cwd {
         cmd.current_dir(cwd);
     }
@@ -213,7 +217,41 @@ fn spawn_streaming(
     })
 }
 
-/// Waits for `running` to exit (killing it if `cancel` gets set meanwhile),
+/// Kills `child` and everything it spawned — a build tool is rarely a single
+/// process (`yog build` → `cargo` → `rustc`, or a `sh -c` wrapper around the
+/// real command), and killing only the direct child leaves the rest running
+/// and holding the output pipes open. On Unix the child leads its own process
+/// group (see `spawn_streaming`), so the whole group is signalled at once; on
+/// Windows `taskkill /T` walks the process tree instead.
+fn kill_tree(child: &mut Child) {
+    #[cfg(unix)]
+    {
+        if let Ok(pgid) = libc::pid_t::try_from(child.id()) {
+            // SAFETY: plain syscall with no memory arguments — a negative pid
+            // addresses the process group `pgid`, which the child leads.
+            unsafe {
+                libc::kill(-pgid, libc::SIGKILL);
+            }
+        }
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        /// Don't flash a console window for `taskkill` from a GUI host.
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        let _ = Command::new("taskkill")
+            .args(["/T", "/F", "/PID", &child.id().to_string()])
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .creation_flags(CREATE_NO_WINDOW)
+            .status();
+    }
+    // Still needed when the above failed, and the only option elsewhere.
+    // Errors here mean it already exited, which the next try_wait sees.
+    let _ = child.kill();
+}
+
+/// Waits for `running` to exit (killing it and its descendants if `cancel` gets set meanwhile),
 /// waits for its reader threads to drain (see [`READER_GRACE`]), then reports the "(process exited ...)" line
 /// into `sink` — strictly after every output line.
 fn finish_streamed(mut running: StreamingChild, cancel: &AtomicBool, sink: &LogSink) -> TaskExit {
@@ -226,8 +264,7 @@ fn finish_streamed(mut running: StreamingChild, cancel: &AtomicBool, sink: &LogS
         }
         if !cancelled && cancel.load(Ordering::Acquire) {
             cancelled = true;
-            // Errors here mean it already exited, which the next try_wait sees.
-            let _ = running.child.kill();
+            kill_tree(&mut running.child);
         }
         std::thread::sleep(POLL_INTERVAL);
     };
@@ -373,6 +410,34 @@ mod tests {
         let exit = handle.wait();
         assert!(exit.cancelled && !exit.success);
         assert_eq!(texts(&sink).last().unwrap(), "(process cancelled)");
+    }
+
+    #[test]
+    fn cancel_kills_grandchildren_too() {
+        let sink = LogSink::new();
+        // The grandchild inherits the pipes and outlives a plain kill of `sh`;
+        // it reports its pid first so the test can check it's gone afterward.
+        let script = "sleep 30 & echo $!; wait";
+        let handle = spawn(Task::new("sh").args(["-c", script]), sink.clone()).unwrap();
+        let grandchild = loop {
+            if let Some(pid) = texts(&sink)
+                .iter()
+                .find_map(|l| l.parse::<libc::pid_t>().ok())
+            {
+                break pid;
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        };
+        handle.cancel();
+        assert!(handle.wait().cancelled);
+
+        // SIGKILL delivery is asynchronous; give the kernel a moment to reap.
+        let alive = (0..50).all(|_| {
+            std::thread::sleep(Duration::from_millis(20));
+            // SAFETY: signal 0 only checks whether the pid exists.
+            unsafe { libc::kill(grandchild, 0) == 0 }
+        });
+        assert!(!alive, "grandchild {grandchild} survived the cancel");
     }
 
     #[test]

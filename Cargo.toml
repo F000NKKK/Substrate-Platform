@@ -13,3 +13,8 @@ anyhow = "1.0.103"
 portable-pty = "0.9"
 serde = { version = "1", features = ["derive"] }
 toml = "1"
+
+# `kill(-pgid, ...)` — cancelling a task kills its whole process group (see
+# `task::kill_tree`).
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
