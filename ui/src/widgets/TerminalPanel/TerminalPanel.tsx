@@ -5,6 +5,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { IconButton } from "../IconButton";
 import { Icon } from "../../infra/icons";
+import { eventKey } from "../../infra/keys";
 import { ContextMenu, useContextMenu } from "../ContextMenu";
 import { useStateStore } from "../../infra/state";
 import "@xterm/xterm/css/xterm.css";
@@ -520,6 +521,8 @@ function TerminalInstance({ id, shell, clearCommand, active, focused, commands, 
     <div
       ref={containerRef}
       className="sp-terminal-view"
+      // Ctrl+<letter> belongs to the shell (Ctrl+W, Ctrl+S, ...), not the IDE.
+      data-sp-native-keys=""
       data-active={active || undefined}
       data-focused={focused || undefined}
       onContextMenu={(e) => menu.openAtPoint(undefined, e)}
