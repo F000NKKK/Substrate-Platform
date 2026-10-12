@@ -23,6 +23,9 @@ export { PropertiesGridEditor } from "./PropertiesGridEditor";
 export { resolveEditor, isBinaryFile, registerEditorProvider, editorProvidersFor, useEditorProviders, generalEditorProviders, editorProviderById } from "./registry";
 export type { EditorProvider } from "./registry";
 export { MultiViewEditor } from "./MultiViewEditor";
+export { MarkdownPreview, MarkdownSplitEditor, setMarkdownLinkHandler } from "./MarkdownPreview";
+export type { MarkdownPreviewProps, MarkdownLinkHandler } from "./MarkdownPreview";
+export { renderMarkdown } from "./markdownRender";
 export type { MultiViewEditorProps } from "./MultiViewEditor";
 export { getEditorView, useEditorView } from "./editorRegistry";
 export {

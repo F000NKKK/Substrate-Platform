@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 import type { EditorComponent } from "./EditorBase";
 import { ImageEditor } from "./ImageEditor";
 import { PropertiesGridEditor } from "./PropertiesGridEditor";
+import { MarkdownPreview, MarkdownSplitEditor } from "./MarkdownPreview";
 import {
   GroovyEditor,
   JavaEditor,
@@ -151,6 +152,18 @@ const builtIns: EditorProvider[] = [
   { id: "substrate.xml", name: "XML Editor", label: "Code", extensions: ["xml", "svg"], component: XmlEditor, kind: "text" },
   { id: "substrate.java", name: "Java Editor", label: "Code", extensions: ["java"], component: JavaEditor, kind: "text" },
   { id: "substrate.markdown", name: "Markdown Editor", label: "Code", extensions: ["md", "markdown"], component: MarkdownEditor, kind: "text" },
+  // Source stays the default, as in VS Code; the preview is a view away.
+  { id: "substrate.markdown.preview", name: "Markdown Preview", label: "Preview", extensions: ["md", "markdown"], component: MarkdownPreview, priority: -1, kind: "designer" },
+  {
+    id: "substrate.markdown.split",
+    name: "Markdown Editor + Preview",
+    label: "Split",
+    extensions: ["md", "markdown"],
+    component: MarkdownSplitEditor,
+    priority: -2,
+    kind: "text",
+    strict: true,
+  },
   { id: "substrate.toml", name: "TOML Editor", label: "Code", extensions: ["toml"], component: TomlEditor, kind: "text" },
   { id: "substrate.yaml", name: "YAML Editor", label: "Code", extensions: ["yml", "yaml"], component: YamlEditor, kind: "text" },
   { id: "substrate.shell", name: "Shell Script Editor", label: "Code", extensions: ["sh", "bash"], component: ShellEditor, kind: "text" },

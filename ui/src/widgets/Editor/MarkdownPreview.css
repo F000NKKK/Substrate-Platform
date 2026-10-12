@@ -1,0 +1,318 @@
+/* VS Code's Markdown preview look, in the platform's colors; code follows
+   the editor's color profile (the --sp-md-* variables set inline). */
+
+.sp-md-preview {
+  height: 100%;
+  overflow: auto;
+  box-sizing: border-box;
+  background: var(--sp-surface-0);
+  color: var(--sp-text);
+}
+
+.sp-md-body {
+  max-width: 980px;
+  padding: 0 26px 26px;
+  font-family: var(--sp-font-ui);
+  font-size: 14px;
+  line-height: 1.6;
+  word-wrap: break-word;
+  user-select: text;
+}
+
+.sp-md-body > :first-child {
+  margin-top: 16px;
+}
+
+.sp-md-body h1,
+.sp-md-body h2,
+.sp-md-body h3,
+.sp-md-body h4,
+.sp-md-body h5,
+.sp-md-body h6 {
+  margin: 24px 0 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.sp-md-body h1 {
+  font-size: 2em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-md-body h2 {
+  font-size: 1.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-md-body h3 {
+  font-size: 1.25em;
+}
+
+.sp-md-body h6 {
+  color: var(--sp-text-muted);
+}
+
+.sp-md-body p,
+.sp-md-body ul,
+.sp-md-body ol,
+.sp-md-body blockquote,
+.sp-md-body table,
+.sp-md-body pre,
+.sp-md-body .markdown-alert {
+  margin: 0 0 16px;
+}
+
+.sp-md-body ul,
+.sp-md-body ol {
+  padding-left: 2em;
+}
+
+.sp-md-body li + li {
+  margin-top: 0.25em;
+}
+
+.sp-md-body a {
+  color: var(--sp-accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sp-md-body a:hover {
+  text-decoration: underline;
+}
+
+.sp-md-body hr {
+  height: 2px;
+  margin: 24px 0;
+  border: 0;
+  background: var(--sp-border);
+}
+
+.sp-md-body img {
+  max-width: 100%;
+}
+
+.sp-md-body blockquote {
+  padding: 0 1em;
+  border-left: 4px solid var(--sp-border-strong);
+  color: var(--sp-text-muted);
+}
+
+.sp-md-body table {
+  border-collapse: collapse;
+  display: block;
+  overflow: auto;
+}
+
+.sp-md-body th,
+.sp-md-body td {
+  padding: 6px 13px;
+  border: 1px solid var(--sp-border);
+}
+
+.sp-md-body th {
+  font-weight: 600;
+  background: var(--sp-surface-1);
+}
+
+.sp-md-body kbd {
+  padding: 2px 5px;
+  border: 1px solid var(--sp-border-strong);
+  border-radius: var(--sp-radius-xs);
+  font-family: var(--sp-font-mono);
+  font-size: 0.85em;
+}
+
+/* Code */
+
+.sp-md-body code {
+  font-family: var(--sp-editor-font-family, var(--sp-font-mono));
+  font-size: 0.9em;
+}
+
+.sp-md-body :not(pre) > code {
+  padding: 0.15em 0.35em;
+  border-radius: var(--sp-radius-xs);
+  background: var(--sp-surface-2);
+}
+
+.sp-md-body pre {
+  padding: 12px 16px;
+  overflow: auto;
+  border-radius: var(--sp-radius-sm);
+  background: var(--sp-md-code-bg);
+  color: var(--sp-md-code-fg);
+  line-height: 1.45;
+}
+
+.sp-md-body .hljs-keyword,
+.sp-md-body .hljs-selector-tag,
+.sp-md-body .hljs-literal,
+.sp-md-body .hljs-meta .hljs-keyword {
+  color: var(--sp-md-keyword);
+}
+
+.sp-md-body .hljs-string,
+.sp-md-body .hljs-regexp,
+.sp-md-body .hljs-char,
+.sp-md-body .hljs-addition {
+  color: var(--sp-md-string);
+}
+
+.sp-md-body .hljs-comment,
+.sp-md-body .hljs-quote,
+.sp-md-body .hljs-meta {
+  color: var(--sp-md-comment);
+  font-style: italic;
+}
+
+.sp-md-body .hljs-number,
+.sp-md-body .hljs-symbol,
+.sp-md-body .hljs-bullet {
+  color: var(--sp-md-number);
+}
+
+.sp-md-body .hljs-type,
+.sp-md-body .hljs-built_in,
+.sp-md-body .hljs-class .hljs-title,
+.sp-md-body .hljs-title.class_ {
+  color: var(--sp-md-type);
+}
+
+.sp-md-body .hljs-title,
+.sp-md-body .hljs-title.function_,
+.sp-md-body .hljs-section {
+  color: var(--sp-md-function);
+}
+
+.sp-md-body .hljs-variable,
+.sp-md-body .hljs-attr,
+.sp-md-body .hljs-attribute,
+.sp-md-body .hljs-params,
+.sp-md-body .hljs-name,
+.sp-md-body .hljs-tag {
+  color: var(--sp-md-variable);
+}
+
+.sp-md-body .hljs-deletion {
+  color: var(--sp-danger);
+}
+
+.sp-md-body .hljs-emphasis {
+  font-style: italic;
+}
+
+.sp-md-body .hljs-strong {
+  font-weight: 600;
+}
+
+/* Task lists */
+
+.sp-md-body .sp-md-task-list {
+  padding-left: 1.2em;
+  list-style: none;
+}
+
+.sp-md-body .sp-md-task {
+  margin: 0 0.35em 0.2em -1.2em;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+/* Footnotes */
+
+.sp-md-body .footnotes {
+  font-size: 0.85em;
+  color: var(--sp-text-muted);
+}
+
+.sp-md-body .footnotes-sep {
+  height: 1px;
+}
+
+/* GitHub alerts (> [!NOTE] ...) */
+
+.sp-md-body .markdown-alert {
+  padding: 0.5em 1em;
+  border-left: 4px solid var(--sp-md-alert);
+}
+
+.sp-md-body .markdown-alert > :last-child {
+  margin-bottom: 0;
+}
+
+.sp-md-body .markdown-alert-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-weight: 600;
+  color: var(--sp-md-alert);
+}
+
+.sp-md-body .markdown-alert-title svg {
+  fill: currentColor;
+}
+
+.sp-md-body .markdown-alert-note {
+  --sp-md-alert: #4493f8;
+}
+
+.sp-md-body .markdown-alert-tip {
+  --sp-md-alert: #3fb950;
+}
+
+.sp-md-body .markdown-alert-important {
+  --sp-md-alert: #ab7df8;
+}
+
+.sp-md-body .markdown-alert-warning {
+  --sp-md-alert: #d29922;
+}
+
+.sp-md-body .markdown-alert-caution {
+  --sp-md-alert: #f85149;
+}
+
+/* Math and diagrams */
+
+.sp-md-body .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.sp-md-body .sp-md-mermaid {
+  margin: 0 0 16px;
+  text-align: center;
+}
+
+.sp-md-body .sp-md-mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.sp-md-body .sp-md-mermaid--error {
+  padding: 8px 12px;
+  border-left: 4px solid var(--sp-danger);
+  color: var(--sp-danger);
+  font-family: var(--sp-font-mono);
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+/* Source | preview */
+
+.sp-md-split {
+  display: flex;
+  height: 100%;
+}
+
+.sp-md-split-pane {
+  flex: 1;
+  min-width: 0;
+}
+
+.sp-md-split-pane + .sp-md-split-pane {
+  border-left: 1px solid var(--sp-border);
+}
