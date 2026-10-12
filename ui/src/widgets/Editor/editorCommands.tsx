@@ -17,14 +17,15 @@ export function editorCanRedo(view: EditorView): boolean {
   return redoDepth(view.state) > 0;
 }
 
-export function editorUndo(view: EditorView): void {
+/** `focus: false` leaves focus where it is — undo driven from another view of the document (a designer beside the text). */
+export function editorUndo(view: EditorView, focus = true): void {
   undo(view);
-  view.focus();
+  if (focus) view.focus();
 }
 
-export function editorRedo(view: EditorView): void {
+export function editorRedo(view: EditorView, focus = true): void {
   redo(view);
-  view.focus();
+  if (focus) view.focus();
 }
 
 /** Whether the language at the cursor defines comment syntax at all (plain text doesn't). */
