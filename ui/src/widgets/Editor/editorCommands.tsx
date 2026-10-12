@@ -1,8 +1,9 @@
-import { redo, redoDepth, undo, undoDepth } from "@codemirror/commands";
-import { openSearchPanel } from "@codemirror/search";
+import { redo, redoDepth, selectAll, undo, undoDepth } from "@codemirror/commands";
+import { gotoLine, openSearchPanel } from "@codemirror/search";
 import { EditorSelection } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { toggleLineComments } from "./lineComments";
+import { changeCase } from "./editorKeymap";
+import { commentLines, toggleLineComments, uncommentLines } from "./lineComments";
 
 // Plain functions over a live `EditorView` (see `useEditorView`) — what a
 // host's Edit menu/toolbar binds to. Every action refocuses the editor
@@ -33,6 +34,32 @@ export function editorCanToggleComment(view: EditorView): boolean {
 
 export function editorToggleComment(view: EditorView): void {
   toggleLineComments(view);
+  view.focus();
+}
+
+export function editorCommentSelection(view: EditorView): void {
+  commentLines(view);
+  view.focus();
+}
+
+export function editorUncommentSelection(view: EditorView): void {
+  uncommentLines(view);
+  view.focus();
+}
+
+export function editorSelectAll(view: EditorView): void {
+  selectAll(view);
+  view.focus();
+}
+
+/** Opens CodeMirror's go-to-line prompt (Ctrl+G). */
+export function editorGoToLine(view: EditorView): void {
+  gotoLine(view);
+}
+
+/** The selection to lower (`upper: false`) or upper case. */
+export function editorChangeCase(view: EditorView, upper: boolean): void {
+  changeCase(upper)(view);
   view.focus();
 }
 

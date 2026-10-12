@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useRef, type CSSProperties, type RefObject } from "react";
-import { Annotation, Compartment, EditorSelection, EditorState, Prec, type Extension } from "@codemirror/state";
+import { Annotation, Compartment, EditorSelection, EditorState, type Extension } from "@codemirror/state";
 import { indentUnit } from "@codemirror/language";
 import { getSearchQuery, SearchQuery, setSearchQuery } from "@codemirror/search";
 import { basicSetup, EditorView } from "codemirror";
-import { keymap } from "@codemirror/view";
 import { useTheme, type EditorPreferences } from "../../infra/theme";
 import { useStateStore } from "../../infra/state";
 import type { EditorProps } from "./EditorBase";
 import { minimalChange } from "./editorCommands";
-import { toggleLineComments } from "./lineComments";
+import { editorKeymap } from "./editorKeymap";
 import { notifyEditorUpdate, registerEditorView } from "./editorRegistry";
 import { resolveEditorTheme } from "./editorThemes";
 import "./TextEditor.css";
@@ -83,8 +82,7 @@ export function TextEditor({
 
     const extensions: Extension[] = [
       basicSetup,
-      // Ahead of basicSetup's own Mod-/ (CodeMirror's toggleComment, which adds `// `).
-      Prec.high(keymap.of([{ key: "Mod-/", run: toggleLineComments }])),
+      editorKeymap,
       compartments.theme.of(resolveEditorTheme(editorColors)),
       compartments.preferences.of(preferencesExtension(editorPreferences)),
       compartments.language.of(language ?? []),

@@ -178,11 +178,11 @@ function onKeyDown(e: KeyboardEvent) {
     if (run([prefix, step])) return;
     // An unbound second step falls through as an ordinary key press.
   }
+  // A chord's first step isn't consumed: the focused editor may have chords
+  // of its own starting the same way (Ctrl+K Ctrl+C), and sees it too.
   if (active.some((r) => r.steps.some((s) => s.length > 1 && s[0] === step))) {
     pending = step;
     pendingAt = Date.now();
-    e.preventDefault();
-    e.stopPropagation();
     return;
   }
   run([step]);
