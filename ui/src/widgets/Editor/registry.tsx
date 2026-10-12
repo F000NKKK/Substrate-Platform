@@ -30,8 +30,10 @@ import {
 export interface EditorProvider {
   /** Stable, unique — what a host remembers as the user's chosen view. */
   id: string;
-  /** Shown on the view switcher and in "Open With…" (e.g. "Designer", "Code"). */
+  /** Shown on the view switcher (e.g. "Designer", "Code"). */
   label: string;
+  /** The editor's full name, for "Open With…" where every editor is listed (e.g. "Rust Editor"). Defaults to `label`. */
+  name?: string;
   /** Lowercase extensions without the dot this applies to. */
   extensions?: string[];
   /** Finer matching than extensions (e.g. only `lang/*.json`) — checked on the absolute path; when both are set, both must match. */
@@ -89,6 +91,20 @@ export function editorProvidersFor(path: string): EditorProvider[] {
   return matching;
 }
 
+/**
+ * Every registered editor, by name — "Open With…" offers all of them, not
+ * just the ones matching the file: the user may know better (a `.log` that's
+ * really JSON).
+ */
+export function allEditorProviders(): EditorProvider[] {
+  return [...providers, plainText].sort((a, b) => (a.name ?? a.label).localeCompare(b.name ?? b.label));
+}
+
+/** The editor registered under `id`, matching any file or not. */
+export function editorProviderById(id: string): EditorProvider | undefined {
+  return id === plainText.id ? plainText : providers.find((p) => p.id === id);
+}
+
 function subscribe(notify: () => void) {
   subscribers.add(notify);
   return () => {
@@ -118,23 +134,24 @@ export function isBinaryFile(filename: string): boolean {
   return editorProvidersFor(filename).every((p) => p.kind === "binary");
 }
 
-const plainText: EditorProvider = { id: "substrate.text", label: "Text", component: PlainTextEditor, kind: "text" };
+const plainText: EditorProvider = { id: "substrate.text", label: "Text", name: "Text Editor", component: PlainTextEditor, kind: "text" };
 
 const builtIns: EditorProvider[] = [
-  { id: "substrate.json", label: "Code", extensions: ["json"], component: JsonEditor, kind: "text" },
-  { id: "substrate.rust", label: "Code", extensions: ["rs"], component: RustEditor, kind: "text" },
-  { id: "substrate.xml", label: "Code", extensions: ["xml", "svg"], component: XmlEditor, kind: "text" },
-  { id: "substrate.java", label: "Code", extensions: ["java"], component: JavaEditor, kind: "text" },
-  { id: "substrate.markdown", label: "Code", extensions: ["md", "markdown"], component: MarkdownEditor, kind: "text" },
-  { id: "substrate.toml", label: "Code", extensions: ["toml"], component: TomlEditor, kind: "text" },
-  { id: "substrate.yaml", label: "Code", extensions: ["yml", "yaml"], component: YamlEditor, kind: "text" },
-  { id: "substrate.shell", label: "Code", extensions: ["sh", "bash"], component: ShellEditor, kind: "text" },
-  { id: "substrate.groovy", label: "Code", extensions: ["gradle", "groovy"], component: GroovyEditor, kind: "text" },
-  { id: "substrate.python", label: "Code", extensions: ["py"], component: PythonEditor, kind: "text" },
-  { id: "substrate.properties.text", label: "Code", extensions: ["properties"], component: PropertiesTextEditor, kind: "text" },
-  { id: "substrate.properties.grid", label: "Designer", extensions: ["properties"], component: PropertiesGridEditor, priority: 10, kind: "designer" },
+  { id: "substrate.json", name: "JSON Editor", label: "Code", extensions: ["json"], component: JsonEditor, kind: "text" },
+  { id: "substrate.rust", name: "Rust Editor", label: "Code", extensions: ["rs"], component: RustEditor, kind: "text" },
+  { id: "substrate.xml", name: "XML Editor", label: "Code", extensions: ["xml", "svg"], component: XmlEditor, kind: "text" },
+  { id: "substrate.java", name: "Java Editor", label: "Code", extensions: ["java"], component: JavaEditor, kind: "text" },
+  { id: "substrate.markdown", name: "Markdown Editor", label: "Code", extensions: ["md", "markdown"], component: MarkdownEditor, kind: "text" },
+  { id: "substrate.toml", name: "TOML Editor", label: "Code", extensions: ["toml"], component: TomlEditor, kind: "text" },
+  { id: "substrate.yaml", name: "YAML Editor", label: "Code", extensions: ["yml", "yaml"], component: YamlEditor, kind: "text" },
+  { id: "substrate.shell", name: "Shell Script Editor", label: "Code", extensions: ["sh", "bash"], component: ShellEditor, kind: "text" },
+  { id: "substrate.groovy", name: "Groovy Editor", label: "Code", extensions: ["gradle", "groovy"], component: GroovyEditor, kind: "text" },
+  { id: "substrate.python", name: "Python Editor", label: "Code", extensions: ["py"], component: PythonEditor, kind: "text" },
+  { id: "substrate.properties.text", name: "Properties Editor", label: "Code", extensions: ["properties"], component: PropertiesTextEditor, kind: "text" },
+  { id: "substrate.properties.grid", name: "Properties Designer", label: "Designer", extensions: ["properties"], component: PropertiesGridEditor, priority: 10, kind: "designer" },
   {
     id: "substrate.image",
+    name: "Image Preview",
     label: "Preview",
     extensions: ["png", "jpg", "jpeg", "gif", "webp", "bmp", "ico", "svg"],
     component: ImageEditor,

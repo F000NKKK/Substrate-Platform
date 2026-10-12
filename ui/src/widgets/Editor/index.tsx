@@ -20,7 +20,7 @@ export {
 export { ImageEditor } from "./ImageEditor";
 export type { ImageEditorProps } from "./ImageEditor";
 export { PropertiesGridEditor } from "./PropertiesGridEditor";
-export { resolveEditor, isBinaryFile, registerEditorProvider, editorProvidersFor, useEditorProviders } from "./registry";
+export { resolveEditor, isBinaryFile, registerEditorProvider, editorProvidersFor, useEditorProviders, allEditorProviders, editorProviderById } from "./registry";
 export type { EditorProvider } from "./registry";
 export { MultiViewEditor } from "./MultiViewEditor";
 export type { MultiViewEditorProps } from "./MultiViewEditor";

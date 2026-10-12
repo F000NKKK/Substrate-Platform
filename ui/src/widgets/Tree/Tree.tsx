@@ -15,8 +15,21 @@ export interface TreeNode<T> {
 
 export interface TreeMenuItem<T> {
   label: string;
-  onSelect: (node: TreeNode<T>) => void;
+  /** Not needed on an item that only opens a `submenu`. */
+  onSelect?: (node: TreeNode<T>) => void;
   destructive?: boolean;
+  disabled?: boolean;
+  checked?: boolean;
+  separatorBefore?: boolean;
+  submenu?: TreeMenuItem<T>[];
+}
+
+function toContextMenuItems<T>(items: TreeMenuItem<T>[], node: TreeNode<T>): ContextMenuItem[] {
+  return items.map(({ onSelect, submenu, ...item }) => ({
+    ...item,
+    onSelect: onSelect && (() => onSelect(node)),
+    submenu: submenu && toContextMenuItems(submenu, node),
+  }));
 }
 
 export interface TreeProps<T> {
@@ -104,11 +117,7 @@ export function Tree<T>({ nodes, renderIcon, getMenuItems, className, ...rest }:
         onClose={tree.closeContextMenu}
         items={
           tree.contextMenu
-            ? getMenuItems!(tree.contextMenu.node).map((item) => ({
-                label: item.label,
-                destructive: item.destructive,
-                onSelect: () => item.onSelect(tree.contextMenu!.node),
-              }))
+            ? toContextMenuItems(getMenuItems!(tree.contextMenu.node), tree.contextMenu.node)
             : []
         }
       />

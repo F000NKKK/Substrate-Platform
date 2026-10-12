@@ -13,8 +13,21 @@ export interface FileTreeNode {
 
 export interface FileTreeMenuItem {
   label: string;
-  onSelect: (node: FileTreeNode) => void;
+  /** Not needed on an item that only opens a `submenu`. */
+  onSelect?: (node: FileTreeNode) => void;
   destructive?: boolean;
+  disabled?: boolean;
+  checked?: boolean;
+  separatorBefore?: boolean;
+  submenu?: FileTreeMenuItem[];
+}
+
+function toTreeMenuItems(items: FileTreeMenuItem[]): TreeMenuItem<FileTreeNode>[] {
+  return items.map(({ onSelect, submenu, ...item }) => ({
+    ...item,
+    onSelect: onSelect && ((node: TreeNode<FileTreeNode>) => onSelect(node.data)),
+    submenu: submenu && toTreeMenuItems(submenu),
+  }));
 }
 
 export interface FileTreeProps {
@@ -52,12 +65,7 @@ export function FileTree({ nodes, onActivate, getMenuItems, ...rest }: FileTreeP
       onActivate={(node) => onActivate?.(node.data)}
       getMenuItems={
         getMenuItems &&
-        ((node: TreeNode<FileTreeNode>) =>
-          getMenuItems(node.data).map((item) => ({
-            label: item.label,
-            destructive: item.destructive,
-            onSelect: () => item.onSelect(node.data),
-          })))
+        ((node: TreeNode<FileTreeNode>) => toTreeMenuItems(getMenuItems(node.data)))
       }
       {...rest}
     />
