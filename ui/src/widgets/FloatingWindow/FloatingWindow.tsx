@@ -58,7 +58,7 @@ export function FloatingWindow({ title, icon, onClose, width = 460, initialPosit
           <span className="sp-floating-window-title">{title}</span>
           {headerExtra}
           <IconButton aria-label={t("Close")} title={t("Close")} onClick={onClose}>
-            <IconClose size={16} />
+            <IconClose />
           </IconButton>
         </div>
         <div className="sp-floating-window-body">{children}</div>

@@ -214,7 +214,7 @@ export function StringListField({ value, onCommit, validateItem, placeholder, ad
             onCommit={(text) => (text.trim() ? commitList(value.map((v, j) => (j === i ? text : v))) : commitList(value.filter((_, j) => j !== i)))}
           />
           <IconButton title={t("Remove")} aria-label={t("Remove")} onClick={() => void commitList(value.filter((_, j) => j !== i))}>
-            <Icon name="trash" size={14} />
+            <Icon name="trash" />
           </IconButton>
         </div>
       ))}
@@ -236,7 +236,7 @@ export function StringListField({ value, onCommit, validateItem, placeholder, ad
             }}
           />
           <IconButton title={t("Cancel")} aria-label={t("Cancel")} onClick={() => setAdding(false)}>
-            <Icon name="close" size={14} />
+            <Icon name="close" />
           </IconButton>
         </div>
       ) : (

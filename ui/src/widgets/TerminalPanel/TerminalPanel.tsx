@@ -261,7 +261,7 @@ export function TerminalPanel({
             disabled={!shells}
             onClick={() => (shells && shells.length > 1 ? addMenu.openAtAnchor() : shells?.[0] && addTerminal(shells[0]))}
           >
-            <Icon name="plus" size={14} />
+            <Icon name="plus" />
           </IconButton>
           <ContextMenu
             target={addMenu.target ? { mode: "anchor" } : null}
@@ -270,14 +270,14 @@ export function TerminalPanel({
           />
         </div>
         <IconButton title={t("Split Terminal")} disabled={!activeId} onClick={splitTerminal}>
-          <Icon name="split" size={14} />
+          <Icon name="split" />
         </IconButton>
         <IconButton title={t("Kill Terminal")} disabled={!activeId} onClick={() => activeId && closeTerminal(activeId)}>
-          <Icon name="trash" size={14} />
+          <Icon name="trash" />
         </IconButton>
         <div className="sp-terminal-toolbar-anchor">
           <IconButton title={t("More Actions")} onClick={() => moreMenu.openAtAnchor()}>
-            <Icon name="more" size={14} />
+            <Icon name="more" />
           </IconButton>
           <ContextMenu
             target={moreMenu.target ? { mode: "anchor" } : null}
@@ -376,7 +376,7 @@ export function TerminalPanel({
                   closeTerminal(tab.id);
                 }}
               >
-                <Icon name="close" size={14} />
+                <Icon name="close" />
               </IconButton>
             </div>
           ))}

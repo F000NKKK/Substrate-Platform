@@ -54,6 +54,8 @@ export interface PropertyGridProps {
   objectName?: string;
   /** Rest of the object selector line (e.g. `File Properties`). */
   objectType?: string;
+  /** What the object is — the selector line's tooltip, and the description pane's text while no row is selected. */
+  objectDescription?: string;
   /** Identifies the shown object — an in-progress edit or error is dropped when it changes. Defaults to `objectName`. */
   objectKey?: string;
   properties: PropertyDescriptor[];
@@ -130,6 +132,7 @@ async function applyEdit(p: PropertyDescriptor, value: PropertyValue): Promise<s
 export function PropertyGrid({
   objectName,
   objectType,
+  objectDescription,
   objectKey,
   properties,
   emptyLabel,
@@ -434,7 +437,7 @@ export function PropertyGrid({
 
   return (
     <div className={["sp-propgrid", className].filter(Boolean).join(" ")}>
-      <div className="sp-propgrid-object" title={objectName ? `${objectName}  ${objectType ?? ""}` : undefined}>
+      <div className="sp-propgrid-object" title={objectName ? [`${objectName}  ${objectType ?? ""}`, objectDescription].filter(Boolean).join("\n") : undefined}>
         {objectName !== undefined && (
           <>
             <span className="sp-propgrid-object-name">{objectName}</span>
@@ -450,7 +453,7 @@ export function PropertyGrid({
           disabled={toolbarDisabled}
           onClick={() => setMode("categorized")}
         >
-          <Icon name="categorized" size={14} />
+          <Icon name="categorized" />
         </IconButton>
         <IconButton
           title={t("Alphabetical")}
@@ -459,7 +462,7 @@ export function PropertyGrid({
           disabled={toolbarDisabled}
           onClick={() => setMode("alphabetical")}
         >
-          <Icon name="alphabetical" size={14} />
+          <Icon name="alphabetical" />
         </IconButton>
         <span className="sp-propgrid-toolbar-separator" />
         <TextField
@@ -478,7 +481,7 @@ export function PropertyGrid({
           data-active={descriptionVisible || undefined}
           onClick={() => setDescriptionVisible((v) => !v)}
         >
-          <Icon name="info" size={14} />
+          <Icon name="info" />
         </IconButton>
       </div>
       <div className="sp-propgrid-body" style={{ ["--sp-propgrid-split" as string]: `${split * 100}%` }}>
@@ -581,6 +584,12 @@ export function PropertyGrid({
         <>
           <div className="sp-propgrid-description-sizer" onPointerDown={startDescriptionDrag} />
           <div className="sp-propgrid-description" style={{ height: descriptionHeight }}>
+            {!current && objectName && objectDescription && (
+              <>
+                <div className="sp-propgrid-description-name">{objectName}</div>
+                <div className="sp-propgrid-description-text">{objectDescription}</div>
+              </>
+            )}
             {current && (
               <>
                 <div className="sp-propgrid-description-name">{current.type === "category" ? (current.name === DEFAULT_CATEGORY ? t("Misc") : current.name) : current.property.name}</div>

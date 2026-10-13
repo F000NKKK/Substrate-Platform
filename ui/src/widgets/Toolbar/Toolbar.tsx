@@ -38,7 +38,7 @@ export function Toolbar({ sections, leading }: ToolbarProps) {
         <div className="sp-toolbar-section" key={i}>
           {section.map((item) => (
             <IconButton key={item.label} title={item.label} disabled={item.disabled} onClick={item.onClick}>
-              <Icon name={item.icon} size={15} />
+              <Icon name={item.icon} />
             </IconButton>
           ))}
         </div>

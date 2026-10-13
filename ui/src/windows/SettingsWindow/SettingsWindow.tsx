@@ -71,7 +71,7 @@ export function SettingsWindow({ sections, initialSectionId, onClose, title, hea
           </div>
         )}
         <IconButton aria-label={t("Close")} onClick={onClose}>
-          <IconClose size={20} />
+          <IconClose />
         </IconButton>
       </div>
 

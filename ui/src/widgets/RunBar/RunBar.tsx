@@ -76,7 +76,7 @@ export function RunBar({ targets, running, onRun, emptyLabel, modes, selectedMod
         className="sp-run-bar-play"
         onClick={() => selectedTarget && onRun(selectedTarget.name)}
       >
-        <Icon name="play" size={15} />
+        <Icon name="play" />
       </IconButton>
       <div className="sp-run-bar-target-anchor">
         <button type="button" className="sp-run-bar-target" disabled={targets.length === 0} onClick={() => menu.openAtAnchor()}>

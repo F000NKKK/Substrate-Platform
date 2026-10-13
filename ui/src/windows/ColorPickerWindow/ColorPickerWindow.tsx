@@ -32,7 +32,7 @@ export function ColorPickerWindow({ title, value, presets, defaultValue, onChang
       <div className="sp-color-picker-header" {...handlers}>
         <Label>{title ?? t("Select Color")}</Label>
         <IconButton aria-label={t("Close")} onClick={onClose}>
-          <IconClose size={20} />
+          <IconClose />
         </IconButton>
       </div>
 
