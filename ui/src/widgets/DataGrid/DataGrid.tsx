@@ -3,7 +3,7 @@ import { ContextMenu } from "../ContextMenu";
 import { IconButton } from "../IconButton";
 import { IconClose } from "../../infra/icons";
 import { tn, useT } from "../../infra/i18n";
-import { useDataGrid, formatAggregate } from "./useDataGrid";
+import { useDataGrid, formatAggregate, DEFAULT_ROW_HEIGHT } from "./useDataGrid";
 import { buildDataGridMenuItems } from "./contextMenuItems";
 import "./DataGrid.css";
 
@@ -64,7 +64,7 @@ export interface DataGridProps<T> {
   columns: DataGridColumn<T>[];
   rows: T[];
   getRowId: (row: T) => string;
-  /** Row height in px — also the virtualization unit, so keep it fixed. Default 28. */
+  /** Row height in px — also the virtualization unit, so keep it fixed. Default 24 (`--sp-control-height`). */
   rowHeight?: number;
   selectable?: boolean;
   selectedIds?: Set<string>;
@@ -131,7 +131,7 @@ export interface DataGridHandle {
  * All state and behavior live in `useDataGrid`; this component is the view.
  */
 export function DataGrid<T>(props: DataGridProps<T>) {
-  const { selectable: selectableRows = false, filterRow = true, onRowActivate, emptyState, className, style, rowHeight = 28 } = props;
+  const { selectable: selectableRows = false, filterRow = true, onRowActivate, emptyState, className, style, rowHeight = DEFAULT_ROW_HEIGHT } = props;
   const { cellNavigation = false, showSelectColumn = true, showGroupPanel = true, rowClassName, cellClassName, cellTitle, handleRef } = props;
   const grid = useDataGrid(props);
   const t = useT();

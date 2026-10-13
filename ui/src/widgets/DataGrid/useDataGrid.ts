@@ -19,7 +19,8 @@ type DisplayItem<T> =
   | { kind: "group"; key: string; level: number; columnKey: string; label: string; count: number; aggregates: Record<string, number>; rows: T[] }
   | { kind: "row"; row: T };
 
-const DEFAULT_ROW_HEIGHT = 28;
+/** = `--sp-control-height`: a row fits an inline editor or a 20px thumbnail. */
+export const DEFAULT_ROW_HEIGHT = 24;
 const DEFAULT_COLUMN_WIDTH = 140;
 const DEFAULT_MIN_WIDTH = 48;
 const SELECT_COLUMN_WIDTH = 32;
