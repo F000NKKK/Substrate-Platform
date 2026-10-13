@@ -74,11 +74,11 @@ function originOf(node: Node | null): MenuOrigin | null {
   return { node, top: rect.top, left: rect.left };
 }
 
-/** Whether scrolling `scrolled` (a scroll event's target) actually moved `origin` on screen — a scroll elsewhere, or one that left it in place (a content refresh nudging `scrollTop`), doesn't. */
+/** Whether scrolling `scrolled` (a scroll event's target) actually moved `origin` on screen — a scroll elsewhere, one that left it in place (a content refresh nudging `scrollTop`), or one after a refresh replaced it doesn't. */
 export function scrollMoves(scrolled: EventTarget | null, origin: MenuOrigin | null): boolean {
   if (!origin) return true;
+  if (!origin.node.isConnected) return false;
   const inside = scrolled === document || scrolled === window || (scrolled instanceof Node && scrolled.contains(origin.node));
-  if (!inside) return false;
-  const now = originOf(origin.node);
-  return !origin.node.isConnected || !now || now.top !== origin.top || now.left !== origin.left;
+  const now = inside && originOf(origin.node);
+  return !!now && (now.top !== origin.top || now.left !== origin.left);
 }

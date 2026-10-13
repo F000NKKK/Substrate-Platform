@@ -7,6 +7,10 @@
   "license": "AGPL-3.0-only",
   "main": "./src/index.tsx",
   "types": "./src/index.tsx",
+  "scripts": {
+    "test": "vitest run",
+    "bench": "vitest bench --run"
+  },
   "peerDependencies": {
     "react": "^19",
     "react-dom": "^19"
@@ -14,7 +18,7 @@
   "dependencies": {
     "@codemirror/commands": "^6",
     "@codemirror/lang-java": "^6",
-    "@codemirror/lang-json": "^6.",
+    "@codemirror/lang-json": "^6",
     "@codemirror/lang-markdown": "^6",
     "@codemirror/lang-rust": "^6",
     "@codemirror/lang-xml": "^6",
@@ -40,5 +44,9 @@
   },
   "overrides": {
     "katex": "$katex"
+  },
+  "devDependencies": {
+    "happy-dom": "^21.0.1",
+    "vitest": "^3.2.7"
   }
 }
