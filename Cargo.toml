@@ -9,7 +9,7 @@ license = "AGPL-3.0-only"
 repository = "https://github.com/F000NKKK/Substrate-Platform"
 
 [dependencies]
-anyhow = "1.0.103"
+anyhow = "1"
 portable-pty = "0.9"
 serde = { version = "1", features = ["derive"] }
 toml = "1"
@@ -18,3 +18,10 @@ toml = "1"
 # `task::kill_tree`).
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
+
+[dev-dependencies]
+criterion = { version = "0.8", default-features = false, features = ["cargo_bench_support"] }
+
+[[bench]]
+name = "core"
+harness = false
