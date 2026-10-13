@@ -7,21 +7,22 @@
 
 /* Same look as the Appearance page's profile picker. */
 .sp-international-settings-select {
-  height: 28px;
-  box-sizing: border-box;
-  padding: 0 var(--sp-space-sm);
+  appearance: none;
+  height: var(--sp-control-height);
+  padding: 0 var(--sp-select-chevron-space) 0 var(--sp-control-padding-x);
   border: none;
-  border-radius: var(--sp-radius-sm);
-  background: transparent;
+  border-radius: var(--sp-control-radius);
+  background: transparent var(--sp-select-chevron) no-repeat right var(--sp-control-padding-x) center;
   color: var(--sp-text-muted);
   font-family: var(--sp-font-ui);
   font-size: var(--sp-font-size);
+  line-height: var(--sp-control-height);
   cursor: pointer;
   align-self: flex-start;
 }
 
 .sp-international-settings-select:hover {
-  background: var(--sp-surface-2);
+  background-color: var(--sp-surface-2);
   color: var(--sp-text);
 }
 

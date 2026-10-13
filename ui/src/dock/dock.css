@@ -236,8 +236,8 @@
   align-items: center;
   justify-content: space-between;
   flex: 0 0 auto;
-  height: 34px;
-  padding: 0 var(--sp-space-sm);
+  height: var(--sp-panel-header-height);
+  padding: 0 var(--sp-space-2xs) 0 var(--sp-space-sm);
   background: transparent;
   cursor: grab;
   user-select: none;
@@ -254,7 +254,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 11px;
+  font-size: var(--sp-font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--sp-text-muted);
@@ -263,7 +263,8 @@
 .sp-panel-surface-actions {
   flex: 0 0 auto;
   display: flex;
-  gap: 2px;
+  align-items: center;
+  gap: var(--sp-space-2xs);
 }
 
 .sp-panel-surface-body {

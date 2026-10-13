@@ -16,44 +16,30 @@
   gap: var(--sp-space-sm);
 }
 
-/* Matches `.sp-btn--ghost`'s own look (transparent until hover, same padding
-   scale/radius) — there's no shared "Select" widget yet, so this stays a
-   plain `<select>`, but it should read as the same family of control as the
-   `Button`s next to it. Deliberately no `appearance: none` — that stripped
-   the native control's own text-centering along with its chrome, which is
-   what made the label look vertically misaligned; the dropdown popup itself
-   is native-rendered regardless (see `color-scheme` in tokens.css) and
-   CSS can't reach further into it than that on every platform anyway. */
+/* A ghost select: `.sp-btn--ghost`'s look (transparent until hover) at the
+   shared control height, so it lines up with the `Button`s next to it. */
 .sp-appearance-settings-select {
-  height: 28px;
-  box-sizing: border-box;
-  padding: 0 var(--sp-space-sm);
+  appearance: none;
+  height: var(--sp-control-height);
+  padding: 0 var(--sp-select-chevron-space) 0 var(--sp-control-padding-x);
   border: none;
-  border-radius: var(--sp-radius-sm);
-  background: transparent;
+  border-radius: var(--sp-control-radius);
+  background: transparent var(--sp-select-chevron) no-repeat right var(--sp-control-padding-x) center;
   color: var(--sp-text-muted);
   font-family: var(--sp-font-ui);
   font-size: var(--sp-font-size);
+  line-height: var(--sp-control-height);
   cursor: pointer;
 }
 
 .sp-appearance-settings-select:hover {
-  background: var(--sp-surface-2);
+  background-color: var(--sp-surface-2);
   color: var(--sp-text);
-}
-
-/* Native <select>s and our own `Button` don't share a sizing formula (the
-   select's own chrome adds bulk our CSS can't fully reach), so this row
-   pins both to the same explicit height rather than trusting padding alone
-   to make them line up. */
-.sp-appearance-settings-row .sp-btn {
-  height: 28px;
-  box-sizing: border-box;
 }
 
 .sp-appearance-settings-error {
   font-size: 0.85em;
-  color: #e5877e;
+  color: var(--sp-danger);
 }
 
 .sp-appearance-settings-colors {

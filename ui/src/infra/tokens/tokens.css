@@ -113,6 +113,8 @@
   --sp-toolbar-gap: var(--sp-space-xs);
   --sp-toolbar-separator-margin: var(--sp-space-xs);
   --sp-panel-header-height: 28px;
+  /* title bar of a floating window / dialog (Settings, Color Picker, Publish, ...) */
+  --sp-caption-height: 32px;
   --sp-statusbar-height: 22px;
   --sp-hover: var(--sp-surface-2);
   --sp-selection: var(--sp-accent-soft);
