@@ -14,6 +14,8 @@ import { editorPhrases } from "./editorPhrases";
 import { notifyEditorUpdate, registerEditorView } from "./editorRegistry";
 import { resolveEditorTheme } from "./editorThemes";
 import { changeGutter } from "./changeGutter";
+import { syncDiagnostics } from "./diagnosticsLint";
+import type { Diagnostic } from "../../infra/diagnostics";
 import "./TextEditor.css";
 
 export interface TextEditorProps extends EditorProps {
@@ -23,6 +25,8 @@ export interface TextEditorProps extends EditorProps {
   extensions?: Extension[];
   /** Called once with the live `EditorView` right after it's created (the view lives for the component's whole lifetime — prop changes reconfigure it in place) — lets a composing component (that supplied `extensions`) dispatch its own transactions into it later, without `TextEditor` itself needing to know why. */
   onViewReady?: (view: EditorView) => void;
+  /** Squiggles for this file's diagnostics (those with a `line`), with their quick fixes on hover. Synced in place; omit for none. */
+  diagnostics?: readonly Diagnostic[];
 }
 
 /**
@@ -55,6 +59,7 @@ export function TextEditor({
   readOnly,
   extensions: extraExtensions,
   onViewReady,
+  diagnostics,
 }: TextEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
@@ -113,6 +118,7 @@ export function TextEditor({
     viewRef.current = view;
     const savedQuery = fromStoredQuery(storeRef.current.get(SEARCH_STATE_KEY));
     if (savedQuery) view.dispatch({ effects: setSearchQuery.of(savedQuery) });
+    if (diagnostics?.length) syncDiagnostics(view, diagnostics);
     onViewReadyRef.current?.(view);
 
     return () => {
@@ -130,6 +136,15 @@ export function TextEditor({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useReconfigure(viewRef, compartments.phrases, useMemo(() => editorPhrases(), [locale]));
   useReconfigure(viewRef, compartments.extra, extraExtensions ?? EMPTY_EXTENSIONS);
+
+  // Plain transactions, like breakpoints — not a reconfigure per change.
+  const syncedDiagnostics = useRef(diagnostics);
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view || syncedDiagnostics.current === diagnostics) return;
+    syncedDiagnostics.current = diagnostics;
+    syncDiagnostics(view, diagnostics ?? []);
+  }, [diagnostics]);
 
   // Re-keyed on `path` so a renamed file's editor stays reachable under its
   // new path (the view itself lives on, undo history included).

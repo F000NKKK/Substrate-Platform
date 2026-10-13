@@ -23,6 +23,7 @@
     "@codemirror/lang-markdown": "^6",
     "@codemirror/lang-rust": "^6",
     "@codemirror/lang-xml": "^6",
+    "@codemirror/lint": "^6",
     "@codemirror/language": "^6",
     "@codemirror/legacy-modes": "^6",
     "@codemirror/merge": "^6",

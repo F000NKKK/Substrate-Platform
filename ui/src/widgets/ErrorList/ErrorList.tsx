@@ -160,8 +160,10 @@ export function ErrorList({ diagnostics, onNavigate, activeFile, openFiles, form
     const selected = rows.filter((r) => selectedIds.has(r.id)).map((r) => r.d);
     const items = selected.length > 0 ? selected : [row.d];
     const help = row.d.codeHref;
+    const fixes = (row.d.fixes ?? []).map((fix, i): ContextMenuItem => ({ label: fix.label, onSelect: fix.apply }));
     return [
-      { label: t("Copy"), shortcut: "Ctrl+C", onSelect: () => copy(items) },
+      ...fixes,
+      { label: t("Copy"), shortcut: "Ctrl+C", separatorBefore: fixes.length > 0, onSelect: () => copy(items) },
       { label: t("Copy Description"), onSelect: () => void navigator.clipboard?.writeText(items.map((d) => d.message).join("\n")) },
       { label: t("Go To Location"), separatorBefore: true, disabled: !row.d.file, onSelect: () => navigate(row.d) },
       ...(help && onOpenHelp ? [{ label: t("Show Error Help"), onSelect: () => onOpenHelp(help, row.d) }] : []),

@@ -20,9 +20,20 @@ export interface Diagnostic {
   file?: string;
   line?: number;
   column?: number;
+  /** End of the span (exclusive column); default: to the end of the word at `column`. */
+  endLine?: number;
+  endColumn?: number;
   /** Project (crate, module, package) the diagnostic belongs to. */
   project?: string;
   /** What reported it (`rustc`, `clippy`, a format checker…). */
   tool?: string;
   origin: DiagnosticOrigin;
+  /** Quick fixes — offered in the Error List's menu and on the editor's squiggle. */
+  fixes?: readonly DiagnosticFix[];
+}
+
+/** One quick action that resolves (or works around) a diagnostic. */
+export interface DiagnosticFix {
+  label: string;
+  apply: () => void;
 }
