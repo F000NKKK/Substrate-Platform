@@ -149,6 +149,9 @@ export function useDataGrid<T>({
   onRowActivate,
   onCellEditCommit,
   persistKey,
+  pinnedRows,
+  cellNavigation = false,
+  onGridKeyDown,
 }: DataGridProps<T>) {
   const persisted = useMemo(() => (persistKey ? loadDataGridState(persistKey) : undefined), [persistKey]);
 
@@ -175,8 +178,13 @@ export function useDataGrid<T>({
   const [viewportHeight, setViewportHeight] = useState(480);
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeColumnKey, setActiveColumnKey] = useState<string | null>(null);
-  const [editingCell, setEditingCell] = useState<{ rowId: string; columnKey: string } | null>(null);
+  const [editingCell, setEditingCell] = useState<{ rowId: string; columnKey: string; initial?: string } | null>(null);
+  // The edit being committed/cancelled — its editor's blur on unmount mustn't commit it twice.
+  const editingRef = useRef<{ rowId: string; columnKey: string } | null>(null);
+  // Set by keyboard navigation: focus the active row once it has rendered.
+  const pendingFocusRef = useRef(false);
   const [flash, setFlash] = useState(false);
+  const [focusTick, setFocusTick] = useState(0);
   const [dragColumnKey, setDragColumnKey] = useState<string | null>(null);
   const [dropIndicator, setDropIndicator] = useState<{ key: string; side: "before" | "after" } | null>(null);
   const [groupPanelHover, setGroupPanelHover] = useState(false);
@@ -242,10 +250,12 @@ export function useDataGrid<T>({
     });
   }, [filteredRows, activeSort, columnByKey]);
 
-  const displayItems = useMemo(
-    () => buildDisplayItems(sortedRows, activeGroupBy, columnByKey, collapsedGroups, 0, ""),
-    [sortedRows, activeGroupBy, columnByKey, collapsedGroups]
-  );
+  const displayItems = useMemo(() => {
+    const items = buildDisplayItems(sortedRows, activeGroupBy, columnByKey, collapsedGroups, 0, "");
+    // Pinned rows (a "new row" placeholder, say) stay last — not sorted, filtered or grouped.
+    if (pinnedRows?.length) items.push(...pinnedRows.map((row): DisplayItem<T> => ({ kind: "row", row })));
+    return items;
+  }, [sortedRows, activeGroupBy, columnByKey, collapsedGroups, pinnedRows]);
 
   const footerAggregates = useMemo(() => computeAggregates(orderedColumns, sortedRows), [orderedColumns, sortedRows]);
 
@@ -303,21 +313,77 @@ export function useDataGrid<T>({
     setGroupPanelVisible((v) => !v);
   }
 
-  function startEdit(rowId: string, columnKey: string) {
+  function startEdit(rowId: string, columnKey: string, initial?: string) {
     const column = columnByKey.get(columnKey);
     if (!column?.editable) return;
-    setEditingCell({ rowId, columnKey });
+    editingRef.current = { rowId, columnKey };
+    setEditingCell({ rowId, columnKey, initial });
   }
 
-  function commitEdit(row: T, columnKey: string, value: string) {
+  /** Ends the edit of `columnKey` in `row` — `false` if it was already over (its editor's late blur). */
+  function endEdit(row: T, columnKey: string): boolean {
+    const current = editingRef.current;
+    if (!current || current.rowId !== getRowId(row) || current.columnKey !== columnKey) return false;
+    editingRef.current = null;
+    setEditingCell(null);
+    return true;
+  }
+
+  /**
+   * Commits an edit. With `cellNavigation`, `move` then goes to the next cell
+   * the way a spreadsheet does — `"down"` after Enter, `"next"`/`"prev"` after
+   * Tab/Shift+Tab — and gives the grid focus back.
+   */
+  function commitEdit(row: T, columnKey: string, value: string, move?: "down" | "next" | "prev") {
+    if (!endEdit(row, columnKey)) return;
     const column = columnByKey.get(columnKey);
     column?.onCellEdit?.(row, columnKey, value);
     onCellEditCommit?.(row, columnKey, value);
-    setEditingCell(null);
+    if (cellNavigation) {
+      const index = displayItems.findIndex((item) => item.kind === "row" && getRowId(item.row) === getRowId(row));
+      if (move === "down") moveTo(index + 1, columnKey);
+      else if (move === "next" || move === "prev") moveAcross(index, columnKey, move === "next" ? 1 : -1);
+      else moveTo(index, columnKey);
+    }
   }
 
   function cancelEdit() {
+    const current = editingRef.current;
+    editingRef.current = null;
     setEditingCell(null);
+    if (cellNavigation && current) {
+      const index = displayItems.findIndex((item) => item.kind === "row" && getRowId(item.row) === current.rowId);
+      moveTo(index, current.columnKey);
+    }
+  }
+
+  /** Makes item `index` (clamped) the active one, `columnKey` the active cell, scrolled to and focused. */
+  function moveTo(index: number, columnKey: string | null = activeColumnKey) {
+    if (displayItems.length === 0) return;
+    const next = clamp(index, 0, displayItems.length - 1);
+    setActiveIndex(next);
+    if (columnKey) setActiveColumnKey(columnKey);
+    scrollIndexIntoView(next);
+    pendingFocusRef.current = true;
+    setFocusTick((n) => n + 1);
+  }
+
+  /** Tab: the next (`dir` 1) or previous editable-or-not visible cell, wrapping onto the next/previous row. */
+  function moveAcross(index: number, columnKey: string | null, dir: 1 | -1) {
+    const keys = visibleColumns.map((c) => c.key);
+    if (keys.length === 0) return;
+    const at = columnKey ? keys.indexOf(columnKey) : -1;
+    let col = at + dir;
+    let row = index;
+    if (col >= keys.length) {
+      col = 0;
+      row++;
+    } else if (col < 0) {
+      col = keys.length - 1;
+      row--;
+    }
+    if (row < 0 || row >= displayItems.length) return moveTo(index, columnKey);
+    moveTo(row, keys[col]);
   }
 
   function toggleGroupCollapsed(key: string) {
@@ -434,12 +500,33 @@ export function useDataGrid<T>({
     else if (bottom > el.scrollTop + viewportHeight) el.scrollTop = bottom - viewportHeight;
   }
 
+  /** Keyboard selection follows the active row: plain arrows select it alone, Shift extends from the anchor, Ctrl just moves. */
+  function selectByKeyboard(index: number, e: KeyboardEvent) {
+    if (!selectable || e.ctrlKey || e.metaKey) return;
+    const item = displayItems[clamp(index, 0, displayItems.length - 1)];
+    if (item?.kind !== "row") return;
+    const rowIndex = sortedRows.indexOf(item.row);
+    if (rowIndex < 0) return;
+    if (e.shiftKey && lastAnchorRef.current === null) lastAnchorRef.current = rowIndex;
+    selectRow(rowIndex, { range: e.shiftKey });
+  }
+
   function handleItemKeyDown(e: KeyboardEvent, index: number) {
     const item = displayItems[index];
+    if (onGridKeyDown) {
+      onGridKeyDown(e, item?.kind === "row" ? item.row : null, activeColumnKey);
+      if (e.defaultPrevented) return;
+    }
+    if (cellNavigation && item?.kind === "row" && handleCellKey(e, index, item.row)) return;
     switch (e.key) {
       case "ArrowDown": {
         e.preventDefault();
         const next = clamp(index + 1, 0, displayItems.length - 1);
+        if (cellNavigation) {
+          moveTo(next);
+          selectByKeyboard(next, e);
+          break;
+        }
         setActiveIndex(next);
         scrollIndexIntoView(next);
         break;
@@ -447,6 +534,11 @@ export function useDataGrid<T>({
       case "ArrowUp": {
         e.preventDefault();
         const next = clamp(index - 1, 0, displayItems.length - 1);
+        if (cellNavigation) {
+          moveTo(next);
+          selectByKeyboard(next, e);
+          break;
+        }
         setActiveIndex(next);
         scrollIndexIntoView(next);
         break;
@@ -491,6 +583,70 @@ export function useDataGrid<T>({
         break;
       }
     }
+  }
+
+  /** `cellNavigation` keys on a data row — `true` if handled. */
+  function handleCellKey(e: KeyboardEvent, index: number, row: T): boolean {
+    const keys = visibleColumns.map((c) => c.key);
+    const current = activeColumnKey && keys.includes(activeColumnKey) ? activeColumnKey : (keys[0] ?? null);
+    const column = current ? columnByKey.get(current) : undefined;
+    const plain = !e.ctrlKey && !e.metaKey && !e.altKey;
+    switch (e.key) {
+      case "ArrowLeft":
+      case "ArrowRight": {
+        if (!plain || !current) return false;
+        e.preventDefault();
+        const at = keys.indexOf(current) + (e.key === "ArrowRight" ? 1 : -1);
+        moveTo(index, keys[clamp(at, 0, keys.length - 1)]);
+        return true;
+      }
+      case "Tab":
+        if (e.ctrlKey || e.metaKey || e.altKey) return false;
+        e.preventDefault();
+        moveAcross(index, current, e.shiftKey ? -1 : 1);
+        return true;
+      case "F2":
+      case "Enter":
+        if (!column?.editable) return false;
+        e.preventDefault();
+        startEdit(getRowId(row), column.key);
+        return true;
+      case "Home":
+      case "End":
+        if (!plain || !current) return false;
+        e.preventDefault();
+        moveTo(index, e.key === "Home" ? keys[0] : keys[keys.length - 1]);
+        return true;
+      case "a":
+      case "A":
+        if (!(e.ctrlKey || e.metaKey) || !selectable) return false;
+        e.preventDefault();
+        commitSelection(new Set(sortedRows.map(getRowId)));
+        return true;
+    }
+    // Typing on a cell starts editing it with what was typed, like a spreadsheet.
+    if (plain && e.key.length === 1 && column?.editable) {
+      e.preventDefault();
+      startEdit(getRowId(row), column.key, e.key);
+      return true;
+    }
+    return false;
+  }
+
+  // Keyboard navigation moved the active row: focus it once it's rendered
+  // (it may only appear after the scroll it caused).
+  useEffect(() => {
+    if (!pendingFocusRef.current || editingCell) return;
+    const el = scrollRef.current?.querySelector<HTMLElement>(`[data-index="${activeIndex}"]`);
+    if (!el) return;
+    pendingFocusRef.current = false;
+    el.focus({ preventScroll: true });
+  });
+
+  /** Focuses (and scrolls to) the cell of row `rowId` in `columnKey` — for a host's "Add" button, after a paste, ... */
+  function focusCell(rowId: string, columnKey?: string) {
+    const index = displayItems.findIndex((item) => item.kind === "row" && getRowId(item.row) === rowId);
+    if (index >= 0) moveTo(index, columnKey ?? activeColumnKey);
   }
 
   const attachScrollRef = useCallback((el: HTMLDivElement | null) => {
@@ -557,6 +713,8 @@ export function useDataGrid<T>({
     startEdit,
     commitEdit,
     cancelEdit,
+    focusCell,
+    focusTick,
     activeColumnKey,
     setActiveColumnKey,
     gridMenu,
