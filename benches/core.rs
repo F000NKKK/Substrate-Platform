@@ -27,7 +27,6 @@ fn pty_output(c: &mut Criterion) {
     let line = "\x1b[32m✓\x1b[0m test dir::tests::list_dir — ok (世界) 🦀\r\n";
     let stream = line.repeat(64 * 1024 / line.len()).into_bytes();
     let mut group = c.benchmark_group("utf8_chunker");
-    group.throughput(criterion::Throughput::Bytes(stream.len() as u64));
     group.bench_function("4k_reads", |b| {
         b.iter(|| {
             let mut chunker = Utf8Chunker::new();
