@@ -11,6 +11,8 @@ export interface FileTreeNode {
   nested?: FileTreeNode[];
   /** Overrides the default folder/folderOpen/file glyph for this node. */
   icon?: ReactNode;
+  /** A generated file (Visual Studio's `MainWindow.g.cs`) — shown greyed and in italics. */
+  generated?: boolean;
 }
 
 export interface FileTreeMenuItem {
@@ -54,7 +56,7 @@ export interface FileTreeProps {
 function toTreeNodes(nodes: FileTreeNode[]): TreeNode<FileTreeNode>[] {
   return nodes.map((node) => ({
     id: node.id,
-    label: node.name,
+    label: node.generated ? <span style={{ fontStyle: "italic", opacity: 0.65 }}>{node.name}</span> : node.name,
     data: node,
     children: node.kind === "folder" ? toTreeNodes(node.children ?? []) : node.nested?.length ? toTreeNodes(node.nested) : undefined,
     openable: node.kind === "file" && !!node.nested?.length,
