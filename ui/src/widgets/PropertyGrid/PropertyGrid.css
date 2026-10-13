@@ -182,6 +182,16 @@
   background-size: 6px 6px;
 }
 
+.sp-propgrid-image {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: var(--sp-space-xs);
+  vertical-align: -3px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
 .sp-propgrid-row[data-readonly] .sp-propgrid-value-text {
   color: var(--sp-text-muted);
 }

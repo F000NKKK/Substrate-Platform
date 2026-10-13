@@ -29,6 +29,8 @@ export interface PropertyDescriptor {
   displayValue?: string;
   /** A CSS color drawn as a small swatch before the value (Visual Studio's Color properties) — edited as text. */
   swatch?: string;
+  /** An image URL drawn as a small thumbnail before the value (pixelated — icons, textures). */
+  image?: string;
   /** How it's edited — default inferred from `value`'s type (`"enum"` when `options` is given). */
   kind?: PropertyKind;
   /** The choices of an `"enum"` property. */
@@ -421,6 +423,7 @@ export function PropertyGrid({
     return (
       <span className="sp-propgrid-value-text">
         {p.swatch && <span className="sp-propgrid-swatch" style={{ boxShadow: `inset 0 0 0 12px ${p.swatch}` }} />}
+        {p.image && <img className="sp-propgrid-image" src={p.image} alt="" />}
         {displayText(p)}
       </span>
     );
