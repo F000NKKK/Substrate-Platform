@@ -1,4 +1,12 @@
+/*
+ * Visual Studio's Properties window. Every row is --sp-row-height; names and
+ * values both start --sp-space-sm into their cell (category names line up
+ * with property names, past the expander column); inline editors fill the
+ * value cell exactly and keep that same text inset, so a value doesn't move
+ * when it turns into an editor.
+ */
 .sp-propgrid {
+  --sp-propgrid-indent: calc(var(--sp-space-xs) * 2 + var(--sp-icon-size));
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -13,11 +21,11 @@
 
 .sp-propgrid-object {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--sp-space-sm);
   flex: 0 0 auto;
-  min-height: 24px;
-  padding: var(--sp-space-xs) var(--sp-space-sm);
+  height: var(--sp-panel-header-height);
+  padding: 0 var(--sp-space-sm);
   border-bottom: 1px solid var(--sp-border);
   white-space: nowrap;
   overflow: hidden;
@@ -39,9 +47,10 @@
 .sp-propgrid-toolbar {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--sp-space-2xs);
   flex: 0 0 auto;
-  padding: var(--sp-space-xs);
+  height: var(--sp-toolbar-height);
+  padding: 0 var(--sp-toolbar-padding-x);
   border-bottom: 1px solid var(--sp-border);
 }
 
@@ -53,7 +62,7 @@
 .sp-propgrid-toolbar-separator {
   flex: 0 0 auto;
   width: 1px;
-  height: 16px;
+  height: var(--sp-icon-size);
   margin: 0 var(--sp-space-xs);
   background: var(--sp-border-strong);
 }
@@ -62,9 +71,7 @@
   flex: 1 1 auto;
   min-width: 0;
   width: auto;
-  height: 22px;
-  margin-right: 2px;
-  padding: 0 var(--sp-space-sm);
+  height: var(--sp-control-height);
 }
 
 /* Grid */
@@ -95,7 +102,7 @@
   display: flex;
   align-items: center;
   gap: var(--sp-space-xs);
-  height: 22px;
+  height: var(--sp-row-height);
   padding: 0 var(--sp-space-xs);
   background: var(--sp-surface-2);
   font-weight: 600;
@@ -124,7 +131,7 @@
 
 .sp-propgrid-row {
   display: flex;
-  height: 22px;
+  height: var(--sp-row-height);
   border-bottom: 1px solid var(--sp-border);
   cursor: default;
 }
@@ -132,7 +139,6 @@
 .sp-propgrid-name {
   position: relative;
   flex: 0 0 var(--sp-propgrid-split);
-  box-sizing: border-box;
   display: flex;
   align-items: center;
   min-width: 0;
@@ -142,7 +148,7 @@
 
 /* Categorized: a left margin under the category chevrons, as in Visual Studio. */
 .sp-propgrid-rows[data-mode="categorized"] .sp-propgrid-name {
-  padding-left: 22px;
+  padding-left: var(--sp-propgrid-indent);
 }
 
 .sp-propgrid-name-text {
@@ -178,10 +184,10 @@
 
 .sp-propgrid-swatch {
   display: inline-block;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   margin-right: var(--sp-space-xs);
-  vertical-align: -2px;
+  vertical-align: -3px;
   border: 1px solid var(--sp-border-strong);
   /* A checkerboard behind translucent colors. */
   background-image: conic-gradient(var(--sp-surface-3) 25%, var(--sp-text-faint) 0 50%, var(--sp-surface-3) 0 75%, var(--sp-text-faint) 0);
@@ -215,7 +221,7 @@
 .sp-propgrid-editor {
   width: 100%;
   height: 100%;
-  box-sizing: border-box;
+  margin: 0;
   font-family: var(--sp-font-ui);
   font-size: var(--sp-font-size);
   color: var(--sp-text);
@@ -233,33 +239,39 @@
 /* Booleans and enums are always-live native dropdowns, flat until hovered
    or focused so a column of them still reads as plain values. */
 .sp-propgrid-select {
+  appearance: none;
   width: 100%;
   height: 100%;
-  box-sizing: border-box;
-  padding: 0 var(--sp-space-xs);
+  min-width: 0;
+  margin: 0;
+  padding: 0 var(--sp-select-chevron-space) 0 calc(var(--sp-space-sm) - 1px);
   border: 1px solid transparent;
   border-radius: 0;
   background: transparent;
   color: var(--sp-text);
   font-family: var(--sp-font-ui);
   font-size: var(--sp-font-size);
+  line-height: calc(var(--sp-row-height) - 3px);
+  text-overflow: ellipsis;
+  white-space: nowrap;
   outline: none;
   cursor: pointer;
 }
 
-.sp-propgrid-select:hover {
-  background: var(--sp-surface-2);
+/* The arrow only shows on hover/focus, as in Visual Studio. */
+.sp-propgrid-select:hover,
+.sp-propgrid-select:focus {
+  background: var(--sp-surface-2) var(--sp-select-chevron) no-repeat right var(--sp-control-padding-x) center;
 }
 
 .sp-propgrid-select:focus {
   border-color: var(--sp-accent);
-  background: var(--sp-surface-2);
 }
 
 .sp-propgrid-error {
-  padding: 2px var(--sp-space-sm) 3px 22px;
+  padding: var(--sp-space-2xs) var(--sp-space-sm) var(--sp-space-2xs) var(--sp-propgrid-indent);
   color: var(--sp-danger);
-  font-size: 12px;
+  font-size: var(--sp-font-size-sm);
   border-bottom: 1px solid var(--sp-border);
   user-select: text;
 }
@@ -275,7 +287,6 @@
 
 .sp-propgrid-description {
   flex: 0 0 auto;
-  box-sizing: border-box;
   padding: 0 var(--sp-space-sm) var(--sp-space-xs);
   overflow-y: auto;
 }
