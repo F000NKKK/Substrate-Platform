@@ -36,12 +36,15 @@ pub struct Project {
     pub kind: Option<String>,
 }
 
+/// File name of a project's own workflow definitions.
+pub const WORKFLOW_FILE: &str = "workflow.toml";
+
 impl Project {
     /// Where this project's own workflow definitions would live, if it has
     /// any — a host falls back to its built-in default workflow set for
     /// `kind` when this path doesn't exist.
     pub fn workflow_path(&self) -> PathBuf {
-        self.root.join("workflow.toml")
+        self.root.join(WORKFLOW_FILE)
     }
 }
 

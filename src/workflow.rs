@@ -142,12 +142,11 @@ fn run_named(
     };
 
     chain.push(name.to_string());
-    for step in &def.steps {
+    let ok = def.steps.iter().all(|step| {
         if cancel.load(Ordering::Acquire) {
-            chain.pop();
             return false;
         }
-        let ok = match step {
+        match step {
             WorkflowStep::Run {
                 run,
                 args,
@@ -176,14 +175,10 @@ fn run_named(
             WorkflowStep::Compose { workflow } => {
                 run_named(file, workflow, vars, cwd, sink, cancel, chain)
             }
-        };
-        if !ok {
-            chain.pop();
-            return false;
         }
-    }
+    });
     chain.pop();
-    true
+    ok
 }
 
 /// Run the named workflow in the background (non-blocking): spawns one
