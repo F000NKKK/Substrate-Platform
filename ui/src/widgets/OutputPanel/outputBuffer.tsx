@@ -12,6 +12,8 @@ import { listen } from "@tauri-apps/api/event";
 const MAX_LINES_DEFAULT = 10_000;
 
 const buffers = new Map<string, string[]>();
+/** Lines ever dropped from the front of each buffer (cap trimming or clear) — `start + index` is a stable per-line id. */
+const dropped = new Map<string, number>();
 const subscribers = new Map<string, Set<() => void>>();
 const listening = new Set<string>();
 
@@ -25,7 +27,11 @@ function ensureListening(eventName: string, maxLines: number) {
 export function appendOutputLine(eventName: string, line: string, maxLines: number): void {
   const buf = buffers.get(eventName) ?? [];
   buf.push(line);
-  if (buf.length > maxLines) buf.splice(0, buf.length - maxLines);
+  if (buf.length > maxLines) {
+    const excess = buf.length - maxLines;
+    buf.splice(0, excess);
+    dropped.set(eventName, (dropped.get(eventName) ?? 0) + excess);
+  }
   buffers.set(eventName, buf);
   subscribers.get(eventName)?.forEach((notify) => notify());
 }
@@ -37,6 +43,11 @@ export function startOutputBuffer(eventName: string, maxLines = MAX_LINES_DEFAUL
 
 export function getOutputBuffer(eventName: string): string[] {
   return buffers.get(eventName) ?? [];
+}
+
+/** Absolute index of `getOutputBuffer(eventName)[0]` since the app started — stable row keys across trimming. */
+export function getOutputBufferStart(eventName: string): number {
+  return dropped.get(eventName) ?? 0;
 }
 
 /** Subscribes to new lines for `eventName`, starting the underlying Tauri listener the first time anything asks for this event name. Returns an unsubscribe function. */
@@ -52,6 +63,7 @@ export function subscribeOutput(eventName: string, maxLines: number, onChange: (
 }
 
 export function clearOutputBuffer(eventName: string): void {
+  dropped.set(eventName, getOutputBufferStart(eventName) + getOutputBuffer(eventName).length);
   buffers.set(eventName, []);
   subscribers.get(eventName)?.forEach((notify) => notify());
 }

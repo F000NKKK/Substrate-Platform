@@ -1,5 +1,5 @@
-import { useEffect, useLayoutEffect, useReducer, useRef } from "react";
-import { getOutputBuffer, subscribeOutput, MAX_LINES_DEFAULT } from "./outputBuffer";
+import { memo, useEffect, useLayoutEffect, useReducer, useRef } from "react";
+import { getOutputBuffer, getOutputBufferStart, subscribeOutput, MAX_LINES_DEFAULT } from "./outputBuffer";
 import { useT } from "../../infra/i18n";
 import "./OutputPanel.css";
 
@@ -51,10 +51,25 @@ export function OutputPanel({
 
   useEffect(() => {
     if (!eventName) return;
-    return subscribeOutput(eventName, maxLines, forceUpdate);
+    // A build streams hundreds of lines per frame, each its own event —
+    // render once per frame, not once per line.
+    let frame = 0;
+    const unsubscribe = subscribeOutput(eventName, maxLines, () => {
+      frame ||= requestAnimationFrame(() => {
+        frame = 0;
+        forceUpdate();
+      });
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      unsubscribe();
+    };
   }, [eventName, maxLines]);
 
   const lines = eventName ? getOutputBuffer(eventName) : (staticLines ?? []);
+  // Keys follow the line, not its position, so trimming the oldest line at
+  // the cap doesn't re-render every row below it.
+  const start = eventName ? getOutputBufferStart(eventName) : 0;
 
   useLayoutEffect(() => {
     const el = containerRef.current;
@@ -71,12 +86,12 @@ export function OutputPanel({
       {lines.length === 0 ? (
         <p className="sp-output-panel-empty">{emptyLabel ?? t("No output yet.")}</p>
       ) : (
-        lines.map((line, i) => (
-          <div className={`sp-output-panel-line sp-output-panel-line--${lineLevel(line)}`} key={i}>
-            {line}
-          </div>
-        ))
+        lines.map((line, i) => <OutputLine key={start + i} line={line} lineLevel={lineLevel} />)
       )}
     </div>
   );
 }
+
+const OutputLine = memo(function OutputLine({ line, lineLevel }: { line: string; lineLevel: (line: string) => OutputLineLevel }) {
+  return <div className={`sp-output-panel-line sp-output-panel-line--${lineLevel(line)}`}>{line}</div>;
+});
