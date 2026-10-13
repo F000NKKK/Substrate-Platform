@@ -11,8 +11,6 @@ export const accentPresets: readonly AccentColor[] = [
 
 export const defaultAccent: AccentColor = accentPresets[0];
 
-export const editorThemePresets: readonly EditorThemeId[] = ["vs-dark", "classic"];
-
 export const defaultEditorTheme: EditorThemeId = "vs-dark";
 
 export const defaultEditorPreferences: EditorPreferences = { fontFamily: "", fontSize: 13, tabSize: 4, wordWrap: true };

@@ -28,7 +28,7 @@ export { changeGutter, setChangeBaseline } from "./changeGutter";
 export { ImageEditor } from "./ImageEditor";
 export type { ImageEditorProps } from "./ImageEditor";
 export { PropertiesGridEditor } from "./PropertiesGridEditor";
-export { resolveEditor, isBinaryFile, registerEditorProvider, editorProvidersFor, useEditorProviders, generalEditorProviders, editorProviderById, editorProviderIcon } from "./registry";
+export { isBinaryFile, registerEditorProvider, editorProvidersFor, useEditorProviders, generalEditorProviders, editorProviderById, editorProviderIcon } from "./registry";
 export type { EditorProvider } from "./registry";
 export { MultiViewEditor } from "./MultiViewEditor";
 export { MarkdownPreview, MarkdownSplitEditor, setMarkdownLinkHandler } from "./MarkdownPreview";

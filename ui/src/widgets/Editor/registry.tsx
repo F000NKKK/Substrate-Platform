@@ -130,11 +130,6 @@ export function useEditorProviders(path: string): EditorProvider[] {
   return editorProvidersFor(path);
 }
 
-/** Resolves which editor opens `filename` by default — falls back to plain, unhighlighted text for anything unrecognized rather than refusing to open it. */
-export function resolveEditor(filename: string): EditorComponent {
-  return editorProvidersFor(filename)[0].component;
-}
-
 /**
  * Whether every editor for `filename` works on the file's raw bytes rather
  * than its text (e.g. a PNG's `ImageEditor`) — a host should skip reading

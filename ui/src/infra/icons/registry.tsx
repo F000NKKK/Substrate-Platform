@@ -83,8 +83,3 @@ export function registerIcons(icons: Record<string, IconComponent>): void {
 export function getRegisteredIcon(name: string): IconComponent | undefined {
   return globalOverrides[name] ?? defaultIcons[name];
 }
-
-/** The built-in names available before any overrides — useful for a product that wants to enumerate or validate against the default set. */
-export function getDefaultIconNames(): string[] {
-  return Object.keys(defaultIcons);
-}

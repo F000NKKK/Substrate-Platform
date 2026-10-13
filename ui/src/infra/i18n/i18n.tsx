@@ -94,11 +94,6 @@ export function availableLocales(): LocaleInfo[] {
   return [...locales.values()];
 }
 
-/** The active locale tag (as chosen or detected, e.g. `"ru-RU"`). */
-export function getLocale(): string {
-  return current;
-}
-
 /**
  * The registered locale the UI is actually shown in — the active tag, or
  * its language (`"ru-RU"` → `"ru"`), else English. What a picker selects.

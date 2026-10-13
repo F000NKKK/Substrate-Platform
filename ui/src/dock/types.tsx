@@ -63,7 +63,3 @@ export type ReopenPlacement = { anchor: "center" } | { anchor: "flyout" } | ({ a
 export type PanelPlacement =
   | { anchor: DockAnchor; mode: DockMode; reopen?: ReopenPlacement }
   | ({ anchor: "float" } & FloatRect);
-
-export function isFloating(p: PanelPlacement): p is Extract<PanelPlacement, { anchor: "float" }> {
-  return p.anchor === "float";
-}
