@@ -7,7 +7,7 @@ export interface PlatformShellProps {
   toolWindows: Partial<Record<ToolWindowAnchor, PanelDef[]>>;
   /** Panel ids that start pinned (docked, taking layout space) rather than auto-hidden. */
   defaultPinned?: Partial<Record<ToolWindowAnchor, string>>;
-  /** When set, the dock layout (panel placements/sizes/active center tab) survives a reload via `localStorage`, keyed by this string (make it unique per app). */
+  /** When set, the dock layout (panel placements/sizes/active center tab) survives a reload via the shell's `StateStore`, keyed by this string (make it unique per app). */
   persistKey?: string;
   /** Panels docked to the center beyond `main`, registered dynamically at runtime — e.g. one per open file in an editor, with no wrapper panel around them. The product owns this array as its own state; the shell just keeps its tab bar/placements in sync with it. */
   extraCenterPanels?: PanelDef[];
