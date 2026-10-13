@@ -1,0 +1,223 @@
+<div align="center">
+
+<a id="top"></a>
+
+# 🧱 Substrate Platform
+
+### Нейтральное ядро для настольных инструментов в стиле IDE
+
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
+[![Commercial license](https://img.shields.io/badge/commercial-available-blueviolet.svg)](COMMERCIAL-LICENSE.md)
+[![Rust 1.99](https://img.shields.io/badge/Rust-1.99-orange.svg)](rust-toolchain.toml)
+[![React 19](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
+[![CodeMirror 6](https://img.shields.io/badge/CodeMirror-6-D30707.svg)](https://codemirror.net/)
+
+🇺🇸 [English](README.md) | 🇷🇺 **Русский**
+
+[Обзор](#-обзор) • [Rust-крейт](#-rust-крейт) • [UI-пакет](#-ui-пакет) • [Подключение](#-подключение) • [Разработка](#-разработка) • [Лицензия](#-лицензия)
+
+</div>
+
+---
+
+## 📖 Обзор
+
+**Substrate Platform** — общая основа для настольных программ, которые
+выглядят и работают как IDE. Она ничего не знает о конкретном продукте:
+примерно как IntelliJ Platform относится к IntelliJ IDEA, PyCharm или Rider.
+Одно ядро, много продуктов поверх него.
+
+Состоит из двух половин:
+
+| Часть | Где | Что даёт |
+|---|---|---|
+| 🦀 **Rust-крейт** `substrate-platform` | корень репозитория | Запуск процессов и workflow, журнал вывода, PTY-терминалы, работа с файлами, модель проектов и решений. Без UI. |
+| ⚛️ **UI-пакет** `substrate-platform-ui` | [`ui/`](ui) | Оконная оболочка с докингом, редакторы, виджеты, диалоги, настройки, темы и локализация для React. Своего бэкенда не имеет. |
+
+Предметную логику продукт приносит сам: свои форматы файлов, типы проектов,
+шаблоны workflow и команды. Substrate даёт только то, что нужно любой IDE.
+
+Первый продукт на этой платформе —
+[Yog-IDLE](https://github.com/F000NKKK/Yog-IDLE) (приложение на Tauri,
+использует обе половины).
+
+<!-- screenshot: docs/images/shell.png — оболочка с докингом в приложении-хосте: меню, центральная зона с вкладкой редактора, закреплённое слева окно с деревом файлов, нижняя панель Output/Terminal и строка состояния -->
+
+```mermaid
+flowchart LR
+    subgraph product["Ваш продукт"]
+        ui["React UI<br/>свои редакторы и панели"]
+        be["Команды бэкенда<br/>(например, Tauri)"]
+    end
+    subgraph sp["Substrate Platform"]
+        spui["substrate-platform-ui<br/>оболочка · редакторы · виджеты"]
+        sprs["substrate-platform<br/>task · workflow · pty · log · dir · project"]
+    end
+    ui --> spui
+    be --> sprs
+    ui <-- "invoke / события" --> be
+```
+
+## 🦀 Rust-крейт
+
+| Модуль | Что делает |
+|---|---|
+| `task` | Запускает внешний процесс без блокировки и построчно пишет stdout/stderr в `LogSink`. У `TaskHandle` есть `is_running`, `exit_status`, `wait` и `cancel` (убивает всё дерево процессов). |
+| `workflow` | Именованные многошаговые сценарии из TOML. Шаги идут по порядку и останавливаются на первой ошибке; шаг может вызвать другой workflow (циклы отлавливаются); работает подстановка `${var}`. У `WorkflowHandle` есть `result`, `wait` и `cancel`. |
+| `log` | Клонируемый журнал `LogSink`, в который только дописывают: его можно прочитать, забрать (`drain`) или получать новые строки через `on_push`. Объём ограничен (`set_max_lines`). |
+| `pty` | Настоящий кроссплатформенный псевдотерминал (`PtySession` на `portable-pty`) с `PtyOptions`, а `spawn_utf8` / `Utf8Chunker` не разрывают многобайтовые символы. |
+| `shell` | `detect_shells()` возвращает реально установленные оболочки. |
+| `dir` | Содержимое одной папки (папки сначала, без учёта регистра), создание, переименование, удаление, чтение и запись текста или байтов. |
+| `project` | Определение `ProjectStandard` по файлам-маркерам, `Project` и `Solution` (TOML-файл с несколькими проектами, загрузка и сохранение). Сами стандарты задаёт хост. |
+
+Какие пути хосту можно трогать, решает сам хост, уровнем выше.
+
+### Запуск задачи
+
+```rust
+use substrate_platform::{LogSink, Task, spawn_task};
+
+let sink = LogSink::new();
+sink.on_push(|line| println!("{:?} {}", line.level, line.text));
+
+let handle = spawn_task(Task::new("cargo").arg("build").cwd("/path/to/project"), sink)?;
+let exit = handle.wait();
+println!("success: {}, code: {:?}", exit.success, exit.code);
+```
+
+### Запуск workflow
+
+```toml
+# workflow.toml
+[workflow.build]
+description = "Release-сборка"
+steps = [{ run = "cargo", args = ["build", "--release"] }]
+
+[workflow.ci]
+steps = [
+    { run = "cargo", args = ["fmt", "--check"] },
+    { workflow = "build" },
+    { run = "cargo", args = ["test"], env = { RUST_LOG = "${log}" } },
+]
+```
+
+```rust
+use std::collections::HashMap;
+use substrate_platform::{LogSink, WorkflowFile, run_workflow};
+
+let file = WorkflowFile::parse(&std::fs::read_to_string("workflow.toml")?)?;
+let vars = HashMap::from([("log".to_string(), "debug".to_string())]);
+let result = run_workflow(file, "ci", vars, ".", LogSink::new()).wait();
+assert!(result.is_success());
+```
+
+## ⚛️ UI-пакет
+
+Поставляется исходниками: `main` и `types` указывают на `src/index.tsx`, а
+компилирует его сборщик хоста. Peer-зависимость: React 19.
+
+### 🪟 Оболочка с докингом
+`PlatformShell` со своим движком докинга (без сторонних библиотек):
+центральная зона с вкладками, панели слева, справа и снизу, которые
+автоматически скрываются или закрепляются, перетаскивание между краями и
+центром, плавающие панели, размеры для каждой панели, места под меню и
+строку состояния. С `persistKey` раскладка сохраняется через `StateStore`
+(по умолчанию `localStorage`, либо хранилище хоста, например файл на каждый
+проект). Через `useShell()` любая панель может показать, скрыть или
+активировать другие.
+
+```tsx
+import { PlatformShell, ThemeProvider, StatusBar } from "substrate-platform-ui";
+
+<ThemeProvider>
+  <PlatformShell
+    main={{ id: "editor", title: "Editor", component: EditorArea }}
+    toolWindows={{
+      left: [{ id: "files", title: "Files", component: FilesPanel }],
+      bottom: [{ id: "output", title: "Output", component: OutputArea }],
+    }}
+    defaultPinned={{ left: "files" }}
+    persistKey="my-app"
+    statusBar={<StatusBar /* ... */ />}
+  />
+</ThemeProvider>
+```
+
+### ✍️ Редакторы
+- `resolveEditor(filename)` выбирает редактор по расширению: текстовый и
+  кодовый на CodeMirror 6 (поле для точек останова, подсветка языков),
+  Markdown с предпросмотром (GFM, KaTeX, Mermaid), таблица для
+  `.properties` и просмотр изображений
+- `DiffEditor` для сравнения двух версий
+
+### 🧩 Виджеты
+| Группа | Виджеты |
+|---|---|
+| Каркас | `MenuBar`, `Toolbar`, `RunBar`, `StatusBar`, `Tab`, `WindowControls`, `FloatingWindow`, `SplitPane` |
+| Данные | `Tree`, `FileTree` + `useDirectoryTree`, `DataGrid`, `PropertyGrid`, `ComponentList`, поля форм (`FormPage`, `CommitTextField`, `SelectField`...) |
+| Вывод | `OutputPanel`, `TerminalPanel` (xterm.js на настоящем PTY), `SearchResults`, `HighlightedText`, `SymbolIcon` |
+| Взаимодействие | `Dialog` (`showDialog`, `confirmDialog`, `promptDialog`), `notify`, `QuickPick`, `SearchField`, `ContextMenu` |
+| Дизайн | `DesignSurface` (выделение, маркеры перемещения и изменения размера), `ColorWheel`, `Swatch`, поля выбора цвета |
+| Основа | `Button`, `IconButton`, `Label`, `TextField` |
+
+### 🎨 Инфраструктура
+- Дизайн-токены в CSS-переменных `--sp-*`, `ThemeProvider` с акцентным
+  цветом и схемами редактора, реестр иконок, работа с цветом
+- `StateStore` для состояния UI между запусками, выделение, горячие клавиши,
+  помощники для drag-and-drop, модель структуры документа (outline)
+- Локализация: английский и русский из коробки
+- `SettingsWindow` и `ColorPickerWindow` с готовыми страницами настроек
+  «Внешний вид», «Редактор» и «Язык и регион»
+
+Вызовы бэкенда передаются колбэками или настраиваемыми именами Tauri-команд
+и событий (с разумными значениями по умолчанию), поэтому пакет не
+навязывает свой бэкенд.
+
+## 🚀 Подключение
+
+Крейт и UI-пакет пока не опубликованы, подключайте их по пути:
+
+```toml
+# Cargo.toml
+[dependencies]
+substrate-platform = { path = "../Substrate-Platform" }
+```
+
+```jsonc
+// package.json
+"dependencies": {
+  "substrate-platform-ui": "file:../Substrate-Platform/ui"
+}
+```
+
+Один раз выполните `npm install` в `Substrate-Platform/ui`, чтобы
+подтянулись его зависимости (CodeMirror, xterm.js и другие).
+
+## 🛠️ Разработка
+
+```sh
+cargo build
+cargo test
+cargo clippy --all-targets
+```
+
+Версия Rust (1.99) закреплена в `rust-toolchain.toml`.
+
+Главное правило: всё здесь остаётся универсальным. Возможность, которая
+нужна только одному продукту, живёт в этом продукте.
+
+## 📄 Лицензия
+
+Двойная лицензия: **AGPL-3.0-only** ([LICENSE](LICENSE)) — бесплатно для
+любого использования в рамках AGPL, или **коммерческая лицензия** для
+закрытого кода: бесплатно при чистой прибыли до $1 000 в месяц, выше —
+плавающие отчисления. Подробности в
+[COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md).
+
+---
+
+<div align="center">
+
+**[⬆ Наверх](#top)**
+
+</div>
