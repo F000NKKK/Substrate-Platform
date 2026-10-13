@@ -213,7 +213,7 @@ export function StringListField({ value, onCommit, validateItem, placeholder, ad
             aria-label={`${i + 1}`}
             onCommit={(text) => (text.trim() ? commitList(value.map((v, j) => (j === i ? text : v))) : commitList(value.filter((_, j) => j !== i)))}
           />
-          <IconButton size={24} title={t("Remove")} aria-label={t("Remove")} onClick={() => void commitList(value.filter((_, j) => j !== i))}>
+          <IconButton title={t("Remove")} aria-label={t("Remove")} onClick={() => void commitList(value.filter((_, j) => j !== i))}>
             <Icon name="trash" size={14} />
           </IconButton>
         </div>
@@ -235,7 +235,7 @@ export function StringListField({ value, onCommit, validateItem, placeholder, ad
               return failed;
             }}
           />
-          <IconButton size={24} title={t("Cancel")} aria-label={t("Cancel")} onClick={() => setAdding(false)}>
+          <IconButton title={t("Cancel")} aria-label={t("Cancel")} onClick={() => setAdding(false)}>
             <Icon name="close" size={14} />
           </IconButton>
         </div>

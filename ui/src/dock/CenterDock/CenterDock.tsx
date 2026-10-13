@@ -64,7 +64,7 @@ export function CenterDock({ layout }: CenterDockProps) {
         {actions.length > 0 && (
           <div className="sp-center-actions">
             {actions.map((action) => (
-              <IconButton key={action.id} size={24} title={action.title} aria-label={action.title} aria-pressed={action.active} onClick={action.onClick}>
+              <IconButton key={action.id} title={action.title} aria-label={action.title} aria-pressed={action.active} onClick={action.onClick}>
                 <Icon name={action.icon} size={16} />
               </IconButton>
             ))}

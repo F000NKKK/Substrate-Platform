@@ -71,7 +71,6 @@ export function RunBar({ targets, running, onRun, emptyLabel, modes, selectedMod
   return (
     <div className="sp-run-bar">
       <IconButton
-        size={26}
         title={selectedTarget ? t("Run: {target}", { target: selectedTarget.name }) : t("Select a target first")}
         disabled={!selectedTarget || running}
         className="sp-run-bar-play"

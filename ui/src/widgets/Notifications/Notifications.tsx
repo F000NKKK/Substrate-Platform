@@ -79,7 +79,7 @@ function Toast({ notification }: { notification: Notification }) {
   return (
     <div className={`sp-notification sp-notification--${level}`} role={level === "error" ? "alert" : "status"}>
       <span className="sp-notification-message">{message}</span>
-      <IconButton size={20} aria-label={t("Dismiss")} onClick={() => dismiss(id)}>
+      <IconButton size="sm" aria-label={t("Dismiss")} onClick={() => dismiss(id)}>
         <Icon name="close" size={12} />
       </IconButton>
     </div>

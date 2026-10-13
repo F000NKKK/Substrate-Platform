@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from "react";
 import { useT } from "../../infra/i18n";
+import { IconClose } from "../../infra/icons";
 import "./Tab.css";
 
 export type TabOrientation = "horizontal" | "horizontal-dock" | "vertical-left" | "vertical-right" | "list";
@@ -43,8 +44,8 @@ export function Tab({ active, orientation = "horizontal", onRequestClose, pinned
           <PinIcon />
         </span>
       ) : onRequestClose && (
-        <span className="sp-tab-close" role="button" aria-label={t("Close tab")} onClick={handleCloseClick}>
-          ×
+        <span className="sp-tab-close" role="button" aria-label={t("Close tab")} title={t("Close")} onClick={handleCloseClick}>
+          <IconClose aria-hidden="true" />
         </span>
       )}
     </button>
@@ -54,7 +55,7 @@ export function Tab({ active, orientation = "horizontal", onRequestClose, pinned
 /** Visual Studio's pinned-tab glyph: an upright pushpin, drawn in the text color. */
 function PinIcon() {
   return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true">
+    <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true">
       <path d="M4 1.5h4M4.5 1.5v4L3 7h6L7.5 5.5v-4" strokeLinejoin="round" />
       <path d="M6 7v4" strokeLinecap="round" />
     </svg>

@@ -444,7 +444,6 @@ export function PropertyGrid({
       </div>
       <div className="sp-propgrid-toolbar">
         <IconButton
-          size={22}
           title={t("Categorized")}
           aria-pressed={mode === "categorized"}
           data-active={mode === "categorized" || undefined}
@@ -454,7 +453,6 @@ export function PropertyGrid({
           <Icon name="categorized" size={14} />
         </IconButton>
         <IconButton
-          size={22}
           title={t("Alphabetical")}
           aria-pressed={mode === "alphabetical"}
           data-active={mode === "alphabetical" || undefined}
@@ -475,7 +473,6 @@ export function PropertyGrid({
           }}
         />
         <IconButton
-          size={22}
           title={descriptionVisible ? t("Hide Description") : t("Show Description")}
           aria-pressed={descriptionVisible}
           data-active={descriptionVisible || undefined}

@@ -1,5 +1,10 @@
 .sp-icon-btn {
   appearance: none;
+  box-sizing: border-box;
+  flex: none;
+  width: var(--sp-icon-btn-size);
+  height: var(--sp-icon-btn-size);
+  padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -10,6 +15,19 @@
   cursor: pointer;
   border-radius: var(--sp-radius-sm);
   transition: background var(--sp-duration-fast) var(--sp-easing), color var(--sp-duration-fast) var(--sp-easing);
+}
+
+.sp-icon-btn--sm {
+  width: var(--sp-icon-btn-size-sm);
+  height: var(--sp-icon-btn-size-sm);
+}
+
+/* The glyph is sized here, not at the call site — CSS beats the SVG's width/height attributes,
+   so every icon-only button gets the same 16px glyph whatever size its <Icon> was created with. */
+.sp-icon-btn > svg {
+  flex: none;
+  width: var(--sp-icon-size);
+  height: var(--sp-icon-size);
 }
 
 .sp-icon-btn:hover {

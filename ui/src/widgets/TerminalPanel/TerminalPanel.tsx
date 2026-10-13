@@ -257,7 +257,6 @@ export function TerminalPanel({
       <div className="sp-terminal-toolbar">
         <div className="sp-terminal-toolbar-anchor">
           <IconButton
-            size={22}
             title={t("New Terminal")}
             disabled={!shells}
             onClick={() => (shells && shells.length > 1 ? addMenu.openAtAnchor() : shells?.[0] && addTerminal(shells[0]))}
@@ -270,14 +269,14 @@ export function TerminalPanel({
             onClose={addMenu.close}
           />
         </div>
-        <IconButton size={22} title={t("Split Terminal")} disabled={!activeId} onClick={splitTerminal}>
+        <IconButton title={t("Split Terminal")} disabled={!activeId} onClick={splitTerminal}>
           <Icon name="split" size={14} />
         </IconButton>
-        <IconButton size={22} title={t("Kill Terminal")} disabled={!activeId} onClick={() => activeId && closeTerminal(activeId)}>
+        <IconButton title={t("Kill Terminal")} disabled={!activeId} onClick={() => activeId && closeTerminal(activeId)}>
           <Icon name="trash" size={14} />
         </IconButton>
         <div className="sp-terminal-toolbar-anchor">
-          <IconButton size={22} title={t("More Actions")} onClick={() => moreMenu.openAtAnchor()}>
+          <IconButton title={t("More Actions")} onClick={() => moreMenu.openAtAnchor()}>
             <Icon name="more" size={14} />
           </IconButton>
           <ContextMenu
@@ -369,7 +368,7 @@ export function TerminalPanel({
                 </span>
               )}
               <IconButton
-                size={22}
+                size="sm"
                 title={t("Close Terminal")}
                 className="sp-terminal-sidebar-item-close"
                 onClick={(e) => {

@@ -89,4 +89,13 @@
   --sp-toolwindow-size: 260px;
   --sp-toolwindow-bottom-size: 220px;
   --sp-menubar-height: 38px;
+
+  /* icons — Visual Studio's metrics: 16px glyphs in a 24px command hit box
+     (toolbars, strips, panel-header actions), 20px in tool-window captions,
+     document tabs and dense rows; toolbars are tall enough to fit a 24px box */
+  --sp-icon-size: 16px;
+  --sp-icon-size-sm: 14px;
+  --sp-icon-btn-size: 24px;
+  --sp-icon-btn-size-sm: 20px;
+  --sp-toolbar-height: 28px;
 }

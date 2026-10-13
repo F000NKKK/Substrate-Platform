@@ -26,16 +26,23 @@
   white-space: nowrap;
 }
 
+/* A 20px hit box like Visual Studio's tab close/pin; the negative block margin keeps the tab as tall as its text. */
 .sp-tab-close {
   display: inline-flex;
+  flex: none;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
+  width: var(--sp-icon-btn-size-sm);
+  height: var(--sp-icon-btn-size-sm);
+  margin: -2px calc(-1 * var(--sp-space-xs)) -2px 0;
   border-radius: var(--sp-radius-sm);
   color: var(--sp-text-faint);
-  font-size: 13px;
   line-height: 1;
+}
+
+.sp-tab-close > svg {
+  width: var(--sp-icon-size-sm);
+  height: var(--sp-icon-size-sm);
 }
 
 .sp-tab-close:hover {

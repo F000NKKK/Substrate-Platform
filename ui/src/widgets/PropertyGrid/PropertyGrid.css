@@ -102,17 +102,23 @@
   cursor: default;
 }
 
+/* Full row height and 16px wide so the expander is easy to hit; only the glyph rotates. */
 .sp-propgrid-chevron {
   display: flex;
+  flex: none;
+  align-self: stretch;
   align-items: center;
   justify-content: center;
-  width: 14px;
+  width: var(--sp-icon-size);
   color: var(--sp-text-faint);
-  transform: rotate(0deg);
+  cursor: pointer;
+}
+
+.sp-propgrid-chevron > svg {
   transition: transform var(--sp-duration-base) var(--sp-easing);
 }
 
-.sp-propgrid-chevron[data-expanded] {
+.sp-propgrid-chevron[data-expanded] > svg {
   transform: rotate(90deg);
 }
 
