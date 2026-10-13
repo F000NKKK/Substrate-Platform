@@ -129,7 +129,7 @@
   align-items: center;
   gap: var(--sp-space-xs);
   height: var(--sp-control-height);
-  padding: 0 var(--sp-space-2xs) 0 var(--sp-space-sm);
+  padding: 0 var(--sp-space-xs) 0 var(--sp-space-sm);
   cursor: pointer;
   color: var(--sp-text-muted);
   border-radius: var(--sp-radius-xs);

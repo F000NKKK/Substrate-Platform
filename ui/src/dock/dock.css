@@ -241,7 +241,7 @@
   justify-content: space-between;
   flex: 0 0 auto;
   height: var(--sp-panel-header-height);
-  padding: 0 var(--sp-space-2xs) 0 var(--sp-space-sm);
+  padding: 0 var(--sp-space-xs) 0 var(--sp-space-sm);
   background: transparent;
   cursor: grab;
   user-select: none;

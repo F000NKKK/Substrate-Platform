@@ -108,11 +108,13 @@
 
   /* rows and bars */
   --sp-row-height: 22px;
-  --sp-toolbar-height: 28px;
-  --sp-toolbar-padding-x: var(--sp-space-xs);
+  --sp-toolbar-height: 32px;
+  /* air between a bar's controls and its edges / its group separators */
+  --sp-toolbar-padding-x: var(--sp-space-sm);
+  --sp-toolbar-padding-y: var(--sp-space-xs);
   --sp-toolbar-gap: var(--sp-space-xs);
-  --sp-toolbar-separator-margin: var(--sp-space-xs);
-  --sp-panel-header-height: 28px;
+  --sp-toolbar-separator-margin: var(--sp-space-sm);
+  --sp-panel-header-height: 32px;
   /* title bar of a floating window / dialog (Settings, Color Picker, Publish, ...) */
   --sp-caption-height: 32px;
   --sp-statusbar-height: 22px;
