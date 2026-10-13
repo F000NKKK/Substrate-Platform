@@ -19,7 +19,7 @@
 }
 
 .sp-tab:focus-visible {
-  box-shadow: 0 0 0 2px var(--sp-accent-soft);
+  box-shadow: var(--sp-focus-ring);
 }
 
 .sp-tab-label {
@@ -34,8 +34,8 @@
   justify-content: center;
   width: var(--sp-icon-btn-size-sm);
   height: var(--sp-icon-btn-size-sm);
-  margin: -2px calc(-1 * var(--sp-space-xs)) -2px 0;
-  border-radius: var(--sp-radius-sm);
+  margin-right: calc(-1 * var(--sp-space-xs));
+  border-radius: var(--sp-control-radius);
   color: var(--sp-text-faint);
   line-height: 1;
 }
@@ -53,8 +53,9 @@
 /* horizontal — the CenterDock's document tabs */
 
 .sp-tab--horizontal {
-  padding: var(--sp-space-xs) var(--sp-space-md);
-  border-radius: var(--sp-radius-sm) var(--sp-radius-sm) 0 0;
+  height: var(--sp-control-height);
+  padding: 0 var(--sp-space-md);
+  border-radius: var(--sp-control-radius) var(--sp-control-radius) 0 0;
 }
 
 .sp-tab--horizontal:hover {
@@ -73,9 +74,10 @@
  * strip semantics as left/right, so it gets the same "flush blend into an
  * open flyout" treatment as those, not CenterDock's permanent underline.
  */
+/* No fixed height: stretches across the strip so an open flyout meets it flush. */
 .sp-tab--horizontal-dock {
-  padding: var(--sp-space-xs) var(--sp-space-sm);
-  border-radius: var(--sp-radius-sm);
+  padding: 0 var(--sp-space-sm);
+  border-radius: var(--sp-control-radius);
 }
 
 .sp-tab--horizontal-dock:hover {
@@ -97,7 +99,7 @@
 .sp-tab--vertical-left,
 .sp-tab--vertical-right {
   padding: var(--sp-space-sm) var(--sp-space-xs);
-  border-radius: var(--sp-radius-sm);
+  border-radius: var(--sp-control-radius);
 }
 
 .sp-tab--vertical-left:hover,
@@ -132,8 +134,9 @@
 .sp-tab--list {
   width: 100%;
   justify-content: flex-start;
-  padding: var(--sp-space-xs) var(--sp-space-sm);
-  border-radius: var(--sp-radius-sm);
+  min-height: var(--sp-control-height);
+  padding: 0 var(--sp-space-sm);
+  border-radius: var(--sp-control-radius);
   text-align: left;
 }
 

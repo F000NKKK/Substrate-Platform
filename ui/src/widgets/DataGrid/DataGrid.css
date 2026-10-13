@@ -20,9 +20,9 @@
   align-items: center;
   flex-wrap: wrap;
   gap: var(--sp-space-xs);
-  min-height: 30px;
+  min-height: var(--sp-toolbar-height);
   flex: 0 0 auto;
-  padding: var(--sp-space-xs) var(--sp-space-sm);
+  padding: var(--sp-space-2xs) var(--sp-space-sm);
   background: var(--sp-surface-1);
   border-bottom: 1px dashed var(--sp-border-strong);
   transition: background var(--sp-duration-fast) var(--sp-easing);
@@ -34,24 +34,25 @@
 
 .sp-datagrid-grouppanel-placeholder {
   color: var(--sp-text-faint);
-  font-size: 11px;
+  font-size: var(--sp-font-size-xs);
 }
 
 .sp-datagrid-groupchip {
   display: inline-flex;
   align-items: center;
   gap: var(--sp-space-xs);
-  padding: 2px var(--sp-space-xs) 2px var(--sp-space-sm);
+  height: var(--sp-control-height-sm);
+  padding: 0 0 0 var(--sp-space-sm);
   background: var(--sp-surface-3);
   border: 1px solid var(--sp-border-strong);
-  border-radius: var(--sp-radius-xs);
-  font-size: 11px;
+  border-radius: var(--sp-control-radius);
+  font-size: var(--sp-font-size-xs);
   color: var(--sp-text);
 }
 
-/* A 20px IconButton; the negative margins keep the chip as tall as its text. */
+/* A 20px IconButton filling the chip's height at its right end. */
 .sp-datagrid-groupchip-remove {
-  margin: -3px -2px -3px 0;
+  height: 100%;
   color: var(--sp-text-faint);
 }
 
@@ -63,7 +64,7 @@
   /* Stays a fixed, clickable strip even with zero visible columns (e.g. every
      column hidden) — otherwise it collapses to its border and there's nothing
      left to right-click to bring a column back via "Show hidden columns". */
-  min-height: 28px;
+  min-height: var(--sp-control-height);
   background: var(--sp-surface-2);
   border-bottom: 1px solid var(--sp-border-strong);
   scrollbar-gutter: stable;
@@ -74,8 +75,8 @@
   display: flex;
   align-items: center;
   gap: var(--sp-space-xs);
-  padding: var(--sp-space-xs) var(--sp-space-sm);
-  font-size: 11px;
+  padding: 0 var(--sp-space-sm);
+  font-size: var(--sp-font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -193,19 +194,19 @@
 .sp-datagrid-filtercell {
   display: flex;
   align-items: center;
-  padding: 3px var(--sp-space-xs);
+  padding: var(--sp-space-2xs) var(--sp-space-xs);
 }
 
 .sp-datagrid-filterinput {
   width: 100%;
-  box-sizing: border-box;
+  height: var(--sp-control-height-sm);
   font-family: var(--sp-font-ui);
-  font-size: 11px;
+  font-size: var(--sp-font-size-xs);
   color: var(--sp-text);
   background: var(--sp-surface-2);
   border: 1px solid var(--sp-border);
-  border-radius: var(--sp-radius-xs);
-  padding: 3px var(--sp-space-xs);
+  border-radius: var(--sp-control-radius);
+  padding: 0 calc(var(--sp-space-sm) - 1px);
   outline: none;
   transition: border-color var(--sp-duration-fast) var(--sp-easing), box-shadow var(--sp-duration-fast) var(--sp-easing);
 }
@@ -216,7 +217,7 @@
 
 .sp-datagrid-filterinput:focus {
   border-color: var(--sp-accent);
-  box-shadow: 0 0 0 2px var(--sp-accent-soft);
+  box-shadow: var(--sp-focus-ring);
 }
 
 /* Body */
@@ -300,7 +301,7 @@
 
 .sp-datagrid-grouplabel {
   color: var(--sp-text-muted);
-  font-size: 12px;
+  font-size: var(--sp-font-size-sm);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -313,7 +314,7 @@
 
 .sp-datagrid-groupcount {
   color: var(--sp-text-faint);
-  font-size: 11px;
+  font-size: var(--sp-font-size-xs);
   flex: 0 0 auto;
 }
 
@@ -321,7 +322,7 @@
   margin-left: auto;
   padding-left: var(--sp-space-md);
   color: var(--sp-text-muted);
-  font-size: 11px;
+  font-size: var(--sp-font-size-xs);
   font-variant-numeric: tabular-nums;
   flex: 0 0 auto;
 }
@@ -364,14 +365,15 @@
 .sp-datagrid-cell-editor {
   width: 100%;
   height: 100%;
-  box-sizing: border-box;
+  margin: 0;
   font-family: var(--sp-font-ui);
   font-size: var(--sp-font-size);
   color: var(--sp-text);
   background: var(--sp-surface-2);
   border: 1px solid var(--sp-accent);
   border-radius: 0;
-  padding: 0 var(--sp-space-sm);
+  /* keeps the text where the cell's own (8px) inset put it */
+  padding: 0 calc(var(--sp-space-sm) - 1px);
   outline: none;
 }
 
@@ -387,8 +389,9 @@
 .sp-datagrid-footercell {
   display: flex;
   align-items: center;
-  padding: var(--sp-space-xs) var(--sp-space-sm);
-  font-size: 11px;
+  min-height: var(--sp-row-height);
+  padding: 0 var(--sp-space-sm);
+  font-size: var(--sp-font-size-xs);
   font-weight: 600;
   color: var(--sp-text);
   font-variant-numeric: tabular-nums;

@@ -11,11 +11,12 @@
   align-items: center;
   justify-content: flex-end;
   flex: 0 0 auto;
-  gap: 2px;
+  gap: var(--sp-space-2xs);
+  min-height: var(--sp-toolbar-height);
   /* Extra right clearance, same reasoning as the sidebar below — keeps these
      buttons clear of a panel-level scrollbar track instead of sitting flush
      against the edge it can appear in. */
-  padding: 2px 10px 2px var(--sp-space-xs);
+  padding: 0 var(--sp-space-sm) 0 var(--sp-toolbar-padding-x);
   border-bottom: 1px solid var(--sp-border);
 }
 
@@ -127,7 +128,8 @@
   display: flex;
   align-items: center;
   gap: var(--sp-space-xs);
-  padding: 4px var(--sp-space-sm);
+  height: var(--sp-control-height);
+  padding: 0 var(--sp-space-2xs) 0 var(--sp-space-sm);
   cursor: pointer;
   color: var(--sp-text-muted);
   border-radius: var(--sp-radius-xs);
@@ -154,19 +156,20 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: var(--sp-font-size-sm);
 }
 
 .sp-terminal-sidebar-item-rename {
   flex: 1;
   min-width: 0;
-  font-size: 12px;
+  height: var(--sp-control-height-sm);
+  font-size: var(--sp-font-size-sm);
   font-family: inherit;
   color: var(--sp-text);
   background: var(--sp-surface-0);
   border: 1px solid var(--sp-border-strong);
   border-radius: var(--sp-radius-xs);
-  padding: 0 2px;
+  padding: 0 var(--sp-space-xs);
   outline: none;
 }
 

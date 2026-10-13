@@ -33,10 +33,11 @@
   appearance: none;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: var(--sp-space-xs) var(--sp-space-sm);
+  gap: var(--sp-space-xs);
+  height: var(--sp-control-height);
+  padding: 0 var(--sp-control-padding-x);
   border: none;
-  border-radius: var(--sp-radius-sm);
+  border-radius: var(--sp-control-radius);
   background: transparent;
   color: var(--sp-text-muted);
   font-family: var(--sp-font-ui);

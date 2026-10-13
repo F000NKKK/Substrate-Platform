@@ -6,10 +6,12 @@
   height: 100%;
 }
 
+/* Tabs sit on the strip's bottom border; the strip is exactly tab + top inset tall, so the active tab meets the document below with no gap. */
 .sp-center-tabs {
   display: flex;
+  align-items: flex-end;
   flex: 0 0 auto;
-  gap: 2px;
+  gap: var(--sp-space-2xs);
   padding: var(--sp-space-xs) var(--sp-space-xs) 0;
   background: var(--sp-surface-1);
   border-bottom: 1px solid var(--sp-border);
@@ -19,9 +21,11 @@
 .sp-center-actions {
   display: flex;
   align-items: center;
-  gap: 2px;
+  align-self: stretch;
+  gap: var(--sp-space-2xs);
   margin-left: auto;
-  padding: 0 var(--sp-space-xs) var(--sp-space-xs);
+  margin-top: calc(-1 * var(--sp-space-xs));
+  padding: 0 var(--sp-space-2xs);
 }
 
 .sp-center-actions .sp-icon-btn[aria-pressed="true"] {
@@ -83,7 +87,7 @@
   display: flex;
   flex: 0 0 auto;
   background: var(--sp-surface-1);
-  gap: 2px;
+  gap: var(--sp-space-2xs);
   padding: var(--sp-space-xs);
   transition: background var(--sp-duration-fast) var(--sp-easing);
 }

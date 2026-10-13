@@ -14,8 +14,8 @@
    tabs — flipped tab shape, the accent edge on top. */
 .sp-multiview-editor-views {
   display: flex;
-  gap: 2px;
-  padding: 0 var(--sp-space-sm);
+  gap: var(--sp-space-2xs);
+  padding: 0 var(--sp-space-xs);
   border-top: 1px solid var(--sp-border);
   background: var(--sp-surface-1);
 }

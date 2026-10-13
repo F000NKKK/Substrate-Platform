@@ -9,7 +9,7 @@
 }
 
 .sp-menubar-title {
-  font-size: 12px;
+  font-size: var(--sp-font-size-sm);
   font-weight: 600;
   color: var(--sp-text-muted);
   letter-spacing: 0.02em;
@@ -19,7 +19,7 @@
 .sp-menubar-items {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--sp-space-2xs);
 }
 
 .sp-menubar-spacer {

@@ -22,7 +22,7 @@
 .sp-contextmenu-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--sp-space-2xs);
 }
 
 .sp-contextmenu-itemwrap {
@@ -30,7 +30,7 @@
 }
 
 .sp-contextmenu-item--destructive {
-  color: #e5877e;
+  color: var(--sp-danger);
 }
 
 .sp-contextmenu-separator {
@@ -75,7 +75,7 @@
   z-index: 201;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--sp-space-2xs);
   min-width: 160px;
   padding: var(--sp-space-xs);
   background: var(--sp-surface-glass);
