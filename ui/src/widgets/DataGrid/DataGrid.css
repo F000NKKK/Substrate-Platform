@@ -13,6 +13,14 @@
   overflow: hidden;
 }
 
+/* Filling a document or panel edge to edge: the surrounding chrome (a
+   toolbar's bottom border, a status bar's top border) already frames it, so
+   its own frame would draw a second 1px line next to theirs. */
+.sp-datagrid--flush {
+  border: none;
+  border-radius: 0;
+}
+
 /* Group panel */
 
 .sp-datagrid-grouppanel {
