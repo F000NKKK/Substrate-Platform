@@ -32,22 +32,27 @@
   box-shadow: inset 0 0 0 1px var(--sp-accent), inset 2px 0 0 var(--sp-accent);
 }
 
+/* The expander spans the full row height and 16px of width so it's easy to hit; only the glyph rotates. */
 .sp-tree-chevron,
 .sp-tree-chevron-spacer {
   flex: 0 0 auto;
+  align-self: stretch;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 13px;
+  width: var(--sp-icon-size);
   color: var(--sp-text-faint);
 }
 
 .sp-tree-chevron {
-  transform: rotate(0deg);
+  cursor: pointer;
+}
+
+.sp-tree-chevron > svg {
   transition: transform var(--sp-duration-base) var(--sp-easing);
 }
 
-.sp-tree-chevron[data-expanded] {
+.sp-tree-chevron[data-expanded] > svg {
   transform: rotate(90deg);
 }
 
