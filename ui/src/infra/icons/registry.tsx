@@ -57,6 +57,8 @@ const defaultIcons: Record<string, IconComponent> = {
   check: glyphs.IconCheck,
   history: glyphs.IconHistory,
   stash: glyphs.IconStash,
+  table: glyphs.IconTable,
+  folderTable: glyphs.IconFolderTable,
 };
 
 const globalOverrides: Record<string, IconComponent> = {};

@@ -49,3 +49,5 @@ export { IconSplitRows } from "./IconSplitRows";
 export { IconSwap } from "./IconSwap";
 export { IconCollapse } from "./IconCollapse";
 export { IconExpand } from "./IconExpand";
+export { IconTable } from "./IconTable";
+export { IconFolderTable } from "./IconFolderTable";

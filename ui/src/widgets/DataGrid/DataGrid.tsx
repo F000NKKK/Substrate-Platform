@@ -44,8 +44,18 @@ export interface DataGridColumn<T> {
   editValue?: (row: T) => string;
   /** Called with the row, this column's key, and the committed string value when an edit commits. */
   onCellEdit?: (row: T, key: string, newValue: string) => void;
-  /** Custom editor overriding the default text `<input>`; call `commit(value)` or `cancel()` to end editing. */
-  renderEdit?: (row: T, commit: (value: string) => void, cancel: () => void) => ReactNode;
+  /**
+   * Custom editor overriding the default text `<input>`; call `commit(value)`
+   * or `cancel()` to end editing. `commit`'s `move` steps the active cell on
+   * like the default editor's Enter/Tab; `initial` is the text the edit was
+   * started by typing, if it was.
+   */
+  renderEdit?: (
+    row: T,
+    commit: (value: string, move?: "down" | "next" | "prev") => void,
+    cancel: () => void,
+    initial?: string
+  ) => ReactNode;
 }
 
 export interface DataGridProps<T> {
@@ -366,8 +376,9 @@ export function DataGrid<T>(props: DataGridProps<T>) {
                           column.renderEdit ? (
                             column.renderEdit(
                               row,
-                              (value) => grid.commitEdit(row, column.key, value),
-                              grid.cancelEdit
+                              (value, move) => grid.commitEdit(row, column.key, value, move),
+                              grid.cancelEdit,
+                              grid.editingCell?.initial
                             )
                           ) : (
                             <input
