@@ -356,6 +356,15 @@
   justify-content: center;
 }
 
+/* `cellNavigation`'s active cell — strong while the grid has focus. */
+.sp-datagrid-cell[data-active] {
+  box-shadow: inset 0 0 0 1px var(--sp-border-strong);
+}
+
+.sp-datagrid-row:focus .sp-datagrid-cell[data-active] {
+  box-shadow: inset 0 0 0 1px var(--sp-accent);
+}
+
 .sp-datagrid-cell[data-editing] {
   padding: 0;
 }

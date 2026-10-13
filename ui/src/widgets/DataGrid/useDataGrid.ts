@@ -152,6 +152,7 @@ export function useDataGrid<T>({
   pinnedRows,
   cellNavigation = false,
   onGridKeyDown,
+  showSelectColumn = true,
 }: DataGridProps<T>) {
   const persisted = useMemo(() => (persistKey ? loadDataGridState(persistKey) : undefined), [persistKey]);
 
@@ -184,7 +185,7 @@ export function useDataGrid<T>({
   // Set by keyboard navigation: focus the active row once it has rendered.
   const pendingFocusRef = useRef(false);
   const [flash, setFlash] = useState(false);
-  const [focusTick, setFocusTick] = useState(0);
+  const [, setFocusTick] = useState(0);
   const [dragColumnKey, setDragColumnKey] = useState<string | null>(null);
   const [dropIndicator, setDropIndicator] = useState<{ key: string; side: "before" | "after" } | null>(null);
   const [groupPanelHover, setGroupPanelHover] = useState(false);
@@ -261,8 +262,8 @@ export function useDataGrid<T>({
 
   const gridTemplate = useMemo(() => {
     const cols = visibleColumns.map((c) => `${widths[c.key] ?? DEFAULT_COLUMN_WIDTH}px`);
-    return selectable ? [`${SELECT_COLUMN_WIDTH}px`, ...cols].join(" ") : cols.join(" ");
-  }, [visibleColumns, widths, selectable]);
+    return selectable && showSelectColumn ? [`${SELECT_COLUMN_WIDTH}px`, ...cols].join(" ") : cols.join(" ");
+  }, [visibleColumns, widths, selectable, showSelectColumn]);
 
   function commitSelection(next: Set<string>) {
     if (selectedIds === undefined) setInternalSelection(next);
@@ -588,7 +589,7 @@ export function useDataGrid<T>({
   /** `cellNavigation` keys on a data row — `true` if handled. */
   function handleCellKey(e: KeyboardEvent, index: number, row: T): boolean {
     const keys = visibleColumns.map((c) => c.key);
-    const current = activeColumnKey && keys.includes(activeColumnKey) ? activeColumnKey : (keys[0] ?? null);
+    const current = activeCellKey;
     const column = current ? columnByKey.get(current) : undefined;
     const plain = !e.ctrlKey && !e.metaKey && !e.altKey;
     switch (e.key) {
@@ -648,6 +649,10 @@ export function useDataGrid<T>({
     const index = displayItems.findIndex((item) => item.kind === "row" && getRowId(item.row) === rowId);
     if (index >= 0) moveTo(index, columnKey ?? activeColumnKey);
   }
+
+  // The active cell's column under `cellNavigation` — the first visible one until a cell is clicked or moved to.
+  const activeCellKey =
+    activeColumnKey && visibleColumns.some((c) => c.key === activeColumnKey) ? activeColumnKey : (visibleColumns[0]?.key ?? null);
 
   const attachScrollRef = useCallback((el: HTMLDivElement | null) => {
     scrollRef.current = el;
@@ -714,7 +719,7 @@ export function useDataGrid<T>({
     commitEdit,
     cancelEdit,
     focusCell,
-    focusTick,
+    activeCellKey,
     activeColumnKey,
     setActiveColumnKey,
     gridMenu,

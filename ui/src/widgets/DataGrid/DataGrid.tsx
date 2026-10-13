@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import { useImperativeHandle, type CSSProperties, type KeyboardEvent, type ReactNode, type Ref } from "react";
 import { ContextMenu } from "../ContextMenu";
 import { tn, useT } from "../../infra/i18n";
 import { useDataGrid, formatAggregate } from "./useDataGrid";
@@ -77,6 +77,34 @@ export interface DataGridProps<T> {
   emptyState?: ReactNode;
   className?: string;
   style?: CSSProperties;
+  /**
+   * Spreadsheet-style cells: an active cell moved with the arrows, Tab and
+   * Home/End; F2, Enter or just typing edits it; in the editor Enter commits
+   * and goes down, Tab/Shift+Tab commit and go across, Esc cancels. With
+   * `selectable`, arrows select the row (Shift extends, Ctrl only moves)
+   * and Ctrl+A selects all. Default false.
+   */
+  cellNavigation?: boolean;
+  /** The checkbox column of a `selectable` grid — set false to select by clicking rows only (Ctrl/Shift-click). Default true. */
+  showSelectColumn?: boolean;
+  /** Rows shown after all the others, untouched by sort, filter and grouping — e.g. an empty "new row" to type into. Not selectable. */
+  pinnedRows?: T[];
+  rowClassName?: (row: T) => string | undefined;
+  /** Per-cell class — for validation marks (`data-invalid` styling is up to the host's CSS). */
+  cellClassName?: (row: T, columnKey: string) => string | undefined;
+  /** Per-cell tooltip — e.g. why it's marked invalid. */
+  cellTitle?: (row: T, columnKey: string) => string | undefined;
+  /** Keys on a focused row, before the grid's own handling — `preventDefault()` to stop it. `row` is null on a group row. */
+  onGridKeyDown?: (e: KeyboardEvent, row: T | null, columnKey: string | null) => void;
+  /** Imperative access: focus a cell, start editing one. */
+  handleRef?: Ref<DataGridHandle>;
+}
+
+export interface DataGridHandle {
+  /** Scrolls to, activates and focuses the cell (the active column when `columnKey` is omitted). */
+  focusCell: (rowId: string, columnKey?: string) => void;
+  /** Starts editing the cell, if its column is `editable`. */
+  editCell: (rowId: string, columnKey: string) => void;
 }
 
 /**
@@ -89,9 +117,20 @@ export interface DataGridProps<T> {
  * All state and behavior live in `useDataGrid`; this component is the view.
  */
 export function DataGrid<T>(props: DataGridProps<T>) {
-  const { selectable = false, filterRow = true, onRowActivate, emptyState, className, style, rowHeight = 28 } = props;
+  const { selectable: selectableRows = false, filterRow = true, onRowActivate, emptyState, className, style, rowHeight = 28 } = props;
+  const { cellNavigation = false, showSelectColumn = true, rowClassName, cellClassName, cellTitle, handleRef } = props;
   const grid = useDataGrid(props);
   const t = useT();
+  // `selectable` below means "has the checkbox column"; row selection itself is `selectableRows`.
+  const selectable = selectableRows && showSelectColumn;
+
+  useImperativeHandle(handleRef, () => ({
+    focusCell: (rowId, columnKey) => grid.focusCell(rowId, columnKey),
+    editCell: (rowId, columnKey) => {
+      grid.focusCell(rowId, columnKey);
+      grid.startEdit(rowId, columnKey);
+    },
+  }));
 
   return (
     <div className={["sp-datagrid", className].filter(Boolean).join(" ")} style={style}>
@@ -274,11 +313,13 @@ export function DataGrid<T>(props: DataGridProps<T>) {
               const id = props.getRowId(row);
               const selected = grid.activeSelection.has(id);
               const rowIndexInSorted = grid.sortedRows.indexOf(row);
+              const rowActive = cellNavigation && index === grid.activeIndex;
               return (
                 <div
                   key={id}
-                  className="sp-datagrid-row"
+                  className={["sp-datagrid-row", rowClassName?.(row)].filter(Boolean).join(" ")}
                   role="row"
+                  data-index={index}
                   data-selected={selected || undefined}
                   tabIndex={index === grid.activeIndex ? 0 : -1}
                   style={{ top: index * rowHeight, height: rowHeight, gridTemplateColumns: grid.gridTemplate }}
@@ -288,7 +329,7 @@ export function DataGrid<T>(props: DataGridProps<T>) {
                   onContextMenu={(e) => e.stopPropagation()}
                   onClick={(e) => {
                     grid.setActiveIndex(index);
-                    if (!selectable) return;
+                    if (!selectableRows || rowIndexInSorted < 0) return;
                     grid.selectRow(rowIndexInSorted, { toggle: e.metaKey || e.ctrlKey, range: e.shiftKey });
                   }}
                 >
@@ -307,8 +348,10 @@ export function DataGrid<T>(props: DataGridProps<T>) {
                     return (
                       <div
                         key={column.key}
-                        className="sp-datagrid-cell"
+                        className={["sp-datagrid-cell", cellClassName?.(row, column.key)].filter(Boolean).join(" ")}
+                        title={editing ? undefined : cellTitle?.(row, column.key)}
                         data-align={column.align ?? "left"}
+                        data-active={(rowActive && grid.activeCellKey === column.key) || undefined}
                         data-editing={editing || undefined}
                         onClick={() => grid.setActiveColumnKey(column.key)}
                         onDoubleClick={(e) => {
@@ -328,13 +371,33 @@ export function DataGrid<T>(props: DataGridProps<T>) {
                             <input
                               className="sp-datagrid-cell-editor"
                               autoFocus
-                              defaultValue={column.editValue?.(row) ?? String((row as Record<string, unknown>)[column.key] ?? "")}
+                              defaultValue={
+                                grid.editingCell?.initial ??
+                                column.editValue?.(row) ??
+                                String((row as Record<string, unknown>)[column.key] ?? "")
+                              }
+                              onFocus={(e) => {
+                                // Started by typing: keep the typed character, caret after it.
+                                const end = e.currentTarget.value.length;
+                                if (grid.editingCell?.initial !== undefined) e.currentTarget.setSelectionRange(end, end);
+                                else e.currentTarget.select();
+                              }}
                               onClick={(e) => e.stopPropagation()}
+                              onDoubleClick={(e) => e.stopPropagation()}
                               onBlur={(e) => grid.commitEdit(row, column.key, e.target.value)}
                               onKeyDown={(e) => {
                                 e.stopPropagation();
-                                if (e.key === "Enter") grid.commitEdit(row, column.key, (e.target as HTMLInputElement).value);
-                                if (e.key === "Escape") grid.cancelEdit();
+                                const value = (e.target as HTMLInputElement).value;
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  grid.commitEdit(row, column.key, value, "down");
+                                } else if (e.key === "Tab" && cellNavigation) {
+                                  e.preventDefault();
+                                  grid.commitEdit(row, column.key, value, e.shiftKey ? "prev" : "next");
+                                } else if (e.key === "Escape") {
+                                  e.preventDefault();
+                                  grid.cancelEdit();
+                                }
                               }}
                             />
                           )
