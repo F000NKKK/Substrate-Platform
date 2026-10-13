@@ -198,7 +198,7 @@ export function ErrorList({ diagnostics, onNavigate, activeFile, openFiles, form
         ))}
         <ToolbarSeparator />
         <SelectField
-          aria-label={t("Source")}
+          aria-label={t("Show items from")}
           value={filter.origins}
           onChange={(origins) => update({ origins: origins as ErrorListOrigins })}
           options={[
