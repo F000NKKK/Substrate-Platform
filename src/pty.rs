@@ -48,39 +48,24 @@ impl Utf8Chunker {
 
     /// Feeds the next chunk; returns everything decodable so far (possibly
     /// empty, if `bytes` only extended an incomplete trailing character).
-    pub fn push(&mut self, bytes: &[u8]) -> String {
-        if self.pending.is_empty() {
-            // Common case: nothing carried over and the chunk is valid as-is.
-            if let Ok(valid) = std::str::from_utf8(bytes) {
-                return valid.to_owned();
+    pub fn push(&mut self, mut bytes: &[u8]) -> String {
+        let mut out = String::with_capacity(self.pending.len() + bytes.len());
+        // Complete the held-back character byte by byte (at most 3), then
+        // decode the rest of the chunk in place — no copy of the whole chunk.
+        while !self.pending.is_empty() {
+            let Some((&next, rest)) = bytes.split_first() else {
+                return out;
+            };
+            self.pending.push(next);
+            bytes = rest;
+            if std::str::from_utf8(&self.pending).is_err_and(|e| e.error_len().is_none()) {
+                continue; // still truncated
             }
+            let pending = std::mem::take(&mut self.pending);
+            self.pending = decode_into(&pending, &mut out).to_vec();
         }
-        self.pending.extend_from_slice(bytes);
-        let mut out = String::with_capacity(self.pending.len());
-        let mut rest: &[u8] = &self.pending;
-        let consumed = loop {
-            match std::str::from_utf8(rest) {
-                Ok(valid) => {
-                    out.push_str(valid);
-                    break self.pending.len();
-                }
-                Err(err) => {
-                    let (valid, after) = rest.split_at(err.valid_up_to());
-                    // `valid_up_to` guarantees this prefix is valid UTF-8.
-                    out.push_str(std::str::from_utf8(valid).unwrap_or_default());
-                    match err.error_len() {
-                        // Invalid sequence in the middle — replace it and keep going.
-                        Some(len) => {
-                            out.push(char::REPLACEMENT_CHARACTER);
-                            rest = &after[len..];
-                        }
-                        // Truncated sequence at the very end — wait for more bytes.
-                        None => break self.pending.len() - after.len(),
-                    }
-                }
-            }
-        };
-        self.pending.drain(..consumed);
+        let tail = decode_into(bytes, &mut out);
+        self.pending.extend_from_slice(tail);
         out
     }
 
@@ -90,6 +75,33 @@ impl Utf8Chunker {
         let out = String::from_utf8_lossy(&self.pending).into_owned();
         self.pending.clear();
         out
+    }
+}
+
+/// Appends everything decodable in `bytes` to `out` (invalid sequences as
+/// U+FFFD) and returns the truncated multi-byte sequence left at the end, if any.
+fn decode_into<'a>(mut bytes: &'a [u8], out: &mut String) -> &'a [u8] {
+    loop {
+        match std::str::from_utf8(bytes) {
+            Ok(valid) => {
+                out.push_str(valid);
+                return &[];
+            }
+            Err(err) => {
+                let (valid, after) = bytes.split_at(err.valid_up_to());
+                // `valid_up_to` guarantees this prefix is valid UTF-8.
+                out.push_str(std::str::from_utf8(valid).unwrap_or_default());
+                match err.error_len() {
+                    // Invalid sequence in the middle — replace it and keep going.
+                    Some(len) => {
+                        out.push(char::REPLACEMENT_CHARACTER);
+                        bytes = &after[len..];
+                    }
+                    // Truncated sequence at the very end — wait for more bytes.
+                    None => return after,
+                }
+            }
+        }
     }
 }
 
