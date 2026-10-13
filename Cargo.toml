@@ -10,6 +10,7 @@ repository = "https://github.com/F000NKKK/Substrate-Platform"
 
 [dependencies]
 anyhow = "1"
+notify = "8"
 portable-pty = "0.9"
 serde = { version = "1", features = ["derive"] }
 toml = "1"

@@ -25,9 +25,19 @@ function toNode(entry: DirEntry): FileTreeNode {
   return { id: entry.path, name: entry.name, kind: entry.kind === "dir" ? "folder" : "file" };
 }
 
+/** Sets `id`'s children to a fresh listing; a child that was there before keeps what's loaded beneath it. */
 function replaceChildren(nodes: FileTreeNode[], id: string, children: FileTreeNode[]): FileTreeNode[] {
   return nodes.map((node) => {
-    if (node.id === id) return { ...node, children };
+    if (node.id === id) {
+      const before = new Map((node.children ?? []).map((c) => [c.id, c]));
+      return {
+        ...node,
+        children: children.map((c) => {
+          const old = before.get(c.id);
+          return old?.children && old.kind === c.kind ? { ...c, children: old.children } : c;
+        }),
+      };
+    }
     if (node.children) return { ...node, children: replaceChildren(node.children, id, children) };
     return node;
   });
@@ -70,6 +80,8 @@ export function useDirectoryTree(
   const [nodes, setNodes] = useState<FileTreeNode[]>([{ id: rootPath, name: rootName, kind: "folder" }]);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set([rootPath]));
   const [loadedIds, setLoadedIds] = useState<Set<string>>(new Set());
+  const loadedRef = useRef(loadedIds);
+  loadedRef.current = loadedIds;
   const [parentById, setParentById] = useState<Record<string, string>>({});
   const rootRef = useRef(rootPath);
   rootRef.current = rootPath;
@@ -207,9 +219,30 @@ export function useDirectoryTree(
     if (parent) await loadFolder(parent);
   }
 
+  /**
+   * Something changed these paths outside the tree (a file watcher saw
+   * it): re-lists every listed folder they're in, or are — silently, since
+   * a folder that's gone simply drops out of its parent's listing.
+   */
+  const refreshPaths = useCallback(
+    async (paths: string[]) => {
+      const folders = new Set<string>();
+      for (const path of paths) {
+        if (loadedRef.current.has(path)) folders.add(path);
+        const parent = path.replace(/[/\\][^/\\]*$/, "");
+        if (loadedRef.current.has(parent)) folders.add(parent);
+      }
+      for (const folder of folders) await loadFolder(folder, true);
+    },
+    [loadFolder]
+  );
+
   return {
     nodes,
     expandedIds,
+    /** The folders listed so far — the ones worth watching for outside changes. */
+    loadedFolders: loadedIds,
+    refreshPaths,
     onExpandedChange,
     createFileIn,
     createDirIn,
