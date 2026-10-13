@@ -32,10 +32,14 @@ impl Level {
     /// the indented/`|`-prefixed continuation lines under a diagnostic —
     /// are plain output.
     pub fn of_stderr_line(line: &str) -> Self {
-        let head = line.trim_start().to_ascii_lowercase();
-        if head.starts_with("error") || head.starts_with("fatal") || head.starts_with("panicked") {
+        let head = line.trim_start().as_bytes();
+        let starts_with = |prefix: &str| {
+            head.get(..prefix.len())
+                .is_some_and(|h| h.eq_ignore_ascii_case(prefix.as_bytes()))
+        };
+        if starts_with("error") || starts_with("fatal") || starts_with("panicked") {
             Level::Error
-        } else if head.starts_with("warning") || head.starts_with("warn:") {
+        } else if starts_with("warning") || starts_with("warn:") {
             Level::Warn
         } else {
             Level::Info
@@ -112,13 +116,15 @@ impl LogSink {
             level,
             text: text.into(),
         };
-        // Clone the callback out and call it with the lock released, in case
-        // the callback itself is slow or re-enters this sink.
-        let callback = self.state().on_push.clone();
-        match callback {
-            Some(callback) => callback(&line),
+        let mut state = self.state();
+        match state.on_push.clone() {
+            // Call it with the lock released, in case the callback itself is
+            // slow or re-enters this sink.
+            Some(callback) => {
+                drop(state);
+                callback(&line);
+            }
             None => {
-                let mut state = self.state();
                 state.lines.push_back(line);
                 trim(&mut state);
             }

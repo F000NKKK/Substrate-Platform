@@ -49,15 +49,20 @@ impl Utf8Chunker {
     /// Feeds the next chunk; returns everything decodable so far (possibly
     /// empty, if `bytes` only extended an incomplete trailing character).
     pub fn push(&mut self, bytes: &[u8]) -> String {
+        if self.pending.is_empty() {
+            // Common case: nothing carried over and the chunk is valid as-is.
+            if let Ok(valid) = std::str::from_utf8(bytes) {
+                return valid.to_owned();
+            }
+        }
         self.pending.extend_from_slice(bytes);
-        let mut out = String::new();
+        let mut out = String::with_capacity(self.pending.len());
         let mut rest: &[u8] = &self.pending;
-        loop {
+        let consumed = loop {
             match std::str::from_utf8(rest) {
                 Ok(valid) => {
                     out.push_str(valid);
-                    rest = &[];
-                    break;
+                    break self.pending.len();
                 }
                 Err(err) => {
                     let (valid, after) = rest.split_at(err.valid_up_to());
@@ -70,15 +75,12 @@ impl Utf8Chunker {
                             rest = &after[len..];
                         }
                         // Truncated sequence at the very end — wait for more bytes.
-                        None => {
-                            rest = after;
-                            break;
-                        }
+                        None => break self.pending.len() - after.len(),
                     }
                 }
             }
-        }
-        self.pending = rest.to_vec();
+        };
+        self.pending.drain(..consumed);
         out
     }
 

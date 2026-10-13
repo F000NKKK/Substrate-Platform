@@ -44,11 +44,8 @@ pub fn list_dir(path: &Path) -> io::Result<Vec<DirEntryInfo>> {
             kind,
         });
     }
-    entries.sort_by(|a, b| match (a.kind, b.kind) {
-        (EntryKind::Dir, EntryKind::File) => std::cmp::Ordering::Less,
-        (EntryKind::File, EntryKind::Dir) => std::cmp::Ordering::Greater,
-        _ => a.name.to_lowercase().cmp(&b.name.to_lowercase()),
-    });
+    // Folders first, then case-insensitive by name.
+    entries.sort_by_cached_key(|e| (e.kind != EntryKind::Dir, e.name.to_lowercase()));
     Ok(entries)
 }
 
