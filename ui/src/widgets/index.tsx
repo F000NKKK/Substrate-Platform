@@ -30,6 +30,8 @@ export { RunBar } from "./RunBar";
 export type { RunBarProps, RunTarget, RunMode } from "./RunBar";
 export { Toolbar, ToolbarSeparator, ToolbarSpacer } from "./Toolbar";
 export type { ToolbarProps, ToolbarSection, ToolbarItem } from "./Toolbar";
+export { InfoBar } from "./InfoBar";
+export type { InfoBarProps, InfoBarAction } from "./InfoBar";
 export { Swatch } from "./Swatch";
 export type { SwatchProps } from "./Swatch";
 export { ColorWheel } from "./ColorWheel";
