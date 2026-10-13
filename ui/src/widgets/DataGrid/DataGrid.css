@@ -49,18 +49,10 @@
   color: var(--sp-text);
 }
 
+/* A 20px IconButton; the negative margins keep the chip as tall as its text. */
 .sp-datagrid-groupchip-remove {
-  appearance: none;
-  border: none;
-  background: transparent;
+  margin: -3px -2px -3px 0;
   color: var(--sp-text-faint);
-  cursor: pointer;
-  line-height: 1;
-  padding: 2px;
-}
-
-.sp-datagrid-groupchip-remove:hover {
-  color: var(--sp-text);
 }
 
 /* Header */

@@ -1,5 +1,7 @@
 import { useImperativeHandle, type CSSProperties, type KeyboardEvent, type ReactNode, type Ref } from "react";
 import { ContextMenu } from "../ContextMenu";
+import { IconButton } from "../IconButton";
+import { IconClose } from "../../infra/icons";
 import { tn, useT } from "../../infra/i18n";
 import { useDataGrid, formatAggregate } from "./useDataGrid";
 import { buildDataGridMenuItems } from "./contextMenuItems";
@@ -160,14 +162,15 @@ export function DataGrid<T>(props: DataGridProps<T>) {
             grid.activeGroupBy.map((key) => (
               <span className="sp-datagrid-groupchip" key={key}>
                 {grid.columnByKey.get(key)?.header ?? key}
-                <button
-                  type="button"
+                <IconButton
+                  size="sm"
                   className="sp-datagrid-groupchip-remove"
                   aria-label={t("Stop grouping by {column}", { column: key })}
+                  title={t("Stop grouping by {column}", { column: key })}
                   onClick={() => grid.commitGroupBy(grid.activeGroupBy.filter((k) => k !== key))}
                 >
-                  ×
-                </button>
+                  <IconClose />
+                </IconButton>
               </span>
             ))
           )}

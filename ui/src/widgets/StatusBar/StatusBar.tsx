@@ -59,7 +59,7 @@ export interface StatusBarButtonProps {
 export function StatusBarButton({ icon, label, title, onClick }: StatusBarButtonProps) {
   return (
     <button type="button" className="sp-status-bar-item sp-status-bar-button" title={title} aria-label={title} onClick={onClick} disabled={!onClick}>
-      {icon && <Icon name={icon} size={12} />}
+      {icon && <Icon name={icon} />}
       {label !== undefined && <span>{label}</span>}
     </button>
   );

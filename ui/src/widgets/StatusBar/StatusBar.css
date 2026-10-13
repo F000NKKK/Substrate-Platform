@@ -82,6 +82,14 @@
 
 /* Trailing indicators sit right after the stage text, not pushed apart. */
 .sp-status-bar-button {
+  justify-content: center;
+  min-width: var(--sp-icon-btn-size-sm);
   margin-left: 2px;
   white-space: nowrap;
+}
+
+.sp-status-bar-button > svg {
+  flex: none;
+  width: var(--sp-icon-size-sm);
+  height: var(--sp-icon-size-sm);
 }

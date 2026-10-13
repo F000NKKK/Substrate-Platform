@@ -2,8 +2,9 @@
   display: flex;
   align-items: center;
   gap: var(--sp-space-xs);
-  min-height: 30px;
-  padding: 3px var(--sp-space-sm);
+  box-sizing: border-box;
+  min-height: var(--sp-toolbar-height);
+  padding: 2px var(--sp-space-sm);
   border-bottom: 1px solid var(--sp-border);
 }
 
