@@ -61,9 +61,14 @@ export function SearchResults<H extends SearchResultHit>({ groups, onActivate, e
     return out;
   }, [groups, collapsed, summary]);
 
-  const selectedRow = selected
-    ? rows.findIndex((r) => r.kind !== "summary" && groups[r.group].key === selected.group && (r.kind === "hit" ? r.hit : -1) === selected.hit)
-    : -1;
+  // Not recomputed on scroll — that re-renders on every frame.
+  const selectedRow = useMemo(
+    () =>
+      selected
+        ? rows.findIndex((r) => r.kind !== "summary" && groups[r.group].key === selected.group && (r.kind === "hit" ? r.hit : -1) === selected.hit)
+        : -1,
+    [rows, groups, selected]
+  );
 
   useEffect(() => {
     const el = ref.current;

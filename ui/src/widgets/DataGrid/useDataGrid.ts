@@ -27,11 +27,12 @@ const SELECT_COLUMN_WIDTH = 32;
 const OVERSCAN = 6;
 const COLUMN_DRAG_MIME = "application/x-sp-datagrid-column";
 
-function defaultCompare<T>(column: DataGridColumn<T>, a: T, b: T): number {
-  const av = column.sortValue ? column.sortValue(a) : "";
-  const bv = column.sortValue ? column.sortValue(b) : "";
-  if (typeof av === "number" && typeof bv === "number") return av - bv;
-  return String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: "base" });
+/** Text order for sorting and grouping: `File2` before `File10`, case-insensitive. One collator — `localeCompare` with options builds a new one per call. */
+const naturalOrder = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+
+function compareValues(a: string | number, b: string | number): number {
+  if (typeof a === "number" && typeof b === "number") return a - b;
+  return naturalOrder.compare(String(a), String(b));
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -80,7 +81,41 @@ function groupValueOf<T>(column: DataGridColumn<T>, row: T): string {
   return "";
 }
 
-function buildDisplayItems<T>(
+/** `rows` whose every non-blank filter (column key → needle) is a case-insensitive substring of that column's filter text. */
+export function filterRows<T>(rows: T[], filters: Record<string, string>, columnByKey: Map<string, DataGridColumn<T>>): T[] {
+  const active = Object.entries(filters).flatMap(([key, needle]) => {
+    const column = columnByKey.get(key);
+    return column && needle.trim() !== "" ? [{ column, needle: needle.toLowerCase() }] : [];
+  });
+  if (active.length === 0) return rows;
+  return rows.filter((row) =>
+    active.every(({ column, needle }) => {
+      const text = column.filterValue ? column.filterValue(row) : column.sortValue ? String(column.sortValue(row)) : "";
+      return text.toLowerCase().includes(needle);
+    })
+  );
+}
+
+/** `rows` ordered by each sort key in turn (a stable sort; `rows` itself is left alone). */
+export function sortRows<T>(rows: T[], sort: DataGridSortState[], columnByKey: Map<string, DataGridColumn<T>>): T[] {
+  if (sort.length === 0) return rows;
+  const keys = sort.flatMap((s) => {
+    const column = columnByKey.get(s.key);
+    return column ? [{ value: column.sortValue, sign: s.direction === "asc" ? 1 : -1 }] : [];
+  });
+  // Each row's sort values computed once, not once per comparison.
+  const decorated = rows.map((row, index) => ({ row, index, values: keys.map((k) => (k.value ? k.value(row) : "")) }));
+  decorated.sort((a, b) => {
+    for (let i = 0; i < keys.length; i++) {
+      const cmp = compareValues(a.values[i], b.values[i]) * keys[i].sign;
+      if (cmp !== 0) return cmp;
+    }
+    return a.index - b.index;
+  });
+  return decorated.map((d) => d.row);
+}
+
+export function buildDisplayItems<T>(
   rows: T[],
   groupBy: string[],
   columnByKey: Map<string, DataGridColumn<T>>,
@@ -101,7 +136,8 @@ function buildDisplayItems<T>(
     else buckets.set(value, [row]);
   }
 
-  const orderedKeys = [...buckets.keys()].sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }));
+  const orderedKeys = [...buckets.keys()].sort(naturalOrder.compare);
+  const columns = [...columnByKey.values()];
   const items: DisplayItem<T>[] = [];
   for (const value of orderedKeys) {
     const bucketRows = buckets.get(value)!;
@@ -113,11 +149,11 @@ function buildDisplayItems<T>(
       columnKey: column.key,
       label: value || "(blank)",
       count: bucketRows.length,
-      aggregates: computeAggregates([...columnByKey.values()], bucketRows),
+      aggregates: computeAggregates(columns, bucketRows),
       rows: bucketRows,
     });
     if (!collapsedGroups.has(groupKey)) {
-      items.push(...buildDisplayItems(bucketRows, groupBy, columnByKey, collapsedGroups, level + 1, groupKey));
+      for (const item of buildDisplayItems(bucketRows, groupBy, columnByKey, collapsedGroups, level + 1, groupKey)) items.push(item);
     }
   }
   return items;
@@ -226,31 +262,12 @@ export function useDataGrid<T>({
   );
   const summaryColumns = useMemo(() => orderedColumns.filter((c) => c.summary && c.summaryValue), [orderedColumns]);
 
-  const filteredRows = useMemo(() => {
-    const activeFilters = Object.entries(filters).filter(([, v]) => v.trim() !== "");
-    if (activeFilters.length === 0) return rows;
-    return rows.filter((row) =>
-      activeFilters.every(([key, needle]) => {
-        const column = columnByKey.get(key);
-        if (!column) return true;
-        const text = column.filterValue ? column.filterValue(row) : column.sortValue ? String(column.sortValue(row)) : "";
-        return text.toLowerCase().includes(needle.toLowerCase());
-      })
-    );
-  }, [rows, filters, columnByKey]);
+  const filteredRows = useMemo(() => filterRows(rows, filters, columnByKey), [rows, filters, columnByKey]);
 
-  const sortedRows = useMemo(() => {
-    if (activeSort.length === 0) return filteredRows;
-    return [...filteredRows].sort((a, b) => {
-      for (const s of activeSort) {
-        const column = columnByKey.get(s.key);
-        if (!column) continue;
-        const cmp = defaultCompare(column, a, b) * (s.direction === "asc" ? 1 : -1);
-        if (cmp !== 0) return cmp;
-      }
-      return 0;
-    });
-  }, [filteredRows, activeSort, columnByKey]);
+  const sortedRows = useMemo(() => sortRows(filteredRows, activeSort, columnByKey), [filteredRows, activeSort, columnByKey]);
+  const sortedIndex = useMemo(() => new Map(sortedRows.map((row, i) => [row, i])), [sortedRows]);
+  /** `row`'s index in `sortedRows` (-1 for a pinned row) — a lookup, not a scan per rendered row. */
+  const sortedIndexOf = useCallback((row: T) => sortedIndex.get(row) ?? -1, [sortedIndex]);
 
   const displayItems = useMemo(() => {
     const items = buildDisplayItems(sortedRows, activeGroupBy, columnByKey, collapsedGroups, 0, "");
@@ -507,7 +524,7 @@ export function useDataGrid<T>({
     if (!selectable || e.ctrlKey || e.metaKey) return;
     const item = displayItems[clamp(index, 0, displayItems.length - 1)];
     if (item?.kind !== "row") return;
-    const rowIndex = sortedRows.indexOf(item.row);
+    const rowIndex = sortedIndexOf(item.row);
     if (rowIndex < 0) return;
     if (e.shiftKey && lastAnchorRef.current === null) lastAnchorRef.current = rowIndex;
     selectRow(rowIndex, { range: e.shiftKey });
@@ -572,7 +589,7 @@ export function useDataGrid<T>({
       case " ":
         e.preventDefault();
         if (item.kind === "group") toggleGroupCollapsed(item.key);
-        else if (selectable) selectRow(sortedRows.indexOf(item.row), { toggle: true });
+        else if (selectable) selectRow(sortedIndexOf(item.row), { toggle: true });
         break;
       case "Enter": {
         if (item.kind === "group") {
@@ -686,6 +703,7 @@ export function useDataGrid<T>({
     filters,
     setFilters,
     sortedRows,
+    sortedIndexOf,
     displayItems,
     visibleItems,
     startIndex,

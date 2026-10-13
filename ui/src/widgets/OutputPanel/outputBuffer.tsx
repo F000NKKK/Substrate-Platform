@@ -18,13 +18,16 @@ const listening = new Set<string>();
 function ensureListening(eventName: string, maxLines: number) {
   if (listening.has(eventName)) return;
   listening.add(eventName);
-  listen<string>(eventName, (event) => {
-    const buf = buffers.get(eventName) ?? [];
-    buf.push(event.payload);
-    if (buf.length > maxLines) buf.splice(0, buf.length - maxLines);
-    buffers.set(eventName, buf);
-    subscribers.get(eventName)?.forEach((notify) => notify());
-  });
+  listen<string>(eventName, (event) => appendOutputLine(eventName, event.payload, maxLines));
+}
+
+/** Appends one line to `eventName`'s buffer (dropping the oldest beyond `maxLines`) and tells its subscribers. */
+export function appendOutputLine(eventName: string, line: string, maxLines: number): void {
+  const buf = buffers.get(eventName) ?? [];
+  buf.push(line);
+  if (buf.length > maxLines) buf.splice(0, buf.length - maxLines);
+  buffers.set(eventName, buf);
+  subscribers.get(eventName)?.forEach((notify) => notify());
 }
 
 /** Starts buffering `eventName` now, before any `OutputPanel` shows it — for a source the user may switch to later (lines emitted before the first subscribe are otherwise never seen). */

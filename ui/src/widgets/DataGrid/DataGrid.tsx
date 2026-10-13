@@ -327,7 +327,7 @@ export function DataGrid<T>(props: DataGridProps<T>) {
               const row = item.row;
               const id = props.getRowId(row);
               const selected = grid.activeSelection.has(id);
-              const rowIndexInSorted = grid.sortedRows.indexOf(row);
+              const rowIndexInSorted = grid.sortedIndexOf(row);
               const rowActive = cellNavigation && index === grid.activeIndex;
               return (
                 <div

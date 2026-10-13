@@ -81,7 +81,9 @@ export function nestFiles(nodes: FileTreeNode[], parentOf: (name: string, siblin
     }
     const parent = parentOf(node.name, siblings)?.toLowerCase();
     if (parent && parent !== node.name.toLowerCase() && files.has(parent)) {
-      nestedUnder.set(parent, [...(nestedUnder.get(parent) ?? []), node]);
+      const nested = nestedUnder.get(parent);
+      if (nested) nested.push(node);
+      else nestedUnder.set(parent, [node]);
     } else top.push(node);
   }
   return top.map((node) => {

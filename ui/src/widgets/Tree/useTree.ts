@@ -8,18 +8,11 @@ export interface FlatEntry<T> {
   parentId: string | null;
 }
 
-function flattenVisible<T>(
-  nodes: TreeNode<T>[],
-  expandedIds: Set<string>,
-  depth: number,
-  parentId: string | null
-): FlatEntry<T>[] {
-  const out: FlatEntry<T>[] = [];
+/** The rows a tree shows: every node, and the children of expanded ones, depth-first. */
+export function flattenVisible<T>(nodes: TreeNode<T>[], expandedIds: Set<string>, depth = 0, parentId: string | null = null, out: FlatEntry<T>[] = []): FlatEntry<T>[] {
   for (const node of nodes) {
     out.push({ node, depth, parentId });
-    if (node.children?.length && expandedIds.has(node.id)) {
-      out.push(...flattenVisible(node.children, expandedIds, depth + 1, node.id));
-    }
+    if (node.children?.length && expandedIds.has(node.id)) flattenVisible(node.children, expandedIds, depth + 1, node.id, out);
   }
   return out;
 }
