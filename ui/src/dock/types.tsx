@@ -46,7 +46,7 @@ export interface TabMenuContext {
   centerIds: string[];
 }
 
-/** `closed` — a transient panel (`PanelDef.floatSize`) that isn't on screen anywhere, not even as a strip tab. */
+/** `closed` — a tool window that isn't on screen anywhere, not even as a strip tab (closed with its × — View brings it back). */
 export type DockMode = "hidden" | "flyout" | "pinned" | "closed";
 
 export interface FloatRect {
@@ -56,8 +56,8 @@ export interface FloatRect {
   h: number;
 }
 
-/** Where a closed transient panel comes back when shown again, if not its `anchor`. */
-export type ReopenPlacement = { anchor: "center" } | ({ anchor: "float" } & FloatRect);
+/** Where a closed panel comes back when shown again, if not pinned on its `anchor` — `flyout`: it was auto-hidden, so it comes back as a strip tab, slid open. */
+export type ReopenPlacement = { anchor: "center" } | { anchor: "flyout" } | ({ anchor: "float" } & FloatRect);
 
 /** Where a panel currently lives — dragged freely between any dock, the center tab group, or out into a floating panel. */
 export type PanelPlacement =

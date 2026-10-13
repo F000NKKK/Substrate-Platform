@@ -175,7 +175,7 @@ export function ToolWindowDock({ anchor, layout }: ToolWindowDockProps) {
           anchor={anchor}
           regionRef={regionRef}
           size={layout.anchorSize(flyoutId!, anchor, "flyout")}
-          onOutsideClick={() => layout.close(flyoutId!)}
+          onOutsideClick={() => layout.hide(flyoutId!)}
           resizeHandle={
             <ResizeHandle
               anchor={anchor}

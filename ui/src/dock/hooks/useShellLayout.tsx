@@ -303,22 +303,21 @@ export function useShellLayout(
         return;
       }
       const home = homeAnchor[id] ?? "bottom";
-      if (panelsById[id]?.floatSize) {
-        // A transient panel leaves every dock, remembering where it was.
-        setPlacements((prev) => {
-          const cur = prev[id];
-          let closed: PanelPlacement = { anchor: home, mode: "closed" };
-          if (cur?.anchor === "float") closed = { anchor: home, mode: "closed", reopen: { ...cur } };
-          else if (cur?.anchor === "center") closed = { anchor: home, mode: "closed", reopen: { anchor: "center" } };
-          else if (cur) closed = { anchor: cur.anchor, mode: "closed" };
-          return { ...prev, [id]: closed };
-        });
-      } else {
-        setPlacements((prev) => ({ ...prev, [id]: { anchor: home, mode: "hidden" } }));
-      }
+      // Like Visual Studio, × takes a tool window off screen entirely —
+      // strip tab included — remembering where it was for View to bring it back.
+      setPlacements((prev) => {
+        const cur = prev[id];
+        let closed: PanelPlacement = { anchor: home, mode: "closed" };
+        if (cur?.anchor === "float") closed = { anchor: home, mode: "closed", reopen: { ...cur } };
+        else if (cur?.anchor === "center") closed = { anchor: home, mode: "closed", reopen: { anchor: "center" } };
+        else if (cur?.mode === "closed") closed = cur;
+        else if (cur?.mode === "flyout" || cur?.mode === "hidden") closed = { anchor: cur.anchor, mode: "closed", reopen: { anchor: "flyout" } };
+        else if (cur) closed = { anchor: cur.anchor, mode: "closed" };
+        return { ...prev, [id]: closed };
+      });
       setCenterActive((cur) => (cur === id ? main.id : cur));
     },
-    [homeAnchor, panelsById, main.id, onCloseDynamicPanel]
+    [homeAnchor, main.id, onCloseDynamicPanel]
   );
 
   const show = useCallback((id: string) => {
@@ -334,6 +333,12 @@ export function useShellLayout(
     } else if (cur.mode === "closed" && cur.reopen?.anchor === "float") {
       const { x, y, w, h } = cur.reopen;
       setPlacements((prev) => ({ ...prev, [id]: { anchor: "float", x, y, w, h } }));
+    } else if (cur.mode === "closed" && cur.reopen?.anchor === "flyout") {
+      setPlacements((prev) => {
+        const next = closeOtherFlyouts(prev, cur.anchor as ToolWindowAnchor, id);
+        next[id] = { anchor: cur.anchor, mode: "flyout" };
+        return next;
+      });
     } else if (cur.mode === "hidden" || cur.mode === "closed") {
       setPlacements((prev) => ({ ...prev, [id]: { anchor: cur.anchor, mode: "pinned" } }));
     }
