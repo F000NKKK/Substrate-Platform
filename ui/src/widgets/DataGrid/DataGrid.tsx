@@ -85,6 +85,8 @@ export interface DataGridProps<T> {
    * and Ctrl+A selects all. Default false.
    */
   cellNavigation?: boolean;
+  /** The "drag a column header here" group panel — false for a grid that's never grouped. Default true. */
+  showGroupPanel?: boolean;
   /** The checkbox column of a `selectable` grid — set false to select by clicking rows only (Ctrl/Shift-click). Default true. */
   showSelectColumn?: boolean;
   /** Rows shown after all the others, untouched by sort, filter and grouping — e.g. an empty "new row" to type into. Not selectable. */
@@ -118,7 +120,7 @@ export interface DataGridHandle {
  */
 export function DataGrid<T>(props: DataGridProps<T>) {
   const { selectable: selectableRows = false, filterRow = true, onRowActivate, emptyState, className, style, rowHeight = 28 } = props;
-  const { cellNavigation = false, showSelectColumn = true, rowClassName, cellClassName, cellTitle, handleRef } = props;
+  const { cellNavigation = false, showSelectColumn = true, showGroupPanel = true, rowClassName, cellClassName, cellTitle, handleRef } = props;
   const grid = useDataGrid(props);
   const t = useT();
   // `selectable` below means "has the checkbox column"; row selection itself is `selectableRows`.
@@ -134,7 +136,7 @@ export function DataGrid<T>(props: DataGridProps<T>) {
 
   return (
     <div className={["sp-datagrid", className].filter(Boolean).join(" ")} style={style}>
-      {grid.groupPanelVisible && (
+      {grid.groupPanelVisible && showGroupPanel && (
         <div
           className="sp-datagrid-grouppanel"
           data-hover={grid.groupPanelHover || undefined}
