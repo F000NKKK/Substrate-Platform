@@ -33,6 +33,8 @@ export interface PropertyDescriptor {
   kind?: PropertyKind;
   /** The choices of an `"enum"` property. */
   options?: readonly string[];
+  /** Values offered while editing a `"string"` property (an editable combo box) — any other text is still accepted. */
+  suggestions?: readonly string[];
   readOnly?: boolean;
   /** Synchronous check before `onCommit` — return an error message to reject the edit. */
   validate?: (value: PropertyValue) => string | null;
@@ -373,9 +375,19 @@ export function PropertyGrid({
     }
     if (editing?.id === p.id) {
       const invalid = error?.id === p.id;
+      const listId = p.suggestions?.length ? `sp-propgrid-suggest-${p.id}` : undefined;
       return (
+        <>
+        {listId && (
+          <datalist id={listId}>
+            {p.suggestions!.map((s) => (
+              <option key={s} value={s} />
+            ))}
+          </datalist>
+        )}
         <input
           className="sp-propgrid-editor"
+          list={listId}
           data-invalid={invalid || undefined}
           aria-invalid={invalid}
           autoFocus
