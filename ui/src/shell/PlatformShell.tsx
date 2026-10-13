@@ -8,7 +8,7 @@ import { isPanelDrag, readPanelDrag, zoneFromPoint, type DropZone } from "../doc
 import { DialogHost } from "../widgets/Dialog";
 import { NotificationHost } from "../widgets/Notifications";
 import { ShellContext, type ShellController } from "./ShellContext";
-import type { ToolWindowAnchor } from "../dock/types";
+import { TOOL_WINDOW_ANCHORS, type ToolWindowAnchor } from "../dock/types";
 import type { PlatformShellProps } from "./types";
 import "../dock/dock.css";
 import "./shell.css";
@@ -47,7 +47,7 @@ export function PlatformShell({
 
   const controller = useMemo<ShellController>(
     () => ({
-      toolWindows: (["left", "right", "bottom"] as const).flatMap((anchor) =>
+      toolWindows: TOOL_WINDOW_ANCHORS.flatMap((anchor) =>
         (toolWindows[anchor] ?? []).map(({ id, title }) => ({ id, title }))
       ),
       isToolWindowVisible: layout.isVisible,

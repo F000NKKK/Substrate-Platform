@@ -1,7 +1,7 @@
 import { Prec, RangeSet, StateEffect, StateField } from "@codemirror/state";
 import { Decoration, EditorView, gutter, GutterMarker } from "@codemirror/view";
 
-/** Dispatched to replace the live breakpoint set without touching the document/undo history — see `TextEditor`'s second effect, which reacts to the `breakpoints` prop by dispatching this into the already-mounted view instead of recreating it. */
+/** Dispatched to replace the live breakpoint set without touching the document/undo history — see `CodeEditor`'s second effect, which reacts to the `breakpoints` prop by dispatching this into the already-mounted view instead of recreating it. */
 export const setBreakpoints = StateEffect.define<ReadonlySet<number>>();
 
 const breakpointState = StateField.define<ReadonlySet<number>>({

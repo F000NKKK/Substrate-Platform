@@ -41,7 +41,6 @@ export interface TerminalPanelProps {
 }
 
 const DEFAULT_COMMANDS = { spawn: "pty_spawn", write: "pty_write", resize: "pty_resize", kill: "pty_kill" };
-const FALLBACK_SHELL: TerminalShellKind = { id: "default", label: "Terminal" };
 
 /**
  * Terminal ids are unique per real session (Date.now()-suffixed, never
@@ -169,16 +168,17 @@ export function TerminalPanel({
 
   useEffect(() => {
     if (shellsProp) return;
+    const fallback: TerminalShellKind = { id: "default", label: t("Terminal") };
     invoke<{ id: string; label: string; command: string; clearCommand: string }[]>(listShellsCommand)
       .then((detected) =>
         setDetectedShells(
           detected.length > 0
             ? detected.map((s) => ({ id: s.id, label: s.label, shell: s.command, clearCommand: s.clearCommand }))
-            : [FALLBACK_SHELL]
+            : [fallback]
         )
       )
-      .catch(() => setDetectedShells([FALLBACK_SHELL]));
-  }, [shellsProp, listShellsCommand]);
+      .catch(() => setDetectedShells([fallback]));
+  }, [shellsProp, listShellsCommand, t]);
 
   /** `groupId` omitted starts a new split group of its own; passed, the new terminal joins that group as an additional side-by-side pane. */
   function addTerminal(kind: TerminalShellKind, groupId?: string, cwd?: string) {

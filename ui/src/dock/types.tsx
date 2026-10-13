@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import type { ContextMenuItem } from "../widgets/ContextMenu";
 
 export type ToolWindowAnchor = "left" | "right" | "bottom";
+export const TOOL_WINDOW_ANCHORS: readonly ToolWindowAnchor[] = ["left", "right", "bottom"];
 
 /** Every place a panel can be docked — the three tool-window edges, or the tabbed center document zone. */
 export type DockAnchor = ToolWindowAnchor | "center";

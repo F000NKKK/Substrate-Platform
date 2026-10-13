@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { DockAnchor, PanelDef, PanelPlacement, ReopenPlacement, ToolWindowAnchor } from "../types";
+import { TOOL_WINDOW_ANCHORS, type DockAnchor, type PanelDef, type PanelPlacement, type ReopenPlacement, type ToolWindowAnchor } from "../types";
 import { useStateStore } from "../../infra/state";
 import type { PersistedShellLayoutState } from "./shellLayoutPersistence";
 
-const ANCHORS: readonly ToolWindowAnchor[] = ["left", "right", "bottom"];
 const DEFAULT_FLOAT_SIZE = { w: 340, h: 280 };
 
 /** Matches the `--sp-toolwindow-size`/`--sp-toolwindow-bottom-size` token defaults — the starting size before a user drags a dock's resize handle. */
@@ -138,7 +137,7 @@ export function useShellLayout(
 ): ShellLayout {
   const panelsById = useMemo(() => {
     const map: Record<string, PanelDef> = { [main.id]: main };
-    for (const anchor of ANCHORS) {
+    for (const anchor of TOOL_WINDOW_ANCHORS) {
       for (const panel of toolWindows[anchor] ?? []) map[panel.id] = panel;
     }
     for (const panel of extraCenterPanels) map[panel.id] = panel;
@@ -147,7 +146,7 @@ export function useShellLayout(
 
   const homeAnchor = useMemo(() => {
     const map: Record<string, DockAnchor> = { [main.id]: "center" };
-    for (const anchor of ANCHORS) {
+    for (const anchor of TOOL_WINDOW_ANCHORS) {
       for (const panel of toolWindows[anchor] ?? []) map[panel.id] = anchor;
     }
     return map;
@@ -162,7 +161,7 @@ export function useShellLayout(
   /** Every declared tool window at its default placement, overridden by whatever `from` restores. */
   function restoredPlacements(from: PersistedShellLayoutState | undefined): Record<string, PanelPlacement> {
     const initial: Record<string, PanelPlacement> = { [main.id]: { anchor: "center", mode: "pinned" } };
-    for (const anchor of ANCHORS) {
+    for (const anchor of TOOL_WINDOW_ANCHORS) {
       for (const panel of toolWindows[anchor] ?? []) {
         initial[panel.id] = panel.floatSize
           ? { anchor, mode: "closed", reopen: initialFloat(panel.floatSize) }

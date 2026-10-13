@@ -88,6 +88,7 @@ registerTranslations(
     "Reset to default": "Восстановить по умолчанию",
 
     // Terminal
+    Terminal: "Терминал",
     "New Terminal": "Новый терминал",
     "Split Terminal": "Разделить терминал",
     "Kill Terminal": "Завершить терминал",

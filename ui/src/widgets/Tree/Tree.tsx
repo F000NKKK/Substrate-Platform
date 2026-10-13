@@ -118,7 +118,7 @@ function findParent<T>(nodes: TreeNode<T>[], id: string): TreeNode<T> | null {
   return null;
 }
 
-/** = `--sp-row-height` (virtualization needs it in JS). */
+/** = `--sp-row-height`, set inline on each row. */
 const ROW_HEIGHT = 22;
 const INDENT = 16;
 
