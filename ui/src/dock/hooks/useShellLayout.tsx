@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DockAnchor, PanelDef, PanelPlacement, ReopenPlacement, ToolWindowAnchor } from "../types";
 import { useStateStore } from "../../infra/state";
-import { loadShellLayoutState, type PersistedShellLayoutState } from "./shellLayoutPersistence";
+import type { PersistedShellLayoutState } from "./shellLayoutPersistence";
 
 const ANCHORS: readonly ToolWindowAnchor[] = ["left", "right", "bottom"];
 const DEFAULT_FLOAT_SIZE = { w: 340, h: 280 };
@@ -155,11 +155,8 @@ export function useShellLayout(
 
   const store = useStateStore();
   const storeKey = persistKey ? `shell.layout:${persistKey}` : null;
-  // Nothing in the store yet (a project opened for the first time) falls
-  // back to the layout saved by older versions in `localStorage`, rather
-  // than all the way back to the defaults.
   const readPersisted = (): PersistedShellLayoutState | undefined =>
-    storeKey && persistKey ? ((store.get(storeKey) as PersistedShellLayoutState | undefined) ?? loadShellLayoutState(persistKey)) : undefined;
+    storeKey ? (store.get(storeKey) as PersistedShellLayoutState | undefined) : undefined;
   const persisted = useMemo(readPersisted, [store, storeKey]);
 
   /** Every declared tool window at its default placement, overridden by whatever `from` restores. */
