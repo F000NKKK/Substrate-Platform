@@ -41,7 +41,7 @@ parts every IDE needs anyway.
 [Yog-IDLE](https://github.com/F000NKKK/Yog-IDLE) is the first product built
 on it (a Tauri app using both halves).
 
-<!-- screenshot: docs/images/shell.png — the docking shell in a host app: menu bar, a tabbed center dock with an editor, a pinned left tool window (file tree), the bottom Output/Terminal dock and the status bar -->
+<p align="center"><img src="docs/images/shell.png" alt="The docking shell: menu bar, tabbed center dock with an editor, pinned Project Explorer and Properties, the Output dock, a floating Find and Replace window and the status bar" width="900"></p>
 
 ```mermaid
 flowchart LR
