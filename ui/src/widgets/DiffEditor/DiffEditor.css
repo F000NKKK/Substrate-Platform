@@ -14,5 +14,5 @@
 
 .sp-diff-editor .cm-collapsedLines {
   font-family: var(--sp-font-ui);
-  font-size: 11px;
+  font-size: var(--sp-font-size-xs);
 }

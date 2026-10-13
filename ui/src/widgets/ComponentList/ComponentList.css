@@ -12,8 +12,8 @@
   display: flex;
   align-items: center;
   gap: var(--sp-space-sm);
-  min-height: 32px;
-  padding: 2px var(--sp-space-sm);
+  min-height: calc(var(--sp-control-height) + var(--sp-space-sm));
+  padding: var(--sp-space-2xs) var(--sp-space-sm);
   border-bottom: 1px solid var(--sp-border);
 }
 

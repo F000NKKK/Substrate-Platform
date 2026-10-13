@@ -4,7 +4,7 @@
   box-sizing: border-box;
   padding: var(--sp-space-sm) var(--sp-space-md);
   font-family: var(--sp-font-mono);
-  font-size: 12px;
+  font-size: var(--sp-font-size-sm);
   color: var(--sp-text);
   overflow: auto;
 }

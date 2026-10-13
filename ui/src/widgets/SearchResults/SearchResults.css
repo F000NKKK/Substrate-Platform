@@ -27,8 +27,7 @@
   right: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
-  box-sizing: border-box;
+  gap: var(--sp-space-xs);
   white-space: nowrap;
 }
 
@@ -50,7 +49,7 @@
 }
 
 .sp-search-results-group {
-  padding-left: 4px;
+  padding-left: var(--sp-space-xs);
   font-weight: 600;
 }
 
@@ -58,8 +57,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: var(--sp-icon-size);
+  height: var(--sp-icon-size);
   color: var(--sp-text-muted);
   cursor: pointer;
 }
@@ -83,9 +82,10 @@
 }
 
 .sp-search-results-hit {
-  padding-left: 30px;
+  /* under the group label, one step further in */
+  padding-left: calc(var(--sp-space-xs) * 2 + var(--sp-icon-size) + var(--sp-space-sm));
   font-family: var(--sp-font-mono);
-  font-size: 12px;
+  font-size: var(--sp-font-size-sm);
 }
 
 .sp-search-results-location {
@@ -99,7 +99,7 @@
 }
 
 .sp-search-results-summary {
-  padding-left: 8px;
+  padding-left: var(--sp-space-sm);
   color: var(--sp-text-muted);
   font-style: italic;
 }

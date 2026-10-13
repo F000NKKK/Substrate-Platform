@@ -3,7 +3,7 @@
 .sp-notifications {
   position: fixed;
   right: var(--sp-space-md);
-  bottom: calc(var(--sp-space-md) + 24px);
+  bottom: calc(var(--sp-space-md) + var(--sp-statusbar-height));
   z-index: 900;
   display: flex;
   flex-direction: column;

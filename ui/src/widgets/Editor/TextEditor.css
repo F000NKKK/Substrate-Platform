@@ -72,6 +72,6 @@
   border-radius: var(--sp-radius-md);
   box-shadow: var(--sp-shadow-md);
   font-family: var(--sp-font-ui);
-  font-size: 12px;
+  font-size: var(--sp-font-size-sm);
   color: var(--sp-text);
 }

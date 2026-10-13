@@ -109,6 +109,6 @@
   border-radius: var(--sp-radius-xs);
   background: var(--sp-surface-3);
   color: var(--sp-text);
-  font: 11px var(--sp-font-ui);
+  font: var(--sp-font-size-xs) var(--sp-font-ui);
   white-space: nowrap;
 }

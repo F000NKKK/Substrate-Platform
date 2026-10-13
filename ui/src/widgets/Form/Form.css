@@ -50,7 +50,7 @@
 .sp-form-section-title {
   flex: 1;
   margin: 0;
-  font-size: 11px;
+  font-size: var(--sp-font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -113,7 +113,7 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--sp-space-2xs);
   min-width: 0;
 }
 
@@ -144,7 +144,7 @@
 
 .sp-form-list-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--sp-space-xs);
 }
 

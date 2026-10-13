@@ -118,6 +118,7 @@ function findParent<T>(nodes: TreeNode<T>[], id: string): TreeNode<T> | null {
   return null;
 }
 
+/** = `--sp-row-height` (virtualization needs it in JS). */
 const ROW_HEIGHT = 22;
 const INDENT = 16;
 
@@ -216,7 +217,7 @@ export function Tree<T>({ nodes, renderIcon, getMenuItems, onDropNodes, canDrag,
             data-node-id={node.id}
             data-drop-target={drag?.targetId === node.id || undefined}
             tabIndex={tree.activeId === node.id ? 0 : -1}
-            style={{ height: ROW_HEIGHT, paddingLeft: depth * INDENT + 6 }}
+            style={{ height: ROW_HEIGHT, paddingLeft: depth * INDENT + 4 }}
             onFocus={() => tree.setActiveId(node.id)}
             onKeyDown={(e) => tree.handleKeyDown(e, entry)}
             onPointerDown={(e) => handleRowPointerDown(node, e)}

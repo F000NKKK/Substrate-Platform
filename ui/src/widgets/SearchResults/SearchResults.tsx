@@ -32,6 +32,7 @@ export interface SearchResultsProps<H extends SearchResultHit> {
   summary?: ReactNode;
 }
 
+/** = `--sp-row-height` (virtualization needs it in JS). */
 const ROW_HEIGHT = 22;
 const OVERSCAN = 12;
 
