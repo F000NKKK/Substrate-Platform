@@ -1,0 +1,85 @@
+.sp-error-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.sp-error-list-toolbar .sp-form-select {
+  flex: 0 0 auto;
+}
+
+.sp-error-list-search {
+  flex: 0 1 260px;
+  min-width: 120px;
+}
+
+.sp-error-list-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* The Errors / Warnings / Messages toggles — VS's pressed-or-not filter buttons. */
+.sp-error-list-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-space-xs);
+  height: var(--sp-control-height);
+  padding: 0 var(--sp-control-padding-x);
+  border: 1px solid transparent;
+  border-radius: var(--sp-control-radius);
+  background: transparent;
+  color: var(--sp-text-muted);
+  font: inherit;
+  font-size: var(--sp-font-size);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sp-error-list-toggle:hover {
+  background: var(--sp-surface-3);
+  color: var(--sp-text);
+}
+
+.sp-error-list-toggle[aria-pressed="true"] {
+  border-color: var(--sp-border-strong);
+  background: var(--sp-surface-2);
+  color: var(--sp-text);
+}
+
+.sp-error-list-toggle[aria-pressed="false"] .sp-error-list-severity {
+  opacity: 0.5;
+}
+
+.sp-error-list-toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--sp-focus-ring);
+}
+
+.sp-error-list-severity {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sp-error-list-severity--error {
+  color: var(--sp-danger);
+}
+
+.sp-error-list-severity--warning {
+  color: var(--sp-warning);
+}
+
+.sp-error-list-severity--message {
+  color: var(--sp-info);
+}
+
+.sp-error-list-code {
+  color: var(--sp-accent);
+  text-decoration: none;
+}
+
+.sp-error-list-code:hover {
+  text-decoration: underline;
+}

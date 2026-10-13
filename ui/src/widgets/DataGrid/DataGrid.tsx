@@ -1,4 +1,4 @@
-import { useImperativeHandle, type CSSProperties, type KeyboardEvent, type ReactNode, type Ref } from "react";
+import { useImperativeHandle, type CSSProperties, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
 import { ContextMenu } from "../ContextMenu";
 import { IconButton } from "../IconButton";
 import { IconClose } from "../../infra/icons";
@@ -82,6 +82,8 @@ export interface DataGridProps<T> {
   /** Shows a per-column text filter beneath the header. Default true. */
   filterRow?: boolean;
   onRowActivate?: (row: T) => void;
+  /** Right-click on a row — the row is selected first (if it wasn't), as in a desktop list. Without it a row has no menu. */
+  onRowContextMenu?: (row: T, e: ReactMouseEvent) => void;
   /** Grid-level catch-all fired alongside any column's own `onCellEdit` when an edit commits. */
   onCellEditCommit?: (row: T, key: string, newValue: string) => void;
   /** When set, column order/widths/sort/groupBy/hidden-columns/group-panel-visibility survive a reload via `localStorage`, keyed by this string (make it unique per grid instance in the app). Only affects state left uncontrolled by its matching prop (`sort`, `groupBy`, `hiddenColumns`). */
@@ -132,7 +134,7 @@ export interface DataGridHandle {
  */
 export function DataGrid<T>(props: DataGridProps<T>) {
   const { selectable: selectableRows = false, filterRow = true, onRowActivate, emptyState, className, style, rowHeight = DEFAULT_ROW_HEIGHT } = props;
-  const { cellNavigation = false, showSelectColumn = true, showGroupPanel = true, rowClassName, cellClassName, cellTitle, handleRef } = props;
+  const { cellNavigation = false, showSelectColumn = true, showGroupPanel = true, rowClassName, cellClassName, cellTitle, handleRef, onRowContextMenu } = props;
   const grid = useDataGrid(props);
   const t = useT();
   // `selectable` below means "has the checkbox column"; row selection itself is `selectableRows`.
@@ -341,7 +343,13 @@ export function DataGrid<T>(props: DataGridProps<T>) {
                   onFocus={() => grid.setActiveIndex(index)}
                   onKeyDown={(e) => grid.handleItemKeyDown(e, index)}
                   onDoubleClick={() => onRowActivate?.(row)}
-                  onContextMenu={(e) => e.stopPropagation()}
+                  onContextMenu={(e) => {
+                    e.stopPropagation();
+                    if (!onRowContextMenu) return;
+                    grid.setActiveIndex(index);
+                    if (selectableRows && !selected && rowIndexInSorted >= 0) grid.selectRow(rowIndexInSorted, { toggle: false, range: false });
+                    onRowContextMenu(row, e);
+                  }}
                   onClick={(e) => {
                     grid.setActiveIndex(index);
                     if (!selectableRows || rowIndexInSorted < 0) return;

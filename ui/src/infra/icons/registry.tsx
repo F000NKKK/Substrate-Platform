@@ -44,6 +44,8 @@ const defaultIcons: Record<string, IconComponent> = {
   categorized: glyphs.IconCategorized,
   alphabetical: glyphs.IconAlphabetical,
   info: glyphs.IconInfo,
+  error: glyphs.IconError,
+  warning: glyphs.IconWarning,
   preview: glyphs.IconPreview,
   previewSide: glyphs.IconPreviewSide,
   code: glyphs.IconCode,

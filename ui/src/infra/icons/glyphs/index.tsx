@@ -51,3 +51,5 @@ export { IconCollapse } from "./IconCollapse";
 export { IconExpand } from "./IconExpand";
 export { IconTable } from "./IconTable";
 export { IconFolderTable } from "./IconFolderTable";
+export { IconError } from "./IconError";
+export { IconWarning } from "./IconWarning";

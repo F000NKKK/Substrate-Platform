@@ -45,6 +45,8 @@ export { AccentColorField } from "./AccentColorField";
 export { OutputPanel } from "./OutputPanel";
 export type { OutputPanelProps, OutputLineLevel } from "./OutputPanel";
 export { defaultLineLevel, clearOutputBuffer, getOutputBuffer, startOutputBuffer } from "./OutputPanel";
+export { ErrorList, filterDiagnostics, DEFAULT_ERROR_LIST_FILTER } from "./ErrorList";
+export type { ErrorListProps, ErrorListFilter, ErrorListScope, ErrorListOrigins, ErrorListContext } from "./ErrorList";
 export { StatusBar, StatusBarButton } from "./StatusBar";
 export type { StatusBarProps, StatusBarButtonProps } from "./StatusBar";
 export { TerminalPanel, openTerminalIn } from "./TerminalPanel";

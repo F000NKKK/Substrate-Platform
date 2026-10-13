@@ -47,6 +47,7 @@
   /* status — log/diagnostic severity, independent of the accent */
   --sp-warning: #d7ba7d;
   --sp-danger: #f48771;
+  --sp-info: #75beff;
 
   /* symbol kinds — Code Search / outline icons, Visual Studio's hues */
   --sp-symbol-type: #ee9d28;
