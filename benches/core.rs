@@ -99,5 +99,11 @@ fn directory_listing(c: &mut Criterion) {
     std::fs::remove_dir_all(&dir).unwrap();
 }
 
-criterion_group!(benches, pty_output, stderr_levels, log_sink, directory_listing);
+criterion_group!(
+    benches,
+    pty_output,
+    stderr_levels,
+    log_sink,
+    directory_listing
+);
 criterion_main!(benches);
