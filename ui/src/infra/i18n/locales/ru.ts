@@ -225,6 +225,7 @@ registerTranslations("ru", {
 
 // Error List.
 registerTranslations("ru", {
+  "Error List": "Список ошибок",
   "Entire Solution": "Все решение",
   "Open Documents": "Открытые документы",
   "Current Document": "Текущий документ",
