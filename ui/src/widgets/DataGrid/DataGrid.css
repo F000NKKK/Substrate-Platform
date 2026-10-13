@@ -377,6 +377,14 @@
   outline: none;
 }
 
+/* A dropdown cell editor: the shared select chevron instead of the OS one. */
+select.sp-datagrid-cell-editor {
+  appearance: none;
+  padding-right: var(--sp-select-chevron-space);
+  background: var(--sp-surface-2) var(--sp-select-chevron) no-repeat right var(--sp-control-padding-x) center;
+  cursor: pointer;
+}
+
 /* Footer */
 
 .sp-datagrid-footer {
