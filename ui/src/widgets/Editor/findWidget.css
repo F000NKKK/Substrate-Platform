@@ -49,8 +49,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 24px;
+  width: var(--sp-icon-btn-size-sm);
+  height: var(--sp-icon-btn-size);
   padding: 0;
   border: none;
   border-radius: var(--sp-radius-sm);
@@ -125,15 +125,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 18px;
+  flex: none;
+  box-sizing: border-box;
+  min-width: var(--sp-icon-btn-size-sm);
+  height: var(--sp-icon-btn-size-sm);
   padding: 0 3px;
   border: 1px solid transparent;
   border-radius: var(--sp-radius-xs);
   background: transparent;
   color: var(--sp-text-muted);
   font-family: var(--sp-font-mono);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1;
   cursor: pointer;
 }
@@ -170,8 +172,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  flex: none;
+  width: var(--sp-icon-btn-size);
+  height: var(--sp-icon-btn-size);
   padding: 0;
   border: none;
   border-radius: var(--sp-radius-sm);

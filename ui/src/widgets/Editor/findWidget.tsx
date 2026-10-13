@@ -256,7 +256,7 @@ function FindWidget({ view, info, register }: { view: EditorView; info: MatchInf
             <ArrowDown />
           </Action>
           <Action title={t("Close (Esc)")} onClick={close}>
-            <IconClose size={14} />
+            <IconClose />
           </Action>
         </div>
         {expanded && !readOnly && (
