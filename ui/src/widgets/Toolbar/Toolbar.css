@@ -1,22 +1,50 @@
+/*
+ * A VS command bar: one row of 24px controls (icon buttons, Buttons, selects,
+ * search boxes) on a --sp-toolbar-height strip, the same gap between every
+ * control, and groups split by a short separator with that same gap (plus
+ * --sp-toolbar-separator-margin) on both sides. Wraps onto a second row
+ * rather than clipping a control when the strip is too narrow.
+ */
 .sp-toolbar {
   display: flex;
   align-items: center;
-  gap: var(--sp-space-xs);
-  box-sizing: border-box;
+  flex-wrap: wrap;
+  gap: var(--sp-space-2xs) var(--sp-toolbar-gap);
+  flex: 0 0 auto;
   min-height: var(--sp-toolbar-height);
-  padding: 2px var(--sp-space-sm);
+  padding: 1px var(--sp-toolbar-padding-x);
   border-bottom: 1px solid var(--sp-border);
 }
 
 .sp-toolbar-section {
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding-right: var(--sp-space-sm);
-  border-right: 1px solid var(--sp-border);
+  gap: var(--sp-space-2xs);
 }
 
-.sp-toolbar-section:last-child {
-  padding-right: 0;
-  border-right: none;
+.sp-toolbar-section:not(:last-child)::after {
+  content: "";
+  flex: none;
+  width: 1px;
+  height: var(--sp-icon-size);
+  /* the section's own 2px gap + this = the toolbar gap + separator margin, matching the right side */
+  margin-left: calc(var(--sp-toolbar-gap) + var(--sp-toolbar-separator-margin) - var(--sp-space-2xs));
+  margin-right: var(--sp-toolbar-separator-margin);
+  background: var(--sp-border-strong);
+}
+
+/* A free-standing group separator for hand-built rows (`<ToolbarSeparator />`). */
+.sp-toolbar-separator {
+  flex: none;
+  align-self: center;
+  width: 1px;
+  height: var(--sp-icon-size);
+  margin: 0 var(--sp-toolbar-separator-margin);
+  background: var(--sp-border-strong);
+}
+
+/* Pushes everything after it to the far end of the row. */
+.sp-toolbar-spacer {
+  flex: 1 1 0;
+  min-width: 0;
 }

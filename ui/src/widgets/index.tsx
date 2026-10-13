@@ -28,7 +28,7 @@ export type { DiffEditorProps, DiffLayout } from "./DiffEditor";
 export { EditorColorField } from "./EditorColorField";
 export { RunBar } from "./RunBar";
 export type { RunBarProps, RunTarget, RunMode } from "./RunBar";
-export { Toolbar } from "./Toolbar";
+export { Toolbar, ToolbarSeparator, ToolbarSpacer } from "./Toolbar";
 export type { ToolbarProps, ToolbarSection, ToolbarItem } from "./Toolbar";
 export { Swatch } from "./Swatch";
 export type { SwatchProps } from "./Swatch";

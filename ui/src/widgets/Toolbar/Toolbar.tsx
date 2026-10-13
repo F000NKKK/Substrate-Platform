@@ -46,3 +46,13 @@ export function Toolbar({ sections, leading }: ToolbarProps) {
     </div>
   );
 }
+
+/** A short vertical divider between groups of controls in a hand-built toolbar row (`.sp-toolbar` or any row using the toolbar tokens). */
+export function ToolbarSeparator() {
+  return <span className="sp-toolbar-separator" role="separator" aria-orientation="vertical" />;
+}
+
+/** Takes the leftover width of a toolbar row, pushing what follows to its far end. */
+export function ToolbarSpacer() {
+  return <span className="sp-toolbar-spacer" />;
+}

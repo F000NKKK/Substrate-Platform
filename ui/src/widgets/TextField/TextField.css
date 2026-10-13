@@ -1,15 +1,20 @@
 .sp-textfield {
   width: 100%;
-  box-sizing: border-box;
+  min-height: var(--sp-control-height);
   font-family: var(--sp-font-ui);
   font-size: var(--sp-font-size);
   color: var(--sp-text);
   background: var(--sp-surface-2);
-  border: 1px solid var(--sp-border-strong);
-  border-radius: var(--sp-radius-sm);
-  padding: var(--sp-space-xs) var(--sp-space-sm);
+  border: var(--sp-control-border);
+  border-radius: var(--sp-control-radius);
+  padding: 0 var(--sp-control-padding-x);
   outline: none;
   transition: border-color var(--sp-duration-fast) var(--sp-easing), box-shadow var(--sp-duration-fast) var(--sp-easing);
+}
+
+/* Multi-line: same box, room above/below the first and last line. */
+textarea.sp-textfield {
+  padding-block: var(--sp-space-xs);
 }
 
 .sp-textfield::placeholder {
@@ -18,5 +23,9 @@
 
 .sp-textfield:focus {
   border-color: var(--sp-accent);
-  box-shadow: 0 0 0 2px var(--sp-accent-soft);
+  box-shadow: var(--sp-focus-ring);
+}
+
+.sp-textfield:disabled {
+  color: var(--sp-text-faint);
 }

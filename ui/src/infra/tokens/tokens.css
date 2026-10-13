@@ -80,11 +80,44 @@
   --sp-font-mono: "Cascadia Code", Consolas, monospace;
   --sp-font-size: 13px;
 
-  /* layout */
+  /* type scale — secondary text (captions, badges, dense lists) */
+  --sp-font-size-sm: 12px;
+  --sp-font-size-xs: 11px;
+
+  /* spacing — a 4px grid (2px only as the hairline step inside dense rows) */
+  --sp-space-2xs: 2px;
   --sp-space-xs: 4px;
   --sp-space-sm: 8px;
   --sp-space-md: 12px;
   --sp-space-lg: 20px;
+
+  /* controls — Visual Studio's metrics: every button, select, text box and
+     toggle in a row shares one height and one horizontal padding, so mixed
+     rows line up without per-call-site tweaks. `-sm` is for dense rows
+     (property grid, data grid, tree inline editors). */
+  --sp-control-height: 24px;
+  --sp-control-height-sm: 20px;
+  --sp-control-padding-x: 8px;
+  --sp-control-radius: var(--sp-radius-xs);
+  --sp-control-border: 1px solid var(--sp-border-strong);
+  --sp-focus-ring: 0 0 0 2px var(--sp-accent-soft);
+  /* The native dropdown arrow is replaced by this one (selects use
+     `appearance: none` so the GTK/Windows theme can't add its own height). */
+  --sp-select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%239b9b9e' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --sp-select-chevron-space: 22px;
+
+  /* rows and bars */
+  --sp-row-height: 22px;
+  --sp-toolbar-height: 28px;
+  --sp-toolbar-padding-x: var(--sp-space-xs);
+  --sp-toolbar-gap: var(--sp-space-xs);
+  --sp-toolbar-separator-margin: var(--sp-space-xs);
+  --sp-panel-header-height: 28px;
+  --sp-statusbar-height: 22px;
+  --sp-hover: var(--sp-surface-2);
+  --sp-selection: var(--sp-accent-soft);
+
+  /* layout */
   --sp-toolwindow-strip: 32px;
   --sp-toolwindow-size: 260px;
   --sp-toolwindow-bottom-size: 220px;
@@ -95,7 +128,6 @@
      document tabs and dense rows; toolbars are tall enough to fit a 24px box */
   --sp-icon-size: 16px;
   --sp-icon-size-sm: 14px;
-  --sp-icon-btn-size: 24px;
-  --sp-icon-btn-size-sm: 20px;
-  --sp-toolbar-height: 28px;
+  --sp-icon-btn-size: var(--sp-control-height);
+  --sp-icon-btn-size-sm: var(--sp-control-height-sm);
 }

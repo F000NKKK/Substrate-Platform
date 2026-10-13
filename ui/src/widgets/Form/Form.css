@@ -70,8 +70,11 @@
   align-items: start;
 }
 
+/* Top-aligned with the control, its text centered on the control's first line. */
 .sp-form-field-label {
-  padding-top: 5px;
+  display: flex;
+  align-items: center;
+  min-height: var(--sp-control-height);
   cursor: default;
   color: var(--sp-text);
   font-size: var(--sp-font-size);
@@ -165,23 +168,47 @@
   cursor: default;
 }
 
+/* Sized like a Button/TextField; `appearance: none` so the OS theme (GTK in
+   particular) can't add its own min-height, padding and arrow — the arrow is
+   drawn from the `--sp-select-chevron` token instead. Sized to its longest
+   option, shrinking (with an ellipsis) only when the row is too narrow. */
 .sp-form-select {
-  flex: 1;
+  appearance: none;
+  flex: 0 1 auto;
   min-width: 0;
-  height: 28px;
-  box-sizing: border-box;
-  padding: 0 var(--sp-space-sm);
-  border: 1px solid var(--sp-border-strong);
-  border-radius: var(--sp-radius-sm);
-  background: var(--sp-surface-2);
+  max-width: 100%;
+  height: var(--sp-control-height);
+  padding: 0 var(--sp-select-chevron-space) 0 var(--sp-control-padding-x);
+  border: var(--sp-control-border);
+  border-radius: var(--sp-control-radius);
+  background: var(--sp-surface-2) var(--sp-select-chevron) no-repeat right var(--sp-control-padding-x) center;
   color: var(--sp-text);
   font-family: var(--sp-font-ui);
   font-size: var(--sp-font-size);
+  line-height: calc(var(--sp-control-height) - 2px);
+  text-overflow: ellipsis;
+  white-space: nowrap;
   align-self: flex-start;
-  max-width: 100%;
+  cursor: pointer;
+}
+
+.sp-form-select:hover {
+  background-color: var(--sp-surface-3);
 }
 
 .sp-form-select:focus {
   outline: none;
   border-color: var(--sp-accent);
+  box-shadow: var(--sp-focus-ring);
+}
+
+.sp-form-select:disabled {
+  color: var(--sp-text-faint);
+  cursor: default;
+}
+
+/* In a row of controls (a toolbar), center on the row instead of the form's top alignment. */
+.sp-toolbar .sp-form-select,
+.sp-form-list-row .sp-form-select {
+  align-self: center;
 }

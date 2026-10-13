@@ -4,19 +4,35 @@
   align-items: center;
   justify-content: center;
   gap: var(--sp-space-xs);
+  flex: none;
+  min-height: var(--sp-control-height);
+  padding: 0 var(--sp-control-padding-x);
   border: none;
   outline: none;
-  border-radius: var(--sp-radius-sm);
+  border-radius: var(--sp-control-radius);
   font-family: var(--sp-font-ui);
   font-size: var(--sp-font-size);
-  padding: var(--sp-space-xs) var(--sp-space-md);
+  line-height: 1.2;
+  white-space: nowrap;
   cursor: pointer;
   transition: background var(--sp-duration-fast) var(--sp-easing), color var(--sp-duration-fast) var(--sp-easing),
     box-shadow var(--sp-duration-fast) var(--sp-easing);
 }
 
 .sp-btn:focus-visible {
-  box-shadow: 0 0 0 2px var(--sp-accent-soft);
+  box-shadow: var(--sp-focus-ring);
+}
+
+.sp-btn > svg {
+  flex: none;
+  width: var(--sp-icon-size);
+  height: var(--sp-icon-size);
+}
+
+.sp-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
 }
 
 .sp-btn--primary {

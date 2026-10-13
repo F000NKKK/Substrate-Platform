@@ -1,0 +1,11 @@
+/*
+ * Platform-wide base rules — the few element-level defaults every widget can
+ * rely on. Sizes in this codebase are always "outer" sizes: a control's
+ * `height: var(--sp-control-height)` includes its border and padding, a
+ * 100%-wide bar with padding stays inside its parent.
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
