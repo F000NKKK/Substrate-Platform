@@ -160,7 +160,7 @@ export function ErrorList({ diagnostics, onNavigate, activeFile, openFiles, form
     const selected = rows.filter((r) => selectedIds.has(r.id)).map((r) => r.d);
     const items = selected.length > 0 ? selected : [row.d];
     const help = row.d.codeHref;
-    const fixes = (row.d.fixes ?? []).map((fix, i): ContextMenuItem => ({ label: fix.label, onSelect: fix.apply }));
+    const fixes = (row.d.fixes ?? []).map((fix): ContextMenuItem => ({ label: fix.label, onSelect: fix.apply }));
     return [
       ...fixes,
       { label: t("Copy"), shortcut: "Ctrl+C", separatorBefore: fixes.length > 0, onSelect: () => copy(items) },
