@@ -415,6 +415,7 @@ export function PropertyGrid({
             if (!busy && editing.session === sessionRef.current) void commitText(p, editing.draft, true);
           }}
         />
+        </>
       );
     }
     return (
