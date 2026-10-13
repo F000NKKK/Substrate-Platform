@@ -107,6 +107,7 @@ registerTranslations(
     "No object selected.": "Объект не выбран.",
     Categorized: "По категориям",
     Alphabetical: "По алфавиту",
+    "Edit…": "Изменить…",
     "Search Properties": "Поиск свойств",
     "Show Description": "Показать описание",
     "Hide Description": "Скрыть описание",

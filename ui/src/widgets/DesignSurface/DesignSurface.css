@@ -42,6 +42,13 @@
   pointer-events: none;
 }
 
+.sp-design-surface-adorners {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
 .sp-design-surface-overlay > * {
   position: absolute;
   box-sizing: border-box;

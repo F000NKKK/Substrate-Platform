@@ -94,6 +94,14 @@ export interface DesignSurfaceProps {
   showGrid?: boolean;
   /** The rendered content, laid out at `scale` with the design origin at its top-left. */
   children?: ReactNode;
+  /**
+   * Product-drawn adornments over the content and the selection frames
+   * (Visual Studio's grid rails), at `scale` with the design origin at the
+   * top-left; not clipped to the page. Only elements with
+   * `pointer-events: auto` take the pointer — and their pointer events and
+   * context menus don't reach the surface.
+   */
+  adorners?: ReactNode;
   className?: string;
 }
 
@@ -175,6 +183,7 @@ export function DesignSurface({
   onContextMenu,
   showGrid = false,
   children,
+  adorners,
   className,
 }: DesignSurfaceProps) {
   const pageRef = useRef<HTMLDivElement>(null);
@@ -493,6 +502,18 @@ export function DesignSurface({
               </div>
             )}
           </div>
+          {adorners && (
+            <div
+              className="sp-design-surface-adorners"
+              onPointerDown={(e) => e.stopPropagation()}
+              onPointerMove={(e) => e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
+              onContextMenu={(e) => e.stopPropagation()}
+              onDoubleClick={(e) => e.stopPropagation()}
+            >
+              {adorners}
+            </div>
+          )}
         </div>
       </div>
     </div>

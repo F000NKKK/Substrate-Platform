@@ -47,6 +47,8 @@ export interface PropertyDescriptor {
    * re-renders with an updated `value`.
    */
   onCommit?: (value: PropertyValue) => void | string | null | Promise<void | string | null>;
+  /** Visual Studio's "…" button at the end of the row: opens the product's own editor for the value (a collection editor, a picker dialog). */
+  edit?: () => void;
 }
 
 export interface PropertyGridProps {
@@ -567,6 +569,20 @@ export function PropertyGrid({
                       onDoubleClick={() => cycle(p)}
                     >
                       {renderValue(p)}
+                      {p.edit && (
+                        <button
+                          type="button"
+                          className="sp-propgrid-ellipsis"
+                          title={t("Edit…")}
+                          disabled={p.readOnly}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            p.edit!();
+                          }}
+                        >
+                          …
+                        </button>
+                      )}
                     </div>
                   </div>
                   {rowError && (
