@@ -2,11 +2,11 @@
   position: relative;
   display: flex;
   align-items: center;
-  height: 22px;
+  height: var(--sp-statusbar-height);
   padding: 0 var(--sp-space-sm);
   background: var(--sp-surface-1);
   border-top: 1px solid var(--sp-border);
-  font-size: 11px;
+  font-size: var(--sp-font-size-xs);
   color: var(--sp-text-muted);
 }
 
@@ -35,8 +35,8 @@
 }
 
 .sp-status-bar-spinner {
-  width: 9px;
-  height: 9px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   border: 1.5px solid var(--sp-text-faint);
   border-top-color: var(--sp-text);
