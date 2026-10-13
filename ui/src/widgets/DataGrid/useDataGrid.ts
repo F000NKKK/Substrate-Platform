@@ -436,9 +436,11 @@ export function useDataGrid<T>({
       resizeRef.current = null;
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
     }
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
   }
 
   function handleHeaderDragStart(e: ReactDragEvent, column: DataGridColumn<T>) {

@@ -122,17 +122,19 @@ export function FloatingPanel({ panel, x, y, w, h, onDock, onClose, onResize, on
     function onPointerUp(ev: PointerEvent) {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
       const drag = dragRef.current;
       dragRef.current = null;
       setDragPos(null);
       setHoverGuide(null);
-      if (!drag) return;
+      if (!drag || ev.type === "pointercancel") return;
       const guide = guideAt(drag, ev.clientX, ev.clientY);
       if (guide) onDockTo?.(guide);
       else onMove?.(drag.startX + ev.clientX - drag.pointerX, drag.startY + ev.clientY - drag.pointerY);
     }
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
   }
 
   const pos = dragPos ?? { x, y };

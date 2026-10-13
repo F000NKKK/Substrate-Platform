@@ -180,10 +180,11 @@ export function Tree<T>({ nodes, renderIcon, getMenuItems, onDropNodes, canDrag,
     function onUp(ev: PointerEvent) {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
       window.removeEventListener("keydown", onKey);
       const current = dragRef.current;
       setDrag(null);
-      if (!started) return;
+      if (!started || ev.type === "pointercancel") return;
       suppressClickRef.current = true;
       setTimeout(() => (suppressClickRef.current = false), 0);
       const targetId = current ? targetAt(ev.clientX, ev.clientY) : null;
@@ -198,6 +199,7 @@ export function Tree<T>({ nodes, renderIcon, getMenuItems, onDropNodes, canDrag,
     }
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
     window.addEventListener("keydown", onKey);
   }
 

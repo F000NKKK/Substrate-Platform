@@ -82,6 +82,7 @@ export function beginItemDrag(e: ReactPointerEvent | PointerEvent, item: Dragged
   function cleanup() {
     window.removeEventListener("pointermove", onMove);
     window.removeEventListener("pointerup", onUp);
+    window.removeEventListener("pointercancel", onUp);
     window.removeEventListener("keydown", onKey, true);
     ghost?.remove();
     ghost = null;
@@ -106,7 +107,7 @@ export function beginItemDrag(e: ReactPointerEvent | PointerEvent, item: Dragged
     target?.over?.(ev.clientX, ev.clientY, item);
   }
   function onUp(ev: PointerEvent) {
-    const dragging = !!ghost;
+    const dragging = !!ghost && ev.type !== "pointercancel";
     const target = dragging ? targetAt(ev.clientX, ev.clientY, item.type) : null;
     cleanup();
     target?.drop(ev.clientX, ev.clientY, item);
@@ -119,5 +120,6 @@ export function beginItemDrag(e: ReactPointerEvent | PointerEvent, item: Dragged
   }
   window.addEventListener("pointermove", onMove);
   window.addEventListener("pointerup", onUp);
+  window.addEventListener("pointercancel", onUp);
   window.addEventListener("keydown", onKey, true);
 }
