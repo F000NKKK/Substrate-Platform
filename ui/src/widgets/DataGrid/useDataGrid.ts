@@ -539,6 +539,12 @@ export function useDataGrid<T>({
       if (e.defaultPrevented) return;
     }
     if (cellNavigation && item?.kind === "row" && handleCellKey(e, index, item.row)) return;
+    // Ctrl+A: every row, not the page's text.
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === "a" && selectable) {
+      e.preventDefault();
+      commitSelection(new Set(sortedRows.map(getRowId)));
+      return;
+    }
     switch (e.key) {
       case "ArrowDown": {
         e.preventDefault();
@@ -637,12 +643,6 @@ export function useDataGrid<T>({
         if (!plain || !current) return false;
         e.preventDefault();
         moveTo(index, e.key === "Home" ? keys[0] : keys[keys.length - 1]);
-        return true;
-      case "a":
-      case "A":
-        if (!(e.ctrlKey || e.metaKey) || !selectable) return false;
-        e.preventDefault();
-        commitSelection(new Set(sortedRows.map(getRowId)));
         return true;
     }
     // Typing on a cell starts editing it with what was typed, like a spreadsheet.
