@@ -15,7 +15,7 @@ it("keeps a crash inside: the message, and Try Again mounts it afresh", async ()
     return createElement("span", null, "fine");
   }
   const host = document.createElement("div");
-  await act(async () => createRoot(host).render(createElement(ErrorBoundary, { what: "The Editor" }, createElement(Flaky))));
+  await act(async () => createRoot(host).render(createElement(ErrorBoundary, { what: "The Editor", children: createElement(Flaky) })));
   expect(host.textContent).toContain("The Editor failed: boom");
   fail = false;
   await act(async () => host.querySelector("button")!.click());
