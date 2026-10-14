@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ErrorBoundary } from "../ErrorBoundary";
 import { Tab } from "../Tab";
 import { useT } from "../../infra/i18n";
 import type { EditorProps } from "./EditorBase";
@@ -33,7 +34,12 @@ export interface MultiViewEditorProps extends EditorProps {
 export function MultiViewEditor({ providers, view, onViewChange, renderView, showSwitcher = true, ...props }: MultiViewEditorProps) {
   const t = useT();
   const active = providers.find((p) => p.id === view) ?? providers[0];
-  const content = renderView ? renderView(active, props) : <active.component {...props} />;
+  // A view's crash stays in it (its message, Try Again); the switcher still works.
+  const content = (
+    <ErrorBoundary key={active.id} what={t(active.name ?? active.label)}>
+      {renderView ? renderView(active, props) : <active.component {...props} />}
+    </ErrorBoundary>
+  );
   if (providers.length < 2 || !showSwitcher) return <>{content}</>;
   return (
     <div className="sp-multiview-editor">

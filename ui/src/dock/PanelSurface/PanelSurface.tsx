@@ -1,4 +1,5 @@
 import type { CSSProperties, PointerEvent, ReactNode } from "react";
+import { ErrorBoundary } from "../../widgets/ErrorBoundary";
 import { IconButton } from "../../widgets/IconButton";
 import { IconPin, IconPinOff, IconClose, IconFloat } from "../../infra/icons";
 import { Outline } from "../../infra/outline";
@@ -62,7 +63,9 @@ export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onF
           </IconButton>
         </div>
       </div>
-      <div className="sp-panel-surface-body">{children}</div>
+      <div className="sp-panel-surface-body">
+        <ErrorBoundary what={title}>{children}</ErrorBoundary>
+      </div>
       {outline && <Outline revision={outlineRevision} />}
     </div>
   );
