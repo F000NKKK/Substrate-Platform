@@ -1,0 +1,26 @@
+.sp-error-boundary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-sm);
+  height: 100%;
+  padding: var(--sp-space-md);
+  overflow: auto;
+  color: var(--sp-text);
+  background: var(--sp-surface-0);
+}
+
+.sp-error-boundary pre {
+  flex: 1;
+  margin: 0;
+  padding: var(--sp-space-sm);
+  overflow: auto;
+  font-size: 11px;
+  white-space: pre-wrap;
+  user-select: text;
+  background: var(--sp-surface-1);
+}
+
+.sp-error-boundary-actions {
+  display: flex;
+  gap: var(--sp-space-sm);
+}
