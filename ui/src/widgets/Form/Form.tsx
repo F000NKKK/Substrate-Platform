@@ -263,16 +263,28 @@ export function CheckField({ checked, onChange, label, disabled }: { checked: bo
 export interface SelectOption {
   value: string;
   label: string;
+  /** Options with the same group are listed under it (an `<optgroup>`), in the order groups first appear. */
+  group?: string;
 }
 
 export function SelectField({ value, options, onChange, disabled, "aria-label": ariaLabel }: { value: string; options: readonly SelectOption[]; onChange: (value: string) => void; disabled?: boolean; "aria-label"?: string }) {
+  const option = (o: SelectOption) => (
+    <option key={o.value} value={o.value}>
+      {o.label}
+    </option>
+  );
+  const groups = [...new Set(options.map((o) => o.group))];
   return (
     <select className="sp-form-select" value={value} disabled={disabled} aria-label={ariaLabel} onChange={(e) => onChange(e.target.value)}>
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
+      {groups.map((g) =>
+        g === undefined ? (
+          options.filter((o) => o.group === undefined).map(option)
+        ) : (
+          <optgroup key={g} label={g}>
+            {options.filter((o) => o.group === g).map(option)}
+          </optgroup>
+        )
+      )}
     </select>
   );
 }
