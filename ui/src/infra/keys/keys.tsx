@@ -278,4 +278,20 @@ function onTextFieldKeyDown(e: KeyboardEvent) {
   if (done) e.preventDefault();
 }
 
-if (typeof window !== "undefined") window.addEventListener("keydown", onTextFieldKeyDown);
+/**
+ * Ctrl+A nobody handled (a list, a grid, an editor would have) outside a
+ * text field: not the webview's "select the whole page" — the app's own
+ * labels, menus and panels aren't a document to select.
+ */
+function onUnhandledSelectAll(e: KeyboardEvent) {
+  if (e.defaultPrevented || !(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey || eventKey(e) !== "a") return;
+  const t = e.target;
+  if (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement) return;
+  if (t instanceof HTMLElement && (t.isContentEditable || t.closest("[data-sp-native-keys]"))) return;
+  e.preventDefault();
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("keydown", onTextFieldKeyDown);
+  window.addEventListener("keydown", onUnhandledSelectAll);
+}

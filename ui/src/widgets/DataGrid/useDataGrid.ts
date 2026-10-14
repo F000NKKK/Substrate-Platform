@@ -9,6 +9,7 @@ import {
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
+import { eventKey } from "../../infra/keys";
 import type { DataGridColumn, DataGridProps, DataGridSortState } from "./DataGrid";
 import { useContextMenu } from "../ContextMenu";
 import { loadDataGridState, saveDataGridState } from "./dataGridPersistence";
@@ -540,7 +541,7 @@ export function useDataGrid<T>({
     }
     if (cellNavigation && item?.kind === "row" && handleCellKey(e, index, item.row)) return;
     // Ctrl+A: every row, not the page's text.
-    if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === "a" && selectable) {
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && eventKey(e) === "a" && selectable) {
       e.preventDefault();
       commitSelection(new Set(sortedRows.map(getRowId)));
       return;

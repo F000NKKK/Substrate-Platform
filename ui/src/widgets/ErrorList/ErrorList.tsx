@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Diagnostic, DiagnosticSeverity } from "../../infra/diagnostics";
 import { Icon } from "../../infra/icons";
+import { eventKey } from "../../infra/keys";
 import { tn, useT } from "../../infra/i18n";
 import { useStoredState } from "../../infra/state";
 import { ContextMenu, useContextMenu, type ContextMenuItem } from "../ContextMenu";
@@ -228,7 +229,7 @@ export function ErrorList({ diagnostics, onNavigate, activeFile, openFiles, form
         onRowActivate={(r) => navigate(r.d)}
         onRowContextMenu={(r, e) => menu.openAtPoint(r, e)}
         onGridKeyDown={(e) => {
-          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c" && selectedIds.size > 0) {
+          if ((e.ctrlKey || e.metaKey) && eventKey(e) === "c" && selectedIds.size > 0) {
             e.preventDefault();
             copy(rows.filter((r) => selectedIds.has(r.id)).map((r) => r.d));
           }

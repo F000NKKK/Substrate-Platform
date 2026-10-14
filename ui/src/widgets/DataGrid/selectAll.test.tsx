@@ -13,7 +13,7 @@ interface Row {
 const rows: Row[] = ["a", "b", "c"].map((id) => ({ id }));
 
 describe("DataGrid Ctrl+A", () => {
-  it("selects every row of a row-selected grid, not the page's text", async () => {
+  it("selects every row of a row-selected grid, under any keyboard layout", async () => {
     let selected: Set<string> | undefined;
     let grid: ReturnType<typeof useDataGrid<Row>> | undefined;
     function Probe() {
@@ -28,7 +28,7 @@ describe("DataGrid Ctrl+A", () => {
     }
     await act(async () => createRoot(document.createElement("div")).render(createElement(Probe)));
     let prevented = false;
-    const e = { key: "a", ctrlKey: true, metaKey: false, altKey: false, shiftKey: false, defaultPrevented: false, preventDefault: () => (prevented = true) };
+    const e = { key: "ф", code: "KeyA", ctrlKey: true, metaKey: false, altKey: false, shiftKey: false, defaultPrevented: false, preventDefault: () => (prevented = true) };
     await act(async () => grid!.handleItemKeyDown(e as unknown as KeyboardEvent, 0));
     expect(prevented).toBe(true);
     expect(selected).toEqual(new Set(["a", "b", "c"]));
