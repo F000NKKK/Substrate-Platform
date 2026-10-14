@@ -10,6 +10,10 @@ registerTranslations(
   {
     // Common
     OK: "ОК",
+    "{what} failed: {error}": "{what}: ошибка — {error}",
+    "This panel failed: {error}": "Ошибка в панели: {error}",
+    "Try Again": "Повторить",
+    "Copy Error": "Копировать ошибку",
     Cancel: "Отмена",
     Close: "Закрыть",
     Delete: "Удалить",
