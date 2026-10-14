@@ -872,10 +872,6 @@ name = "yog-data-derive"
 version = "0.4.1"
 
 [[patch.unused]]
-name = "yog-debugger"
-version = "0.9.0"
-
-[[patch.unused]]
 name = "yog-dimensions"
 version = "0.12.0"
 
@@ -888,16 +884,8 @@ name = "yog-event"
 version = "0.4.0"
 
 [[patch.unused]]
-name = "yog-formats"
-version = "0.4.0"
-
-[[patch.unused]]
 name = "yog-gfx"
 version = "0.26.0"
-
-[[patch.unused]]
-name = "yog-hot-reload"
-version = "0.2.3"
 
 [[patch.unused]]
 name = "yog-interop"
@@ -932,20 +920,12 @@ name = "yog-storage"
 version = "0.1.0"
 
 [[patch.unused]]
-name = "yog-symbols"
-version = "0.4.0"
-
-[[patch.unused]]
 name = "yog-ui"
 version = "0.41.1"
 
 [[patch.unused]]
 name = "yog-world"
 version = "0.3.0"
-
-[[patch.unused]]
-name = "yog-worldgen"
-version = "0.1.0"
 
 [[patch.unused]]
 name = "yog_pipes_exports"
