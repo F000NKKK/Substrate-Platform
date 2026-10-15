@@ -215,11 +215,14 @@ export function ThemeProvider({ children, initialAccent }: ThemeProviderProps) {
     storeEditorPreferences(s.editorPreferences);
     setEditorPreferencesState(s.editorPreferences);
   }, []);
-  function tracked<A extends unknown[], R>(change: (...args: A) => R): (...args: A) => R {
+  // `name`: changes of the same setting in quick succession (typing a
+  // font, a size's arrows) are one step.
+  function tracked<A extends unknown[], R>(name: string, change: (...args: A) => R): (...args: A) => R {
     return (...args: A) => {
       const before = snapshot.current;
       const result = change(...args);
-      pushDocumentStep(SETTINGS_HISTORY, { undo: () => restore(before), redo: () => void change(...args) });
+      const what = args[0] && typeof args[0] === "object" ? Object.keys(args[0]).join(",") : String(args[0] ?? "");
+      pushDocumentStep(SETTINGS_HISTORY, { undo: () => restore(before), redo: () => void change(...args), merge: `theme:${name}:${what}` });
       return result;
     };
   }
@@ -232,21 +235,21 @@ export function ThemeProvider({ children, initialAccent }: ThemeProviderProps) {
   const value = useMemo<ThemeContextValue>(
     () => ({
       accent,
-      setAccent: tracked(setAccent),
+      setAccent: tracked("setAccent", setAccent),
       presets: accentPresets,
       editorTheme,
-      setEditorTheme: tracked(setEditorTheme),
+      setEditorTheme: tracked("setEditorTheme", setEditorTheme),
       editorProfiles,
       editorColors,
-      setEditorColor: tracked(setEditorColor),
-      resetEditorColors: tracked(resetEditorColors),
-      createEditorProfile: tracked(createEditorProfile),
-      deleteEditorProfile: tracked(deleteEditorProfile),
+      setEditorColor: tracked("setEditorColor", setEditorColor),
+      resetEditorColors: tracked("resetEditorColors", resetEditorColors),
+      createEditorProfile: tracked("createEditorProfile", createEditorProfile),
+      deleteEditorProfile: tracked("deleteEditorProfile", deleteEditorProfile),
       exportEditorProfile,
-      importEditorProfile: tracked(importEditorProfile),
+      importEditorProfile: tracked("importEditorProfile", importEditorProfile),
       editorPreferences,
-      setEditorPreferences: tracked(setEditorPreferences),
-      resetEditorPreferences: tracked(resetEditorPreferences),
+      setEditorPreferences: tracked("setEditorPreferences", setEditorPreferences),
+      resetEditorPreferences: tracked("resetEditorPreferences", resetEditorPreferences),
     }),
     [
       accent,

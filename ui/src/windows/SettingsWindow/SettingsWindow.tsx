@@ -82,6 +82,7 @@ export function SettingsWindow({ sections, initialSectionId, onClose, title, hea
         <div className="sp-settings-sidebar">
           {!hideSearch && (
             <TextField
+            data-own-undo
             placeholder={t("Search Settings")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}

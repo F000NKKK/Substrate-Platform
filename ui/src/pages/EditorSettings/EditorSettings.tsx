@@ -24,6 +24,8 @@ export const editorSettingsKeywords: readonly string[] = Object.values(LABELS);
  */
 function NumberSetting({ value, min, max, onCommit }: { value: number; min: number; max: number; onCommit: (n: number) => void }) {
   const [draft, setDraft] = useState<string | null>(null);
+  // The value changed from elsewhere (Undo/Redo): show it, not the typing.
+  if (draft !== null && draft !== "" && Number(draft) !== value && Number.isInteger(Number(draft)) && Number(draft) >= min && Number(draft) <= max) setDraft(null);
   return (
     <TextField
       className="sp-editor-settings-number"
