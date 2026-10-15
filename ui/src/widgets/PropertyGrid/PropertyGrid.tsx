@@ -39,6 +39,8 @@ export interface PropertyDescriptor {
   kind?: PropertyKind;
   /** The choices of an `"enum"` property. */
   options?: readonly string[];
+  /** How an `"enum"` choice is shown (`"text"` → "Text") — default the choice itself. */
+  optionLabel?: (option: string) => string;
   /** Values offered while editing a `"string"` property (an editable combo box) — any other text is still accepted. */
   suggestions?: readonly string[];
   readOnly?: boolean;
@@ -115,6 +117,7 @@ function displayText(p: PropertyDescriptor): string {
   if (p.value === null) return "";
   if (Array.isArray(p.value)) return p.value.join(", ");
   if (typeof p.value === "boolean") return p.value ? t("True") : t("False");
+  if (p.optionLabel && kindOf(p) === "enum") return p.optionLabel(String(p.value));
   // A text shows its first line; the rest is there once it's edited.
   if (kindOf(p) === "text") {
     const lines = String(p.value).split("\n");
@@ -520,7 +523,7 @@ export function PropertyGrid({
         >
           {choices.map((c) => (
             <option key={c} value={c}>
-              {kind === "bool" ? (c === "true" ? t("True") : t("False")) : c}
+              {kind === "bool" ? (c === "true" ? t("True") : t("False")) : (p.optionLabel?.(c) ?? c)}
             </option>
           ))}
         </select>
