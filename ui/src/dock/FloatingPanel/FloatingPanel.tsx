@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { PanelSurface } from "../PanelSurface/PanelSurface";
 import type { DockAnchor, PanelDef } from "../types";
+import { DockGuides, dockTargetAt } from "../DockGuides";
 
 export interface FloatingPanelProps {
   panel: PanelDef;
@@ -20,18 +21,8 @@ export interface FloatingPanelProps {
 
 /** Waits for a resize drag to settle before reporting it, rather than once per frame. */
 const RESIZE_SETTLE_MS = 150;
-/** The dock guide buttons' size and spacing (px). */
-const GUIDE_SIZE = 32;
-const GUIDE_STEP = 38;
 /** How much of the title bar always stays on screen. */
 const KEEP_VISIBLE = 80;
-
-const GUIDE_OFFSETS: Record<DockAnchor, { dx: number; dy: number }> = {
-  center: { dx: 0, dy: 0 },
-  left: { dx: -GUIDE_STEP, dy: 0 },
-  right: { dx: GUIDE_STEP, dy: 0 },
-  bottom: { dx: 0, dy: GUIDE_STEP },
-};
 
 interface Drag {
   pointerX: number;
@@ -43,29 +34,14 @@ interface Drag {
 }
 
 function guideAt(drag: Drag, clientX: number, clientY: number): DockAnchor | null {
-  if (!drag.main) return null;
-  const cx = drag.main.left + drag.main.width / 2;
-  const cy = drag.main.top + drag.main.height / 2;
-  for (const [anchor, { dx, dy }] of Object.entries(GUIDE_OFFSETS) as [DockAnchor, { dx: number; dy: number }][]) {
-    if (Math.abs(clientX - (cx + dx)) <= GUIDE_SIZE / 2 && Math.abs(clientY - (cy + dy)) <= GUIDE_SIZE / 2) return anchor;
-  }
-  return null;
-}
-
-/** The part of the main area a guide would dock into, for the preview under it. */
-function previewRect(main: DOMRect, anchor: DockAnchor) {
-  const edge = 0.3;
-  if (anchor === "left") return { left: main.left, top: main.top, width: main.width * edge, height: main.height };
-  if (anchor === "right") return { left: main.right - main.width * edge, top: main.top, width: main.width * edge, height: main.height };
-  if (anchor === "bottom") return { left: main.left, top: main.bottom - main.height * edge, width: main.width, height: main.height * edge };
-  return { left: main.left, top: main.top, width: main.width, height: main.height };
+  return drag.main ? dockTargetAt(drag.main, clientX, clientY) : null;
 }
 
 /**
  * A panel pulled out of every dock — a free-floating window inside the
  * shell, like a Visual Studio floating tool window. Drag its title bar to
- * move it; while dragging, dock guides appear over the main area — drop on
- * one to dock it to that edge or as a tab in the center. Its pin button
+ * move it; while dragging, the dock guides (`DockGuides`) appear over the
+ * main area — drop on one, or near an edge, to dock it there. Its pin button
  * sends it back to its home dock, and its bottom-right corner resizes it
  * (plain CSS `resize`; the settled size is reported via `onResize`).
  */
@@ -164,26 +140,7 @@ export function FloatingPanel({ panel, x, y, w, h, onDock, onClose, onResize, on
           <Component />
         </PanelSurface>
       </div>
-      {dragPos && main && (
-        <>
-          {hoverGuide && <div className="sp-dock-preview" style={previewRect(main, hoverGuide)} />}
-          <div className="sp-dock-guides" style={{ left: main.left + main.width / 2, top: main.top + main.height / 2 }}>
-            {(Object.keys(GUIDE_OFFSETS) as DockAnchor[]).map((anchor) => (
-              <div
-                key={anchor}
-                className={`sp-dock-guide-button sp-dock-guide-button--${anchor}`}
-                data-hover={hoverGuide === anchor || undefined}
-                style={{
-                  width: GUIDE_SIZE,
-                  height: GUIDE_SIZE,
-                  left: GUIDE_OFFSETS[anchor].dx - GUIDE_SIZE / 2,
-                  top: GUIDE_OFFSETS[anchor].dy - GUIDE_SIZE / 2,
-                }}
-              />
-            ))}
-          </div>
-        </>
-      )}
+      {dragPos && main && <DockGuides main={main} hover={hoverGuide} />}
     </>
   );
 }
