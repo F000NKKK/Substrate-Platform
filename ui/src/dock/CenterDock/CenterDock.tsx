@@ -78,7 +78,8 @@ export function CenterDock({ layout }: CenterDockProps) {
           onClose={menu.close}
         />
       )}
-      <div className="sp-center-body" {...handlers}>
+      {/* Not a drop target itself: the guides decide (a tab here, or floating where dropped). */}
+      <div className="sp-center-body">
         {layout.centerIds.map((id) => {
           const panel = layout.panelsById[id];
           if (!panel) return null;
