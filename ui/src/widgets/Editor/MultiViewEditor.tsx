@@ -4,6 +4,7 @@ import { Tab } from "../Tab";
 import { useT } from "../../infra/i18n";
 import type { EditorProps } from "./EditorBase";
 import type { EditorProvider } from "./registry";
+import { recordDocumentChange, setDocumentWriter } from "./documentHistory";
 import "./MultiViewEditor.css";
 
 export interface MultiViewEditorProps extends EditorProps {
@@ -30,14 +31,30 @@ export interface MultiViewEditorProps extends EditorProps {
  * history doesn't survive the round trip through a designer).
  *
  * With a single provider it renders just that editor, no switcher.
+ *
+ * A designer's changes go into the document's history (`documentHistory`):
+ * Undo/Redo work in every designer, whatever it keeps itself.
  */
 export function MultiViewEditor({ providers, view, onViewChange, renderView, showSwitcher = true, ...props }: MultiViewEditorProps) {
   const t = useT();
   const active = providers.find((p) => p.id === view) ?? providers[0];
+  // Text views keep CodeMirror's history; a designer's edits are recorded here.
+  const { onChange, content: text, path } = props;
+  if (onChange && path) setDocumentWriter(path, onChange);
+  const viewProps: EditorProps =
+    active.kind === "text" || !onChange || !path
+      ? props
+      : {
+          ...props,
+          onChange: (next: string) => {
+            recordDocumentChange(path, text, next);
+            onChange(next);
+          },
+        };
   // A view's crash stays in it (its message, Try Again); the switcher still works.
   const content = (
     <ErrorBoundary key={active.id} what={t(active.name ?? active.label)}>
-      {renderView ? renderView(active, props) : <active.component {...props} />}
+      {renderView ? renderView(active, viewProps) : <active.component {...viewProps} />}
     </ErrorBoundary>
   );
   if (providers.length < 2 || !showSwitcher) return <>{content}</>;
