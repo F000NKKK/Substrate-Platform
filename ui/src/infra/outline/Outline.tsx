@@ -121,7 +121,7 @@ export function Outline(props: OutlineProps) {
   return <SelfOutline {...props} />;
 }
 
-function SelfOutline({ shape = boxShape, radius = DEFAULT_RADIUS, color = "var(--sp-accent)", strokeWidth = 1.5, className, revision }: OutlineProps) {
+function SelfOutline({ shape = boxShape, radius, color = "var(--sp-accent)", strokeWidth = 1.5, className, revision }: OutlineProps) {
   const ref = useRef<SVGSVGElement>(null);
   const [path, setPath] = useState("");
   const shapeRef = useRef(shape);
@@ -136,7 +136,10 @@ function SelfOutline({ shape = boxShape, radius = DEFAULT_RADIUS, color = "var(-
     // Inset by half the stroke so the stroke's outer edge lands on the
     // parent's own edge and isn't trimmed by the parent's overflow clip.
     const box: OutlineRect = { l: inset, t: inset, r: w - inset, b: h - inset };
-    setPath(w > 0 && h > 0 ? shapeRef.current([box], radius, strokeWidth) : "");
+    // Rounded as its box is (the radius it clips to), unless told otherwise —
+    // so the clip never cuts the outline's corners.
+    const r = radius ?? (parseFloat(getComputedStyle(parent).borderTopLeftRadius) || DEFAULT_RADIUS);
+    setPath(w > 0 && h > 0 ? shapeRef.current([box], r, strokeWidth) : "");
   }
 
   // Synchronous recompute, in the same commit as a driven resize (the parent's

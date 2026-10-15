@@ -462,6 +462,8 @@ export function PropertyGrid({
                 if (e.key === "Enter") {
                   e.preventDefault();
                   commitAt(i, e.currentTarget.value);
+                  // Done typing: the keyboard is the grid's again (Ctrl+Z undoes the edit, not the typing).
+                  focusRows();
                 } else if (e.key === "Escape") {
                   e.preventDefault();
                   e.currentTarget.value = shortNumber(n);
