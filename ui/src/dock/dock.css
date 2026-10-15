@@ -347,6 +347,11 @@
 
 /* floating — a panel pulled free of every dock */
 
+/*
+ * Opaque like a docked one — what's behind a window doesn't read through
+ * it — and rounded as much as the panel's own `Outline`, so the clip
+ * doesn't cut the outline's corners.
+ */
 .sp-floating-panel {
   position: absolute;
   z-index: 60;
@@ -354,14 +359,12 @@
   min-height: 120px;
   resize: both;
   overflow: hidden;
-  border-radius: var(--sp-radius-md);
+  border-radius: var(--sp-radius-sm);
   box-shadow: var(--sp-shadow-md);
-  background: var(--sp-surface-glass);
-  backdrop-filter: blur(var(--sp-blur));
-  -webkit-backdrop-filter: blur(var(--sp-blur));
+  background: var(--sp-surface-1);
 }
 
-/* Transparent so the glass wrapper shows through; the accent outline comes from PanelSurface's own `Outline`. */
+/* The wrapper paints the background; the accent outline comes from PanelSurface's own `Outline`. */
 .sp-floating-panel .sp-panel-surface {
   height: 100%;
   background: transparent;
