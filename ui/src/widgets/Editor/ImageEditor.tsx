@@ -32,13 +32,16 @@ export interface ImageEditorProps extends EditorProps {
  * asset protocol to display the file directly rather than round-tripping
  * bytes through IPC; pass `loadBytes` to go through IPC anyway.
  */
-export function ImageEditor({ path, loadBytes }: ImageEditorProps) {
-  const [src, setSrc] = useState<string | null>(loadBytes ? null : convertFileSrc(path));
+export function ImageEditor({ path, loadBytes, contentVersion }: ImageEditorProps) {
+  // The version in the URL: the webview caches by it, so a file changed on
+  // disk (the host bumps `contentVersion`) shows anew.
+  const url = () => `${convertFileSrc(path)}?v=${contentVersion ?? 0}`;
+  const [src, setSrc] = useState<string | null>(loadBytes ? null : url());
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loadBytes) {
-      setSrc(convertFileSrc(path));
+      setSrc(url());
       return;
     }
     let objectUrl: string | null = null;
@@ -60,7 +63,8 @@ export function ImageEditor({ path, loadBytes }: ImageEditorProps) {
       cancelled = true;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [path, loadBytes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [path, loadBytes, contentVersion]);
 
   return (
     <div className="sp-image-editor">
