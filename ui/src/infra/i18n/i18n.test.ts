@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { contextKey, formatShortcut, pt, registerTranslations, resolvedLocale, setLocale, t, tn } from "./i18n";
+import { contextKey, formatShortcut, pt, registerTranslations, resolvedLocale, setLocale, t, tn, withShortcut } from "./i18n";
+import "./locales/ru";
 
 registerTranslations({ id: "xx", name: "Test" }, {
   Save: "Sauv",
@@ -42,5 +43,15 @@ describe("i18n", () => {
     setLocale("xx");
     expect(formatShortcut("ctrl+shift+k esc")).toBe("Strg+Shift+K Esc");
     expect(formatShortcut("Alt+F4")).toBe("Alt+F4");
+  });
+
+  it("names mouse buttons, keypad keys and labelled shortcuts in the locale", () => {
+    setLocale("ru");
+    expect(formatShortcut("shift+mmb")).toBe("Shift+СКМ");
+    expect(formatShortcut("ctrl+num1")).toBe("Ctrl+Num 1");
+    expect(formatShortcut("ctrl+enter")).toBe("Ctrl+Ввод");
+    expect(withShortcut("Find next", "f3")).toBe("Найти далее (F3)");
+    setLocale("en");
+    expect(formatShortcut("wheel")).toBe("Wheel");
   });
 });
