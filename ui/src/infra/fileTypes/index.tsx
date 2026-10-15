@@ -6,6 +6,7 @@ export {
   fileTypeById,
   fileNameOf,
   extensionOf,
+  stemOf,
   subscribeFileTypes,
   useFileType,
   fileTypesRevision,

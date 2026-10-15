@@ -64,6 +64,13 @@ export function extensionOf(path: string): string {
   return dot > 0 ? name.slice(dot + 1).toLowerCase() : "";
 }
 
+/** The file name of `path` without its extension (`screens/main.yui` → `main`). */
+export function stemOf(path: string): string {
+  const name = fileNameOf(path);
+  const dot = name.lastIndexOf(".");
+  return dot > 0 ? name.slice(0, dot) : name;
+}
+
 /** Every kind `path` is, most specific first: matched types, then by extension; later registrations first. */
 export function fileTypesOf(path: string): FileType[] {
   const ext = extensionOf(path);
