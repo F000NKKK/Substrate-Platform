@@ -4,7 +4,9 @@ import { ToolWindowDock } from "../dock/ToolWindowDock/ToolWindowDock";
 import { CenterDock } from "../dock/CenterDock/CenterDock";
 import { FloatingPanel } from "../dock/FloatingPanel/FloatingPanel";
 import { useShellLayout } from "../dock/hooks/useShellLayout";
-import { isPanelDrag, readPanelDrag, zoneFromPoint, type DropZone } from "../dock/dnd";
+import { isPanelDrag, readPanelDrag } from "../dock/dnd";
+import { DockGuides, dockTargetAt } from "../dock/DockGuides";
+import type { DockAnchor } from "../dock/types";
 import { DialogHost } from "../widgets/Dialog";
 import { NotificationHost } from "../widgets/Notifications";
 import { ShellContext, type ShellController } from "./ShellContext";
@@ -43,7 +45,8 @@ export function PlatformShell({
   statusBar,
 }: PlatformShellProps) {
   const layout = useShellLayout(main, toolWindows, defaultPinned, persistKey, extraCenterPanels, onCloseDynamicPanel);
-  const [dropZone, setDropZone] = useState<DropZone | null>(null);
+  // A panel dragged over the main area: the dock guides, and what's under the pointer.
+  const [dragOver, setDragOver] = useState<{ main: DOMRect; target: DockAnchor | null } | null>(null);
 
   const controller = useMemo<ShellController>(
     () => ({
@@ -79,20 +82,29 @@ export function PlatformShell({
     if (!isPanelDrag(e)) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
-    setDropZone(zoneFromPoint(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect()));
+    const main = e.currentTarget.getBoundingClientRect();
+    setDragOver({ main, target: dockTargetAt(main, e.clientX, e.clientY) });
   }
 
-  function handleMainDragLeave() {
-    setDropZone(null);
+  function handleMainDragLeave(e: DragEvent) {
+    // Leaving for one of its own children isn't leaving.
+    if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+    setDragOver(null);
   }
 
   function handleMainDrop(e: DragEvent) {
     const id = readPanelDrag(e);
-    setDropZone(null);
+    setDragOver(null);
     if (!id) return;
     e.preventDefault();
-    const zone = zoneFromPoint(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect());
-    layout.dockTo(id, zone === "center" ? "center" : zone);
+    const main = e.currentTarget.getBoundingClientRect();
+    const target = dockTargetAt(main, e.clientX, e.clientY);
+    if (target) layout.dockTo(id, target);
+    else {
+      // Not on a guide or an edge: it floats where it was dropped.
+      const shell = e.currentTarget.closest(".sp-shell")?.getBoundingClientRect();
+      layout.floatAt(id, e.clientX - (shell?.left ?? 0) - 40, e.clientY - (shell?.top ?? 0) - 12);
+    }
   }
 
   return (
@@ -110,7 +122,7 @@ export function PlatformShell({
               onDrop={handleMainDrop}
             >
               <CenterDock layout={layout} />
-              {dropZone && <div className={`sp-dock-guide sp-dock-guide--${dropZone}`} />}
+              {dragOver && <DockGuides main={dragOver.main} hover={dragOver.target} />}
             </div>
 
             {hasRight && <ToolWindowDock anchor="right" layout={layout} />}

@@ -6,6 +6,6 @@ export type { PanelSurfaceProps } from "./PanelSurface";
 export { FloatingPanel } from "./FloatingPanel";
 export { useShellLayout } from "./hooks/useShellLayout";
 export type { ShellLayout } from "./hooks/useShellLayout";
-export { startPanelDrag, endPanelDrag, readPanelDrag, zoneFromPoint, PANEL_DRAG_MIME } from "./dnd";
-export type { DropZone } from "./dnd";
+export { startPanelDrag, endPanelDrag, readPanelDrag, PANEL_DRAG_MIME } from "./dnd";
+export { DockGuides, dockTargetAt } from "./DockGuides";
 export type { PanelDef, PanelAction, TabMenuContext, ToolWindowAnchor, DockAnchor, DockMode, PanelPlacement, FloatRect, ReopenPlacement } from "./types";
