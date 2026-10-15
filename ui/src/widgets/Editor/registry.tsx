@@ -1,4 +1,6 @@
 import { useSyncExternalStore } from "react";
+import { fileTypesOf, fileTypesRevision, subscribeFileTypes } from "../../infra/fileTypes";
+import "./fileTypes";
 import type { EditorComponent } from "./EditorBase";
 import { ImageEditor } from "./ImageEditor";
 import { PropertiesGridEditor } from "./PropertiesGridEditor";
@@ -37,10 +39,8 @@ export interface EditorProvider {
   name?: string;
   /** `Icon` name for the button that switches to this view (a host's editor title actions). Defaults by `kind`: `code` for text, `grid` for designers, `preview` for binary. */
   icon?: string;
-  /** Lowercase extensions without the dot this applies to. */
-  extensions?: string[];
-  /** Finer matching than extensions (e.g. only `lang/*.json`) — checked on the absolute path; when both are set, both must match. */
-  match?: (path: string) => boolean;
+  /** The kinds of file it opens (`FileType` ids — `"rust"`, `"png"`): which files those are is said there, once. */
+  fileTypes: readonly string[];
   component: EditorComponent;
   /** The default view is the matching provider with the highest priority; ties go to the one registered last. Text editors are 0, built-in designers/previews 10. */
   priority?: number;
@@ -81,18 +81,12 @@ export function registerEditorProvider(provider: EditorProvider): () => void {
   };
 }
 
-function extensionOf(path: string): string {
-  const name = path.split(/[/\\]/).pop() ?? path;
-  return name.includes(".") ? (name.split(".").pop()?.toLowerCase() ?? "") : "";
-}
-
 /** Every editor that can open `path`, default first. Never empty — plain text opens anything. */
 export function editorProvidersFor(path: string): EditorProvider[] {
-  const ext = extensionOf(path);
+  const kinds = fileTypesOf(path).map((t) => t.id);
   const matching = providers
     .map((provider, order) => ({ provider, order }))
-    .filter(({ provider }) => (!provider.extensions || provider.extensions.includes(ext)) && (!provider.match || provider.match(path)))
-    .filter(({ provider }) => provider.extensions || provider.match)
+    .filter(({ provider }) => provider.fileTypes.some((id) => kinds.includes(id)))
     .sort((a, b) => (b.provider.priority ?? 0) - (a.provider.priority ?? 0) || b.order - a.order)
     .map(({ provider }) => provider);
   if (!matching.some((p) => p.kind === "text") && !matching.some((p) => p.kind === "binary")) {
@@ -127,6 +121,7 @@ function subscribe(notify: () => void) {
 /** `editorProvidersFor(path)`, re-rendering the caller when providers are registered or removed. */
 export function useEditorProviders(path: string): EditorProvider[] {
   useSyncExternalStore(subscribe, () => revision);
+  useSyncExternalStore(subscribeFileTypes, fileTypesRevision);
   return editorProvidersFor(path);
 }
 
@@ -146,39 +141,39 @@ export function isBinaryFile(filename: string): boolean {
   return editorProvidersFor(filename).every((p) => p.kind === "binary");
 }
 
-const plainText: EditorProvider = { id: "substrate.text", label: "Plain Text", name: "Plain Text Editor", component: PlainTextEditor, kind: "text" };
+const plainText: EditorProvider = { id: "substrate.text", label: "Plain Text", name: "Plain Text Editor", fileTypes: ["text"], component: PlainTextEditor, kind: "text" };
 
 const builtIns: EditorProvider[] = [
-  { id: "substrate.json", name: "JSON Editor", label: "Code", extensions: ["json"], component: JsonEditor, kind: "text" },
-  { id: "substrate.rust", name: "Rust Editor", label: "Code", extensions: ["rs"], component: RustEditor, kind: "text" },
-  { id: "substrate.xml", name: "XML Editor", label: "Code", extensions: ["xml", "svg"], component: XmlEditor, kind: "text" },
-  { id: "substrate.java", name: "Java Editor", label: "Code", extensions: ["java"], component: JavaEditor, kind: "text" },
-  { id: "substrate.markdown", name: "Markdown Editor", label: "Source", extensions: ["md", "markdown"], component: MarkdownEditor, kind: "text" },
+  { id: "substrate.json", name: "JSON Editor", label: "Code", fileTypes: ["json"], component: JsonEditor, kind: "text" },
+  { id: "substrate.rust", name: "Rust Editor", label: "Code", fileTypes: ["rust"], component: RustEditor, kind: "text" },
+  { id: "substrate.xml", name: "XML Editor", label: "Code", fileTypes: ["xml", "svg"], component: XmlEditor, kind: "text" },
+  { id: "substrate.java", name: "Java Editor", label: "Code", fileTypes: ["java"], component: JavaEditor, kind: "text" },
+  { id: "substrate.markdown", name: "Markdown Editor", label: "Source", fileTypes: ["markdown"], component: MarkdownEditor, kind: "text" },
   // Source stays the default, as in VS Code; the preview is a view away.
-  { id: "substrate.markdown.preview", name: "Markdown Preview", label: "Preview", icon: "preview", extensions: ["md", "markdown"], component: MarkdownPreview, priority: -1, kind: "designer" },
+  { id: "substrate.markdown.preview", name: "Markdown Preview", label: "Preview", icon: "preview", fileTypes: ["markdown"], component: MarkdownPreview, priority: -1, kind: "designer" },
   {
     id: "substrate.markdown.split",
     name: "Markdown Editor + Preview",
     label: "Preview to the Side",
     icon: "previewSide",
-    extensions: ["md", "markdown"],
+    fileTypes: ["markdown"],
     component: MarkdownSplitEditor,
     priority: -2,
     kind: "text",
     strict: true,
   },
-  { id: "substrate.toml", name: "TOML Editor", label: "Code", extensions: ["toml"], component: TomlEditor, kind: "text" },
-  { id: "substrate.yaml", name: "YAML Editor", label: "Code", extensions: ["yml", "yaml"], component: YamlEditor, kind: "text" },
-  { id: "substrate.shell", name: "Shell Script Editor", label: "Code", extensions: ["sh", "bash"], component: ShellEditor, kind: "text" },
-  { id: "substrate.groovy", name: "Groovy Editor", label: "Code", extensions: ["gradle", "groovy"], component: GroovyEditor, kind: "text" },
-  { id: "substrate.python", name: "Python Editor", label: "Code", extensions: ["py"], component: PythonEditor, kind: "text" },
-  { id: "substrate.properties.text", name: "Properties Editor", label: "Code", extensions: ["properties"], component: PropertiesTextEditor, kind: "text" },
-  { id: "substrate.properties.grid", name: "Properties Designer", label: "Designer", extensions: ["properties"], component: PropertiesGridEditor, priority: 10, kind: "designer" },
+  { id: "substrate.toml", name: "TOML Editor", label: "Code", fileTypes: ["toml"], component: TomlEditor, kind: "text" },
+  { id: "substrate.yaml", name: "YAML Editor", label: "Code", fileTypes: ["yaml"], component: YamlEditor, kind: "text" },
+  { id: "substrate.shell", name: "Shell Script Editor", label: "Code", fileTypes: ["shell"], component: ShellEditor, kind: "text" },
+  { id: "substrate.groovy", name: "Groovy Editor", label: "Code", fileTypes: ["gradle", "groovy"], component: GroovyEditor, kind: "text" },
+  { id: "substrate.python", name: "Python Editor", label: "Code", fileTypes: ["python"], component: PythonEditor, kind: "text" },
+  { id: "substrate.properties.text", name: "Properties Editor", label: "Code", fileTypes: ["properties"], component: PropertiesTextEditor, kind: "text" },
+  { id: "substrate.properties.grid", name: "Properties Designer", label: "Designer", fileTypes: ["properties"], component: PropertiesGridEditor, priority: 10, kind: "designer" },
   {
     id: "substrate.image",
     name: "Image Preview",
     label: "Preview",
-    extensions: ["png", "jpg", "jpeg", "gif", "webp", "bmp", "ico", "svg"],
+    fileTypes: ["png", "jpeg", "gif", "webp", "bmp", "ico", "svg"],
     component: ImageEditor,
     priority: 10,
     kind: "binary",

@@ -11,6 +11,7 @@ import { properties } from "@codemirror/legacy-modes/mode/properties";
 import { groovy } from "@codemirror/legacy-modes/mode/groovy";
 import { python } from "@codemirror/legacy-modes/mode/python";
 import type { Extension } from "@codemirror/state";
+import { fileTypeOf } from "../../infra/fileTypes";
 import { CodeEditor, type CodeEditorProps } from "./CodeEditor";
 import { TextEditor, type TextEditorProps } from "./TextEditor";
 
@@ -32,17 +33,17 @@ import { TextEditor, type TextEditorProps } from "./TextEditor";
 // return a brand new object on every call — calling them inline would
 // trigger a pointless (re-highlighting) reconfigure on every single render.
 
-const jsonLanguage = json();
-const rustLanguage = rust();
-const xmlLanguage = xml();
-const javaLanguage = java();
-const markdownLanguage = markdown();
-const tomlLanguage = StreamLanguage.define(toml);
-const yamlLanguage = StreamLanguage.define(yaml);
-const shellLanguage = StreamLanguage.define(shell);
-const propertiesLanguage = StreamLanguage.define(properties);
-const groovyLanguage = StreamLanguage.define(groovy);
-const pythonLanguage = StreamLanguage.define(python);
+export const jsonLanguage = json();
+export const rustLanguage = rust();
+export const xmlLanguage = xml();
+export const javaLanguage = java();
+export const markdownLanguage = markdown();
+export const tomlLanguage = StreamLanguage.define(toml);
+export const yamlLanguage = StreamLanguage.define(yaml);
+export const shellLanguage = StreamLanguage.define(shell);
+export const propertiesLanguage = StreamLanguage.define(properties);
+export const groovyLanguage = StreamLanguage.define(groovy);
+export const pythonLanguage = StreamLanguage.define(python);
 
 export function PlainTextEditor(props: TextEditorProps) {
   return <TextEditor {...props} />;
@@ -108,28 +109,7 @@ export function xmlSchemaLanguage(schema: XmlSchema): Extension {
   return xml({ elements: schema.elements, attributes: schema.attributes, autoCloseTags: true });
 }
 
-const LANGUAGES_BY_EXTENSION: Record<string, Extension> = {
-  json: jsonLanguage,
-  rs: rustLanguage,
-  xml: xmlLanguage,
-  svg: xmlLanguage,
-  java: javaLanguage,
-  md: markdownLanguage,
-  markdown: markdownLanguage,
-  toml: tomlLanguage,
-  yml: yamlLanguage,
-  yaml: yamlLanguage,
-  sh: shellLanguage,
-  bash: shellLanguage,
-  properties: propertiesLanguage,
-  gradle: groovyLanguage,
-  groovy: groovyLanguage,
-  py: pythonLanguage,
-};
-
-/** The syntax highlighting the language editors use for `path`'s kind of file — for a CodeMirror view outside them (a diff). `undefined` for plain text. */
+/** The syntax highlighting the language editors use for `path`'s kind of file (its `FileType.language`) — for a CodeMirror view outside them (a diff). `undefined` for plain text. */
 export function languageForPath(path: string): Extension | undefined {
-  const name = path.split(/[/\\]/).pop() ?? "";
-  const ext = name.includes(".") ? name.split(".").pop()!.toLowerCase() : "";
-  return LANGUAGES_BY_EXTENSION[ext];
+  return fileTypeOf(path)?.language;
 }

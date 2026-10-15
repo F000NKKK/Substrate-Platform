@@ -1,18 +1,8 @@
+import { fileTypeOf } from "../../infra/fileTypes";
 import { useEffect, useState } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import type { EditorProps } from "./EditorBase";
 import "./ImageEditor.css";
-
-const MIME_BY_EXTENSION: Record<string, string> = {
-  png: "image/png",
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  gif: "image/gif",
-  webp: "image/webp",
-  bmp: "image/bmp",
-  ico: "image/x-icon",
-  svg: "image/svg+xml",
-};
 
 export interface ImageEditorProps extends EditorProps {
   /**
@@ -52,8 +42,7 @@ export function ImageEditor({ path, loadBytes, contentVersion }: ImageEditorProp
       .then((bytes) => {
         if (cancelled) return;
         const data = Array.isArray(bytes) ? new Uint8Array(bytes) : bytes;
-        const ext = path.split(".").pop()?.toLowerCase() ?? "";
-        objectUrl = URL.createObjectURL(new Blob([data as BlobPart], { type: MIME_BY_EXTENSION[ext] ?? "application/octet-stream" }));
+        objectUrl = URL.createObjectURL(new Blob([data as BlobPart], { type: fileTypeOf(path)?.mime ?? "application/octet-stream" }));
         setSrc(objectUrl);
       })
       .catch((err) => {

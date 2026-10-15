@@ -1,6 +1,7 @@
 import { useMemo, type ReactNode } from "react";
 import { Tree, type TreeMenuItem, type TreeNode } from "../Tree";
 import { Icon } from "../../infra/icons";
+import { fileTypeOf } from "../../infra/fileTypes";
 
 export interface FileTreeNode {
   id: string;
@@ -100,7 +101,10 @@ export function FileTree({ nodes, onActivate, getMenuItems, onDropNodes, canDrag
     <Tree
       nodes={treeNodes}
       renderIcon={(node, expanded) =>
-        node.data.icon ?? <Icon name={node.data.kind === "folder" ? (expanded ? "folderOpen" : "folder") : "file"} size={15} />
+        node.data.icon ?? (
+          // A file's icon is its kind's (`FileType.icon`).
+          <Icon name={node.data.kind === "folder" ? (expanded ? "folderOpen" : "folder") : (fileTypeOf(node.data.id)?.icon ?? "file")} size={15} />
+        )
       }
       onActivate={(node) => onActivate?.(node.data)}
       getMenuItems={
