@@ -405,20 +405,20 @@
 }
 
 .sp-dock-guide-button--center::after {
-  inset: 6px;
-  border-top: 4px solid var(--sp-accent-strong);
+  inset: 8px;
+  border-top: 5px solid var(--sp-accent-strong);
 }
 
 .sp-dock-guide-button--left::after {
-  inset: 6px 18px 6px 6px;
+  inset: 8px 24px 8px 8px;
 }
 
 .sp-dock-guide-button--right::after {
-  inset: 6px 6px 6px 18px;
+  inset: 8px 8px 8px 24px;
 }
 
 .sp-dock-guide-button--bottom::after {
-  inset: 18px 6px 6px 6px;
+  inset: 24px 8px 8px 8px;
 }
 
 .sp-dock-guide-button[data-hover] {
@@ -430,6 +430,7 @@
   opacity: 1;
 }
 
+/* Where the panel would go — the one look for every drag (see DockGuides). */
 .sp-dock-preview {
   position: fixed;
   z-index: 85;
@@ -438,5 +439,12 @@
   background: var(--sp-accent-soft);
   border: 2px solid var(--sp-accent);
   border-radius: var(--sp-radius-sm);
+  animation: sp-dock-preview-in var(--sp-duration-fast) var(--sp-easing);
+}
+
+@keyframes sp-dock-preview-in {
+  from {
+    opacity: 0;
+  }
 }
 
