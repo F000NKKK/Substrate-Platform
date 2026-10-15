@@ -56,7 +56,8 @@ export interface ComponentListProps {
 /**
  * An installer-style list of components — one line each: name, version,
  * status and its actions (Install / Update / ...), with what it is and
- * where it lives in the tooltip, and a progress bar or an error under it
+ * where it lives in the tooltip; while it works, a bar along the row and
+ * what it's doing in the status's place; an error under it
  * only while there's one. Product-neutral: the product decides what the
  * components are and what the actions do.
  */
@@ -98,24 +99,26 @@ function Rows({ items }: { items: ComponentListItem[] }) {
             <div className="sp-component-title">
               <span className="sp-component-name">{item.name}</span>
               {item.version && <span className="sp-component-version">{item.version}</span>}
-              <span className={`sp-component-status is-${item.status}`}>{item.statusLabel}</span>
+              {/* Working: what it's doing now, in the status's place — the bar runs along the row. */}
+              <span className={`sp-component-status is-${item.status}`} title={item.status === "working" ? item.progressLabel : undefined}>
+                <span className="sp-component-status-text">
+                  {item.status === "working" && item.progress != null ? `${item.progressLabel ?? item.statusLabel} · ${Math.round(item.progress * 100)}%` : item.status === "working" ? (item.progressLabel ?? item.statusLabel) : item.statusLabel}
+                </span>
+              </span>
             </div>
             {item.error && <div className="sp-component-error">{item.error}</div>}
-            {item.status === "working" && (
-              <div className="sp-component-progress">
-                <div
-                  className={`sp-component-progress-bar${item.progress == null ? " is-indeterminate" : ""}`}
-                  role="progressbar"
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-valuenow={item.progress == null ? undefined : Math.round(item.progress * 100)}
-                >
-                  <div className="sp-component-progress-fill" style={item.progress == null ? undefined : { width: `${Math.round(item.progress * 100)}%` }} />
-                </div>
-                {item.progressLabel && <span className="sp-component-progress-label">{item.progressLabel}</span>}
-              </div>
-            )}
           </div>
+          {item.status === "working" && (
+            <div
+              className={`sp-component-progress${item.progress == null ? " is-indeterminate" : ""}`}
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={item.progress == null ? undefined : Math.round(item.progress * 100)}
+            >
+              <div className="sp-component-progress-fill" style={item.progress == null ? undefined : { width: `${Math.round(item.progress * 100)}%` }} />
+            </div>
+          )}
           {item.actions && item.actions.length > 0 && (
             <div className="sp-component-actions">
               {item.actions.map((action) => (

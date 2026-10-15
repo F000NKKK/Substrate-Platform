@@ -9,6 +9,7 @@
 }
 
 .sp-component-row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--sp-space-sm);
@@ -77,6 +78,19 @@
   white-space: nowrap;
 }
 
+.sp-component-status.is-working {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 55%;
+  color: var(--sp-text);
+}
+
+.sp-component-status-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .sp-component-status::before {
   content: "";
   width: 6px;
@@ -109,19 +123,14 @@
   overflow-wrap: anywhere;
 }
 
+/* Working: a bar along the bottom of the row — the row keeps its height. */
 .sp-component-progress {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-space-sm);
-  margin-top: var(--sp-space-xs);
-}
-
-.sp-component-progress-bar {
-  position: relative;
-  flex: 1;
-  height: 4px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
   overflow: hidden;
-  border-radius: 2px;
   background: var(--sp-surface-3);
 }
 
@@ -131,7 +140,7 @@
   transition: width var(--sp-duration-base) var(--sp-easing);
 }
 
-.sp-component-progress-bar.is-indeterminate .sp-component-progress-fill {
+.sp-component-progress.is-indeterminate .sp-component-progress-fill {
   position: absolute;
   width: 30%;
   animation: sp-component-indeterminate 1.2s var(--sp-easing) infinite;
@@ -144,12 +153,6 @@
   to {
     left: 100%;
   }
-}
-
-.sp-component-progress-label {
-  color: var(--sp-text-muted);
-  font-size: 0.85em;
-  white-space: nowrap;
 }
 
 .sp-component-actions {
