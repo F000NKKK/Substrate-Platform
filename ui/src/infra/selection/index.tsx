@@ -4,6 +4,7 @@ export {
   useSelection,
   activatePropertyContext,
   usePropertyContext,
+  setPropertyContext,
   useHasPropertyContext,
   PROPERTIES_KIND,
 } from "./selection";

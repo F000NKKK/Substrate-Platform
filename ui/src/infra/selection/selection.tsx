@@ -116,6 +116,25 @@ export function useHasPropertyContext(owner: string | null | undefined): boolean
 }
 
 /**
+ * Sets (or with `null` drops) `owner`'s property context outside React —
+ * a window that builds its rows on demand. Shown at once while it's the
+ * selection; `activatePropertyContext` makes it so.
+ */
+export function setPropertyContext(owner: string, set: PropertySet | null): void {
+  const had = contexts.has(owner);
+  const ours = current?.kind === PROPERTIES_KIND && current.source === owner;
+  if (!set) {
+    contexts.delete(owner);
+    if (had) ownersChanged();
+    if (ours) setSelection(null);
+    return;
+  }
+  contexts.set(owner, set);
+  if (!had) ownersChanged();
+  if (ours) publishContext(owner, set);
+}
+
+/**
  * A window's property context for its lifetime (`owner`: what names the
  * window — a document's path). It's what Properties shows while the window
  * is active (`activatePropertyContext` when it gets focus); while shown, a
@@ -123,22 +142,8 @@ export function useHasPropertyContext(owner: string | null | undefined): boolean
  */
 export function usePropertyContext(owner: string, set: PropertySet | null): void {
   useEffect(() => {
-    const had = contexts.has(owner);
-    if (!set) {
-      contexts.delete(owner);
-      if (had) ownersChanged();
-      return;
-    }
-    contexts.set(owner, set);
-    if (!had) ownersChanged();
-    if (current?.kind === PROPERTIES_KIND && current.source === owner) publishContext(owner, set);
+    if (set) setPropertyContext(owner, set);
+    else if (contexts.has(owner)) setPropertyContext(owner, null);
   });
-  useEffect(
-    () => () => {
-      contexts.delete(owner);
-      ownersChanged();
-      if (current?.kind === PROPERTIES_KIND && current.source === owner) setSelection(null);
-    },
-    [owner],
-  );
+  useEffect(() => () => setPropertyContext(owner, null), [owner]);
 }
