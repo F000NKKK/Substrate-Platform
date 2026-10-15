@@ -1,1 +1,1 @@
-export { DockGuides, dockTargetAt } from "./DockGuides";
+export { DockGuides, dockTargetAt, documentsRect } from "./DockGuides";

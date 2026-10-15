@@ -5,7 +5,7 @@ import { CenterDock } from "../dock/CenterDock/CenterDock";
 import { FloatingPanel } from "../dock/FloatingPanel/FloatingPanel";
 import { useShellLayout } from "../dock/hooks/useShellLayout";
 import { isPanelDrag, readPanelDrag } from "../dock/dnd";
-import { DockGuides, dockTargetAt } from "../dock/DockGuides";
+import { DockGuides, dockTargetAt, documentsRect } from "../dock/DockGuides";
 import type { DockAnchor } from "../dock/types";
 import { DialogHost } from "../widgets/Dialog";
 import { NotificationHost } from "../widgets/Notifications";
@@ -46,7 +46,7 @@ export function PlatformShell({
 }: PlatformShellProps) {
   const layout = useShellLayout(main, toolWindows, defaultPinned, persistKey, extraCenterPanels, onCloseDynamicPanel);
   // A panel dragged over the main area: the dock guides, and what's under the pointer.
-  const [dragOver, setDragOver] = useState<{ main: DOMRect; target: DockAnchor | null } | null>(null);
+  const [dragOver, setDragOver] = useState<{ main: DOMRect; documents: DOMRect | null; target: DockAnchor | null } | null>(null);
 
   const controller = useMemo<ShellController>(
     () => ({
@@ -83,7 +83,7 @@ export function PlatformShell({
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
     const main = e.currentTarget.getBoundingClientRect();
-    setDragOver({ main, target: dockTargetAt(main, e.clientX, e.clientY) });
+    setDragOver({ main, documents: documentsRect(e.currentTarget), target: dockTargetAt(main, e.clientX, e.clientY) });
   }
 
   // A drop a strip or the tab bar took (they stop it here), or a drag
@@ -125,7 +125,7 @@ export function PlatformShell({
         {menu && <div className="sp-shell-menu">{menu}</div>}
         <div className="sp-shell-body" onDragOver={handleMainDragOver} onDragLeave={handleMainDragLeave} onDrop={handleMainDrop}>
           {/* The guides sit at the middle of the whole window, whatever's docked. */}
-          {dragOver && <DockGuides main={dragOver.main} hover={dragOver.target} />}
+          {dragOver && <DockGuides main={dragOver.main} documents={dragOver.documents} hover={dragOver.target} />}
           <div className="sp-shell-upper">
             {hasLeft && <ToolWindowDock anchor="left" layout={layout} />}
 

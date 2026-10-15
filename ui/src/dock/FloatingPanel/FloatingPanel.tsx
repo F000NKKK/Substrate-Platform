@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { PanelSurface } from "../PanelSurface/PanelSurface";
 import type { DockAnchor, PanelDef } from "../types";
-import { DockGuides, dockTargetAt } from "../DockGuides";
+import { DockGuides, dockTargetAt, documentsRect } from "../DockGuides";
 
 export interface FloatingPanelProps {
   panel: PanelDef;
@@ -31,6 +31,8 @@ interface Drag {
   startY: number;
   /** The whole window body, where the guides sit, in viewport coordinates. */
   main: DOMRect | null;
+  /** The documents' area, where a tab goes. */
+  documents: DOMRect | null;
 }
 
 function guideAt(drag: Drag, clientX: number, clientY: number): DockAnchor | null {
@@ -88,6 +90,7 @@ export function FloatingPanel({ panel, x, y, w, h, onDock, onClose, onResize, on
       startY: y,
       // The guides sit at the middle of the whole window, whatever's docked.
       main: el.closest(".sp-shell")?.querySelector(".sp-shell-body")?.getBoundingClientRect() ?? null,
+      documents: documentsRect(el.closest(".sp-shell")),
     };
 
     function onPointerMove(ev: PointerEvent) {
@@ -141,7 +144,7 @@ export function FloatingPanel({ panel, x, y, w, h, onDock, onClose, onResize, on
           <Component />
         </PanelSurface>
       </div>
-      {dragPos && main && <DockGuides main={main} hover={hoverGuide} />}
+      {dragPos && main && <DockGuides main={main} documents={dragRef.current?.documents} hover={hoverGuide} />}
     </>
   );
 }

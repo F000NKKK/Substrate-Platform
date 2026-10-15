@@ -43,11 +43,26 @@ function previewRect(main: DOMRect, anchor: DockAnchor) {
   return { left: main.left, top: main.top, width: main.width, height: main.height };
 }
 
-/** The guides over `main` while a panel is dragged, `hover` (from `dockTargetAt`) previewed. */
-export function DockGuides({ main, hover }: { /** The whole window body: the guides at its middle, edges at its sides. */ main: DOMRect; hover: DockAnchor | null }) {
+/** The rect of the documents' area (the center dock) in `root`, where a tab would go. */
+export function documentsRect(root: Element | null): DOMRect | null {
+  return root?.querySelector(".sp-center-dock")?.getBoundingClientRect() ?? null;
+}
+
+/**
+ * The guides over `main` while a panel is dragged, `hover` (from
+ * `dockTargetAt`) previewed: an edge's share of the window, or — the
+ * center guide — a new tab in the documents' area (`documents`).
+ */
+export function DockGuides({ main, documents, hover }: { /** The whole window body: the guides at its middle, edges at its sides. */ main: DOMRect; documents?: DOMRect | null; hover: DockAnchor | null }) {
+  const tab = hover === "center" && documents;
   return (
     <>
-      {hover && <div key={hover} className="sp-dock-preview" style={previewRect(main, hover)} />}
+      {hover && !tab && <div key={hover} className="sp-dock-preview" style={previewRect(main, hover)} />}
+      {tab && (
+        <div key="tab" className="sp-dock-preview is-tab" style={{ left: documents.left, top: documents.top, width: documents.width, height: documents.height }}>
+          <span className="sp-dock-preview-tab" />
+        </div>
+      )}
       <div className="sp-dock-guides" style={{ left: main.left + main.width / 2, top: main.top + main.height / 2 }}>
         {(Object.keys(GUIDE_OFFSETS) as DockAnchor[]).map((anchor) => (
           <div
