@@ -158,13 +158,21 @@
   flex: 0 0 auto;
 }
 
+/*
+ * A pinned panel keeps its remembered size while the window has room for
+ * it, and never more than its share of a small window — a side panel two
+ * fifths of the width, the bottom one under half the height — so the
+ * documents and the other panels keep space to work in.
+ */
 .sp-dock-pinned-slot--left,
 .sp-dock-pinned-slot--right {
   flex-direction: row;
+  max-width: 40vw;
 }
 
 .sp-dock-pinned-slot--bottom {
   flex-direction: column;
+  max-height: 45vh;
 }
 
 /*
