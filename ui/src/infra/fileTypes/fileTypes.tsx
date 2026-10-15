@@ -64,6 +64,11 @@ export function extensionOf(path: string): string {
   return dot > 0 ? name.slice(dot + 1).toLowerCase() : "";
 }
 
+/** `name` in folder `folder` (`/` between, the folder's trailing separators dropped). */
+export function joinPath(folder: string, name: string): string {
+  return `${folder.replace(/[/\\]+$/, "")}/${name}`;
+}
+
 /** The file name of `path` without its extension (`screens/main.yui` → `main`). */
 export function stemOf(path: string): string {
   const name = fileNameOf(path);

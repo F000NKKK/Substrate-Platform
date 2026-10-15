@@ -7,6 +7,7 @@ export {
   fileNameOf,
   extensionOf,
   stemOf,
+  joinPath,
   subscribeFileTypes,
   useFileType,
   fileTypesRevision,
