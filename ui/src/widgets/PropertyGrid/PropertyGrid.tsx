@@ -7,8 +7,11 @@ import { notify } from "../Notifications";
 import { t, useT } from "../../infra/i18n";
 import "./PropertyGrid.css";
 
-export type PropertyKind = "string" | "number" | "bool" | "enum" | "vector" | "custom";
-/** A vector (`"vector"`) is a tuple of numbers — a position, a size, a turn. */
+export type PropertyKind = "string" | "text" | "number" | "bool" | "enum" | "vector" | "custom";
+/**
+ * A vector (`"vector"`) is a tuple of numbers — a position, a size, a turn;
+ * a `"text"` is a string of several lines (a page's text, a description).
+ */
 export type PropertyValue = string | number | boolean | readonly number[];
 
 /**
@@ -112,6 +115,11 @@ function displayText(p: PropertyDescriptor): string {
   if (p.value === null) return "";
   if (Array.isArray(p.value)) return p.value.join(", ");
   if (typeof p.value === "boolean") return p.value ? t("True") : t("False");
+  // A text shows its first line; the rest is there once it's edited.
+  if (kindOf(p) === "text") {
+    const lines = String(p.value).split("\n");
+    return lines.length > 1 ? `${lines[0]} …` : lines[0];
+  }
   return String(p.value);
 }
 
@@ -530,6 +538,36 @@ export function PropertyGrid({
             ))}
           </datalist>
         )}
+        {kind === "text" ? (
+          <textarea
+            className="sp-propgrid-editor is-text"
+            data-invalid={invalid || undefined}
+            aria-invalid={invalid}
+            autoFocus
+            spellCheck={false}
+            rows={Math.min(10, Math.max(3, editing.draft.split("\n").length + 1))}
+            value={editing.draft}
+            readOnly={busy}
+            onFocus={(e) => e.currentTarget.select()}
+            onChange={(e) => {
+              setEditing({ ...editing, draft: e.target.value });
+              if (invalid) setError(null);
+            }}
+            onKeyDown={(e) => {
+              // Enter is a new line here; Ctrl+Enter applies, as in a commit box.
+              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                if (!busy) void commitText(p, editing.draft, false);
+              } else if (e.key === "Escape") {
+                e.preventDefault();
+                cancelEdit();
+              }
+            }}
+            onBlur={() => {
+              if (!busy && editing.session === sessionRef.current) void commitText(p, editing.draft, true);
+            }}
+          />
+        ) : (
         <input
           className="sp-propgrid-editor"
           list={listId}
@@ -560,6 +598,7 @@ export function PropertyGrid({
             if (!busy && editing.session === sessionRef.current) void commitText(p, editing.draft, true);
           }}
         />
+        )}
         </>
       );
     }
@@ -697,6 +736,7 @@ export function PropertyGrid({
                     data-key={item.key}
                     data-property-id={p.id}
                     className="sp-propgrid-row"
+                    data-multiline={(editing?.id === p.id && kindOf(p) === "text") || undefined}
                     role="row"
                     aria-selected={active}
                     data-selected={active || undefined}

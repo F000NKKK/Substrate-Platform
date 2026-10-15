@@ -251,6 +251,24 @@
   outline: none;
 }
 
+/* A text being edited: the row grows to the box, which is a few lines tall. */
+.sp-propgrid-row[data-multiline] {
+  height: auto;
+  min-height: var(--sp-row-height);
+}
+
+.sp-propgrid-row[data-multiline] .sp-propgrid-name {
+  align-items: flex-start;
+  padding-top: 3px;
+}
+
+.sp-propgrid-editor.is-text {
+  height: auto;
+  padding: 2px calc(var(--sp-space-sm) - 1px);
+  line-height: 1.35;
+  resize: vertical;
+}
+
 .sp-propgrid-editor[data-invalid] {
   border-color: var(--sp-danger);
 }
