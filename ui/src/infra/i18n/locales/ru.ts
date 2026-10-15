@@ -49,10 +49,6 @@ registerTranslations(
     MMB: "СКМ",
     RMB: "ПКМ",
     Wheel: "Колесо",
-    Up: "↑",
-    Down: "↓",
-    Left: "←",
-    Right: "→",
 
     // Settings: International
     Language: "Язык",
