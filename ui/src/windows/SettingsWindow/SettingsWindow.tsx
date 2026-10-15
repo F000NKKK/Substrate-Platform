@@ -1,3 +1,4 @@
+import { SETTINGS_HISTORY } from "../../infra/history";
 import { useMemo, useState, type ReactNode } from "react";
 import { IconButton } from "../../widgets/IconButton";
 import { Tab } from "../../widgets/Tab";
@@ -38,9 +39,6 @@ export interface SettingsWindowProps {
   /** The undo history Ctrl+Z acts on while the focus is in the window — where its pages record their changes (`undoable`). Default `SETTINGS_HISTORY`. */
   undoScope?: string;
 }
-
-/** The Options' undo history: the platform's settings record their changes here. */
-export const SETTINGS_HISTORY = "settings";
 
 /**
  * A real Options-style window — its own title bar (draggable, closable),

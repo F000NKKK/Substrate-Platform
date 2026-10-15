@@ -1,6 +1,7 @@
 import { createContext, useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import type { HslColor } from "../color";
 import { tokens } from "../tokens";
+import { pushDocumentStep, SETTINGS_HISTORY } from "../history";
 import type { AccentColor, EditorColorKey, EditorColorProfile, EditorColorScheme, EditorPreferences, EditorThemeId, ThemeContextValue } from "./types";
 import {
   accentPresets,
@@ -197,6 +198,32 @@ export function ThemeProvider({ children, initialAccent }: ThemeProviderProps) {
     }
   }, []);
 
+  // Every change of these is undoable in the Options (`SETTINGS_HISTORY`):
+  // Undo puts all of them back as they were, Redo does the change again.
+  const snapshot = useRef({ accent, editorTheme, editorColors, editorPreferences, customProfiles });
+  snapshot.current = { accent, editorTheme, editorColors, editorPreferences, customProfiles };
+  const restore = useCallback((s: typeof snapshot.current) => {
+    applyAccent(s.accent);
+    storeAccent(s.accent);
+    setAccentState(s.accent);
+    storeCustomProfiles(s.customProfiles);
+    setCustomProfilesState(s.customProfiles);
+    storeEditorTheme(s.editorTheme);
+    setEditorThemeState(s.editorTheme);
+    storeEditorColors(s.editorColors);
+    setEditorColorsState(s.editorColors);
+    storeEditorPreferences(s.editorPreferences);
+    setEditorPreferencesState(s.editorPreferences);
+  }, []);
+  function tracked<A extends unknown[], R>(change: (...args: A) => R): (...args: A) => R {
+    return (...args: A) => {
+      const before = snapshot.current;
+      const result = change(...args);
+      pushDocumentStep(SETTINGS_HISTORY, { undo: () => restore(before), redo: () => void change(...args) });
+      return result;
+    };
+  }
+
   const editorProfiles = useMemo<readonly EditorColorProfile[]>(
     () => [...builtInProfiles, ...customProfiles.map((p) => ({ id: p.id, name: p.name, builtIn: false, colors: p.colors }))],
     [customProfiles]
@@ -205,21 +232,21 @@ export function ThemeProvider({ children, initialAccent }: ThemeProviderProps) {
   const value = useMemo<ThemeContextValue>(
     () => ({
       accent,
-      setAccent,
+      setAccent: tracked(setAccent),
       presets: accentPresets,
       editorTheme,
-      setEditorTheme,
+      setEditorTheme: tracked(setEditorTheme),
       editorProfiles,
       editorColors,
-      setEditorColor,
-      resetEditorColors,
-      createEditorProfile,
-      deleteEditorProfile,
+      setEditorColor: tracked(setEditorColor),
+      resetEditorColors: tracked(resetEditorColors),
+      createEditorProfile: tracked(createEditorProfile),
+      deleteEditorProfile: tracked(deleteEditorProfile),
       exportEditorProfile,
-      importEditorProfile,
+      importEditorProfile: tracked(importEditorProfile),
       editorPreferences,
-      setEditorPreferences,
-      resetEditorPreferences,
+      setEditorPreferences: tracked(setEditorPreferences),
+      resetEditorPreferences: tracked(resetEditorPreferences),
     }),
     [
       accent,

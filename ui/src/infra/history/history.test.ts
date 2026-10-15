@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { documentAction, documentHistory, forgetDocumentHistory, pushDocumentStep, recordDocumentChange, setDocumentWriter } from "./documentHistory";
+import { documentAction, documentHistory, forgetDocumentHistory, pushDocumentStep, recordDocumentChange, setDocumentWriter } from "./history";
 
 describe("document history", () => {
   let text = "a";

@@ -26,6 +26,9 @@ export interface DocumentStep {
   redo: () => void;
 }
 
+/** The Options' history: the platform's settings record their changes here (`undoable`). */
+export const SETTINGS_HISTORY = "settings";
+
 /** Changes closer together than this (ms) merge into one step. */
 const MERGE_MS = 400;
 const LIMIT = 200;

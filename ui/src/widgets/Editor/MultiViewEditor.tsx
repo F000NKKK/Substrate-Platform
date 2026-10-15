@@ -4,7 +4,7 @@ import { Tab } from "../Tab";
 import { useT } from "../../infra/i18n";
 import type { EditorProps } from "./EditorBase";
 import type { EditorProvider } from "./registry";
-import { recordDocumentChange, setDocumentWriter } from "./documentHistory";
+import { recordDocumentChange, setDocumentWriter } from "../../infra/history";
 import "./MultiViewEditor.css";
 
 export interface MultiViewEditorProps extends EditorProps {

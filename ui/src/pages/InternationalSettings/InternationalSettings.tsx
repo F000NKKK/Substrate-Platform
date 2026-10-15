@@ -1,4 +1,5 @@
 import { Label } from "../../widgets/Label";
+import { SETTINGS_HISTORY, undoable } from "../../infra/history";
 import { availableLocales, localeFollowsSystem, resolvedLocale, setLocale, useT } from "../../infra/i18n";
 import "./InternationalSettings.css";
 
@@ -27,7 +28,7 @@ export function InternationalSettings() {
       <select
         className="sp-international-settings-select"
         value={localeFollowsSystem() ? SYSTEM : shown}
-        onChange={(e) => setLocale(e.target.value === SYSTEM ? null : e.target.value)}
+        onChange={(e) => undoable(SETTINGS_HISTORY, localeFollowsSystem() ? null : resolvedLocale(), e.target.value === SYSTEM ? null : e.target.value, setLocale)}
       >
         <option value={SYSTEM}>{t("Same as system ({language})", { language: systemName })}</option>
         {locales.map((l) => (
