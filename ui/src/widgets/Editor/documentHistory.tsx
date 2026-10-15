@@ -175,6 +175,30 @@ export function useDocumentHistory(path: string | null | undefined): DocumentHis
   return documentHistory(path);
 }
 
+// -- Scopes ------------------------------------------------------------------
+//
+// A history isn't only a document's: a window that changes things outside
+// any document (Options, Project Properties) has one of its own, named by
+// the scope it marks (`UndoScope`). Ctrl+Z goes to the history of the scope
+// the focus is in, else to the active document's.
+
+/** The undo scope `el` is in (`data-undo-scope` of its nearest marked ancestor), if any. */
+export function undoScopeOf(el: Element | null): string | null {
+  const marked = el?.closest("[data-undo-scope]");
+  return marked?.getAttribute("data-undo-scope") || null;
+}
+
+/**
+ * Sets something undoably in history `scope`: `apply(next)` now, and a step
+ * that applies `before` again (and `next` on Redo) — for a setter outside
+ * any document (an option, a project's manifest field). Nothing when equal.
+ */
+export function undoable<T>(scope: string, before: T, next: T, apply: (value: T) => void): void {
+  apply(next);
+  if (Object.is(before, next) || JSON.stringify(before) === JSON.stringify(next)) return;
+  pushDocumentStep(scope, { undo: () => apply(before), redo: () => apply(next) });
+}
+
 /** Forgets `path`'s history (its tab closed, or reloaded from disk). */
 export function forgetDocumentHistory(path: string): void {
   if (entries.delete(path)) changed();

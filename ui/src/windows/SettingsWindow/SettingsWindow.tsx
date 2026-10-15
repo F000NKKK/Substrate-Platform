@@ -35,7 +35,12 @@ export interface SettingsWindowProps {
   sectionStateKey?: string;
   /** Hides the search box — for windows with a handful of fixed pages. */
   hideSearch?: boolean;
+  /** The undo history Ctrl+Z acts on while the focus is in the window — where its pages record their changes (`undoable`). Default `SETTINGS_HISTORY`. */
+  undoScope?: string;
 }
+
+/** The Options' undo history: the platform's settings record their changes here. */
+export const SETTINGS_HISTORY = "settings";
 
 /**
  * A real Options-style window — its own title bar (draggable, closable),
@@ -44,7 +49,7 @@ export interface SettingsWindowProps {
  * right. Any product wires its own sections in; the shell
  * (this window) is the one reusable piece.
  */
-export function SettingsWindow({ sections, initialSectionId, onClose, title, headerExtra, sectionStateKey = "settings.section", hideSearch }: SettingsWindowProps) {
+export function SettingsWindow({ sections, initialSectionId, onClose, title, headerExtra, sectionStateKey = "settings.section", hideSearch, undoScope = SETTINGS_HISTORY }: SettingsWindowProps) {
   const locale = useLocale();
   const { pos, handlers } = useDraggable({ x: 240, y: 100 });
   const [lastSectionId, setLastSectionId] = useStoredState<string | undefined>(
@@ -61,7 +66,7 @@ export function SettingsWindow({ sections, initialSectionId, onClose, title, hea
   const selected = filtered.find((s) => s.id === selectedId) ?? filtered[0];
 
   return (
-    <div className="sp-settings-window" style={{ left: pos.x, top: pos.y }}>
+    <div className="sp-settings-window" data-undo-scope={undoScope} style={{ left: pos.x, top: pos.y }}>
       <div className="sp-settings-header" {...handlers}>
         <IconSettings size={14} />
         <span className="sp-settings-title">{title ?? t("Options")}</span>
