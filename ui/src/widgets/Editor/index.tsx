@@ -18,6 +18,8 @@ export {
   GroovyEditor,
   PythonEditor,
   languageForPath,
+  jsonLanguage,
+  xmlLanguage,
   xmlSchemaLanguage,
 } from "./languageEditors";
 export type { XmlSchema } from "./languageEditors";
