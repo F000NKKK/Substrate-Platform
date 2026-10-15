@@ -226,6 +226,7 @@ function FindWidget({ view, info, register }: { view: EditorView; info: MatchInf
         <div className="sp-find-row">
           <div className="sp-find-field" data-invalid={info.invalid || undefined} data-empty={(!!query.search && info.total === 0) || undefined}>
             <input
+              data-own-undo
               ref={findRef}
               className="sp-find-input"
               placeholder={t("Find...")}
@@ -263,6 +264,7 @@ function FindWidget({ view, info, register }: { view: EditorView; info: MatchInf
           <div className="sp-find-row">
             <div className="sp-find-field">
               <input
+                data-own-undo
                 ref={replaceRef}
                 className="sp-find-input"
                 placeholder={t("Replace...")}

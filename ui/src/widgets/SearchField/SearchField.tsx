@@ -47,6 +47,7 @@ export function SearchField({ value, onValueChange, options, onOptionsChange, in
   return (
     <div className={["sp-search-field", className].filter(Boolean).join(" ")} data-invalid={invalid || undefined}>
       <input
+        data-own-undo
         ref={inputRef}
         className="sp-search-field-input"
         spellCheck={false}

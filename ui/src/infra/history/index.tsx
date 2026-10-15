@@ -8,6 +8,7 @@ export {
   forgetDocumentHistory,
   undoable,
   undoScopeOf,
+  undoTarget,
   SETTINGS_HISTORY,
 } from "./history";
 export type { DocumentHistory, DocumentStep } from "./history";

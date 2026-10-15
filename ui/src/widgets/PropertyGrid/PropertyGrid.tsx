@@ -560,6 +560,8 @@ export function PropertyGrid({
         {kind === "text" ? (
           <textarea
             className="sp-propgrid-editor is-text"
+            // Typing not applied yet: Ctrl+Z undoes it here.
+            data-own-undo
             data-invalid={invalid || undefined}
             aria-invalid={invalid}
             autoFocus
@@ -589,6 +591,7 @@ export function PropertyGrid({
         ) : (
         <input
           className="sp-propgrid-editor"
+          data-own-undo
           list={listId}
           data-invalid={invalid || undefined}
           aria-invalid={invalid}
@@ -667,6 +670,7 @@ export function PropertyGrid({
         </IconButton>
         <span className="sp-propgrid-toolbar-separator" />
         <TextField
+          data-own-undo
           className="sp-propgrid-search"
           placeholder={t("Search Properties")}
           value={query}
