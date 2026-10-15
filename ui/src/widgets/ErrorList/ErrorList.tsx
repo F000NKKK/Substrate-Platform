@@ -8,7 +8,7 @@ import { ContextMenu, useContextMenu, type ContextMenuItem } from "../ContextMen
 import { DataGrid, type DataGridColumn } from "../DataGrid";
 import { SelectField } from "../Form";
 import { SearchField } from "../SearchField";
-import { ToolbarSeparator, ToolbarSpacer } from "../Toolbar";
+import { Divider, Spacer } from "../Layout";
 import {
   DEFAULT_ERROR_LIST_FILTER,
   diagnosticsToTsv,
@@ -184,7 +184,7 @@ export function ErrorList({ diagnostics, onNavigate, activeFile, openFiles, form
             { value: "current", label: t("Current Document") },
           ]}
         />
-        <ToolbarSeparator />
+        <Divider />
         {SEVERITIES.map((s) => (
           <button
             key={s}
@@ -199,7 +199,7 @@ export function ErrorList({ diagnostics, onNavigate, activeFile, openFiles, form
             {toggleLabel(s, counts[s])}
           </button>
         ))}
-        <ToolbarSeparator />
+        <Divider />
         <SelectField
           aria-label={t("Show items from")}
           value={filter.origins}
@@ -210,7 +210,7 @@ export function ErrorList({ diagnostics, onNavigate, activeFile, openFiles, form
             { value: "live", label: t("Live Analysis Only") },
           ]}
         />
-        <ToolbarSpacer />
+        <Spacer />
         <SearchField className="sp-error-list-search" value={search} onValueChange={setSearch} placeholder={t("Search Error List")} aria-label={t("Search Error List")} />
       </div>
       <DataGrid<Row>

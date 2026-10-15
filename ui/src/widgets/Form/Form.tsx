@@ -265,17 +265,19 @@ export interface SelectOption {
   label: string;
   /** Options with the same group are listed under it (an `<optgroup>`), in the order groups first appear. */
   group?: string;
+  /** Shown but not pickable (nothing to look in yet). */
+  disabled?: boolean;
 }
 
-export function SelectField({ value, options, onChange, disabled, "aria-label": ariaLabel }: { value: string; options: readonly SelectOption[]; onChange: (value: string) => void; disabled?: boolean; "aria-label"?: string }) {
+export function SelectField({ id, value, options, onChange, disabled, "aria-label": ariaLabel }: { id?: string; value: string; options: readonly SelectOption[]; onChange: (value: string) => void; disabled?: boolean; "aria-label"?: string }) {
   const option = (o: SelectOption) => (
-    <option key={o.value} value={o.value}>
+    <option key={o.value} value={o.value} disabled={o.disabled}>
       {o.label}
     </option>
   );
   const groups = [...new Set(options.map((o) => o.group))];
   return (
-    <select className="sp-form-select" value={value} disabled={disabled} aria-label={ariaLabel} onChange={(e) => onChange(e.target.value)}>
+    <select id={id} className="sp-form-select" value={value} disabled={disabled} aria-label={ariaLabel} onChange={(e) => onChange(e.target.value)}>
       {groups.map((g) =>
         g === undefined ? (
           options.filter((o) => o.group === undefined).map(option)

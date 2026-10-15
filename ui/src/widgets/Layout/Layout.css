@@ -1,0 +1,16 @@
+/* Pushes everything after it to the far end of a flex row (or column). */
+.sp-spacer {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* A group divider in a row of controls: as tall as an icon, the separator margin on both sides. */
+.sp-divider {
+  flex: none;
+  align-self: center;
+  width: 1px;
+  height: var(--sp-icon-size);
+  margin: 0 var(--sp-toolbar-separator-margin);
+  background: var(--sp-border-strong);
+}

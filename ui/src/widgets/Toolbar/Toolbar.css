@@ -22,7 +22,7 @@
   gap: var(--sp-space-2xs);
 }
 
-.sp-toolbar-section:not(:last-child):not(:has(+ .sp-toolbar-spacer))::after {
+.sp-toolbar-section:not(:last-child):not(:has(+ .sp-spacer))::after {
   content: "";
   flex: none;
   width: 1px;
@@ -33,21 +33,7 @@
   background: var(--sp-border-strong);
 }
 
-/* A free-standing group separator for hand-built rows (`<ToolbarSeparator />`). */
-.sp-toolbar-separator {
-  flex: none;
-  align-self: center;
-  width: 1px;
-  height: var(--sp-icon-size);
-  margin: 0 var(--sp-toolbar-separator-margin);
-  background: var(--sp-border-strong);
-}
 
-/* Pushes everything after it to the far end of the row. */
-.sp-toolbar-spacer {
-  flex: 1 1 0;
-  min-width: 0;
-}
 
 /* ── An editor's command bar ─────────────────────────────────────────────── */
 

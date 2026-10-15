@@ -19,7 +19,7 @@ export type ToolbarSection = ToolbarItem[];
 export interface ToolbarProps {
   /** Icon-button groups, the shell's own command bar. An editor's bar builds its row from the `Toolbar*` parts as `children` instead. */
   sections?: ToolbarSection[];
-  /** The row, built from `ToolbarGroup`, `ToolbarButton`, `ToolbarModes`, `ToolbarSelect`, `ToolbarCheck`, `ToolbarLabel`, `ToolbarSeparator`, `ToolbarSpacer`. */
+  /** The row, built from `ToolbarGroup`, `ToolbarButton`, `ToolbarModes`, `ToolbarSelect`, `ToolbarCheck`, `ToolbarLabel`, `ToolbarInput`, and `Spacer` / `Divider`. */
   children?: ReactNode;
   className?: string;
   /** Arbitrary content rendered before the icon sections, in its own divided slot — for something with its own state/behavior (a run-target picker, a search box, ...) that belongs in the same row without `Toolbar` itself knowing anything about it. */
@@ -53,16 +53,6 @@ export function Toolbar({ sections = [], leading, children, className }: Toolbar
       ))}
     </div>
   );
-}
-
-/** A short vertical divider between groups of controls in a hand-built toolbar row (`.sp-toolbar` or any row using the toolbar tokens). */
-export function ToolbarSeparator() {
-  return <span className="sp-toolbar-separator" role="separator" aria-orientation="vertical" />;
-}
-
-/** Takes the leftover width of a toolbar row, pushing what follows to its far end. */
-export function ToolbarSpacer() {
-  return <span className="sp-toolbar-spacer" />;
 }
 
 // -- An editor's command bar, part by part ------------------------------------
