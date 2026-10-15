@@ -60,6 +60,6 @@ export {
   revealLine,
 } from "./editorCommands";
 export { registerDocumentCommands, useDocumentCommands, notifyDocumentCommands } from "./documentCommands";
-export { useDocumentHistory, recordDocumentChange, forgetDocumentHistory } from "./documentHistory";
-export type { DocumentHistory } from "./documentHistory";
+export { useDocumentHistory, documentHistory, recordDocumentChange, pushDocumentStep, documentAction, forgetDocumentHistory } from "./documentHistory";
+export type { DocumentHistory, DocumentStep } from "./documentHistory";
 export type { DocumentCommands } from "./documentCommands";

@@ -1,14 +1,17 @@
 import { useSyncExternalStore } from "react";
 
 /**
- * Undo for every editor of a document, kept by the platform: each change a
- * designer makes to the document's text is recorded here (`MultiViewEditor`
- * does it for every non-text view), so Undo/Redo work in any designer
- * without it keeping a history of its own. Text editors keep CodeMirror's.
- * A designer with finer steps of its own registers `DocumentCommands`,
- * which win over this.
+ * Undo for every editor of a document, kept by the platform — the one way
+ * Undo/Redo work in a designer (Ctrl+Z, Ctrl+Y / Ctrl+Shift+Z, the Edit
+ * menu, the toolbar):
  *
- * Changes in quick succession (a drag, typing into a field) are one step.
+ * - each change a designer makes to the document's text is a step,
+ *   recorded for it (`MultiViewEditor` wraps every non-text view's
+ *   `onChange`); text views keep CodeMirror's history;
+ * - what isn't text (a texture's pixels) a designer records as a step of
+ *   its own (`pushDocumentStep`);
+ * - steps made by one action (`documentAction`) are one step, and changes
+ *   in quick succession (a drag, typing into a field) merge.
  */
 export interface DocumentHistory {
   canUndo: boolean;
@@ -17,18 +20,32 @@ export interface DocumentHistory {
   redo: () => void;
 }
 
+/** One undoable step: how to take it back and do it again. */
+export interface DocumentStep {
+  undo: () => void;
+  redo: () => void;
+}
+
 /** Changes closer together than this (ms) merge into one step. */
 const MERGE_MS = 400;
 const LIMIT = 200;
 
+/** A text change: from `before` to `after`, written back through the document's writer. */
+interface TextStep extends DocumentStep {
+  text: { before: string; after: string };
+}
+
 interface Entry {
-  past: string[];
-  future: string[];
-  /** The text after the last recorded change, and when — to merge a burst. */
-  last: string | null;
+  past: DocumentStep[];
+  future: DocumentStep[];
+  /** When the last step was recorded — a burst merges. */
   at: number;
   /** Writes a text back into the document (the editor's `onChange`). */
-  apply: ((text: string) => void) | null;
+  write: ((text: string) => void) | null;
+  /** Steps of the action under way (`documentAction`), made one when it ends. */
+  group: DocumentStep[] | null;
+  /** Undoing or redoing: what that writes isn't a new step. */
+  replaying: boolean;
 }
 
 const entries = new Map<string, Entry>();
@@ -43,64 +60,119 @@ function changed() {
 function entryOf(path: string): Entry {
   let e = entries.get(path);
   if (!e) {
-    e = { past: [], future: [], last: null, at: 0, apply: null };
+    e = { past: [], future: [], at: 0, write: null, group: null, replaying: false };
     entries.set(path, e);
   }
   return e;
 }
 
-/** Records a change of `path` from `before` to `after` (as a designer wrote it). */
+function push(e: Entry, step: DocumentStep) {
+  if (e.group) {
+    e.group.push(step);
+    return;
+  }
+  e.past.push(step);
+  if (e.past.length > LIMIT) e.past.shift();
+  e.future = [];
+  e.at = Date.now();
+  changed();
+}
+
+/** Several steps as one, undone last first. */
+function composite(steps: DocumentStep[]): DocumentStep {
+  return {
+    undo: () => [...steps].reverse().forEach((s) => s.undo()),
+    redo: () => steps.forEach((s) => s.redo()),
+  };
+}
+
+/** Records a change of `path`'s text from `before` to `after` (as a designer wrote it). */
 export function recordDocumentChange(path: string, before: string, after: string): void {
   if (before === after) return;
   const e = entryOf(path);
-  const now = Date.now();
+  if (e.replaying) return;
   // Continuing the last change (dragging, typing): one step.
-  const merging = e.last === before && now - e.at < MERGE_MS && e.past.length > 0;
-  if (!merging) {
-    e.past.push(before);
-    if (e.past.length > LIMIT) e.past.shift();
+  const last = e.group ? e.group[e.group.length - 1] : e.past[e.past.length - 1];
+  const lastText = last && "text" in last ? (last as TextStep).text : null;
+  if (lastText && lastText.after === before && (e.group || Date.now() - e.at < MERGE_MS)) {
+    lastText.after = after;
+    e.at = Date.now();
+    if (!e.group) e.future = [];
+    return;
   }
-  e.future = [];
-  e.last = after;
-  e.at = now;
-  changed();
+  const text = { before, after };
+  const step: TextStep = {
+    text,
+    undo: () => e.write?.(text.before),
+    redo: () => e.write?.(text.after),
+  };
+  push(e, step);
 }
 
-/** How the document is written back on Undo/Redo — the latest editor's `onChange`. */
-export function setDocumentWriter(path: string, apply: (text: string) => void): void {
-  entryOf(path).apply = apply;
+/** Records a step that isn't the text (a texture's pixels) for `path`. */
+export function pushDocumentStep(path: string, step: DocumentStep): void {
+  const e = entryOf(path);
+  if (!e.replaying) push(e, step);
 }
 
-function step(path: string, current: string, back: boolean) {
+/** Runs `action` on `path` as one undoable step, whatever it changes. */
+export function documentAction<T>(path: string, action: () => T): T {
+  const e = entryOf(path);
+  if (e.group) return action();
+  e.group = [];
+  try {
+    return action();
+  } finally {
+    const steps = e.group;
+    e.group = null;
+    if (steps.length) push(e, steps.length === 1 ? steps[0] : composite(steps));
+  }
+}
+
+/** How the document's text is written back on Undo/Redo — the latest editor's `onChange`. */
+export function setDocumentWriter(path: string, write: (text: string) => void): void {
+  entryOf(path).write = write;
+}
+
+function step(path: string, back: boolean) {
   const e = entries.get(path);
-  if (!e?.apply) return;
-  const from = back ? e.past : e.future;
-  const text = from.pop();
-  if (text === undefined) return;
-  (back ? e.future : e.past).push(current);
-  e.last = null;
-  e.apply(text);
+  if (!e) return;
+  const s = (back ? e.past : e.future).pop();
+  if (!s) return;
+  (back ? e.future : e.past).push(s);
+  e.replaying = true;
+  try {
+    if (back) s.undo();
+    else s.redo();
+  } finally {
+    e.replaying = false;
+  }
+  e.at = 0;
   changed();
 }
 
-/** Undo/Redo over `path`'s recorded changes; `current` is its text now. */
-export function useDocumentHistory(path: string | null | undefined, current: string | undefined): DocumentHistory {
-  useSyncExternalStore(
-    (notify) => {
-      subscribers.add(notify);
-      return () => {
-        subscribers.delete(notify);
-      };
-    },
-    () => revision
-  );
+/** Undo/Redo over `path`'s steps. */
+export function documentHistory(path: string | null | undefined): DocumentHistory {
   const e = path ? entries.get(path) : undefined;
   return {
-    canUndo: !!e?.past.length && !!e.apply,
-    canRedo: !!e?.future.length && !!e.apply,
-    undo: () => path && current !== undefined && step(path, current, true),
-    redo: () => path && current !== undefined && step(path, current, false),
+    canUndo: !!e?.past.length,
+    canRedo: !!e?.future.length,
+    undo: () => path && step(path, true),
+    redo: () => path && step(path, false),
   };
+}
+
+function subscribe(notify: () => void) {
+  subscribers.add(notify);
+  return () => {
+    subscribers.delete(notify);
+  };
+}
+
+/** `documentHistory(path)`, re-rendering the caller as steps come and go. */
+export function useDocumentHistory(path: string | null | undefined): DocumentHistory {
+  useSyncExternalStore(subscribe, () => revision);
+  return documentHistory(path);
 }
 
 /** Forgets `path`'s history (its tab closed, or reloaded from disk). */

@@ -2,15 +2,13 @@ import { useSyncExternalStore } from "react";
 
 /**
  * What a non-text editor (a designer) can do through the host's Edit menu
- * and toolbar — the counterpart of `registerEditorView` for editors that
- * aren't a CodeMirror view. Each `can*` is read when the menu renders; call
- * `notifyDocumentCommands` when one of them may have changed.
+ * and toolbar — Cut, Copy, Paste, Select All, Delete; the counterpart of
+ * `registerEditorView` for editors that aren't a CodeMirror view. Undo and
+ * Redo aren't among them: they're the platform's (`documentHistory`). Each
+ * `can*` is read when the menu renders; call `notifyDocumentCommands` when
+ * one of them may have changed.
  */
 export interface DocumentCommands {
-  canUndo: () => boolean;
-  undo: () => void;
-  canRedo: () => boolean;
-  redo: () => void;
   /** Something is selected that Cut/Copy/Delete would act on. */
   hasSelection: () => boolean;
   cut: () => void;
