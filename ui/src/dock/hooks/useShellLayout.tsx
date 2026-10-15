@@ -245,6 +245,26 @@ export function useShellLayout(
     [placements]
   );
 
+  // Read when a tab leaves the center (from inside state updaters, so refs).
+  const centerIdsRef = useRef(centerIds);
+  centerIdsRef.current = centerIds;
+  const panelsByIdRef = useRef(panelsById);
+  panelsByIdRef.current = panelsById;
+
+  /**
+   * Which tab the center shows once `leaving` go (closed, docked
+   * elsewhere, floated): the first tab still there, pinned ones first, as
+   * the strip lists them — the main view only once no tab is left.
+   */
+  const successor = useCallback(
+    (leaving: readonly string[]) => {
+      const byId = panelsByIdRef.current;
+      const shown = centerIdsRef.current.filter((id) => id !== main.id && !leaving.includes(id) && byId[id] && !byId[id].hidden);
+      return shown.find((id) => byId[id].pinned) ?? shown[0] ?? main.id;
+    },
+    [main.id]
+  );
+
   const pinnedInAnchor = useCallback(
     (anchor: ToolWindowAnchor) =>
       Object.entries(placements).filter(([, p]) => p.anchor === anchor && p.mode === "pinned").map(([id]) => id),
@@ -311,7 +331,7 @@ export function useShellLayout(
         else if (cur) closed = { anchor: cur.anchor, mode: "closed" };
         return { ...prev, [id]: closed };
       });
-      setCenterActive((cur) => (cur === id ? main.id : cur));
+      setCenterActive((cur) => (cur === id ? successor([id]) : cur));
     },
     [homeAnchor, main.id, onCloseDynamicPanel]
   );
@@ -381,7 +401,7 @@ export function useShellLayout(
       });
     }
     if (added.length > 0) setCenterActive(added[added.length - 1].id);
-    if (removed.length > 0) setCenterActive((cur) => (removed.includes(cur) ? main.id : cur));
+    if (removed.length > 0) setCenterActive((cur) => (removed.includes(cur) ? successor(removed) : cur));
 
     prevExtraIdsRef.current = currentIds;
   }, [extraCenterPanels, main.id]);
@@ -400,8 +420,9 @@ export function useShellLayout(
       // tab, CenterDock would otherwise keep rendering it there (it looks up
       // `panelsById[centerActiveId]` directly, not filtered by `centerIds`),
       // showing the same panel both at its new anchor and, stale, in the
-      // center at once.
-      setCenterActive((cur) => (cur === id ? main.id : cur));
+      // center at once. The next tab takes over (`successor`), not the
+      // empty main view.
+      setCenterActive((cur) => (cur === id ? successor([id]) : cur));
     },
     [main.id]
   );
@@ -413,7 +434,7 @@ export function useShellLayout(
         const size = cur?.anchor === "float" ? { w: cur.w, h: cur.h } : (panelsById[id]?.floatSize ?? DEFAULT_FLOAT_SIZE);
         return { ...prev, [id]: { anchor: "float", x, y, ...size } };
       });
-      setCenterActive((activeCur) => (activeCur === id ? main.id : activeCur));
+      setCenterActive((activeCur) => (activeCur === id ? successor([id]) : activeCur));
     },
     [main.id, panelsById]
   );
