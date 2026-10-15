@@ -1,5 +1,5 @@
 import type { CSSProperties, DragEvent } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ToolWindowDock } from "../dock/ToolWindowDock/ToolWindowDock";
 import { CenterDock } from "../dock/CenterDock/CenterDock";
 import { FloatingPanel } from "../dock/FloatingPanel/FloatingPanel";
@@ -86,6 +86,18 @@ export function PlatformShell({
     setDragOver({ main, target: dockTargetAt(main, e.clientX, e.clientY) });
   }
 
+  // A drop a strip or the tab bar took (they stop it here), or a drag
+  // given up: the guides go.
+  useEffect(() => {
+    const clear = () => setDragOver(null);
+    window.addEventListener("dragend", clear, true);
+    window.addEventListener("drop", clear, true);
+    return () => {
+      window.removeEventListener("dragend", clear, true);
+      window.removeEventListener("drop", clear, true);
+    };
+  }, []);
+
   function handleMainDragLeave(e: DragEvent) {
     // Leaving for one of its own children isn't leaving.
     if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
@@ -111,18 +123,14 @@ export function PlatformShell({
     <ShellContext.Provider value={controller}>
       <div className="sp-shell">
         {menu && <div className="sp-shell-menu">{menu}</div>}
-        <div className="sp-shell-body">
+        <div className="sp-shell-body" onDragOver={handleMainDragOver} onDragLeave={handleMainDragLeave} onDrop={handleMainDrop}>
+          {/* The guides sit at the middle of the whole window, whatever's docked. */}
+          {dragOver && <DockGuides main={dragOver.main} hover={dragOver.target} />}
           <div className="sp-shell-upper">
             {hasLeft && <ToolWindowDock anchor="left" layout={layout} />}
 
-            <div
-              className="sp-shell-main"
-              onDragOver={handleMainDragOver}
-              onDragLeave={handleMainDragLeave}
-              onDrop={handleMainDrop}
-            >
+            <div className="sp-shell-main">
               <CenterDock layout={layout} />
-              {dragOver && <DockGuides main={dragOver.main} hover={dragOver.target} />}
             </div>
 
             {hasRight && <ToolWindowDock anchor="right" layout={layout} />}

@@ -29,7 +29,7 @@ interface Drag {
   pointerY: number;
   startX: number;
   startY: number;
-  /** The main area, where the guides sit, in viewport coordinates. */
+  /** The whole window body, where the guides sit, in viewport coordinates. */
   main: DOMRect | null;
 }
 
@@ -86,7 +86,8 @@ export function FloatingPanel({ panel, x, y, w, h, onDock, onClose, onResize, on
       pointerY: e.clientY,
       startX: x,
       startY: y,
-      main: el.closest(".sp-shell")?.querySelector(".sp-shell-main")?.getBoundingClientRect() ?? null,
+      // The guides sit at the middle of the whole window, whatever's docked.
+      main: el.closest(".sp-shell")?.querySelector(".sp-shell-body")?.getBoundingClientRect() ?? null,
     };
 
     function onPointerMove(ev: PointerEvent) {

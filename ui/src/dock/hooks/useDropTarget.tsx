@@ -34,6 +34,8 @@ export function useDropTarget(onDropPanel: (panelId: string) => void): DropTarge
       onDragOver: (e) => {
         if (!isPanelDrag(e)) return;
         e.preventDefault();
+        // Ours, not the shell's guides under it.
+        e.stopPropagation();
         e.dataTransfer.dropEffect = "move";
       },
       onDragLeave: () => setDragOver(false),
@@ -42,6 +44,7 @@ export function useDropTarget(onDropPanel: (panelId: string) => void): DropTarge
         const id = readPanelDrag(e);
         if (!id) return;
         e.preventDefault();
+        e.stopPropagation();
         onDropPanel(id);
       },
     },

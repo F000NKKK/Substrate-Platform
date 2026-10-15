@@ -3,7 +3,7 @@ import type { DockAnchor } from "../types";
 /**
  * Where a dragged panel would go — the one docking mechanism for every
  * drag (a tab from a dock strip or the center, a floating window's title
- * bar): a compass of guides at the middle of the main area (center: a tab
+ * bar): a compass of guides at the middle of the window (center: a tab
  * there; left/right/bottom: that edge), and bands along the edges that do
  * the same when the pointer's simply near one. `null`: neither — the panel
  * floats where it's dropped.
@@ -44,7 +44,7 @@ function previewRect(main: DOMRect, anchor: DockAnchor) {
 }
 
 /** The guides over `main` while a panel is dragged, `hover` (from `dockTargetAt`) previewed. */
-export function DockGuides({ main, hover }: { main: DOMRect; hover: DockAnchor | null }) {
+export function DockGuides({ main, hover }: { /** The whole window body: the guides at its middle, edges at its sides. */ main: DOMRect; hover: DockAnchor | null }) {
   return (
     <>
       {hover && <div key={hover} className="sp-dock-preview" style={previewRect(main, hover)} />}
