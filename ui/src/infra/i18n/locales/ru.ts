@@ -37,8 +37,22 @@ registerTranslations(
     "Unpin tab": "Открепить вкладку",
     "Close tab": "Закрыть вкладку",
 
-    // Keys (formatShortcut)
+    True: "Да",
+    False: "Нет",
+
+    // Keys (formatShortcut, withShortcut) — translated once, here.
     Space: "Пробел",
+    Enter: "Ввод",
+    Backspace: "Backspace",
+    Num: "Num",
+    LMB: "ЛКМ",
+    MMB: "СКМ",
+    RMB: "ПКМ",
+    Wheel: "Колесо",
+    Up: "↑",
+    Down: "↓",
+    Left: "←",
+    Right: "→",
 
     // Settings: International
     Language: "Язык",
@@ -203,14 +217,13 @@ registerTranslations(
     // Quick Find / Quick Replace / Go To Line
     "Find...": "Найти...",
     "Replace...": "Заменить...",
-    "Find next (F3)": "Найти далее (F3)",
-    "Find previous (Shift+F3)": "Найти ранее (Shift+F3)",
-    "Close (Esc)": "Закрыть (Esc)",
-    "Match case (Alt+C)": "С учетом регистра (Alt+C)",
-    "Match whole word (Alt+W)": "Слово целиком (Alt+W)",
-    "Use regular expressions (Alt+E)": "Использовать регулярные выражения (Alt+E)",
-    "Replace next (Alt+R)": "Заменить следующее (Alt+R)",
-    "Replace all (Alt+A)": "Заменить все (Alt+A)",
+    "Find next": "Найти далее",
+    "Find previous": "Найти ранее",
+    "Match case": "С учетом регистра",
+    "Match whole word": "Слово целиком",
+    "Use regular expressions": "Использовать регулярные выражения",
+    "Replace next": "Заменить следующее",
+    "Replace all": "Заменить все",
     "Show replace": "Показать замену",
     "Hide replace": "Скрыть замену",
     "No results": "Нет результатов",

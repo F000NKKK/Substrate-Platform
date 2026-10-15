@@ -320,3 +320,84 @@
   line-height: 1.35;
   user-select: text;
 }
+
+/* ── Inspector additions: compact, vectors, scrubbing, custom rows ───────── */
+
+.sp-propgrid.is-compact {
+  border: none;
+}
+
+/* A number's name scrubs it (drag left/right). */
+.sp-propgrid-name[data-scrubbable] {
+  cursor: ew-resize;
+}
+
+.sp-propgrid-vector {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+}
+
+.sp-propgrid-vector-part {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  border: 1px solid var(--sp-border);
+  border-radius: 2px;
+  background: var(--sp-surface-0);
+  overflow: hidden;
+}
+
+.sp-propgrid-vector-part:focus-within {
+  border-color: var(--sp-accent);
+}
+
+.sp-propgrid-vector-label {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--sp-text-faint);
+  cursor: ew-resize;
+  user-select: none;
+}
+
+.sp-propgrid-vector-part[data-axis="0"] .sp-propgrid-vector-label { color: #e5484d; }
+.sp-propgrid-vector-part[data-axis="1"] .sp-propgrid-vector-label { color: #46a758; }
+.sp-propgrid-vector-part[data-axis="2"] .sp-propgrid-vector-label { color: #3e8ef7; }
+
+.sp-propgrid-vector-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  border: none;
+  outline: none;
+  padding: 0 4px 0 0;
+  background: transparent;
+  color: var(--sp-text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.sp-propgrid-vector-input:disabled {
+  color: var(--sp-text-faint);
+}
+
+/* A whole-width row: a preview or picker under its category. */
+.sp-propgrid-custom {
+  padding: var(--sp-space-xs) var(--sp-space-sm);
+  border-bottom: 1px solid var(--sp-border-subtle, transparent);
+}
+
+.sp-propgrid-custom-name {
+  color: var(--sp-text-muted);
+  font-size: 0.9em;
+  margin-bottom: var(--sp-space-2xs);
+}

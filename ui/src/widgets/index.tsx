@@ -64,6 +64,8 @@ export { FloatingWindow } from "./FloatingWindow";
 export type { FloatingWindowProps } from "./FloatingWindow";
 export { SearchField } from "./SearchField";
 export type { SearchFieldProps, SearchOptions } from "./SearchField";
+export { Inspector } from "./Inspector";
+export type { InspectorProps } from "./Inspector";
 export { QuickPick } from "./QuickPick";
 export type { QuickPickProps, QuickPickItem, QuickPickFilter } from "./QuickPick";
 export { SearchResults } from "./SearchResults";

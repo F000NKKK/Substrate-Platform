@@ -1,14 +1,15 @@
-import { useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Icon } from "../../infra/icons";
 import { useStoredState } from "../../infra/state";
 import { IconButton } from "../IconButton";
 import { TextField } from "../TextField";
 import { notify } from "../Notifications";
-import { useT } from "../../infra/i18n";
+import { t, useT } from "../../infra/i18n";
 import "./PropertyGrid.css";
 
-export type PropertyKind = "string" | "number" | "bool" | "enum";
-export type PropertyValue = string | number | boolean;
+export type PropertyKind = "string" | "number" | "bool" | "enum" | "vector" | "custom";
+/** A vector (`"vector"`) is a tuple of numbers — a position, a size, a turn. */
+export type PropertyValue = string | number | boolean | readonly number[];
 
 /**
  * One row of a `PropertyGrid` — what a product's property provider builds
@@ -49,6 +50,12 @@ export interface PropertyDescriptor {
   onCommit?: (value: PropertyValue) => void | string | null | Promise<void | string | null>;
   /** Visual Studio's "…" button at the end of the row: opens the product's own editor for the value (a collection editor, a picker dialog). */
   edit?: () => void;
+  /** A `"number"` or `"vector"`: what one step is — dragging the name left/right (or a component's label) changes it by steps, as Blender's fields do. Default 1. */
+  step?: number;
+  /** A `"vector"`'s component labels — default `X`, `Y`, `Z`, `W` (coloured as the axes). */
+  labels?: readonly string[];
+  /** A `"custom"` row: what it shows across the whole width (a preview, a picker) — it isn't edited as a value. */
+  render?: () => ReactNode;
 }
 
 export interface PropertyGridProps {
@@ -65,6 +72,15 @@ export interface PropertyGridProps {
   /** Prefix for the view mode, column split, collapsed categories and description pane state remembered in the current `StateStore`. */
   persistKey?: string;
   className?: string;
+  /**
+   * `"sorted"` (Visual Studio's Properties window): categories and
+   * properties by name. `"declared"` (an editor's inspector): as given —
+   * position before rotation before scale. The Alphabetical view sorts
+   * either way.
+   */
+  order?: "sorted" | "declared";
+  /** Hides the toolbar (view mode, search) — an inspector inside an editor, short lists the author ordered. */
+  compact?: boolean;
 }
 
 type ViewMode = "categorized" | "alphabetical";
@@ -80,6 +96,8 @@ const MAX_DESCRIPTION = 320;
 
 function kindOf(p: PropertyDescriptor): PropertyKind {
   if (p.kind) return p.kind;
+  if (p.render) return "custom";
+  if (Array.isArray(p.value)) return "vector";
   if (typeof p.value === "boolean") return "bool";
   if (typeof p.value === "number") return "number";
   return p.options ? "enum" : "string";
@@ -92,7 +110,8 @@ function isEditable(p: PropertyDescriptor): boolean {
 function displayText(p: PropertyDescriptor): string {
   if (p.displayValue !== undefined) return p.displayValue;
   if (p.value === null) return "";
-  if (typeof p.value === "boolean") return p.value ? "True" : "False";
+  if (Array.isArray(p.value)) return p.value.join(", ");
+  if (typeof p.value === "boolean") return p.value ? t("True") : t("False");
   return String(p.value);
 }
 
@@ -101,6 +120,18 @@ function draftOf(p: PropertyDescriptor): string {
 }
 
 const byName = (a: PropertyDescriptor, b: PropertyDescriptor) => a.name.localeCompare(b.name);
+
+const AXES = ["X", "Y", "Z", "W"];
+
+function sameValue(a: PropertyValue | null, b: PropertyValue | null): boolean {
+  if (Array.isArray(a) && Array.isArray(b)) return a.length === b.length && a.every((v, i) => v === b[i]);
+  return a === b;
+}
+
+/** A number as a field shows it: no float noise (0.30000000000000004 → 0.3). */
+function shortNumber(n: number): string {
+  return String(Math.round(n * 10000) / 10000);
+}
 
 /** Runs `validate` then `onCommit` — resolves the rejection message, or `null` once applied. */
 async function applyEdit(p: PropertyDescriptor, value: PropertyValue): Promise<string | null> {
@@ -140,6 +171,8 @@ export function PropertyGrid({
   emptyLabel,
   persistKey = "properties",
   className,
+  order = "sorted",
+  compact = false,
 }: PropertyGridProps) {
   const t = useT();
   const [mode, setMode] = useStoredState<ViewMode>(`${persistKey}.view`, "categorized", (v) => v === "categorized" || v === "alphabetical");
@@ -182,14 +215,18 @@ export function PropertyGrid({
       groups.set(category, [...(groups.get(category) ?? []), p]);
     }
     const out: GridItem[] = [];
-    for (const name of [...groups.keys()].sort((a, b) => a.localeCompare(b))) {
+    const names = [...groups.keys()];
+    if (order === "sorted") names.sort((a, b) => a.localeCompare(b));
+    for (const name of names) {
       // While searching every match shows, collapsed or not.
       const isCollapsed = !searching && collapsed.has(name);
       out.push({ type: "category", key: `c:${name}`, name, collapsed: isCollapsed });
-      if (!isCollapsed) for (const p of groups.get(name)!.sort(byName)) out.push({ type: "property", key: `p:${p.id}`, property: p });
+      const members = groups.get(name)!;
+      if (order === "sorted") members.sort(byName);
+      if (!isCollapsed) for (const p of members) out.push({ type: "property", key: `p:${p.id}`, property: p });
     }
     return out;
-  }, [properties, mode, query, searching, collapsed]);
+  }, [properties, mode, query, searching, collapsed, order]);
 
   const current = items.find((item) => item.key === cursor) ?? null;
 
@@ -205,9 +242,10 @@ export function PropertyGrid({
     setCursor(`p:${p.id}`);
     if (!isEditable(p) || busyId === p.id) return;
     const kind = kindOf(p);
-    if (kind === "bool" || kind === "enum") {
-      // Always-rendered dropdowns — focusing one is "editing" it.
-      rowsRef.current?.querySelector<HTMLSelectElement>(`[data-property-id="${CSS.escape(p.id)}"] select`)?.focus();
+    if (kind === "custom") return;
+    if (kind === "bool" || kind === "enum" || kind === "vector") {
+      // Always-rendered dropdowns and fields — focusing one is "editing" it.
+      rowsRef.current?.querySelector<HTMLElement>(`[data-property-id="${CSS.escape(p.id)}"] select, [data-property-id="${CSS.escape(p.id)}"] input`)?.focus();
       return;
     }
     setEditing({ id: p.id, draft: draftOf(p), session: ++sessionRef.current });
@@ -222,7 +260,7 @@ export function PropertyGrid({
 
   /** Commits `value` — resolves whether it was accepted (a rejection's message is shown by the caller's choice: inline, or `notify` on blur). */
   async function commit(p: PropertyDescriptor, value: PropertyValue): Promise<string | null> {
-    if (value === p.value) return null;
+    if (sameValue(value, p.value)) return null;
     setBusyId(p.id);
     const message = await applyEdit(p, value);
     setBusyId(null);
@@ -238,7 +276,7 @@ export function PropertyGrid({
   async function commitText(p: PropertyDescriptor, draft: string, viaBlur: boolean) {
     const session = sessionRef.current;
     const parsed = parseDraft(p, draft);
-    const message = typeof parsed === "object" ? parsed.error : await commit(p, parsed);
+    const message = typeof parsed === "object" && !Array.isArray(parsed) ? (parsed as { error: string }).error : await commit(p, parsed as PropertyValue);
     if (session !== sessionRef.current) return;
     if (!message) {
       sessionRef.current++;
@@ -334,6 +372,101 @@ export function PropertyGrid({
     target.addEventListener("pointercancel", onUp);
   }
 
+  /**
+   * Drags a number (or one component of a vector) by its label, as Blender
+   * does: a step per few pixels, Shift for a tenth of it; committed once,
+   * on release.
+   */
+  function startScrub(e: ReactPointerEvent<HTMLElement>, p: PropertyDescriptor, component: number | null) {
+    if (e.button !== 0 || !isEditable(p) || busyId === p.id) return;
+    const base = component === null ? (typeof p.value === "number" ? p.value : null) : Array.isArray(p.value) ? p.value[component] : null;
+    if (base === null || base === undefined) return;
+    e.preventDefault();
+    const target = e.currentTarget;
+    target.setPointerCapture(e.pointerId);
+    const startX = e.clientX;
+    const step = p.step ?? 1;
+    let latest = base;
+    const valueAt = (n: number): PropertyValue => {
+      if (component === null) return n;
+      const v = [...(p.value as readonly number[])];
+      v[component] = n;
+      return v;
+    };
+    const onMove = (ev: PointerEvent) => {
+      const steps = Math.round((ev.clientX - startX) / 4);
+      latest = Math.round((base + steps * step * (ev.shiftKey ? 0.1 : 1)) * 10000) / 10000;
+      const out = rowsRef.current?.querySelector<HTMLElement>(`[data-property-id="${CSS.escape(p.id)}"] [data-scrub="${component ?? "value"}"]`);
+      if (out) {
+        if (out instanceof HTMLInputElement) out.value = shortNumber(latest);
+        else out.textContent = shortNumber(latest);
+      }
+    };
+    const onUp = () => {
+      target.removeEventListener("pointermove", onMove);
+      target.removeEventListener("pointerup", onUp);
+      target.removeEventListener("pointercancel", onUp);
+      if (latest !== base) void commitChoice(p, valueAt(latest));
+    };
+    target.addEventListener("pointermove", onMove);
+    target.addEventListener("pointerup", onUp);
+    target.addEventListener("pointercancel", onUp);
+  }
+
+  /** A vector's fields: each component its own box, committed on Enter or leaving it. */
+  function renderVector(p: PropertyDescriptor) {
+    const v = Array.isArray(p.value) ? (p.value as readonly number[]) : [];
+    const labels = p.labels ?? AXES;
+    const editable = isEditable(p);
+    const commitAt = (i: number, text: string) => {
+      const n = Number(text.trim());
+      if (text.trim() === "" || Number.isNaN(n)) {
+        setError({ id: p.id, message: t("Not a valid number.") });
+        return;
+      }
+      const next = [...v];
+      next[i] = n;
+      void commitChoice(p, next);
+    };
+    return (
+      <span className="sp-propgrid-vector">
+        {v.map((n, i) => (
+          <label key={i} className="sp-propgrid-vector-part" data-axis={i}>
+            <span className="sp-propgrid-vector-label" onPointerDown={(e) => startScrub(e, p, i)}>
+              {labels[i] ?? ""}
+            </span>
+            <input
+              key={`${p.id}:${n}`}
+              className="sp-propgrid-vector-input"
+              data-scrub={i}
+              defaultValue={shortNumber(n)}
+              disabled={!editable || busyId === p.id}
+              spellCheck={false}
+              inputMode="decimal"
+              onFocus={(e) => {
+                setCursor(`p:${p.id}`);
+                e.currentTarget.select();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  commitAt(i, e.currentTarget.value);
+                } else if (e.key === "Escape") {
+                  e.preventDefault();
+                  e.currentTarget.value = shortNumber(n);
+                  focusRows();
+                }
+              }}
+              onBlur={(e) => {
+                if (e.currentTarget.value !== shortNumber(n)) commitAt(i, e.currentTarget.value);
+              }}
+            />
+          </label>
+        ))}
+      </span>
+    );
+  }
+
   /** Drags the description pane's top edge — taller upward. */
   function startDescriptionDrag(e: ReactPointerEvent<HTMLDivElement>) {
     if (e.button !== 0) return;
@@ -357,6 +490,7 @@ export function PropertyGrid({
     const kind = kindOf(p);
     const editable = isEditable(p);
     const busy = busyId === p.id;
+    if (kind === "vector") return renderVector(p);
     if (editable && (kind === "bool" || kind === "enum")) {
       const choices = kind === "bool" ? ["true", "false"] : [...(p.options ?? [])];
       const value = draftOf(p);
@@ -378,7 +512,7 @@ export function PropertyGrid({
         >
           {choices.map((c) => (
             <option key={c} value={c}>
-              {kind === "bool" ? (c === "true" ? "True" : "False") : c}
+              {kind === "bool" ? (c === "true" ? t("True") : t("False")) : c}
             </option>
           ))}
         </select>
@@ -433,7 +567,7 @@ export function PropertyGrid({
       <span className="sp-propgrid-value-text">
         {p.swatch && <span className="sp-propgrid-swatch" style={{ boxShadow: `inset 0 0 0 12px ${p.swatch}` }} />}
         {p.image && <img className="sp-propgrid-image" src={p.image} alt="" />}
-        {displayText(p)}
+        {kind === "number" ? <span data-scrub="value">{displayText(p)}</span> : displayText(p)}
       </span>
     );
   }
@@ -442,7 +576,8 @@ export function PropertyGrid({
   const toolbarDisabled = objectName === undefined;
 
   return (
-    <div className={["sp-propgrid", className].filter(Boolean).join(" ")}>
+    <div className={["sp-propgrid", compact && "is-compact", className].filter(Boolean).join(" ")}>
+      {(!compact || objectName !== undefined) && (
       <div className="sp-propgrid-object" title={objectName ? [`${objectName}  ${objectType ?? ""}`, objectDescription].filter(Boolean).join("\n") : undefined}>
         {objectName !== undefined && (
           <>
@@ -451,6 +586,8 @@ export function PropertyGrid({
           </>
         )}
       </div>
+      )}
+      {!compact && (
       <div className="sp-propgrid-toolbar">
         <IconButton
           title={t("Categorized")}
@@ -490,6 +627,7 @@ export function PropertyGrid({
           <Icon name="info" />
         </IconButton>
       </div>
+      )}
       <div className="sp-propgrid-body" style={{ ["--sp-propgrid-split" as string]: `${split * 100}%` }}>
         {objectName === undefined ? (
           <div className="sp-propgrid-empty">{emptyLabel ?? t("No object selected.")}</div>
@@ -536,6 +674,23 @@ export function PropertyGrid({
               const p = item.property;
               const editable = isEditable(p);
               const rowError = error?.id === p.id ? error.message : null;
+              if (kindOf(p) === "custom") {
+                return (
+                  <div
+                    key={item.key}
+                    data-key={item.key}
+                    data-property-id={p.id}
+                    className="sp-propgrid-custom"
+                    role="row"
+                    aria-selected={active}
+                    data-selected={active || undefined}
+                    onClick={() => setCursor(item.key)}
+                  >
+                    {p.name && <div className="sp-propgrid-custom-name">{p.name}</div>}
+                    {p.render?.()}
+                  </div>
+                );
+              }
               return (
                 <div key={item.key} className="sp-propgrid-entry">
                   <div
@@ -552,6 +707,8 @@ export function PropertyGrid({
                       className="sp-propgrid-name"
                       role="gridcell"
                       title={p.name}
+                      data-scrubbable={(editable && kindOf(p) === "number") || undefined}
+                      onPointerDown={(e) => kindOf(p) === "number" && startScrub(e, p, null)}
                       onDoubleClick={() => (kindOf(p) === "bool" || kindOf(p) === "enum" ? cycle(p) : beginEdit(p))}
                     >
                       <span className="sp-propgrid-name-text">{p.name}</span>
@@ -568,7 +725,7 @@ export function PropertyGrid({
                       role="gridcell"
                       title={editing?.id === p.id ? undefined : displayText(p)}
                       onClick={() => {
-                        if (editable && editing?.id !== p.id && kindOf(p) !== "bool" && kindOf(p) !== "enum") beginEdit(p);
+                        if (editable && editing?.id !== p.id && kindOf(p) !== "bool" && kindOf(p) !== "enum" && kindOf(p) !== "vector") beginEdit(p);
                       }}
                       onDoubleClick={() => cycle(p)}
                     >

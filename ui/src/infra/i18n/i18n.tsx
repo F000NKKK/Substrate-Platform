@@ -227,6 +227,11 @@ const KEY_LABELS: Record<string, string> = {
   tab: "Tab",
   pause: "Pause",
   cancel: "Break",
+  // The mouse: buttons and the wheel.
+  lmb: "LMB",
+  mmb: "MMB",
+  rmb: "RMB",
+  wheel: "Wheel",
 };
 
 /**
@@ -240,10 +245,22 @@ export function formatShortcut(shortcut: string): string {
       step
         .split(/\+(?!$)/)
         .map((part) => {
+          // The numeric keypad: `num1`, `numpad1` → "Num 1" (its word translated).
+          const num = /^num(?:pad)?(\d|[a-z]+)$/.exec(part);
+          if (num) return `${t("Num")} ${num[1].length === 1 ? num[1].toUpperCase() : t(num[1][0].toUpperCase() + num[1].slice(1))}`;
           const label = KEY_LABELS[part] ?? (/^f\d+$/.test(part) ? part.toUpperCase() : part.length === 1 ? part.toUpperCase() : part[0].toUpperCase() + part.slice(1));
           return t(label);
         })
         .join("+"),
     )
     .join(" ");
+}
+
+/**
+ * A label with its shortcut, as tooltips and menus write it — the label and
+ * each key translated on their own (catalogs hold "Find next", not "Find
+ * next (F3)"): `withShortcut("Find next", "f3")` → `"Найти далее (F3)"`.
+ */
+export function withShortcut(label: string, shortcut: string, params?: Record<string, string | number>): string {
+  return `${t(label, params)} (${formatShortcut(shortcut)})`;
 }

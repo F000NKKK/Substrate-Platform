@@ -15,7 +15,7 @@ import {
 } from "@codemirror/search";
 import { EditorSelection, type EditorState, type Extension } from "@codemirror/state";
 import { EditorView, type Panel, type ViewUpdate } from "@codemirror/view";
-import { t, useT } from "../../infra/i18n";
+import { t, useT, withShortcut } from "../../infra/i18n";
 import { IconChevronRight, IconClose } from "../../infra/icons";
 import { showDialog } from "../Dialog";
 import "./findWidget.css";
@@ -236,26 +236,26 @@ function FindWidget({ view, info, register }: { view: EditorView; info: MatchInf
               onKeyDown={(e) => onKeyDown(e, "find")}
               onFocus={() => (origin.current = view.state.selection.main.from)}
             />
-            <Toggle on={query.caseSensitive} title={t("Match case (Alt+C)")} onClick={() => setQuery({ caseSensitive: !query.caseSensitive })}>
+            <Toggle on={query.caseSensitive} title={withShortcut("Match case", "alt+c")} onClick={() => setQuery({ caseSensitive: !query.caseSensitive })}>
               Aa
             </Toggle>
-            <Toggle on={query.wholeWord} title={t("Match whole word (Alt+W)")} onClick={() => setQuery({ wholeWord: !query.wholeWord })}>
+            <Toggle on={query.wholeWord} title={withShortcut("Match whole word", "alt+w")} onClick={() => setQuery({ wholeWord: !query.wholeWord })}>
               <span className="sp-find-word">ab</span>
             </Toggle>
-            <Toggle on={query.regexp} title={t("Use regular expressions (Alt+E)")} onClick={() => setQuery({ regexp: !query.regexp })}>
+            <Toggle on={query.regexp} title={withShortcut("Use regular expressions", "alt+e")} onClick={() => setQuery({ regexp: !query.regexp })}>
               .*
             </Toggle>
           </div>
           <span className="sp-find-status" data-empty={(!!query.search && info.total === 0) || undefined}>
             {status}
           </span>
-          <Action title={t("Find previous (Shift+F3)")} disabled={!info.total} onClick={previous}>
+          <Action title={withShortcut("Find previous", "shift+f3")} disabled={!info.total} onClick={previous}>
             <ArrowUp />
           </Action>
-          <Action title={t("Find next (F3)")} disabled={!info.total} onClick={next}>
+          <Action title={withShortcut("Find next", "f3")} disabled={!info.total} onClick={next}>
             <ArrowDown />
           </Action>
-          <Action title={t("Close (Esc)")} onClick={close}>
+          <Action title={withShortcut("Close", "esc")} onClick={close}>
             <IconClose />
           </Action>
         </div>
@@ -273,10 +273,10 @@ function FindWidget({ view, info, register }: { view: EditorView; info: MatchInf
                 onKeyDown={(e) => onKeyDown(e, "replace")}
               />
             </div>
-            <Action title={t("Replace next (Alt+R)")} disabled={!info.total} onClick={() => replaceNext(view)}>
+            <Action title={withShortcut("Replace next", "alt+r")} disabled={!info.total} onClick={() => replaceNext(view)}>
               <ReplaceOne />
             </Action>
-            <Action title={t("Replace all (Alt+A)")} disabled={!info.total} onClick={() => replaceAll(view)}>
+            <Action title={withShortcut("Replace all", "alt+a")} disabled={!info.total} onClick={() => replaceAll(view)}>
               <ReplaceAll />
             </Action>
           </div>

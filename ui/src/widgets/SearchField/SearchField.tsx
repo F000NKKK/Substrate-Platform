@@ -1,5 +1,5 @@
 import type { InputHTMLAttributes, ReactNode, Ref } from "react";
-import { useT } from "../../infra/i18n";
+import { useT, withShortcut } from "../../infra/i18n";
 import "./SearchField.css";
 
 /** Visual Studio's three search options — the Aa / ab / .* toggles. */
@@ -28,7 +28,7 @@ export interface SearchFieldProps extends Omit<InputHTMLAttributes<HTMLInputElem
  * other search UI that should look like one family with the editor's own.
  */
 export function SearchField({ value, onValueChange, options, onOptionsChange, invalid, trailing, inputRef, className, ...props }: SearchFieldProps) {
-  const t = useT();
+  useT(); // re-render on a locale change
   const toggle = (key: keyof SearchOptions, label: ReactNode, title: string) =>
     options && (
       <button
@@ -55,9 +55,9 @@ export function SearchField({ value, onValueChange, options, onOptionsChange, in
         onChange={(e) => onValueChange(e.target.value)}
         {...props}
       />
-      {toggle("matchCase", "Aa", t("Match case (Alt+C)"))}
-      {toggle("wholeWord", <span className="sp-search-field-word">ab</span>, t("Match whole word (Alt+W)"))}
-      {toggle("regex", ".*", t("Use regular expressions (Alt+E)"))}
+      {toggle("matchCase", "Aa", withShortcut("Match case", "alt+c"))}
+      {toggle("wholeWord", <span className="sp-search-field-word">ab</span>, withShortcut("Match whole word", "alt+w"))}
+      {toggle("regex", ".*", withShortcut("Use regular expressions", "alt+e"))}
       {trailing}
     </div>
   );
