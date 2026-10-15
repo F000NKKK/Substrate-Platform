@@ -1,0 +1,67 @@
+/* A window's controls: action on the left, key caps on the right. */
+.sp-key-hints {
+  padding: var(--sp-space-sm) var(--sp-space-md);
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size-sm, 12px);
+  color: var(--sp-text-muted);
+}
+
+.sp-key-hints-title {
+  margin-bottom: var(--sp-space-xs);
+  font-weight: 600;
+  color: var(--sp-text);
+}
+
+.sp-key-hints-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+}
+
+.sp-key-hints-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-space-sm);
+}
+
+.sp-key-hints-row dt {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sp-key-hints-row dd {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 2px;
+  margin: 0;
+}
+
+.sp-key-hints-alt {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.sp-key-hints-or {
+  padding: 0 2px;
+  color: var(--sp-text-faint);
+}
+
+.sp-key-hints kbd {
+  min-width: 16px;
+  padding: 0 4px;
+  border: 1px solid var(--sp-border-strong, var(--sp-border));
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  background: var(--sp-surface-2);
+  color: var(--sp-text);
+  font: inherit;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+}

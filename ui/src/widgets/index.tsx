@@ -76,3 +76,5 @@ export { FormPage, FormSection, FormField, CommitTextField, StringListField, Che
 export type { CommitResult, FormFieldProps, CommitTextFieldProps, StringListFieldProps, SelectOption } from "./Form";
 export { ComponentList } from "./ComponentList";
 export type { ComponentListProps, ComponentListItem, ComponentListAction, ComponentListSection, ComponentStatus } from "./ComponentList";
+export { KeyHints } from "./KeyHints";
+export type { KeyHint, KeyHintsProps } from "./KeyHints";

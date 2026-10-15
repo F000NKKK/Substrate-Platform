@@ -42,6 +42,7 @@ registerTranslations(
 
     // Keys (formatShortcut, withShortcut) — translated once, here.
     Space: "Пробел",
+    Controls: "Управление",
     Enter: "Ввод",
     Backspace: "Backspace",
     Num: "Num",

@@ -502,8 +502,22 @@ export function PropertyGrid({
     const editable = isEditable(p);
     const busy = busyId === p.id;
     if (kind === "vector") return renderVector(p);
-    if (editable && (kind === "bool" || kind === "enum")) {
-      const choices = kind === "bool" ? ["true", "false"] : [...(p.options ?? [])];
+    if (kind === "bool") {
+      // A check box, as a designer's inspector has — toggled in place.
+      return (
+        <input
+          type="checkbox"
+          className="sp-propgrid-check"
+          checked={p.value === true}
+          disabled={!editable || busy}
+          aria-label={p.name}
+          onChange={(e) => void commitChoice(p, e.target.checked)}
+          onFocus={() => setCursor(`p:${p.id}`)}
+        />
+      );
+    }
+    if (editable && kind === "enum") {
+      const choices = [...(p.options ?? [])];
       const value = draftOf(p);
       // A value outside the declared options still shows as itself.
       if (!choices.includes(value)) choices.unshift(value);
@@ -512,7 +526,7 @@ export function PropertyGrid({
           className="sp-propgrid-select"
           value={value}
           disabled={busy}
-          onChange={(e) => void commitChoice(p, kind === "bool" ? e.target.value === "true" : e.target.value)}
+          onChange={(e) => void commitChoice(p, e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Escape") {
               e.preventDefault();
@@ -523,7 +537,7 @@ export function PropertyGrid({
         >
           {choices.map((c) => (
             <option key={c} value={c}>
-              {kind === "bool" ? (c === "true" ? t("True") : t("False")) : (p.optionLabel?.(c) ?? c)}
+              {p.optionLabel?.(c) ?? c}
             </option>
           ))}
         </select>
@@ -770,7 +784,7 @@ export function PropertyGrid({
                       onClick={() => {
                         if (editable && editing?.id !== p.id && kindOf(p) !== "bool" && kindOf(p) !== "enum" && kindOf(p) !== "vector") beginEdit(p);
                       }}
-                      onDoubleClick={() => cycle(p)}
+                      onDoubleClick={() => kindOf(p) !== "bool" && cycle(p)}
                     >
                       {renderValue(p)}
                       {p.edit && (

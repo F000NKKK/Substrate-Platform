@@ -1,4 +1,4 @@
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 import type { PropertyDescriptor } from "../../widgets/PropertyGrid";
 
 /**
@@ -71,6 +71,10 @@ export interface PropertySet {
   /** Identifies the element — an edit in progress is dropped when it changes. */
   objectKey: string;
   properties: PropertyDescriptor[];
+  /** Above the rows, as given: what isn't a value — a large preview, the element's icon, a picker. */
+  header?: ReactNode;
+  /** Under the rows, as given: a pane of its own (a UV editor, the window's controls — `KeyHints`). */
+  footer?: ReactNode;
   /** `"declared"`: the rows as given (position before rotation before scale); default sorted by name, as Visual Studio lists properties. */
   order?: "sorted" | "declared";
 }

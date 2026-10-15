@@ -324,6 +324,7 @@
 
 .sp-propgrid-description {
   flex: 0 0 auto;
+  box-sizing: border-box;
   padding: 0 var(--sp-space-sm) var(--sp-space-xs);
   overflow-y: auto;
 }
@@ -354,9 +355,11 @@
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
-  gap: 2px;
+  gap: 3px;
   width: 100%;
   min-width: 0;
+  padding: 0 3px 0 2px;
+  box-sizing: border-box;
 }
 
 .sp-propgrid-vector-part {
@@ -396,7 +399,7 @@
   width: 100%;
   border: none;
   outline: none;
-  padding: 0 4px 0 0;
+  padding: 0 5px 0 2px;
   background: transparent;
   color: var(--sp-text);
   font: inherit;
@@ -408,8 +411,16 @@
   color: var(--sp-text-faint);
 }
 
-/* A whole-width row: a preview or picker under its category. */
+/* A check box value: toggled where it stands. */
+.sp-propgrid-check {
+  margin: 0 0 0 var(--sp-space-sm);
+  accent-color: var(--sp-accent);
+}
+
+/* A whole-width row: a preview or picker under its category, as wide as the window. */
 .sp-propgrid-custom {
+  display: flex;
+  flex-direction: column;
   padding: var(--sp-space-xs) var(--sp-space-sm);
   border-bottom: 1px solid var(--sp-border-subtle, transparent);
 }
