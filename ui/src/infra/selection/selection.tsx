@@ -71,6 +71,8 @@ export interface PropertySet {
   /** Identifies the element — an edit in progress is dropped when it changes. */
   objectKey: string;
   properties: PropertyDescriptor[];
+  /** `"declared"`: the rows as given (position before rotation before scale); default sorted by name, as Visual Studio lists properties. */
+  order?: "sorted" | "declared";
 }
 
 export const PROPERTIES_KIND = "properties";
@@ -139,10 +141,13 @@ export function setPropertyContext(owner: string, set: PropertySet | null): void
  * window — a document's path). It's what Properties shows while the window
  * is active (`activatePropertyContext` when it gets focus); while shown, a
  * new `set` (another element picked, a value changed) shows at once.
+ * `set` may be a function, asked once the render is done.
  */
-export function usePropertyContext(owner: string, set: PropertySet | null): void {
+export function usePropertyContext(owner: string, set: PropertySet | null | (() => PropertySet | null)): void {
   useEffect(() => {
-    if (set) setPropertyContext(owner, set);
+    // A function is asked after the render — what the rest of it (past an early return) settled on.
+    const shown = typeof set === "function" ? set() : set;
+    if (shown) setPropertyContext(owner, shown);
     else if (contexts.has(owner)) setPropertyContext(owner, null);
   });
   useEffect(() => () => setPropertyContext(owner, null), [owner]);
