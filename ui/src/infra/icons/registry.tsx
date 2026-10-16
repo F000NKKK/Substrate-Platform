@@ -61,6 +61,15 @@ const defaultIcons: Record<string, IconComponent> = {
   stash: glyphs.IconStash,
   table: glyphs.IconTable,
   folderTable: glyphs.IconFolderTable,
+  arrowLeft: glyphs.IconArrowLeft,
+  arrowRight: glyphs.IconArrowRight,
+  home: glyphs.IconHome,
+  refresh: glyphs.IconRefresh,
+  filter: glyphs.IconFilter,
+  files: glyphs.IconFiles,
+  locate: glyphs.IconLocate,
+  link: glyphs.IconLink,
+  properties: glyphs.IconProperties,
 };
 
 const globalOverrides: Record<string, IconComponent> = {};
