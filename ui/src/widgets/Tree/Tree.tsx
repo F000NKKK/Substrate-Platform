@@ -4,6 +4,7 @@ import { ViewportPortal } from "../../infra/portal";
 import { ContextMenu, type ContextMenuItem } from "../ContextMenu";
 import { useTree } from "./useTree";
 import type { FlatEntry } from "./useTree";
+import { nodeText } from "./treeNav";
 import "./Tree.css";
 
 export interface TreeNode<T> {
@@ -18,6 +19,12 @@ export interface TreeNode<T> {
    * activate it like a leaf.
    */
   openable?: boolean;
+  /** Plain text for type-ahead and the inline editor — default the label, when that's a string. */
+  text?: string;
+  /** Drawn dimmed — an item that's been Cut, or one shown only because hidden items are. */
+  faded?: boolean;
+  /** Content at the row's end — a status mark (a version-control letter, a count). */
+  trailing?: ReactNode;
   data: T;
 }
 
@@ -67,6 +74,18 @@ export interface TreeProps<T> {
   canDrag?: (node: TreeNode<T>) => boolean;
   /** Whether a drop can go into a branch (default: every non-`openable` branch); a drop elsewhere goes to the nearest ancestor that can take it. */
   canDropInto?: (node: TreeNode<T>) => boolean;
+  /** `*` on a node: open it and everything under it. Default: every branch already in `nodes`; a lazily-loaded tree supplies its own (to load what isn't listed yet). */
+  onExpandAll?: (node: TreeNode<T>) => void;
+  /** The node whose label is an inline text box (Rename, a new item's name), focused with its text selected. */
+  editingId?: string | null;
+  /** Enter, or the box losing focus: the text typed. */
+  onEditCommit?: (node: TreeNode<T>, text: string) => void;
+  /** Escape. */
+  onEditCancel?: (node: TreeNode<T>) => void;
+  /** What part of the text the inline box starts with selected, `[start, end)` — default all of it. */
+  editSelection?: (node: TreeNode<T>, text: string) => [number, number];
+  /** Scrolls this node into view and makes it the keyboard's — whenever a new object is passed (Sync with Active Document). */
+  reveal?: { id: string } | null;
   className?: string;
 }
 
@@ -133,8 +152,42 @@ const INDENT = 16;
  * a listing in the tens of thousands. `FileTree` is a thin config layer on
  * top of this one.
  */
-export function Tree<T>({ nodes, renderIcon, getMenuItems, onDropNodes, canDrag, canDropInto = defaultCanDropInto, className, ...rest }: TreeProps<T>) {
+export function Tree<T>({
+  nodes,
+  renderIcon,
+  getMenuItems,
+  onDropNodes,
+  canDrag,
+  canDropInto = defaultCanDropInto,
+  editingId,
+  onEditCommit,
+  onEditCancel,
+  editSelection,
+  reveal,
+  className,
+  ...rest
+}: TreeProps<T>) {
   const tree = useTree({ nodes, getMenuItems, ...rest });
+  const rootRef = useRef<HTMLDivElement>(null);
+  const rowElement = (id: string) =>
+    [...(rootRef.current?.querySelectorAll<HTMLElement>(".sp-tree-row[data-node-id]") ?? [])].find((row) => row.dataset.nodeId === id);
+
+  // A keyboard move puts the DOM focus on the row it moved to (the roving tabindex alone wouldn't).
+  useEffect(() => {
+    const id = tree.focusRequestRef.current;
+    if (!id || id !== tree.activeId) return;
+    tree.focusRequestRef.current = null;
+    rowElement(id)?.focus();
+  });
+
+  useEffect(() => {
+    if (!reveal) return;
+    tree.setActiveId(reveal.id);
+    // After the expand that brought it into the tree has laid out.
+    const frame = requestAnimationFrame(() => rowElement(reveal.id)?.scrollIntoView({ block: "nearest" }));
+    return () => cancelAnimationFrame(frame);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reveal]);
   const [drag, setDrag] = useState<TreeDrag | null>(null);
   const dragRef = useRef<TreeDrag | null>(null);
   dragRef.current = drag;
@@ -218,10 +271,13 @@ export function Tree<T>({ nodes, renderIcon, getMenuItems, onDropNodes, canDrag,
             data-selected={selected || undefined}
             data-node-id={node.id}
             data-drop-target={drag?.targetId === node.id || undefined}
+            data-faded={node.faded || undefined}
             tabIndex={tree.activeId === node.id ? 0 : -1}
             style={{ height: ROW_HEIGHT, paddingLeft: depth * INDENT + 4 }}
             onFocus={() => tree.setActiveId(node.id)}
-            onKeyDown={(e) => tree.handleKeyDown(e, entry)}
+            onKeyDown={(e) => {
+              if (e.target === e.currentTarget) tree.handleKeyDown(e, entry);
+            }}
             onPointerDown={(e) => handleRowPointerDown(node, e)}
             onClick={(e) => {
               if (!suppressClickRef.current) tree.handleRowClick(node, e);
@@ -252,7 +308,17 @@ export function Tree<T>({ nodes, renderIcon, getMenuItems, onDropNodes, canDrag,
               <span className="sp-tree-chevron-spacer" />
             )}
             {renderIcon && <span className="sp-tree-icon">{renderIcon(node, expanded)}</span>}
-            <span className="sp-tree-label">{node.label}</span>
+            {editingId === node.id ? (
+              <TreeEditBox
+                text={nodeText(node)}
+                selection={editSelection?.(node, nodeText(node))}
+                onCommit={(text) => onEditCommit?.(node, text)}
+                onCancel={() => onEditCancel?.(node)}
+              />
+            ) : (
+              <span className="sp-tree-label">{node.label}</span>
+            )}
+            {node.trailing !== undefined && <span className="sp-tree-trailing">{node.trailing}</span>}
           </div>
           {node.children && node.children.length > 0 && (
             <div className="sp-tree-children" data-expanded={expanded || undefined}>
@@ -265,7 +331,7 @@ export function Tree<T>({ nodes, renderIcon, getMenuItems, onDropNodes, canDrag,
   }
 
   return (
-    <div className={["sp-tree", className].filter(Boolean).join(" ")} role="tree" data-dragging={drag ? true : undefined}>
+    <div ref={rootRef} className={["sp-tree", className].filter(Boolean).join(" ")} role="tree" aria-multiselectable data-dragging={drag ? true : undefined}>
       {renderNodes(nodes, 0, null)}
       {drag && (
         <ViewportPortal>
@@ -285,5 +351,56 @@ export function Tree<T>({ nodes, renderIcon, getMenuItems, onDropNodes, canDrag,
         }
       />
     </div>
+  );
+}
+
+/**
+ * The inline text box of a node being renamed or named — Enter or leaving it
+ * commits, Escape cancels; keys typed in it stay in it (no type-ahead, no
+ * tree navigation).
+ */
+function TreeEditBox({ text, selection, onCommit, onCancel }: { text: string; selection?: [number, number]; onCommit: (text: string) => void; onCancel: () => void }) {
+  const [value, setValue] = useState(text);
+  const inputRef = useRef<HTMLInputElement>(null);
+  /** Committed or cancelled already — the blur that follows mustn't commit again. */
+  const doneRef = useRef(false);
+  useEffect(() => {
+    const input = inputRef.current;
+    if (!input) return;
+    input.focus();
+    const [start, end] = selection ?? [0, text.length];
+    input.setSelectionRange(start, end);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const finish = (commit: boolean) => {
+    if (doneRef.current) return;
+    doneRef.current = true;
+    if (commit) onCommit(value);
+    else onCancel();
+  };
+  return (
+    <input
+      ref={inputRef}
+      className="sp-tree-edit"
+      data-own-undo
+      spellCheck={false}
+      autoComplete="off"
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onKeyDown={(e) => {
+        e.stopPropagation();
+        if (e.key === "Enter") {
+          e.preventDefault();
+          finish(true);
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          finish(false);
+        }
+      }}
+      onBlur={() => finish(true)}
+      onClick={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+    />
   );
 }

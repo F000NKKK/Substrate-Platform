@@ -1,5 +1,6 @@
 import type { InputHTMLAttributes, ReactNode, Ref } from "react";
 import { useT, withShortcut } from "../../infra/i18n";
+import { Icon } from "../../infra/icons";
 import "./SearchField.css";
 
 /** Visual Studio's three search options — the Aa / ab / .* toggles. */
@@ -19,6 +20,8 @@ export interface SearchFieldProps extends Omit<InputHTMLAttributes<HTMLInputElem
   invalid?: boolean;
   /** Extra content at the field's end, after the toggles. */
   trailing?: ReactNode;
+  /** A filter box, as Visual Studio's tool-window searches: a ✕ clears it while it has text, and so does Escape. */
+  clearable?: boolean;
   inputRef?: Ref<HTMLInputElement>;
 }
 
@@ -27,8 +30,8 @@ export interface SearchFieldProps extends Omit<InputHTMLAttributes<HTMLInputElem
  * (Aa, ab, .*) sit inside it, on the right. Used by Find in Files and any
  * other search UI that should look like one family with the editor's own.
  */
-export function SearchField({ value, onValueChange, options, onOptionsChange, invalid, trailing, inputRef, className, ...props }: SearchFieldProps) {
-  useT(); // re-render on a locale change
+export function SearchField({ value, onValueChange, options, onOptionsChange, invalid, trailing, clearable, inputRef, className, onKeyDown, ...props }: SearchFieldProps) {
+  const t = useT();
   const toggle = (key: keyof SearchOptions, label: ReactNode, title: string) =>
     options && (
       <button
@@ -54,8 +57,28 @@ export function SearchField({ value, onValueChange, options, onOptionsChange, in
         autoComplete="off"
         value={value}
         onChange={(e) => onValueChange(e.target.value)}
+        onKeyDown={(e) => {
+          onKeyDown?.(e);
+          if (e.defaultPrevented || !clearable || e.key !== "Escape" || value === "") return;
+          // Escape clears the filter first; once it's empty, Escape goes on (to close or leave whatever holds it).
+          e.preventDefault();
+          e.stopPropagation();
+          onValueChange("");
+        }}
         {...props}
       />
+      {clearable && value !== "" && (
+        <button
+          type="button"
+          className="sp-search-field-toggle sp-search-field-clear"
+          title={t("Clear search")}
+          aria-label={t("Clear search")}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => onValueChange("")}
+        >
+          <Icon name="close" size={12} />
+        </button>
+      )}
       {toggle("matchCase", "Aa", withShortcut("Match case", "alt+c"))}
       {toggle("wholeWord", <span className="sp-search-field-word">ab</span>, withShortcut("Match whole word", "alt+w"))}
       {toggle("regex", ".*", withShortcut("Use regular expressions", "alt+e"))}

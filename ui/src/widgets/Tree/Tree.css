@@ -130,3 +130,31 @@
   color: var(--sp-accent);
   font-weight: 700;
 }
+
+.sp-tree-row[data-faded] .sp-tree-label,
+.sp-tree-row[data-faded] .sp-tree-icon {
+  opacity: 0.55;
+}
+
+.sp-tree-trailing {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding-left: var(--sp-space-sm);
+  display: flex;
+  align-items: center;
+}
+
+/* Rename / a new item's name, in place of the label. */
+.sp-tree-edit {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: calc(var(--sp-row-height, 22px) - 4px);
+  padding: 0 var(--sp-space-xs);
+  font: inherit;
+  color: var(--sp-text);
+  background: var(--sp-surface-0);
+  border: 1px solid var(--sp-accent);
+  border-radius: var(--sp-radius-xs);
+  outline: none;
+  user-select: text;
+}

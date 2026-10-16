@@ -17,6 +17,9 @@ export interface DirectoryTreeCommands {
   remove?: (path: string) => Promise<void>;
 }
 
+/** How many folders `expandSubtree` opens at most. */
+const EXPAND_SUBTREE_LIMIT = 500;
+
 function joinPath(parent: string, name: string): string {
   return `${parent.replace(/[/\\]+$/, "")}/${name}`;
 }
@@ -93,20 +96,20 @@ export function useDirectoryTree(
   // saved set with just the root).
   const restoredRef = useRef(false);
 
-  /** Resolves `false` if the listing failed (reported to `onError` unless `silent`) or belongs to a root no longer shown. */
-  const loadFolder = useCallback(
-    async (id: string, silent = false): Promise<boolean> => {
+  /** The listing (`null` if it failed — reported to `onError` unless `silent` — or belongs to a root no longer shown). */
+  const listFolder = useCallback(
+    async (id: string, silent = false): Promise<DirEntry[] | null> => {
       const root = rootRef.current;
       let entries: DirEntry[];
       try {
         entries = await commands.list(id);
       } catch (err) {
         if (!silent) onErrorRef.current(err, id);
-        return false;
+        return null;
       }
       // The root changed while this listing was in flight — it belongs to a
       // tree that no longer exists.
-      if (rootRef.current !== root) return false;
+      if (rootRef.current !== root) return null;
       setNodes((prev) => replaceChildren(prev, id, entries.map(toNode)));
       setParentById((prev) => {
         const next = { ...prev };
@@ -114,10 +117,14 @@ export function useDirectoryTree(
         return next;
       });
       setLoadedIds((prev) => new Set(prev).add(id));
-      return true;
+      loadedRef.current = new Set(loadedRef.current).add(id);
+      return entries;
     },
     [commands]
   );
+
+  /** Resolves `false` if the listing failed (reported to `onError` unless `silent`) or belongs to a root no longer shown. */
+  const loadFolder = useCallback(async (id: string, silent = false): Promise<boolean> => (await listFolder(id, silent)) !== null, [listFolder]);
 
   // Resets to a fresh single-node tree whenever the root changes, then loads
   // it — the root starts pre-expanded, so there's no `onExpandedChange`
@@ -237,6 +244,56 @@ export function useDirectoryTree(
     [loadFolder]
   );
 
+  /**
+   * `*` on a folder: lists every folder under `id` not listed yet (up to
+   * `limit` of them, skipping the ones `skip` names — a build output folder
+   * nobody wants opened wholesale) and opens them all.
+   */
+  async function expandSubtree(id: string, options: { limit?: number; skip?: (path: string) => boolean } = {}) {
+    const limit = options.limit ?? EXPAND_SUBTREE_LIMIT;
+    const opened = new Set<string>([id]);
+    const queue = [id];
+    while (queue.length > 0 && opened.size < limit) {
+      const folder = queue.shift()!;
+      const entries = await listFolder(folder, true);
+      if (!entries) continue;
+      for (const entry of entries) {
+        if (entry.kind !== "dir" || options.skip?.(entry.path) || opened.size >= limit) continue;
+        opened.add(entry.path);
+        queue.push(entry.path);
+      }
+    }
+    setExpandedIds((prev) => new Set([...prev, ...opened]));
+  }
+
+  /**
+   * Sync with Active Document: lists and opens the folders down to `path`
+   * so its row exists. Resolves whether `path` is under the root and its
+   * folders could be listed.
+   */
+  async function revealPath(path: string): Promise<boolean> {
+    const base = rootPath.replace(/[/\\]+$/, "");
+    if (path === rootPath || !isWithin(path, base)) return path === rootPath;
+    const chain: string[] = [rootPath];
+    const rest = path.slice(base.length + 1).split(/[/\\]/);
+    rest.pop();
+    let at = base;
+    for (const part of rest) {
+      at = joinPath(at, part);
+      chain.push(at);
+    }
+    for (const folder of chain) {
+      if (!loadedRef.current.has(folder) && !(await loadFolder(folder, true))) return false;
+    }
+    setExpandedIds((prev) => new Set([...prev, ...chain]));
+    return true;
+  }
+
+  /** Refresh: re-lists every folder listed so far. */
+  async function refreshAll() {
+    for (const folder of [...loadedRef.current]) await loadFolder(folder, true);
+  }
+
   return {
     nodes,
     expandedIds,
@@ -249,6 +306,9 @@ export function useDirectoryTree(
     renameNode,
     removeNode,
     reload: (id: string) => loadFolder(id).then(() => {}),
+    expandSubtree,
+    revealPath,
+    refreshAll,
   };
 }
 

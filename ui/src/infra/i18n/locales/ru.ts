@@ -230,6 +230,7 @@ registerTranslations(
     "Match case": "С учетом регистра",
     "Match whole word": "Слово целиком",
     "Use regular expressions": "Использовать регулярные выражения",
+    "Clear search": "Очистить поиск",
     "Replace next": "Заменить следующее",
     "Replace all": "Заменить все",
     "Show replace": "Показать замену",

@@ -2,6 +2,8 @@ import { useMemo, type ReactNode } from "react";
 import { Tree, type TreeMenuItem, type TreeNode } from "../Tree";
 import { Icon } from "../../infra/icons";
 import { fileTypeOf } from "../../infra/fileTypes";
+import { HighlightedText } from "../HighlightedText";
+import type { TextRanges } from "./fileTreeFilter";
 
 export interface FileTreeNode {
   id: string;
@@ -14,6 +16,10 @@ export interface FileTreeNode {
   icon?: ReactNode;
   /** A generated file (Visual Studio's `MainWindow.g.cs`) — shown greyed and in italics. */
   generated?: boolean;
+  /** Drawn dimmed: Cut and waiting for a Paste, or shown only because hidden files are. */
+  faded?: boolean;
+  /** At the row's end — a version-control status letter, say. */
+  decoration?: ReactNode;
 }
 
 export interface FileTreeMenuItem {
@@ -51,17 +57,41 @@ export interface FileTreeProps {
   onDropNodes?: (ids: string[], folder: FileTreeNode, copy: boolean) => void;
   /** Whether a node can be dragged (default: every one). */
   canDrag?: (node: FileTreeNode) => boolean;
+  /** Spans of names to mark — search hits (`filterFileTree`'s `highlights`). */
+  highlights?: ReadonlyMap<string, TextRanges>;
+  /** The node being renamed (or named, for a new one) in place. */
+  editingId?: string | null;
+  /** The name typed into the inline box — Enter, or leaving it. */
+  onRenameCommit?: (node: FileTreeNode, name: string) => void;
+  onRenameCancel?: (node: FileTreeNode) => void;
+  /** `*` on a folder — see `Tree`'s `onExpandAll`. */
+  onExpandAll?: (node: FileTreeNode) => void;
+  /** Scrolls this node into view — see `Tree`'s `reveal`. */
+  reveal?: { id: string } | null;
   className?: string;
 }
 
-function toTreeNodes(nodes: FileTreeNode[]): TreeNode<FileTreeNode>[] {
-  return nodes.map((node) => ({
-    id: node.id,
-    label: node.generated ? <span style={{ fontStyle: "italic", opacity: 0.65 }}>{node.name}</span> : node.name,
-    data: node,
-    children: node.kind === "folder" ? toTreeNodes(node.children ?? []) : node.nested?.length ? toTreeNodes(node.nested) : undefined,
-    openable: node.kind === "file" && !!node.nested?.length,
-  }));
+function toTreeNodes(nodes: FileTreeNode[], highlights: ReadonlyMap<string, TextRanges> | undefined): TreeNode<FileTreeNode>[] {
+  return nodes.map((node) => {
+    const ranges = highlights?.get(node.id);
+    const name = ranges ? <HighlightedText text={node.name} ranges={ranges} /> : node.name;
+    return {
+      id: node.id,
+      label: node.generated ? <span style={{ fontStyle: "italic", opacity: 0.65 }}>{name}</span> : name,
+      text: node.name,
+      faded: node.faded,
+      trailing: node.decoration,
+      data: node,
+      children: node.kind === "folder" ? toTreeNodes(node.children ?? [], highlights) : node.nested?.length ? toTreeNodes(node.nested, highlights) : undefined,
+      openable: node.kind === "file" && !!node.nested?.length,
+    };
+  });
+}
+
+/** Renaming a file starts with its name selected without the extension, as in Explorer and Visual Studio. */
+function nameSelection(node: TreeNode<FileTreeNode>, text: string): [number, number] {
+  const dot = text.lastIndexOf(".");
+  return node.data.kind === "file" && dot > 0 ? [0, dot] : [0, text.length];
 }
 
 /**
@@ -94,8 +124,8 @@ export function nestFiles(nodes: FileTreeNode[], parentOf: (name: string, siblin
 }
 
 /** `Tree` configured for a file explorer: folder/file (open/closed) icons on top of its generic expand/collapse, selection, and context-menu behavior. */
-export function FileTree({ nodes, onActivate, getMenuItems, onDropNodes, canDrag, ...rest }: FileTreeProps) {
-  const treeNodes = useMemo(() => toTreeNodes(nodes), [nodes]);
+export function FileTree({ nodes, onActivate, getMenuItems, onDropNodes, canDrag, highlights, onRenameCommit, onRenameCancel, onExpandAll, ...rest }: FileTreeProps) {
+  const treeNodes = useMemo(() => toTreeNodes(nodes, highlights), [nodes, highlights]);
 
   return (
     <Tree
@@ -114,6 +144,10 @@ export function FileTree({ nodes, onActivate, getMenuItems, onDropNodes, canDrag
       onDropNodes={onDropNodes && ((ids, target, copy) => onDropNodes(ids, target.data, copy))}
       canDrag={canDrag && ((node) => canDrag(node.data))}
       canDropInto={(node) => node.data.kind === "folder"}
+      onEditCommit={onRenameCommit && ((node, text) => onRenameCommit(node.data, text))}
+      onEditCancel={onRenameCancel && ((node) => onRenameCancel(node.data))}
+      editSelection={nameSelection}
+      onExpandAll={onExpandAll && ((node) => onExpandAll(node.data))}
       {...rest}
     />
   );

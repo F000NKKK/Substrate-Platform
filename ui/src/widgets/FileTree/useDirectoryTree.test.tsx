@@ -66,3 +66,32 @@ describe("useDirectoryTree.refreshPaths", () => {
     expect(listed).toBe(0);
   });
 });
+
+describe("useDirectoryTree.expandSubtree / revealPath", () => {
+  it("lists and opens every folder under one, skipping what it's told to", async () => {
+    disk.set("/p", [dir("/p/src"), dir("/p/target")]);
+    disk.set("/p/src", [dir("/p/src/ui"), file("/p/src/lib.rs")]);
+    disk.set("/p/src/ui", [dir("/p/src/ui/widgets")]);
+    disk.set("/p/src/ui/widgets", []);
+    disk.set("/p/target", [dir("/p/target/debug")]);
+    const tree = await mount();
+    await act(() => tree().expandSubtree("/p", { skip: (path) => path.endsWith("/target") }));
+    expect([...tree().expandedIds].sort()).toEqual(["/p", "/p/src", "/p/src/ui", "/p/src/ui/widgets"]);
+    expect(names(tree(), "/p/src/ui")).toEqual(["widgets"]);
+  });
+
+  it("opens the folders down to a path, listing them as it goes", async () => {
+    disk.set("/p", [dir("/p/src")]);
+    disk.set("/p/src", [dir("/p/src/ui")]);
+    disk.set("/p/src/ui", [file("/p/src/ui/Main.yui")]);
+    const tree = await mount();
+    let found = false;
+    await act(async () => {
+      found = await tree().revealPath("/p/src/ui/Main.yui");
+    });
+    expect(found).toBe(true);
+    expect([...tree().expandedIds].sort()).toEqual(["/p", "/p/src", "/p/src/ui"]);
+    expect(names(tree(), "/p/src/ui")).toEqual(["Main.yui"]);
+    expect(await tree().revealPath("/elsewhere/x.rs")).toBe(false);
+  });
+});
