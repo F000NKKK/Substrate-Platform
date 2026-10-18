@@ -79,3 +79,5 @@ export { ComponentList } from "./ComponentList";
 export type { ComponentListProps, ComponentListItem, ComponentListAction, ComponentListSection, ComponentStatus } from "./ComponentList";
 export { KeyHints } from "./KeyHints";
 export type { KeyHint, KeyHintsProps } from "./KeyHints";
+export { ProgressBar } from "./ProgressBar";
+export type { ProgressBarProps } from "./ProgressBar";

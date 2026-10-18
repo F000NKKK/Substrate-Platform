@@ -1,0 +1,23 @@
+.sp-progress {
+  position: relative;
+  height: 4px;
+  overflow: hidden;
+  background: var(--sp-border);
+  border-radius: var(--sp-radius-sm);
+}
+
+.sp-progress-fill {
+  height: 100%;
+  background: var(--sp-accent);
+  transition: width var(--sp-duration-fast) linear;
+}
+
+.sp-progress--indeterminate .sp-progress-fill {
+  width: 30%;
+  animation: sp-progress-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes sp-progress-slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(340%); }
+}

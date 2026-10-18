@@ -62,3 +62,8 @@ export { IconFiles } from "./IconFiles";
 export { IconLocate } from "./IconLocate";
 export { IconLink } from "./IconLink";
 export { IconProperties } from "./IconProperties";
+export { IconPackage } from "./IconPackage";
+export { IconDownload } from "./IconDownload";
+export { IconPuzzle } from "./IconPuzzle";
+export { IconLayers } from "./IconLayers";
+export { IconBell } from "./IconBell";
