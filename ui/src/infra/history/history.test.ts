@@ -48,4 +48,18 @@ describe("document history", () => {
     documentHistory("/a").redo();
     expect([text, pixels]).toEqual(["with a texture", 2]);
   });
+
+  it("keeps an async action one step until it settles", async () => {
+    setDocumentWriter("/a", (t) => (text = t));
+    let pixels = 1;
+    await documentAction("/a", async () => {
+      pushDocumentStep("/a", { undo: () => (pixels = 1), redo: () => (pixels = 2) });
+      pixels = 2;
+      await Promise.resolve();
+      edit("written later");
+    });
+    documentHistory("/a").undo();
+    expect([text, pixels]).toEqual(["a", 1]);
+    expect(documentHistory("/a").canUndo).toBe(false);
+  });
 });

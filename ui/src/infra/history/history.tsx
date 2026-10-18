@@ -131,18 +131,33 @@ export function pushDocumentStep(path: string, step: DocumentStep): void {
   if (!e.replaying) push(e, step);
 }
 
-/** Runs `action` on `path` as one undoable step, whatever it changes. */
+/**
+ * Runs `action` on `path` as one undoable step, whatever it changes — an
+ * async one (its result a promise) until it settles, the changes it makes
+ * when its awaits come back included.
+ */
 export function documentAction<T>(path: string, action: () => T): T {
   const e = entryOf(path);
   if (e.group) return action();
   e.group = [];
-  try {
-    return action();
-  } finally {
-    const steps = e.group;
+  const close = () => {
+    const steps = e.group ?? [];
     e.group = null;
     if (steps.length) push(e, steps.length === 1 ? steps[0] : composite(steps));
+  };
+  let result: T;
+  try {
+    result = action();
+  } catch (err) {
+    close();
+    throw err;
   }
+  if (result instanceof Promise) {
+    void result.finally(close).catch(() => {});
+    return result;
+  }
+  close();
+  return result;
 }
 
 /** How the document's text is written back on Undo/Redo — the latest editor's `onChange`. */
