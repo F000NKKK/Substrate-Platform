@@ -42,7 +42,7 @@
   min-height: 0;
   overflow: hidden;
   background: var(--sp-surface-0);
-  /* Same colour as the gap around it, so without a frame the document runs straight into the docked panels. */
+  /* Same color as the gap around it, so without a frame the document runs straight into the docked panels. */
   border: 1px solid var(--sp-border-strong);
   border-radius: var(--sp-radius-sm);
 }

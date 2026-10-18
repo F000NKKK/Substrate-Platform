@@ -57,7 +57,7 @@ export interface PropertyDescriptor {
   edit?: () => void;
   /** A `"number"` or `"vector"`: what one step is — dragging the name left/right (or a component's label) changes it by steps, as Blender's fields do. Default 1. */
   step?: number;
-  /** A `"vector"`'s component labels — default `X`, `Y`, `Z`, `W` (coloured as the axes). */
+  /** A `"vector"`'s component labels — default `X`, `Y`, `Z`, `W` (colored as the axes). */
   labels?: readonly string[];
   /** A `"custom"` row: what it shows across the whole width (a preview, a picker) — it isn't edited as a value. */
   render?: () => ReactNode;
