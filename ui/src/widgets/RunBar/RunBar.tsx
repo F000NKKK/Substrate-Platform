@@ -11,6 +11,15 @@ export interface RunTarget {
   /** Human-readable label (e.g. a friendly name from the target's own config), preferred over `name`/`description` for display when present. */
   displayName?: string;
   description?: string;
+  /**
+   * Targets that are one thing in several variants (a program on several
+   * platforms, a loader on several game versions) share a `group`: the bar
+   * then offers the group and the variant as two pickers instead of one
+   * long list. A group with one target and no `variant` shows no second picker.
+   */
+  group?: string;
+  groupLabel?: string;
+  variant?: string;
 }
 
 /** One entry in the optional mode picker — see `RunBarProps.modes`. */
@@ -25,7 +34,7 @@ export interface RunBarProps {
   onRun: (name: string) => void;
   emptyLabel?: string;
   /**
-   * An optional second picker next to the target one — entirely opaque to
+   * An optional extra picker next to the target one — entirely opaque to
    * `RunBar`: it has no idea what a mode *means* (debug vs. release, a
    * build configuration, anything else a host product invents), it just
    * renders named options and reports which one is selected. Omit
@@ -37,22 +46,21 @@ export interface RunBarProps {
   onModeChange?: (name: string) => void;
 }
 
+const label = (t: RunTarget) => t.displayName ?? t.description ?? t.name;
+const groupOf = (t: RunTarget) => t.group ?? t.name;
+
 /**
- * A Visual Studio-style run-target picker: choose a target from a dropdown,
- * then hit the solid green Start arrow to launch it — purely presentational,
- * the product supplies `targets`/`running`/`onRun` from whatever actually
- * resolves and executes them (a workflow engine, a CLI's `run <name>`, anything).
- * Owns its own state/behavior entirely separately from `Toolbar`; meant to
- * be composed into one via its `leading` slot rather than merged into it,
- * mirroring VS's startup-item selector + Start button sitting in the same
- * toolbar row as its other actions. The chosen target is remembered in the
- * current `StateStore` (`"run.target"`).
+ * A Visual Studio-style run-target picker: choose a target from a dropdown
+ * (or a group and its variant, see `RunTarget.group`), then hit the solid
+ * green Start arrow to launch it — purely presentational, the product
+ * supplies `targets`/`running`/`onRun` from whatever actually resolves and
+ * executes them (a workflow engine, a CLI's `run <name>`, anything). Owns
+ * its own state, composed into a `Toolbar` rather than merged into it. The
+ * chosen target is remembered in the current `StateStore` (`"run.target"`).
  */
 export function RunBar({ targets, running, onRun, emptyLabel, modes, selectedMode, onModeChange }: RunBarProps) {
   const [selected, setSelected] = useStoredState<string | null>("run.target", null, (v) => typeof v === "string");
   const t = useT();
-  const menu = useContextMenu<void>();
-  const modeMenu = useContextMenu<void>();
 
   useEffect(() => {
     // No targets (yet — they're often still loading) isn't a reason to
@@ -65,51 +73,78 @@ export function RunBar({ targets, running, onRun, emptyLabel, modes, selectedMod
     setSelected(preferred.name);
   }, [targets, selected, setSelected]);
 
-  const selectedTarget = targets.find((t) => t.name === selected);
+  const current = targets.find((t) => t.name === selected);
+  const grouped = targets.some((t) => t.group);
+  const groups = [...new Map(targets.map((t) => [groupOf(t), t])).values()];
+  const variants = current ? targets.filter((t) => groupOf(t) === groupOf(current) && t.variant) : [];
+
+  /** Switching group keeps the variant when the new group has it, else takes its last (newest). */
+  function pickGroup(group: string) {
+    const members = targets.filter((t) => groupOf(t) === group);
+    const same = members.find((m) => m.variant && m.variant === current?.variant);
+    setSelected((same ?? members[members.length - 1]).name);
+  }
+
   const selectedModeEntry = modes?.find((m) => m.name === selectedMode);
+  const nothing = emptyLabel ?? t("No targets");
 
   return (
     <div className="sp-run-bar">
       <IconButton
-        title={selectedTarget ? t("Run: {target}", { target: selectedTarget.name }) : t("Select a target first")}
-        disabled={!selectedTarget || running}
+        title={current ? t("Run: {target}", { target: label(current) }) : t("Select a target first")}
+        disabled={!current || running}
         className="sp-run-bar-play"
-        onClick={() => selectedTarget && onRun(selectedTarget.name)}
+        onClick={() => current && onRun(current.name)}
       >
         <Icon name="play" />
       </IconButton>
-      <div className="sp-run-bar-target-anchor">
-        <button type="button" className="sp-run-bar-target" disabled={targets.length === 0} onClick={() => menu.openAtAnchor()}>
-          <span>{selectedTarget?.displayName ?? selectedTarget?.description ?? selectedTarget?.name ?? emptyLabel ?? t("No targets")}</span>
-          <Icon name="chevronRight" size={11} className="sp-run-bar-chevron" />
-        </button>
-        <ContextMenu
-          target={menu.target ? { mode: "anchor" } : null}
-          items={targets.map((t) => ({
-            label: t.displayName ?? t.description ?? t.name,
-            checked: t.name === selected,
-            onSelect: () => setSelected(t.name),
-          }))}
-          onClose={menu.close}
-        />
-      </div>
-      {modes && modes.length > 0 && (
-        <div className="sp-run-bar-target-anchor">
-          <button type="button" className="sp-run-bar-target" onClick={() => modeMenu.openAtAnchor()}>
-            <span>{selectedModeEntry?.label ?? selectedModeEntry?.name ?? modes[0]?.label ?? modes[0]?.name}</span>
-            <Icon name="chevronRight" size={11} className="sp-run-bar-chevron" />
-          </button>
-          <ContextMenu
-            target={modeMenu.target ? { mode: "anchor" } : null}
-            items={modes.map((m) => ({
-              label: m.label ?? m.name,
-              checked: m.name === selectedMode,
-              onSelect: () => onModeChange?.(m.name),
-            }))}
-            onClose={modeMenu.close}
+      {grouped ? (
+        <>
+          <Picker
+            text={current ? (current.groupLabel ?? groupOf(current)) : nothing}
+            disabled={targets.length === 0}
+            items={groups.map((g) => ({ label: g.groupLabel ?? groupOf(g), checked: current !== undefined && groupOf(g) === groupOf(current), onSelect: () => pickGroup(groupOf(g)) }))}
           />
-        </div>
+          {variants.length > 0 && (
+            <Picker
+              text={current?.variant ?? ""}
+              items={variants.map((v) => ({ label: v.variant ?? label(v), checked: v.name === selected, onSelect: () => setSelected(v.name) }))}
+            />
+          )}
+        </>
+      ) : (
+        <Picker
+          text={current ? label(current) : nothing}
+          disabled={targets.length === 0}
+          items={targets.map((tg) => ({ label: label(tg), checked: tg.name === selected, onSelect: () => setSelected(tg.name) }))}
+        />
       )}
+      {modes && modes.length > 0 && (
+        <Picker
+          text={selectedModeEntry?.label ?? selectedModeEntry?.name ?? modes[0]?.label ?? modes[0]?.name ?? ""}
+          items={modes.map((m) => ({ label: m.label ?? m.name, checked: m.name === selectedMode, onSelect: () => onModeChange?.(m.name) }))}
+        />
+      )}
+    </div>
+  );
+}
+
+interface PickerItem {
+  label: string;
+  checked: boolean;
+  onSelect: () => void;
+}
+
+/** One dropdown of the bar: its current choice, a menu of the others. */
+function Picker({ text, items, disabled }: { text: string; items: PickerItem[]; disabled?: boolean }) {
+  const menu = useContextMenu<void>();
+  return (
+    <div className="sp-run-bar-target-anchor">
+      <button type="button" className="sp-run-bar-target" disabled={disabled} onClick={() => menu.openAtAnchor()}>
+        <span>{text}</span>
+        <Icon name="chevronRight" size={11} className="sp-run-bar-chevron" />
+      </button>
+      <ContextMenu target={menu.target ? { mode: "anchor" } : null} items={items} onClose={menu.close} />
     </div>
   );
 }
