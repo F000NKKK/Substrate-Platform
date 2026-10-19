@@ -58,6 +58,8 @@ const defaultIcons: Record<string, IconComponent> = {
   branch: glyphs.IconBranch,
   arrowDown: glyphs.IconArrowDown,
   arrowUp: glyphs.IconArrowUp,
+  replace: glyphs.IconReplace,
+  replaceAll: glyphs.IconReplaceAll,
   fetch: glyphs.IconFetch,
   sync: glyphs.IconSync,
   minus: glyphs.IconMinus,

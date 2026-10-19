@@ -19,6 +19,7 @@ import { t, useT, withShortcut } from "../../infra/i18n";
 import { IconChevronRight, IconClose } from "../../infra/icons";
 import { showDialog } from "../Dialog";
 import "./findWidget.css";
+import { Icon } from "../../infra/icons";
 
 // Visual Studio's Quick Find / Quick Replace: a compact box floating over
 // the top-right corner of the editor rather than a bar pushing the text
@@ -108,31 +109,6 @@ function Action({ title, disabled, onClick, children }: { title: string; disable
     </button>
   );
 }
-
-const ArrowUp = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M8 13V3M3.5 7.5 8 3l4.5 4.5" />
-  </svg>
-);
-const ArrowDown = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M8 3v10M3.5 8.5 8 13l4.5-4.5" />
-  </svg>
-);
-const ReplaceOne = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M2.5 4.5h6M6 2l2.5 2.5L6 7" />
-    <rect x="7.5" y="9" width="6" height="4.5" rx="1" />
-  </svg>
-);
-const ReplaceAll = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M2 4h5M5 1.75 7.25 4 5 6.25" />
-    <rect x="5" y="8.5" width="4.5" height="3.5" rx="0.8" />
-    <rect x="10.5" y="8.5" width="4" height="3.5" rx="0.8" />
-    <path d="M5 14.25h9.5" />
-  </svg>
-);
 
 function FindWidget({ view, info, register }: { view: EditorView; info: MatchInfo; register: (c: Controller) => void }) {
   const t = useT();
@@ -251,10 +227,10 @@ function FindWidget({ view, info, register }: { view: EditorView; info: MatchInf
             {status}
           </span>
           <Action title={withShortcut("Find previous", "shift+f3")} disabled={!info.total} onClick={previous}>
-            <ArrowUp />
+            <Icon name="arrowUp" />
           </Action>
           <Action title={withShortcut("Find next", "f3")} disabled={!info.total} onClick={next}>
-            <ArrowDown />
+            <Icon name="arrowDown" />
           </Action>
           <Action title={withShortcut("Close", "esc")} onClick={close}>
             <IconClose />
@@ -276,10 +252,10 @@ function FindWidget({ view, info, register }: { view: EditorView; info: MatchInf
               />
             </div>
             <Action title={withShortcut("Replace next", "alt+r")} disabled={!info.total} onClick={() => replaceNext(view)}>
-              <ReplaceOne />
+              <Icon name="replace" />
             </Action>
             <Action title={withShortcut("Replace all", "alt+a")} disabled={!info.total} onClick={() => replaceAll(view)}>
-              <ReplaceAll />
+              <Icon name="replaceAll" />
             </Action>
           </div>
         )}

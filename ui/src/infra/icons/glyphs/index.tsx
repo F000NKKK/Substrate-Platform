@@ -67,3 +67,5 @@ export { IconDownload } from "./IconDownload";
 export { IconPuzzle } from "./IconPuzzle";
 export { IconLayers } from "./IconLayers";
 export { IconBell } from "./IconBell";
+export { IconReplace } from "./IconReplace";
+export { IconReplaceAll } from "./IconReplaceAll";
