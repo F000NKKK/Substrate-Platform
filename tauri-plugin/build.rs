@@ -7,7 +7,7 @@ use substrate_platform::commands::{SUBSTRATE, names};
 /// The default permission set: what a product grants by `substrate:default`.
 const DEFAULT_PERMISSIONS: &str = "permissions/default.toml";
 
-fn main() {
+fn main() -> std::io::Result<()> {
     let commands: &'static [&'static str] = Box::leak(names(SUBSTRATE).into_boxed_slice());
     let allows: Vec<String> = commands.iter().map(|c| format!("  \"allow-{}\",", c.replace('_', "-"))).collect();
     let text = format!(
@@ -15,7 +15,8 @@ fn main() {
         allows.join("\n")
     );
     if std::fs::read_to_string(DEFAULT_PERMISSIONS).ok().as_deref() != Some(text.as_str()) {
-        std::fs::write(DEFAULT_PERMISSIONS, text).expect("permissions/ is writable");
+        std::fs::write(DEFAULT_PERMISSIONS, text)?;
     }
     tauri_plugin::Builder::new(commands).build();
+    Ok(())
 }

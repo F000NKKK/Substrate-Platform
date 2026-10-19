@@ -5,16 +5,11 @@
 /// Where the UI imports the templates from, from the crate.
 const DEFAULT_OUT: &str = "ui/src/infra/host/host.generated.ts";
 
-fn main() {
-    let path = std::env::args()
-        .nth(1)
-        .unwrap_or_else(|| DEFAULT_OUT.to_string());
+fn main() -> Result<(), String> {
+    let path = std::env::args().nth(1).unwrap_or_else(|| DEFAULT_OUT.to_string());
     let text = substrate_platform::message::typescript();
     if std::fs::read_to_string(&path).ok().as_deref() == Some(text.as_str()) {
-        return;
+        return Ok(());
     }
-    if let Err(e) = std::fs::write(&path, text) {
-        eprintln!("substrate-messages: {path}: {e}");
-        std::process::exit(1);
-    }
+    std::fs::write(&path, text).map_err(|e| format!("{path}: {e}"))
 }

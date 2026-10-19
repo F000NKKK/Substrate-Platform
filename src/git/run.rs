@@ -138,10 +138,9 @@ pub(crate) fn stream(out: Output, cmd: &mut Command, shown: &str) -> Result<(), 
             out(err.clone());
             err
         })?;
-    let (stdout, stderr) = (
-        child.stdout.take().expect("piped"),
-        child.stderr.take().expect("piped"),
-    );
+    let (Some(stdout), Some(stderr)) = (child.stdout.take(), child.stderr.take()) else {
+        return Err(Message::new(m::CANT_START).arg("error", "no output"));
+    };
     let (stdout, stderr, status) = std::thread::scope(|scope| {
         let forward = |reader: Box<dyn Read + Send>| {
             scope.spawn(move || {
