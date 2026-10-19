@@ -3,7 +3,7 @@ import { ErrorBoundary } from "../ErrorBoundary";
 import { Tab } from "../Tab";
 import { useT } from "../../infra/i18n";
 import type { EditorProps } from "./EditorBase";
-import type { EditorProvider } from "./registry";
+import { EDITOR_KIND, type EditorProvider } from "./registry";
 import { recordDocumentChange, setDocumentWriter } from "../../infra/history";
 import "./MultiViewEditor.css";
 
@@ -42,7 +42,7 @@ export function MultiViewEditor({ providers, view, onViewChange, renderView, sho
   const { onChange, content: text, path } = props;
   if (onChange && path) setDocumentWriter(path, onChange);
   const viewProps: EditorProps =
-    active.kind === "text" || !onChange || !path
+    active.kind === EDITOR_KIND.text || !onChange || !path
       ? props
       : {
           ...props,

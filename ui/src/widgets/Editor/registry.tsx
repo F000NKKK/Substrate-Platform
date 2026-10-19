@@ -20,6 +20,10 @@ import {
   YamlEditor,
 } from "./languageEditors";
 
+/** What an editor provider works on: the text, a structured view over it, or the bytes. */
+export const EDITOR_KIND = { text: "text", designer: "designer", binary: "binary" } as const;
+export type EditorKind = (typeof EDITOR_KIND)[keyof typeof EDITOR_KIND];
+
 /**
  * One way of viewing/editing a kind of file — the platform's counterpart to
  * Visual Studio's editor factories. A file can have several (a `.resx`-style
@@ -50,7 +54,7 @@ export interface EditorProvider {
    * same text. `"binary"` — works on the file's bytes and ignores `content`
    * (see `isBinaryFile`).
    */
-  kind: "text" | "designer" | "binary";
+  kind: EditorKind;
   /**
    * Offered only for the files it matches, even in "Open With…" — for an
    * editor that can't make sense of anything else (a designer over one file
@@ -89,7 +93,7 @@ export function editorProvidersFor(path: string): EditorProvider[] {
     .filter(({ provider }) => provider.fileTypes.some((id) => kinds.includes(id)))
     .sort((a, b) => (b.provider.priority ?? 0) - (a.provider.priority ?? 0) || b.order - a.order)
     .map(({ provider }) => provider);
-  if (!matching.some((p) => p.kind === "text") && !matching.some((p) => p.kind === "binary")) {
+  if (!matching.some((p) => p.kind === EDITOR_KIND.text) && !matching.some((p) => p.kind === EDITOR_KIND.binary)) {
     matching.push(plainText);
   }
   return matching;
@@ -102,7 +106,7 @@ export function editorProvidersFor(path: string): EditorProvider[] {
  */
 export function generalEditorProviders(): EditorProvider[] {
   return [...providers, plainText]
-    .filter((p) => !(p.strict ?? p.kind !== "text"))
+    .filter((p) => !(p.strict ?? p.kind !== EDITOR_KIND.text))
     .sort((a, b) => (a.name ?? a.label).localeCompare(b.name ?? b.label));
 }
 
@@ -134,23 +138,23 @@ export function useEditorProviders(path: string): EditorProvider[] {
  */
 /** The provider's `icon`, or the default for its kind. */
 export function editorProviderIcon(provider: EditorProvider): string {
-  return provider.icon ?? (provider.kind === "text" ? "code" : provider.kind === "designer" ? "grid" : "preview");
+  return provider.icon ?? (provider.kind === EDITOR_KIND.text ? "code" : provider.kind === EDITOR_KIND.designer ? "grid" : "preview");
 }
 
 export function isBinaryFile(filename: string): boolean {
-  return editorProvidersFor(filename).every((p) => p.kind === "binary");
+  return editorProvidersFor(filename).every((p) => p.kind === EDITOR_KIND.binary);
 }
 
-const plainText: EditorProvider = { id: "substrate.text", label: "Plain Text", name: "Plain Text Editor", fileTypes: ["text"], component: PlainTextEditor, kind: "text" };
+const plainText: EditorProvider = { id: "substrate.text", label: "Plain Text", name: "Plain Text Editor", fileTypes: ["text"], component: PlainTextEditor, kind: EDITOR_KIND.text };
 
 const builtIns: EditorProvider[] = [
-  { id: "substrate.json", name: "JSON Editor", label: "Code", fileTypes: ["json"], component: JsonEditor, kind: "text" },
-  { id: "substrate.rust", name: "Rust Editor", label: "Code", fileTypes: ["rust"], component: RustEditor, kind: "text" },
-  { id: "substrate.xml", name: "XML Editor", label: "Code", fileTypes: ["xml", "svg"], component: XmlEditor, kind: "text" },
-  { id: "substrate.java", name: "Java Editor", label: "Code", fileTypes: ["java"], component: JavaEditor, kind: "text" },
-  { id: "substrate.markdown", name: "Markdown Editor", label: "Source", fileTypes: ["markdown"], component: MarkdownEditor, kind: "text" },
+  { id: "substrate.json", name: "JSON Editor", label: "Code", fileTypes: ["json"], component: JsonEditor, kind: EDITOR_KIND.text },
+  { id: "substrate.rust", name: "Rust Editor", label: "Code", fileTypes: ["rust"], component: RustEditor, kind: EDITOR_KIND.text },
+  { id: "substrate.xml", name: "XML Editor", label: "Code", fileTypes: ["xml", "svg"], component: XmlEditor, kind: EDITOR_KIND.text },
+  { id: "substrate.java", name: "Java Editor", label: "Code", fileTypes: ["java"], component: JavaEditor, kind: EDITOR_KIND.text },
+  { id: "substrate.markdown", name: "Markdown Editor", label: "Source", fileTypes: ["markdown"], component: MarkdownEditor, kind: EDITOR_KIND.text },
   // Source stays the default, as in VS Code; the preview is a view away.
-  { id: "substrate.markdown.preview", name: "Markdown Preview", label: "Preview", icon: "preview", fileTypes: ["markdown"], component: MarkdownPreview, priority: -1, kind: "designer" },
+  { id: "substrate.markdown.preview", name: "Markdown Preview", label: "Preview", icon: "preview", fileTypes: ["markdown"], component: MarkdownPreview, priority: -1, kind: EDITOR_KIND.designer },
   {
     id: "substrate.markdown.split",
     name: "Markdown Editor + Preview",
@@ -159,16 +163,16 @@ const builtIns: EditorProvider[] = [
     fileTypes: ["markdown"],
     component: MarkdownSplitEditor,
     priority: -2,
-    kind: "text",
+    kind: EDITOR_KIND.text,
     strict: true,
   },
-  { id: "substrate.toml", name: "TOML Editor", label: "Code", fileTypes: ["toml"], component: TomlEditor, kind: "text" },
-  { id: "substrate.yaml", name: "YAML Editor", label: "Code", fileTypes: ["yaml"], component: YamlEditor, kind: "text" },
-  { id: "substrate.shell", name: "Shell Script Editor", label: "Code", fileTypes: ["shell"], component: ShellEditor, kind: "text" },
-  { id: "substrate.groovy", name: "Groovy Editor", label: "Code", fileTypes: ["gradle", "groovy"], component: GroovyEditor, kind: "text" },
-  { id: "substrate.python", name: "Python Editor", label: "Code", fileTypes: ["python"], component: PythonEditor, kind: "text" },
-  { id: "substrate.properties.text", name: "Properties Editor", label: "Code", fileTypes: ["properties"], component: PropertiesTextEditor, kind: "text" },
-  { id: "substrate.properties.grid", name: "Properties Designer", label: "Designer", fileTypes: ["properties"], component: PropertiesGridEditor, priority: 10, kind: "designer" },
+  { id: "substrate.toml", name: "TOML Editor", label: "Code", fileTypes: ["toml"], component: TomlEditor, kind: EDITOR_KIND.text },
+  { id: "substrate.yaml", name: "YAML Editor", label: "Code", fileTypes: ["yaml"], component: YamlEditor, kind: EDITOR_KIND.text },
+  { id: "substrate.shell", name: "Shell Script Editor", label: "Code", fileTypes: ["shell"], component: ShellEditor, kind: EDITOR_KIND.text },
+  { id: "substrate.groovy", name: "Groovy Editor", label: "Code", fileTypes: ["gradle", "groovy"], component: GroovyEditor, kind: EDITOR_KIND.text },
+  { id: "substrate.python", name: "Python Editor", label: "Code", fileTypes: ["python"], component: PythonEditor, kind: EDITOR_KIND.text },
+  { id: "substrate.properties.text", name: "Properties Editor", label: "Code", fileTypes: ["properties"], component: PropertiesTextEditor, kind: EDITOR_KIND.text },
+  { id: "substrate.properties.grid", name: "Properties Designer", label: "Designer", fileTypes: ["properties"], component: PropertiesGridEditor, priority: 10, kind: EDITOR_KIND.designer },
   {
     id: "substrate.image",
     name: "Image Preview",
@@ -176,7 +180,7 @@ const builtIns: EditorProvider[] = [
     fileTypes: ["png", "jpeg", "gif", "webp", "bmp", "ico", "svg"],
     component: ImageEditor,
     priority: 10,
-    kind: "binary",
+    kind: EDITOR_KIND.binary,
   },
 ];
 builtIns.forEach((provider) => providers.push(provider));
