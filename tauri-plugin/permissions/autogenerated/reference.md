@@ -46,6 +46,10 @@ Every command Substrate's UI calls.
 - `allow-replace-in-files`
 - `allow-project-items`
 - `allow-project-files-containing`
+- `allow-workspace-load`
+- `allow-workspace-save`
+- `allow-app-state-load`
+- `allow-app-state-save`
 - `allow-terminal-shells`
 - `allow-terminal-spawn`
 - `allow-terminal-write`
@@ -83,6 +87,58 @@ Enables the allow_path command without any pre-configured scope.
 <td>
 
 Denies the allow_path command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-app-state-load`
+
+</td>
+<td>
+
+Enables the app_state_load command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-app-state-load`
+
+</td>
+<td>
+
+Denies the app_state_load command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-app-state-save`
+
+</td>
+<td>
+
+Enables the app_state_save command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-app-state-save`
+
+</td>
+<td>
+
+Denies the app_state_save command without any pre-configured scope.
 
 </td>
 </tr>
@@ -1279,6 +1335,58 @@ Enables the terminal_write command without any pre-configured scope.
 <td>
 
 Denies the terminal_write command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-workspace-load`
+
+</td>
+<td>
+
+Enables the workspace_load command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-workspace-load`
+
+</td>
+<td>
+
+Denies the workspace_load command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-workspace-save`
+
+</td>
+<td>
+
+Enables the workspace_save command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-workspace-save`
+
+</td>
+<td>
+
+Denies the workspace_save command without any pre-configured scope.
 
 </td>
 </tr>

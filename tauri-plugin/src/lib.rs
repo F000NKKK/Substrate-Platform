@@ -14,6 +14,8 @@ mod git;
 mod open;
 #[cfg(feature = "search")]
 mod search;
+#[cfg(feature = "state")]
+mod state;
 #[cfg(feature = "terminal")]
 mod terminal;
 
@@ -38,7 +40,13 @@ pub struct Options {
     /// What a search keeps out of the walk, and where generated code lives.
     #[cfg(feature = "search")]
     pub search: substrate_platform::search::Layout,
+    /// Where the product keeps its own data in a project.
+    #[cfg(feature = "state")]
+    pub state: Option<state::StateOptions>,
 }
+
+#[cfg(feature = "state")]
+pub use state::StateOptions;
 
 /// The plugin with no product options.
 pub fn init<R: tauri::Runtime>() -> TauriPlugin<R> {
@@ -60,7 +68,11 @@ pub fn init_with<R: tauri::Runtime>(options: Options) -> TauriPlugin<R> {
                 app.manage(search::Searches::default());
                 app.manage(options.search);
             }
-            #[cfg(not(feature = "search"))]
+            #[cfg(feature = "state")]
+            if let Some(state) = options.state {
+                app.manage(state);
+            }
+            #[cfg(not(any(feature = "search", feature = "state")))]
             let _ = options;
             Ok(())
         })
@@ -68,6 +80,14 @@ pub fn init_with<R: tauri::Runtime>(options: Options) -> TauriPlugin<R> {
             open::open_url,
             open::open_path,
             open::reveal_path,
+            #[cfg(feature = "state")]
+            state::workspace_load,
+            #[cfg(feature = "state")]
+            state::workspace_save,
+            #[cfg(feature = "state")]
+            state::app_state_load,
+            #[cfg(feature = "state")]
+            state::app_state_save,
             #[cfg(feature = "search")]
             search::find_in_files,
             #[cfg(feature = "search")]

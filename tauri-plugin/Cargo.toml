@@ -15,12 +15,14 @@ links = "tauri-plugin-substrate"
 fs = ["substrate-platform/fs"]
 git = ["substrate-platform/git"]
 search = ["substrate-platform/search"]
+state = ["substrate-platform/state", "dep:serde_json"]
 terminal = ["substrate-platform/terminal"]
 
 [dependencies]
 substrate-platform = { path = ".." }
 tauri = "2"
 serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", optional = true }
 
 [build-dependencies]
 substrate-platform = { path = ".." }

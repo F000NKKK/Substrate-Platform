@@ -40,6 +40,9 @@ export const messages = {
     badMask: "Invalid file mask {mask}: {error}",
     writeFailed: "{path}: {error}",
   },
+  state: {
+    failed: "{path}: {error}",
+  },
   terminal: {
     cantStart: "Couldn't start the shell: {error}",
     failed: "The terminal failed: {error}",
@@ -102,6 +105,12 @@ export const substrate = {
     replaceInFiles: { plugin: "substrate", command: "replace_in_files" },
     projectItems: { plugin: "substrate", command: "project_items" },
     projectFilesContaining: { plugin: "substrate", command: "project_files_containing" },
+  },
+  state: {
+    workspaceLoad: { plugin: "substrate", command: "workspace_load" },
+    workspaceSave: { plugin: "substrate", command: "workspace_save" },
+    appStateLoad: { plugin: "substrate", command: "app_state_load" },
+    appStateSave: { plugin: "substrate", command: "app_state_save" },
   },
   terminal: {
     terminalShells: { plugin: "substrate", command: "terminal_shells" },

@@ -16,5 +16,6 @@ import "./locales/ru.project";
 import "./locales/ru.search";
 import "./locales/ru.settings";
 import "./locales/ru.shell";
+import "./locales/ru.state";
 import "./locales/ru.terminal";
 import "./locales/ru.widgets";
