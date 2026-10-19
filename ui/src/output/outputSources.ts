@@ -15,10 +15,12 @@ export interface OutputSourceDef {
   emptyLabel: string;
 }
 
-/** The platform's own sources: the IDE's messages, and Source Control. */
+/** The platform's own sources' ids: the IDE's messages, and Source Control. */
+export const PLATFORM_OUTPUT = { ide: "ide", git: "git" } as const;
+
 const PLATFORM_SOURCES: OutputSourceDef[] = [
-  { id: "ide", label: "General", event: events.ideOutput, emptyLabel: "No messages." },
-  { id: "git", label: "Source Control - Git", event: events.gitOutput, emptyLabel: "Fetch, pull, push and other Git operations show their output here." },
+  { id: PLATFORM_OUTPUT.ide, label: "General", event: events.ideOutput, emptyLabel: "No messages." },
+  { id: PLATFORM_OUTPUT.git, label: "Source Control - Git", event: events.gitOutput, emptyLabel: "Fetch, pull, push and other Git operations show their output here." },
 ];
 
 let sources: OutputSourceDef[] = PLATFORM_SOURCES;
