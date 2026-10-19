@@ -163,8 +163,11 @@ impl PtySession {
 
         let mut cmd = CommandBuilder::new(options.shell.unwrap_or_else(default_shell));
         // The system's environment, not an AppImage's (see `process`).
-        for key in crate::process::foreign_vars() {
-            cmd.env_remove(key);
+        for (key, value) in crate::process::host_env() {
+            match value {
+                Some(value) => cmd.env(key, value),
+                None => cmd.env_remove(key),
+            }
         }
         cmd.args(&options.args);
         if let Some(cwd) = options.cwd {

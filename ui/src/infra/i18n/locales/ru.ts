@@ -9,6 +9,11 @@ registerTranslations(
   { id: "ru", name: "Русский" },
   {
     // Common
+    // The Output window
+    "Show output from:": "Показать выходные данные из:",
+    "Clear {source} Output": "Очистить вывод: {source}",
+    "No messages.": "Нет сообщений.",
+    "General": "Общие",
     OK: "ОК",
     "{what} failed: {error}": "{what}: ошибка — {error}",
     "This panel failed: {error}": "Ошибка в панели: {error}",

@@ -5,8 +5,11 @@
 /// The host plugin's name: its commands are `plugin:<this>|<command>`.
 pub const PLUGIN: &str = "substrate";
 
+/// The General output: what the IDE itself reports (errors, notices).
+pub const IDE_OUTPUT: &str = "substrate://ide-output";
+
 /// A Source Control run's lines, as [`crate::message::Message`]s.
 pub const GIT_OUTPUT: &str = "substrate://git-output";
 
 /// Every event, for the UI's generated copy: (name in code, event).
-pub const ALL: &[(&str, &str)] = &[("gitOutput", GIT_OUTPUT)];
+pub const ALL: &[(&str, &str)] = &[("ideOutput", IDE_OUTPUT), ("gitOutput", GIT_OUTPUT)];

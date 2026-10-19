@@ -26,5 +26,6 @@ export const plugin = "substrate";
 
 /** The events Substrate's host sends its UI. */
 export const events = {
+  ideOutput: "substrate://ide-output",
   gitOutput: "substrate://git-output",
 } as const;

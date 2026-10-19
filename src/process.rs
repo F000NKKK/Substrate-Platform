@@ -6,31 +6,43 @@
 //! found`). Everything a product starts goes through here.
 
 use std::ffi::{OsStr, OsString};
+use std::path::PathBuf;
 use std::process::Command;
 
 /// What an AppImage's runtime tells the program inside about itself.
 const APPIMAGE_VARS: [&str; 4] = ["APPDIR", "APPIMAGE", "ARGV0", "OWD"];
 
-/// The variables a started program mustn't inherit: the AppImage's own, and
-/// every one pointing into its mount. None outside an AppImage.
-pub fn foreign_vars() -> Vec<OsString> {
+/// How a started program's environment differs from this process's: each
+/// variable an AppImage changed, with the value the system had (`None`:
+/// unset). Lists (`XDG_DATA_DIRS`, `LD_LIBRARY_PATH`…) only lose the
+/// entries into the AppImage — the runtime put them in front of the
+/// system's own, which a GTK program can't start without. Empty outside an
+/// AppImage.
+pub fn host_env() -> Vec<(OsString, Option<OsString>)> {
     let Some(appdir) = std::env::var_os("APPDIR").filter(|d| !d.is_empty()) else {
         return Vec::new();
     };
-    let appdir = appdir.to_string_lossy().into_owned();
-    let mut out: Vec<OsString> = std::env::vars_os()
-        .filter(|(_, v)| v.to_string_lossy().contains(&appdir))
-        .map(|(k, _)| k)
+    let appdir = PathBuf::from(appdir);
+    let mut out: Vec<(OsString, Option<OsString>)> = std::env::vars_os()
+        .filter(|(_, v)| std::env::split_paths(v).any(|p| p.starts_with(&appdir)))
+        .map(|(k, v)| {
+            let kept: Vec<PathBuf> = std::env::split_paths(&v).filter(|p| !p.as_os_str().is_empty() && !p.starts_with(&appdir)).collect();
+            let value = if kept.is_empty() { None } else { std::env::join_paths(kept).ok() };
+            (k, value)
+        })
         .collect();
-    out.extend(APPIMAGE_VARS.map(OsString::from));
+    out.extend(APPIMAGE_VARS.map(|k| (OsString::from(k), None)));
     out
 }
 
 /// A command for `program` with the system's own environment.
 pub fn command(program: impl AsRef<OsStr>) -> Command {
     let mut cmd = Command::new(program);
-    for key in foreign_vars() {
-        cmd.env_remove(key);
+    for (key, value) in host_env() {
+        match value {
+            Some(value) => cmd.env(key, value),
+            None => cmd.env_remove(key),
+        };
     }
     cmd
 }
@@ -40,9 +52,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn outside_an_appimage_nothing_is_removed() {
+    fn outside_an_appimage_nothing_changes() {
         if std::env::var_os("APPDIR").is_none() {
-            assert!(foreign_vars().is_empty());
+            assert!(host_env().is_empty());
         }
     }
 }

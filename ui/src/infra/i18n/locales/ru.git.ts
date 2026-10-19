@@ -7,6 +7,8 @@ const git = messages.git;
 registerTranslations(
   { id: "ru", name: "Русский" },
   {
+    "Source Control - Git": "Система управления версиями — Git",
+    "Fetch, pull, push and other Git operations show their output here.": "Здесь отображаются выходные данные получения, извлечения, отправки и других операций Git.",
     [git.missing]: "Git не установлен или отсутствует в PATH.",
     [git.cantStart]: "Не удалось запустить git: {error}",
     [git.authFailed]: "Удаленный репозиторий запросил учетные данные, но приложение не может их запросить. Настройте помощник учетных данных Git (например, Git Credential Manager) или SSH-ключ и повторите попытку.",

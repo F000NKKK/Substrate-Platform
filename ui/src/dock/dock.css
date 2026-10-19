@@ -37,6 +37,16 @@
   background: var(--sp-accent-soft);
 }
 
+/*
+ * Content keeps its own layers inside: an editor's gutters (CodeMirror's
+ * z-index 200), a terminal's, a tree's drag line — none of them may show
+ * through an auto-hide flyout (z-index 40) sliding over the content.
+ */
+.sp-center-body,
+.sp-panel-surface-body {
+  isolation: isolate;
+}
+
 .sp-center-body {
   position: relative;
   flex: 1;

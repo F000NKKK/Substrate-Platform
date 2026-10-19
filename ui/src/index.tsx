@@ -15,5 +15,7 @@ export * from "./infra/fileTypes";
 export * from "./infra/history";
 export * from "./shell";
 export * from "./widgets";
+export * from "./output";
+export * from "./documents";
 export * from "./windows";
 export * from "./pages";
