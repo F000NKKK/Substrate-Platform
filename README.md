@@ -51,7 +51,7 @@ flowchart LR
     end
     subgraph sp["Substrate Platform"]
         spui["substrate-platform-ui<br/>shell · editors · widgets"]
-        sprs["substrate-platform<br/>task · workflow · pty · log · dir · project"]
+        sprs["substrate-platform<br/>run · terminal · fs · project · git"]
     end
     ui --> spui
     be --> sprs
@@ -60,22 +60,24 @@ flowchart LR
 
 ## 🦀 Rust Crate
 
-| Module | What it does |
+Always there: `message` (user-facing text as templates the UI translates), `events`, `process` (what a started program's environment should be) and `workspace` (the folders the user opened; paths outside them are refused). Every other module is a Cargo feature of its name, so a product builds only what it uses (`full` turns on all):
+
+| Feature / module | What it does |
 |---|---|
-| `task` | Runs an external process without blocking and streams stdout/stderr line by line into a `LogSink`. `TaskHandle` has `is_running`, `exit_status`, `wait` and `cancel` (which kills the whole process tree). |
-| `workflow` | Named multi-step flows from a TOML file. Steps run in order and stop at the first failure; a step can call another workflow (cycles are detected); `${var}` is substituted. `WorkflowHandle` has `result`, `wait` and `cancel`. |
-| `log` | A cloneable, append-only `LogSink`: read or drain it, or stream new lines with `on_push`. Retention is bounded (`set_max_lines`). |
-| `pty` | A real cross-platform pseudo-terminal (`PtySession`, via `portable-pty`), with `PtyOptions` and `spawn_utf8` / `Utf8Chunker` so output never splits a multi-byte character. |
-| `shell` | `detect_shells()` lists the shells that are actually installed. |
-| `dir` | One-level directory listing (folders first, case-insensitive), create/rename/remove, read/write as text or bytes. |
-| `project` | `ProjectStandard` detection by marker files, `Project`, and `Solution` (a TOML file with several projects, load/save). The host defines its own standards. |
+| `run` | `run::task` runs an external process without blocking and streams stdout/stderr line by line into a `LogSink`; `TaskHandle` has `is_running`, `exit_status`, `wait` and `cancel` (which kills the whole process tree). `run::workflow`: named multi-step flows from a TOML file — steps run in order and stop at the first failure, a step can call another workflow (cycles are detected), `${var}` is substituted. `run::log`: a cloneable, append-only `LogSink` with bounded retention. |
+| `terminal` | A real cross-platform pseudo-terminal (`PtySession`, via `portable-pty`) with `PtyOptions`; `Utf8Chunker` so output never splits a multi-byte character; `detect_shells()` lists the shells that are installed. |
+| `fs` | `fs::dir`: one-level directory listing (folders first, case-insensitive), create/rename/remove, read/write as text or bytes. `fs::watch`: `DirWatcher`, debounced change notifications. |
+| `project` | The project and solution model and its API — no format of its own, and it reads no files. `Solution`: solution folders, configurations and platforms, each project's configuration per solution configuration, build dependencies (`build_order`), plus ordered properties and sections for everything else a format keeps; `Project`: properties (per configuration too), target frameworks, items, references. The product implements `SolutionFormat` / `ProjectFormat` for its files (`.sln`, `.slnx`, `.csproj`, its own) and registers them in `Formats`; `ProjectStandard` tells a project's kind from the file list the product gives it. |
+| `git` | Source Control over the `git` CLI: status, staging, commits, diffs, history, branches, remotes, stashes, settings. |
+
+The Tauri plugin `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) has the same features for its commands (`git`).
 
 Which paths a host may touch is deliberately left to the host, one layer up.
 
 ### Run a task
 
 ```rust
-use substrate_platform::{LogSink, Task, spawn_task};
+use substrate_platform::run::{LogSink, Task, spawn_task};
 
 let sink = LogSink::new();
 sink.on_push(|line| println!("{:?} {}", line.level, line.text));
@@ -103,7 +105,7 @@ steps = [
 
 ```rust
 use std::collections::HashMap;
-use substrate_platform::{LogSink, WorkflowFile, run_workflow};
+use substrate_platform::run::{LogSink, WorkflowFile, run_workflow};
 
 let file = WorkflowFile::parse(&std::fs::read_to_string("workflow.toml")?)?;
 let vars = HashMap::from([("log".to_string(), "debug".to_string())]);

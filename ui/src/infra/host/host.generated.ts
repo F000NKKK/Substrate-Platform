@@ -19,6 +19,20 @@ export const messages = {
     failed: "[error] git {command} failed (exit code {code})",
     killed: "[error] git {command} was stopped by a signal",
   },
+  project: {
+    noFormat: "No format this app knows reads {path}.",
+    dependencyCycle: "{project} depends on itself through its build dependencies.",
+    unknownDependency: "{project} depends on {dependency}, which isn't in the solution.",
+  },
+  process: {
+    notALink: "{url} isn't a web or mail link.",
+    cantStart: "Couldn't start {program}: {error}",
+  },
+  workspace: {
+    nothingOpen: "No project is open.",
+    notOnDisk: "{path} doesn't resolve to anything on disk.",
+    outside: "{path} is outside any open project.",
+  },
 } as const;
 
 /** The host plugin's name: its commands are `plugin:<this>|<command>`. */

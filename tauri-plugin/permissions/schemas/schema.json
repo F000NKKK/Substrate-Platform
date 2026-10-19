@@ -583,10 +583,22 @@
           "markdownDescription": "Denies the git_unstage command without any pre-configured scope."
         },
         {
-          "description": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`",
+          "description": "Enables the open_url command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-open-url",
+          "markdownDescription": "Enables the open_url command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the open_url command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-open-url",
+          "markdownDescription": "Denies the open_url command without any pre-configured scope."
+        },
+        {
+          "description": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-open-url`\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`"
+          "markdownDescription": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-open-url`\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`"
         }
       ]
     }

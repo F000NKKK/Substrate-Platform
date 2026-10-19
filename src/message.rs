@@ -73,7 +73,15 @@ macro_rules! messages {
 
 /// Every template Substrate declares, for the export.
 pub fn catalog() -> Vec<(&'static str, &'static str, &'static str)> {
-    [crate::git::messages::ALL, crate::workspace::ALL].concat()
+    let groups: &[&[(&str, &str, &str)]] = &[
+        #[cfg(feature = "git")]
+        crate::git::messages::ALL,
+        #[cfg(feature = "project")]
+        crate::project::messages::ALL,
+        crate::process::ALL,
+        crate::workspace::ALL,
+    ];
+    groups.concat()
 }
 
 /// The templates as a TypeScript module: `messages.<group>.<name>`.

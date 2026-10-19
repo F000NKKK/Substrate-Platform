@@ -11,7 +11,7 @@ use std::sync::mpsc;
 use std::sync::{Arc, Condvar, Mutex};
 use std::time::Duration;
 
-use crate::log::LogSink;
+use super::log::LogSink;
 
 /// One external command to run, with its output streamed to a [`LogSink`].
 pub struct Task {
@@ -218,7 +218,7 @@ fn spawn_streaming(
 }
 
 /// Kills `child` and everything it spawned — a build tool is rarely a single
-/// process (`yog build` → `cargo` → `rustc`, or a `sh -c` wrapper around the
+/// process (`make` → `cargo` → `rustc`, or a `sh -c` wrapper around the
 /// real command), and killing only the direct child leaves the rest running
 /// and holding the output pipes open. On Unix the child leads its own process
 /// group (see `spawn_streaming`), so the whole group is signalled at once; on
@@ -314,7 +314,7 @@ fn finish_streamed(mut running: StreamingChild, cancel: &AtomicBool, sink: &LogS
 }
 
 /// Blocking: spawn `program`, stream its output into `sink`, and wait for it
-/// to exit before returning — [`crate::workflow`]'s executor uses this to run
+/// to exit before returning — [`super::workflow`]'s executor uses this to run
 /// a chain of steps strictly one after another instead of firing them all in
 /// parallel like [`spawn`] does. Reports its own "exited with ..." line into
 /// `sink`, same as [`spawn`]; setting `cancel` kills the child early.

@@ -1,6 +1,6 @@
 //! Named, multi-step build/run flows described in TOML — "run `restore`,
 //! then `build`, then `test`" instead of one bare command. Built on
-//! [`crate::task`]'s process-streaming plumbing: unlike [`crate::task::spawn`]
+//! [`super::task`]'s process-streaming plumbing: unlike [`super::task::spawn`]
 //! (fires one command off in parallel with everything else), a workflow's
 //! steps run strictly one after another, stopping at the first failure.
 //! Product-agnostic — knows nothing about what a step's `run` command
@@ -13,8 +13,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use serde::{Deserialize, Serialize};
 
-use crate::log::LogSink;
-use crate::task::{Completion, run_streamed};
+use super::log::LogSink;
+use super::task::{Completion, run_streamed};
 
 /// One `workflow.toml`'s worth of named flows.
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -85,7 +85,7 @@ struct WorkflowShared {
     result: Completion<WorkflowResult>,
 }
 
-/// Mirrors [`crate::task::TaskHandle`]'s shape — poll [`Self::is_running`]
+/// Mirrors [`super::task::TaskHandle`]'s shape — poll [`Self::is_running`]
 /// (or [`Self::result`]) from the UI thread, or block on [`Self::wait`];
 /// output arrives in the [`LogSink`] passed to [`run`].
 #[derive(Clone)]
@@ -109,7 +109,7 @@ impl WorkflowHandle {
     }
 
     /// Kills the currently-running step and skips every remaining one —
-    /// asynchronous, like [`crate::task::TaskHandle::cancel`].
+    /// asynchronous, like [`super::task::TaskHandle::cancel`].
     pub fn cancel(&self) {
         self.shared.cancel.store(true, Ordering::Release);
     }

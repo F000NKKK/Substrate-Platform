@@ -7,8 +7,12 @@
 //! touch must be in a folder the user opened. A product's own commands
 //! check their paths against the same one ([`Workspace::check`]).
 
+#[cfg(feature = "git")]
 mod git;
+mod open;
 
+#[cfg(any(feature = "git"))]
+use substrate_platform::message::Message;
 pub use substrate_platform::workspace::Workspace;
 use tauri::Manager;
 use tauri::plugin::{Builder, TauriPlugin};
@@ -17,10 +21,13 @@ use tauri::plugin::{Builder, TauriPlugin};
 pub use substrate_platform::events::PLUGIN as NAME;
 
 /// Runs `work` off the UI thread.
-pub(crate) async fn blocking<T: Send + 'static>(work: impl FnOnce() -> Result<T, substrate_platform::message::Message> + Send + 'static) -> Result<T, substrate_platform::message::Message> {
-    tauri::async_runtime::spawn_blocking(work).await.map_err(|e| substrate_platform::message::Message::verbatim(e))?
+#[cfg(any(feature = "git"))]
+pub(crate) async fn blocking<T: Send + 'static>(work: impl FnOnce() -> Result<T, Message> + Send + 'static) -> Result<T, Message> {
+    tauri::async_runtime::spawn_blocking(work).await.map_err(Message::verbatim)?
 }
 
+/// The plugin, with the commands of each feature turned on (`build.rs`
+/// lists the same names for their permissions).
 pub fn init<R: tauri::Runtime>() -> TauriPlugin<R> {
     Builder::new(NAME)
         .setup(|app, _api| {
@@ -28,30 +35,57 @@ pub fn init<R: tauri::Runtime>() -> TauriPlugin<R> {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            git::git_status,
-            git::git_stage,
-            git::git_unstage,
-            git::git_discard,
-            git::git_commit,
-            git::git_last_message,
-            git::git_diff_texts,
-            git::git_head_text,
-            git::git_log,
-            git::git_commit_files,
-            git::git_branches,
-            git::git_switch,
-            git::git_branch_create,
-            git::git_branch_delete,
-            git::git_remote,
-            git::git_integrate,
-            git::git_operation,
-            git::git_clone,
-            git::git_init,
-            git::git_stash_list,
-            git::git_stash_push,
-            git::git_stash_op,
-            git::git_config_get,
-            git::git_config_set,
+            open::open_url,
+            open::open_path,
+            open::reveal_path,
+            #[cfg(feature = "git")]
+            git::changes::git_status,
+            #[cfg(feature = "git")]
+            git::changes::git_stage,
+            #[cfg(feature = "git")]
+            git::changes::git_unstage,
+            #[cfg(feature = "git")]
+            git::changes::git_discard,
+            #[cfg(feature = "git")]
+            git::changes::git_commit,
+            #[cfg(feature = "git")]
+            git::changes::git_last_message,
+            #[cfg(feature = "git")]
+            git::changes::git_diff_texts,
+            #[cfg(feature = "git")]
+            git::changes::git_head_text,
+            #[cfg(feature = "git")]
+            git::history::git_log,
+            #[cfg(feature = "git")]
+            git::history::git_commit_files,
+            #[cfg(feature = "git")]
+            git::history::git_branches,
+            #[cfg(feature = "git")]
+            git::history::git_switch,
+            #[cfg(feature = "git")]
+            git::history::git_branch_create,
+            #[cfg(feature = "git")]
+            git::history::git_branch_delete,
+            #[cfg(feature = "git")]
+            git::remote::git_remote,
+            #[cfg(feature = "git")]
+            git::remote::git_integrate,
+            #[cfg(feature = "git")]
+            git::remote::git_operation,
+            #[cfg(feature = "git")]
+            git::remote::git_clone,
+            #[cfg(feature = "git")]
+            git::remote::git_init,
+            #[cfg(feature = "git")]
+            git::stash::git_stash_list,
+            #[cfg(feature = "git")]
+            git::stash::git_stash_push,
+            #[cfg(feature = "git")]
+            git::stash::git_stash_op,
+            #[cfg(feature = "git")]
+            git::stash::git_config_get,
+            #[cfg(feature = "git")]
+            git::stash::git_config_set,
         ])
         .build()
 }

@@ -9,7 +9,7 @@ import type { Extension } from "@codemirror/state";
  * extensions. Products add their own with `registerFileType`.
  */
 export interface FileType {
-  /** Stable, unique (`"rust"`, `"yog.yui"`). */
+  /** Stable, unique (`"rust"`, `"acme.layout"`). */
   id: string;
   /** What it's called — English, shown through `t` (`"Rust"`, `"PNG Image"`). */
   name: string;

@@ -3,7 +3,13 @@
 //! `LD_LIBRARY_PATH` into its mount, its GTK and GIO modules, `APPDIR`… —
 //! and a program it starts that inherits them loads the AppImage's
 //! libraries instead of its own, and fails (`version 'LIBSYSTEMD_254' not
-//! found`). Everything a product starts goes through here.
+//! found`). Everything a product starts goes through here — programs
+//! ([`command`], [`start`]), and links and files opened with the user's
+//! default app ([`open_link`], [`open_path`], [`reveal`]).
+
+mod open;
+
+pub use open::{open_link, open_path, reveal, start};
 
 use std::ffi::{OsStr, OsString};
 use std::path::PathBuf;
@@ -11,6 +17,13 @@ use std::process::Command;
 
 /// What an AppImage's runtime tells the program inside about itself.
 const APPIMAGE_VARS: [&str; 4] = ["APPDIR", "APPIMAGE", "ARGV0", "OWD"];
+
+crate::messages! {
+    process {
+        NOT_A_LINK = "{url} isn't a web or mail link.",
+        CANT_START = "Couldn't start {program}: {error}",
+    }
+}
 
 /// How a started program's environment differs from this process's: each
 /// variable an AppImage changed, with the value the system had (`None`:

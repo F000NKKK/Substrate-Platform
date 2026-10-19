@@ -5,7 +5,7 @@
 use serde::Serialize;
 
 /// One shell the host can offer to spawn — `command` is what gets passed to
-/// [`crate::pty::PtySession::spawn`]'s `shell` argument. Serializes with
+/// [`super::PtySession::spawn`]'s `shell` argument. Serializes with
 /// camelCase field names (`clearCommand`), ready to hand to a JS frontend.
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]

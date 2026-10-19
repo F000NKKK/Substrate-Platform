@@ -12,15 +12,15 @@ beforeAll(() => {
 const leaf = (id: string): TreeNode<null> => ({ id, label: id, data: null });
 const branch = (id: string, children: TreeNode<null>[]): TreeNode<null> => ({ id, label: id, data: null, children });
 
-const NODES = [branch("src", [leaf("alpha.rs"), leaf("apple.rs"), branch("ui", [leaf("main.yui")]), leaf("beta.rs")]), leaf("yog.toml")];
+const NODES = [branch("src", [leaf("alpha.rs"), leaf("apple.rs"), branch("ui", [leaf("main.xml")]), leaf("beta.rs")]), leaf("zeta.toml")];
 
 describe("typeAheadIndex", () => {
   const flat = flattenVisible(NODES, new Set(["src"]));
   const ids = flat.map((e) => e.node.id);
 
   it("jumps to the next row starting with the letter, wrapping around", () => {
-    expect(ids[typeAheadIndex(flat, 0, "y")]).toBe("yog.toml");
-    expect(ids[typeAheadIndex(flat, ids.indexOf("yog.toml"), "s")]).toBe("src");
+    expect(ids[typeAheadIndex(flat, 0, "z")]).toBe("zeta.toml");
+    expect(ids[typeAheadIndex(flat, ids.indexOf("zeta.toml"), "s")]).toBe("src");
   });
 
   it("cycles through the rows when one letter repeats", () => {
@@ -51,7 +51,7 @@ describe("tree navigation helpers", () => {
 
   it("selects a Shift range either way", () => {
     const flat = flattenVisible(NODES, new Set());
-    expect(rangeIds(flat, 1, 0)).toEqual(["src", "yog.toml"]);
+    expect(rangeIds(flat, 1, 0)).toEqual(["src", "zeta.toml"]);
   });
 });
 
@@ -87,9 +87,9 @@ describe("Tree keyboard", () => {
   it("arrows select and move the focus; Right/Left expand, enter and leave a branch", async () => {
     const t = await mountTree();
     await t.press("src", "ArrowDown");
-    expect([...t.state.selected]).toEqual(["yog.toml"]);
-    expect(document.activeElement).toBe(t.row("yog.toml"));
-    await t.press("yog.toml", "ArrowUp");
+    expect([...t.state.selected]).toEqual(["zeta.toml"]);
+    expect(document.activeElement).toBe(t.row("zeta.toml"));
+    await t.press("zeta.toml", "ArrowUp");
     await t.press("src", "ArrowRight");
     expect(t.state.expanded.has("src")).toBe(true);
     await t.press("src", "ArrowRight");

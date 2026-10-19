@@ -11,7 +11,7 @@ describe("createRustcParser", () => {
   it("reads human-format errors and warnings with their location and lint", () => {
     const out = parseAll(
       [
-        "   Compiling my_mod v0.1.0 (/p/.yog-build)",
+        "   Compiling my_app v0.1.0 (/p/build)",
         "error[E0425]: cannot find value `x` in this scope",
         " --> ../src/lib.rs:3:5",
         "  |",
@@ -23,10 +23,10 @@ describe("createRustcParser", () => {
         "   |",
         "   = note: `#[warn(unused_variables)]` on by default",
         "",
-        "warning: `my_mod` (lib) generated 1 warning",
-        "error: could not compile `my_mod` (lib) due to 1 previous error; 1 warning emitted",
+        "warning: `my_app` (lib) generated 1 warning",
+        "error: could not compile `my_app` (lib) due to 1 previous error; 1 warning emitted",
       ].join("\n"),
-      { resolvePath: (p: string) => `/p/.yog-build/${p}` }
+      { resolvePath: (p: string) => `/p/build/${p}` }
     );
     expect(out).toEqual([
       {
@@ -34,10 +34,10 @@ describe("createRustcParser", () => {
         message: "cannot find value `x` in this scope",
         code: "E0425",
         codeHref: "https://doc.rust-lang.org/error_codes/E0425.html",
-        file: "/p/.yog-build/../src/lib.rs",
+        file: "/p/build/../src/lib.rs",
         line: 3,
         column: 5,
-        project: "my_mod",
+        project: "my_app",
         tool: "rustc",
         origin: "build",
       },
@@ -46,10 +46,10 @@ describe("createRustcParser", () => {
         message: "unused variable: `y`",
         code: "unused_variables",
         codeHref: undefined,
-        file: "/p/.yog-build/../src/foo.rs",
+        file: "/p/build/../src/foo.rs",
         line: 10,
         column: 9,
-        project: "my_mod",
+        project: "my_app",
         tool: "rustc",
         origin: "build",
       },
@@ -65,7 +65,7 @@ describe("createRustcParser", () => {
   it("reads cargo JSON messages", () => {
     const line = JSON.stringify({
       reason: "compiler-message",
-      target: { name: "my_mod" },
+      target: { name: "my_app" },
       message: {
         message: "this `return` is needless",
         level: "warning",
@@ -81,7 +81,7 @@ describe("createRustcParser", () => {
         tool: "clippy",
         file: "src/lib.rs",
         line: 7,
-        project: "my_mod",
+        project: "my_app",
       }),
     ]);
   });

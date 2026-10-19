@@ -5,8 +5,9 @@
 use std::hint::black_box;
 
 use criterion::{BatchSize, Criterion, criterion_group, criterion_main};
-use substrate_platform::dir::list_dir;
-use substrate_platform::{Level, LogSink, Utf8Chunker};
+use substrate_platform::fs::dir::list_dir;
+use substrate_platform::run::{Level, LogSink};
+use substrate_platform::terminal::Utf8Chunker;
 
 /// A realistic slice of `cargo build` stderr — mostly progress, some diagnostics.
 const STDERR_LINES: &[&str] = &[

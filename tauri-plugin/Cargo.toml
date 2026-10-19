@@ -5,10 +5,14 @@ edition = "2024"
 rust-version = "1.99"
 authors = ["F000NK"]
 license = "AGPL-3.0-only"
-description = "Substrate Platform's host commands for a Tauri app: the workspace boundary, Source Control — what Substrate's UI calls, the same in every product."
+description = "Substrate Platform's host commands for a Tauri app: the workspace boundary, opening links, Source Control — what Substrate's UI calls, the same in every product."
 repository = "https://github.com/F000NKKK/Substrate-Platform"
 # Tauri wants a plugin's links key: its permissions are found by it.
 links = "tauri-plugin-substrate"
+
+# Each command group is a feature of its name, turning on the core's module.
+[features]
+git = ["substrate-platform/git"]
 
 [dependencies]
 substrate-platform = { path = ".." }

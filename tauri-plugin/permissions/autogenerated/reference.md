@@ -4,6 +4,7 @@ Every command Substrate's UI calls.
 
 #### This default permission set includes the following:
 
+- `allow-open-url`
 - `allow-git-status`
 - `allow-git-stage`
 - `allow-git-unstage`
@@ -658,6 +659,32 @@ Enables the git_unstage command without any pre-configured scope.
 <td>
 
 Denies the git_unstage command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-open-url`
+
+</td>
+<td>
+
+Enables the open_url command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-open-url`
+
+</td>
+<td>
+
+Denies the open_url command without any pre-configured scope.
 
 </td>
 </tr>

@@ -86,7 +86,7 @@ describe("data grid 20k rows", () => {
   });
 });
 
-const logLine = "   Compiling yog-api v0.40.0 (/home/user/Projects/yog/Yog-Mod-Loader/rust/crates/yog-api)";
+const logLine = "   Compiling app-core v0.40.0 (/home/user/Projects/app/crates/app-core)";
 describe("output buffer", () => {
   bench(
     "append 20k lines at the 10k cap",

@@ -51,7 +51,7 @@ flowchart LR
     end
     subgraph sp["Substrate Platform"]
         spui["substrate-platform-ui<br/>оболочка · редакторы · виджеты"]
-        sprs["substrate-platform<br/>task · workflow · pty · log · dir · project"]
+        sprs["substrate-platform<br/>run · terminal · fs · project · git"]
     end
     ui --> spui
     be --> sprs
@@ -60,22 +60,24 @@ flowchart LR
 
 ## 🦀 Rust-крейт
 
-| Модуль | Что делает |
+Всегда есть: `message` (тексты для пользователя в виде шаблонов, которые переводит UI), `events`, `process` (каким должно быть окружение запущенной программы) и `workspace` (открытые пользователем папки; пути вне их отклоняются). Остальные модули — Cargo features с тем же именем, продукт собирает только то, чем пользуется (`full` включает все):
+
+| Feature / модуль | Что делает |
 |---|---|
-| `task` | Запускает внешний процесс без блокировки и построчно пишет stdout/stderr в `LogSink`. У `TaskHandle` есть `is_running`, `exit_status`, `wait` и `cancel` (убивает всё дерево процессов). |
-| `workflow` | Именованные многошаговые сценарии из TOML. Шаги идут по порядку и останавливаются на первой ошибке; шаг может вызвать другой workflow (циклы отлавливаются); работает подстановка `${var}`. У `WorkflowHandle` есть `result`, `wait` и `cancel`. |
-| `log` | Клонируемый журнал `LogSink`, в который только дописывают: его можно прочитать, забрать (`drain`) или получать новые строки через `on_push`. Объём ограничен (`set_max_lines`). |
-| `pty` | Настоящий кроссплатформенный псевдотерминал (`PtySession` на `portable-pty`) с `PtyOptions`, а `spawn_utf8` / `Utf8Chunker` не разрывают многобайтовые символы. |
-| `shell` | `detect_shells()` возвращает реально установленные оболочки. |
-| `dir` | Содержимое одной папки (папки сначала, без учёта регистра), создание, переименование, удаление, чтение и запись текста или байтов. |
-| `project` | Определение `ProjectStandard` по файлам-маркерам, `Project` и `Solution` (TOML-файл с несколькими проектами, загрузка и сохранение). Сами стандарты задаёт хост. |
+| `run` | `run::task` запускает внешний процесс без блокировки и построчно передаёт stdout/stderr в `LogSink`; у `TaskHandle` есть `is_running`, `exit_status`, `wait` и `cancel` (завершает всё дерево процессов). `run::workflow`: именованные многошаговые сценарии из TOML — шаги идут по порядку и останавливаются на первой ошибке, шаг может вызвать другой сценарий (циклы обнаруживаются), подставляется `${var}`. `run::log`: клонируемый журнал `LogSink` только на добавление, с ограниченным хранением. |
+| `terminal` | Настоящий кроссплатформенный псевдотерминал (`PtySession`, через `portable-pty`) с `PtyOptions`; `Utf8Chunker`, чтобы вывод не разрывал многобайтовые символы; `detect_shells()` перечисляет установленные оболочки. |
+| `fs` | `fs::dir`: список содержимого папки (сначала папки, без учёта регистра), создание/переименование/удаление, чтение/запись текста или байтов. `fs::watch`: `DirWatcher`, уведомления об изменениях с подавлением дребезга. |
+| `project` | Модель проектов и решений и API к ней — без собственного формата и без чтения файлов. `Solution`: папки решения, конфигурации и платформы, конфигурация каждого проекта для каждой конфигурации решения, зависимости сборки (`build_order`), а также упорядоченные свойства и секции для всего остального, что хранит формат; `Project`: свойства (в том числе по конфигурациям), целевые платформы, элементы, ссылки. Продукт реализует `SolutionFormat` / `ProjectFormat` для своих файлов (`.sln`, `.slnx`, `.csproj`, свои) и регистрирует их в `Formats`; `ProjectStandard` определяет вид проекта по списку файлов, который передаёт продукт. |
+| `git` | Система управления версиями через CLI `git`: состояние, индексирование, фиксации, сравнения, история, ветви, удалённые репозитории, спрятанные изменения, параметры. |
+
+У Tauri-плагина `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) те же features для его команд (`git`).
 
 Какие пути хосту можно трогать, решает сам хост, уровнем выше.
 
 ### Запуск задачи
 
 ```rust
-use substrate_platform::{LogSink, Task, spawn_task};
+use substrate_platform::run::{LogSink, Task, spawn_task};
 
 let sink = LogSink::new();
 sink.on_push(|line| println!("{:?} {}", line.level, line.text));
@@ -103,7 +105,7 @@ steps = [
 
 ```rust
 use std::collections::HashMap;
-use substrate_platform::{LogSink, WorkflowFile, run_workflow};
+use substrate_platform::run::{LogSink, WorkflowFile, run_workflow};
 
 let file = WorkflowFile::parse(&std::fs::read_to_string("workflow.toml")?)?;
 let vars = HashMap::from([("log".to_string(), "debug".to_string())]);
