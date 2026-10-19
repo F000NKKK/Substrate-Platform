@@ -44,7 +44,7 @@ export function PlatformShell({
   menu,
   statusBar,
 }: PlatformShellProps) {
-  const layout = useShellLayout(main, toolWindows, defaultPinned, persistKey, extraCenterPanels, onCloseDynamicPanel);
+  const layout = useShellLayout({ main, toolWindows, defaultPinned, persistKey, extraCenterPanels, onCloseDynamicPanel });
   // A panel dragged over the main area: the dock guides, and what's under the pointer.
   const [dragOver, setDragOver] = useState<{ main: DOMRect; documents: DOMRect | null; target: DockAnchor | null } | null>(null);
 
