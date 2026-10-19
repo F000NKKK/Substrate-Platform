@@ -19,6 +19,8 @@ export interface FloatingWindowProps {
   /** Controls in the title bar, before the close button. */
   headerExtra?: ReactNode;
   className?: string;
+  /** Blocks the rest of the IDE until it's closed (a backdrop under it takes every click), as Visual Studio's Add New Item does. */
+  modal?: boolean;
   children: ReactNode;
 }
 
@@ -28,7 +30,7 @@ export interface FloatingWindowProps {
  * Quick Find (raised surface, strong border, shadow). For dialogs that work
  * alongside the editor, like Visual Studio's Find and Replace window.
  */
-export function FloatingWindow({ title, icon, onClose, width = 460, initialPosition, headerExtra, className, children }: FloatingWindowProps) {
+export function FloatingWindow({ title, icon, onClose, width = 460, initialPosition, headerExtra, className, modal, children }: FloatingWindowProps) {
   const t = useT();
   const [initial] = useState(() => initialPosition ?? { x: Math.max(8, Math.round((window.innerWidth - width) / 2)), y: 96 });
   const { pos, handlers } = useDraggable(initial);
@@ -44,25 +46,27 @@ export function FloatingWindow({ title, icon, onClose, width = 460, initialPosit
     }
   }
 
-  return (
-    <ViewportPortal>
-      <div
-        className={["sp-floating-window", className].filter(Boolean).join(" ")}
-        role="dialog"
-        aria-label={title}
-        style={{ left, top, width }}
-        onKeyDown={onKeyDown}
-      >
-        <div className="sp-floating-window-header" {...handlers}>
-          {icon && <span className="sp-floating-window-icon">{icon}</span>}
-          <span className="sp-floating-window-title">{title}</span>
-          {headerExtra}
-          <IconButton aria-label={t("Close")} title={t("Close")} onClick={onClose}>
-            <IconClose />
-          </IconButton>
-        </div>
-        <div className="sp-floating-window-body">{children}</div>
+  const frame = (
+    <div
+      className={["sp-floating-window", className].filter(Boolean).join(" ")}
+      role="dialog"
+      aria-label={title}
+      aria-modal={modal ? "true" : undefined}
+      style={{ left, top, width }}
+      onKeyDown={onKeyDown}
+      // Its clicks are its own — not "outside" for a flyout or menu it was opened from.
+      onPointerDown={(e) => e.stopPropagation()}
+    >
+      <div className="sp-floating-window-header" {...handlers}>
+        {icon && <span className="sp-floating-window-icon">{icon}</span>}
+        <span className="sp-floating-window-title">{title}</span>
+        {headerExtra}
+        <IconButton aria-label={t("Close")} title={t("Close")} onClick={onClose}>
+          <IconClose />
+        </IconButton>
       </div>
-    </ViewportPortal>
+      <div className="sp-floating-window-body">{children}</div>
+    </div>
   );
+  return <ViewportPortal>{modal ? <div className="sp-floating-window-backdrop" onPointerDown={(e) => e.stopPropagation()}>{frame}</div> : frame}</ViewportPortal>;
 }
