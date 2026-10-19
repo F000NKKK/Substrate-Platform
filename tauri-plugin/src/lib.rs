@@ -7,6 +7,8 @@
 //! touch must be in a folder the user opened. A product's own commands
 //! check their paths against the same one ([`Workspace::check`]).
 
+#[cfg(feature = "fs")]
+mod fs;
 #[cfg(feature = "git")]
 mod git;
 mod open;
@@ -36,12 +38,34 @@ pub fn init<R: tauri::Runtime>() -> TauriPlugin<R> {
             app.manage(Workspace::default());
             #[cfg(feature = "terminal")]
             app.manage(terminal::Terminals::default());
+            #[cfg(feature = "fs")]
+            app.manage(fs::Watcher::default());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             open::open_url,
             open::open_path,
             open::reveal_path,
+            #[cfg(feature = "fs")]
+            fs::dir_list,
+            #[cfg(feature = "fs")]
+            fs::dir_create_file,
+            #[cfg(feature = "fs")]
+            fs::dir_create_dir,
+            #[cfg(feature = "fs")]
+            fs::dir_rename,
+            #[cfg(feature = "fs")]
+            fs::dir_remove,
+            #[cfg(feature = "fs")]
+            fs::dir_copy,
+            #[cfg(feature = "fs")]
+            fs::file_read,
+            #[cfg(feature = "fs")]
+            fs::file_write,
+            #[cfg(feature = "fs")]
+            fs::allow_path,
+            #[cfg(feature = "fs")]
+            fs::fs_watch,
             #[cfg(feature = "terminal")]
             terminal::terminal_shells,
             #[cfg(feature = "terminal")]

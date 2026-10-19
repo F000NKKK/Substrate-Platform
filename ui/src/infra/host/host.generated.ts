@@ -2,6 +2,12 @@
 
 /** Substrate's message templates: the i18n catalogs' keys for what the backend says. */
 export const messages = {
+  fs: {
+    notAFile: "{path} isn't a file.",
+    alreadyExists: "{path} already exists.",
+    intoItself: "A folder can't be copied into itself.",
+    failed: "{path}: {error}",
+  },
   git: {
     missing: "Git isn't installed, or isn't on PATH.",
     cantStart: "Couldn't start git: {error}",
@@ -46,6 +52,7 @@ export const plugin = "substrate";
 export const events = {
   ideOutput: "substrate://ide-output",
   gitOutput: "substrate://git-output",
+  filesChanged: "substrate://files-changed",
   terminalOutput: "substrate://terminal-output",
   terminalExit: "substrate://terminal-exit",
 } as const;

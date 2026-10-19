@@ -9,6 +9,7 @@ export { RU } from "./locales/ru";
 import "./locales/ru";
 import "./locales/ru.editor";
 import "./locales/ru.errorList";
+import "./locales/ru.files";
 import "./locales/ru.git";
 import "./locales/ru.output";
 import "./locales/ru.project";

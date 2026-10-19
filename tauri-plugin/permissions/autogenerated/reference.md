@@ -7,6 +7,16 @@ Every command Substrate's UI calls.
 - `allow-open-url`
 - `allow-open-path`
 - `allow-reveal-path`
+- `allow-dir-list`
+- `allow-dir-create-file`
+- `allow-dir-create-dir`
+- `allow-dir-rename`
+- `allow-dir-remove`
+- `allow-dir-copy`
+- `allow-file-read`
+- `allow-file-write`
+- `allow-allow-path`
+- `allow-fs-watch`
 - `allow-git-status`
 - `allow-git-stage`
 - `allow-git-unstage`
@@ -45,6 +55,266 @@ Every command Substrate's UI calls.
 <th>Description</th>
 </tr>
 
+
+<tr>
+<td>
+
+`substrate:allow-allow-path`
+
+</td>
+<td>
+
+Enables the allow_path command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-allow-path`
+
+</td>
+<td>
+
+Denies the allow_path command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dir-copy`
+
+</td>
+<td>
+
+Enables the dir_copy command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dir-copy`
+
+</td>
+<td>
+
+Denies the dir_copy command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dir-create-dir`
+
+</td>
+<td>
+
+Enables the dir_create_dir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dir-create-dir`
+
+</td>
+<td>
+
+Denies the dir_create_dir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dir-create-file`
+
+</td>
+<td>
+
+Enables the dir_create_file command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dir-create-file`
+
+</td>
+<td>
+
+Denies the dir_create_file command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dir-list`
+
+</td>
+<td>
+
+Enables the dir_list command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dir-list`
+
+</td>
+<td>
+
+Denies the dir_list command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dir-remove`
+
+</td>
+<td>
+
+Enables the dir_remove command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dir-remove`
+
+</td>
+<td>
+
+Denies the dir_remove command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dir-rename`
+
+</td>
+<td>
+
+Enables the dir_rename command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dir-rename`
+
+</td>
+<td>
+
+Denies the dir_rename command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-file-read`
+
+</td>
+<td>
+
+Enables the file_read command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-file-read`
+
+</td>
+<td>
+
+Denies the file_read command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-file-write`
+
+</td>
+<td>
+
+Enables the file_write command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-file-write`
+
+</td>
+<td>
+
+Denies the file_write command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-fs-watch`
+
+</td>
+<td>
+
+Enables the fs_watch command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-fs-watch`
+
+</td>
+<td>
+
+Denies the fs_watch command without any pre-configured scope.
+
+</td>
+</tr>
 
 <tr>
 <td>

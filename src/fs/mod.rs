@@ -2,6 +2,7 @@
 //! files ([`dir`]) and watching them ([`watch`]). Feature `fs`.
 
 pub mod dir;
+pub mod messages;
 pub mod watch;
 
 pub use dir::{DirEntryInfo, EntryKind};

@@ -295,6 +295,126 @@
       "type": "string",
       "oneOf": [
         {
+          "description": "Enables the allow_path command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-allow-path",
+          "markdownDescription": "Enables the allow_path command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the allow_path command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-allow-path",
+          "markdownDescription": "Denies the allow_path command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the dir_copy command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dir-copy",
+          "markdownDescription": "Enables the dir_copy command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dir_copy command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dir-copy",
+          "markdownDescription": "Denies the dir_copy command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the dir_create_dir command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dir-create-dir",
+          "markdownDescription": "Enables the dir_create_dir command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dir_create_dir command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dir-create-dir",
+          "markdownDescription": "Denies the dir_create_dir command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the dir_create_file command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dir-create-file",
+          "markdownDescription": "Enables the dir_create_file command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dir_create_file command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dir-create-file",
+          "markdownDescription": "Denies the dir_create_file command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the dir_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dir-list",
+          "markdownDescription": "Enables the dir_list command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dir_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dir-list",
+          "markdownDescription": "Denies the dir_list command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the dir_remove command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dir-remove",
+          "markdownDescription": "Enables the dir_remove command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dir_remove command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dir-remove",
+          "markdownDescription": "Denies the dir_remove command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the dir_rename command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dir-rename",
+          "markdownDescription": "Enables the dir_rename command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dir_rename command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dir-rename",
+          "markdownDescription": "Denies the dir_rename command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the file_read command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-file-read",
+          "markdownDescription": "Enables the file_read command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the file_read command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-file-read",
+          "markdownDescription": "Denies the file_read command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the file_write command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-file-write",
+          "markdownDescription": "Enables the file_write command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the file_write command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-file-write",
+          "markdownDescription": "Denies the file_write command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the fs_watch command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-fs-watch",
+          "markdownDescription": "Enables the fs_watch command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the fs_watch command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-fs-watch",
+          "markdownDescription": "Denies the fs_watch command without any pre-configured scope."
+        },
+        {
           "description": "Enables the git_branch_create command without any pre-configured scope.",
           "type": "string",
           "const": "allow-git-branch-create",
@@ -679,10 +799,10 @@
           "markdownDescription": "Denies the terminal_write command without any pre-configured scope."
         },
         {
-          "description": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-open-url`\n- `allow-open-path`\n- `allow-reveal-path`\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`\n- `allow-terminal-shells`\n- `allow-terminal-spawn`\n- `allow-terminal-write`\n- `allow-terminal-resize`\n- `allow-terminal-kill`",
+          "description": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-open-url`\n- `allow-open-path`\n- `allow-reveal-path`\n- `allow-dir-list`\n- `allow-dir-create-file`\n- `allow-dir-create-dir`\n- `allow-dir-rename`\n- `allow-dir-remove`\n- `allow-dir-copy`\n- `allow-file-read`\n- `allow-file-write`\n- `allow-allow-path`\n- `allow-fs-watch`\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`\n- `allow-terminal-shells`\n- `allow-terminal-spawn`\n- `allow-terminal-write`\n- `allow-terminal-resize`\n- `allow-terminal-kill`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-open-url`\n- `allow-open-path`\n- `allow-reveal-path`\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`\n- `allow-terminal-shells`\n- `allow-terminal-spawn`\n- `allow-terminal-write`\n- `allow-terminal-resize`\n- `allow-terminal-kill`"
+          "markdownDescription": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-open-url`\n- `allow-open-path`\n- `allow-reveal-path`\n- `allow-dir-list`\n- `allow-dir-create-file`\n- `allow-dir-create-dir`\n- `allow-dir-rename`\n- `allow-dir-remove`\n- `allow-dir-copy`\n- `allow-file-read`\n- `allow-file-write`\n- `allow-allow-path`\n- `allow-fs-watch`\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`\n- `allow-terminal-shells`\n- `allow-terminal-spawn`\n- `allow-terminal-write`\n- `allow-terminal-resize`\n- `allow-terminal-kill`"
         }
       ]
     }

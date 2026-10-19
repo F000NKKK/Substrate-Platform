@@ -42,7 +42,21 @@ const DEFAULT_PERMISSIONS: &str = "permissions/default.toml";
 /// Feature `terminal`: shell sessions.
 const TERMINAL: &[&str] = &["terminal_shells", "terminal_spawn", "terminal_write", "terminal_resize", "terminal_kill"];
 
-const GROUPS: &[&[&str]] = &[CORE, GIT, TERMINAL];
+/// Feature `fs`: folders and files.
+const FS: &[&str] = &[
+    "dir_list",
+    "dir_create_file",
+    "dir_create_dir",
+    "dir_rename",
+    "dir_remove",
+    "dir_copy",
+    "file_read",
+    "file_write",
+    "allow_path",
+    "fs_watch",
+];
+
+const GROUPS: &[&[&str]] = &[CORE, FS, GIT, TERMINAL];
 
 fn main() {
     let commands: &'static [&'static str] = Box::leak(GROUPS.concat().into_boxed_slice());

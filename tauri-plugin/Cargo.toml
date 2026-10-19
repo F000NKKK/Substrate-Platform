@@ -12,6 +12,7 @@ links = "tauri-plugin-substrate"
 
 # Each command group is a feature of its name, turning on the core's module.
 [features]
+fs = ["substrate-platform/fs"]
 git = ["substrate-platform/git"]
 terminal = ["substrate-platform/terminal"]
 

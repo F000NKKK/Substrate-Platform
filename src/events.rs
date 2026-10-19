@@ -11,6 +11,9 @@ pub const IDE_OUTPUT: &str = "substrate://ide-output";
 /// A Source Control run's lines, as [`crate::message::Message`]s.
 pub const GIT_OUTPUT: &str = "substrate://git-output";
 
+/// Paths changed outside the IDE, in the watched folders: a list of paths.
+pub const FILES_CHANGED: &str = "substrate://files-changed";
+
 /// A terminal's output: `{ id, data }`.
 pub const TERMINAL_OUTPUT: &str = "substrate://terminal-output";
 
@@ -21,6 +24,7 @@ pub const TERMINAL_EXIT: &str = "substrate://terminal-exit";
 pub const ALL: &[(&str, &str)] = &[
     ("ideOutput", IDE_OUTPUT),
     ("gitOutput", GIT_OUTPUT),
+    ("filesChanged", FILES_CHANGED),
     ("terminalOutput", TERMINAL_OUTPUT),
     ("terminalExit", TERMINAL_EXIT),
 ];

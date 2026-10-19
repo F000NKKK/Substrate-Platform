@@ -8,7 +8,7 @@ export interface DirEntry {
   kind: "file" | "dir";
 }
 
-/** Every operation is injected — the product supplies its own `invoke("dir_*", ...)` calls, the same "commands as props" shape `TerminalPanel` already uses. Omit a mutating callback to leave that action unavailable (e.g. a read-only browse mode). */
+/** Every operation is injected — `hostFiles` serves them through the host plugin. Omit a mutating callback to leave that action unavailable (e.g. a read-only browse mode). */
 export interface DirectoryTreeCommands {
   list: (path: string) => Promise<DirEntry[]>;
   createFile?: (path: string) => Promise<void>;
