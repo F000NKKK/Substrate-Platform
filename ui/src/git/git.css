@@ -1,0 +1,519 @@
+/* Git Changes, Git Repository and the diff tabs. Nothing here may be wider
+   than its panel: every row clips (ellipsis) instead of scrolling sideways. */
+
+.sp-git-changes,
+.sp-git-diff,
+.sp-git-repo {
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+  color: var(--sp-text);
+}
+
+/* Change colors, Visual Studio's (readable on both light and dark surfaces) — a product's file explorer marks changed files with them too. */
+:root {
+  --sp-git-modified: #3f8fd2;
+  --sp-git-added: #4fa64a;
+  --sp-git-renamed: #a874d4;
+  /* rows start under the section title, past the expander column */
+  --sp-git-indent: calc(var(--sp-space-xs) * 2 + var(--sp-icon-size));
+}
+
+.sp-git-changes,
+.sp-git-diff {
+  display: flex;
+  flex-direction: column;
+}
+
+.sp-git-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-space-sm);
+  height: 100%;
+  padding: var(--sp-space-md);
+  color: var(--sp-text-muted);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.sp-git-empty p {
+  margin: 0;
+}
+
+.sp-git-note {
+  padding: var(--sp-space-xs) var(--sp-space-sm) var(--sp-space-xs) var(--sp-git-indent);
+  color: var(--sp-text-faint);
+  overflow-wrap: anywhere;
+}
+
+
+.sp-git-chevron-down {
+  transform: rotate(90deg);
+}
+
+/* ── Pane headers ── */
+
+.sp-git-pane-header,
+.sp-git-diff-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-2xs);
+  flex: 0 0 auto;
+  height: var(--sp-toolbar-height);
+  min-width: 0;
+  padding: 0 var(--sp-toolbar-padding-x);
+  border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-git-pane-header {
+  height: var(--sp-panel-header-height);
+  padding: 0 var(--sp-space-xs) 0 var(--sp-space-sm);
+  gap: var(--sp-space-xs);
+  color: var(--sp-text-muted);
+}
+
+.sp-git-busy {
+  flex: 0 0 auto;
+  padding: var(--sp-space-2xs) var(--sp-space-sm);
+  font-size: var(--sp-font-size-sm);
+  color: var(--sp-accent);
+  border-bottom: 1px solid var(--sp-border);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sp-git-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-space-sm);
+  flex: 0 0 auto;
+  padding: var(--sp-space-sm);
+  margin: var(--sp-space-sm) var(--sp-space-sm) 0;
+  border: 1px solid var(--sp-warning);
+  border-radius: var(--sp-radius-sm);
+  background: var(--sp-surface-2);
+}
+
+.sp-git-banner-text {
+  flex: 1 1 160px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ── Commit box ── */
+
+.sp-git-commit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-sm);
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: var(--sp-space-sm);
+  border-bottom: 1px solid var(--sp-border);
+}
+
+/* Also `.sp-textfield` — the platform's field look, focus ring included. */
+.sp-git-message {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-height: calc(4 * 1.4em + 2 * var(--sp-space-xs) + 2px);
+  max-height: 40vh;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.sp-git-commit-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-space-sm) var(--sp-space-md);
+  min-width: 0;
+}
+
+.sp-git-split {
+  display: inline-flex;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.sp-git-split > .sp-btn {
+  margin: 0;
+}
+
+.sp-git-split > .sp-btn:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.sp-git-split > .sp-git-split-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--sp-space-xs);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: 1px solid color-mix(in srgb, var(--sp-accent-contrast) 30%, transparent);
+}
+
+/* ── Lists ── */
+
+.sp-git-lists {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-bottom: var(--sp-space-sm);
+}
+
+.sp-git-section {
+  min-width: 0;
+}
+
+.sp-git-section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-xs);
+  height: var(--sp-control-height);
+  padding: 0 var(--sp-space-2xs) 0 var(--sp-space-xs);
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  min-width: 0;
+}
+
+/* The 10px chevron centered in a 16px expander column, so the title starts where the rows' text does. */
+.sp-git-section-header > svg:first-child {
+  flex: none;
+  margin: 0 calc((var(--sp-icon-size) - 10px) / 2);
+}
+
+.sp-git-section-header:hover {
+  background: var(--sp-surface-2);
+}
+
+.sp-git-section-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sp-git-section-actions {
+  display: inline-flex;
+  gap: var(--sp-space-2xs);
+  font-weight: normal;
+  flex: 0 0 auto;
+}
+
+.sp-git-count {
+  flex: 0 0 auto;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: var(--sp-surface-3);
+  color: var(--sp-text-muted);
+  font-size: 0.85em;
+  font-weight: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.sp-git-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-xs);
+  height: var(--sp-row-height);
+  min-width: 0;
+  padding: 0 var(--sp-space-2xs) 0 var(--sp-git-indent);
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: default;
+}
+
+.sp-git-row:hover {
+  background: var(--sp-surface-2);
+}
+
+.sp-git-row:focus {
+  outline: none;
+  background: var(--sp-accent-soft);
+}
+
+.sp-git-selected,
+.sp-git-selected:hover {
+  background: var(--sp-accent-soft);
+}
+
+.sp-git-row-actions {
+  display: none;
+  flex: 0 0 auto;
+  margin-left: auto;
+  gap: var(--sp-space-2xs);
+}
+
+.sp-git-row:hover .sp-git-row-actions,
+.sp-git-row:focus-within .sp-git-row-actions {
+  display: inline-flex;
+}
+
+/* The name gives way last; the folder after it takes what's left. */
+.sp-git-name {
+  flex: 0 1 auto;
+  min-width: 2em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sp-git-dir {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--sp-text-faint);
+  font-size: 0.92em;
+}
+
+.sp-git-deleted {
+  text-decoration: line-through;
+  color: var(--sp-text-muted);
+}
+
+.sp-git-current {
+  font-weight: 600;
+}
+
+.sp-git-letter {
+  flex: 0 0 12px;
+  text-align: center;
+  font-family: var(--sp-font-mono);
+  font-weight: 700;
+}
+
+.sp-git-kind-modified,
+.sp-git-kind-typeChanged {
+  color: var(--sp-git-modified);
+}
+
+.sp-git-kind-added,
+.sp-git-kind-untracked,
+.sp-git-kind-copied {
+  color: var(--sp-git-added);
+}
+
+.sp-git-kind-deleted {
+  color: var(--sp-danger);
+}
+
+.sp-git-kind-renamed {
+  color: var(--sp-git-renamed);
+}
+
+.sp-git-kind-conflicted {
+  color: var(--sp-warning);
+}
+
+/* ── Git Repository ── */
+
+.sp-git-repo {
+  display: grid;
+  grid-template-columns: minmax(150px, 22%) minmax(0, 1fr) minmax(180px, 28%);
+}
+
+.sp-git-branches,
+.sp-git-history,
+.sp-git-details {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.sp-git-branches {
+  border-right: 1px solid var(--sp-border);
+}
+
+.sp-git-details {
+  border-left: 1px solid var(--sp-border);
+}
+
+.sp-git-branch-scroll,
+.sp-git-commit-list,
+.sp-git-details-files {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.sp-git-group {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-xs);
+  min-width: 0;
+  padding: var(--sp-space-sm) var(--sp-space-sm) var(--sp-space-2xs);
+  color: var(--sp-text-muted);
+  font-size: var(--sp-font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sp-git-group-remote {
+  padding: var(--sp-space-2xs) var(--sp-space-sm) var(--sp-space-2xs) var(--sp-space-md);
+  text-transform: none;
+  font-size: 1em;
+  font-weight: normal;
+  color: var(--sp-text);
+}
+
+.sp-git-branches .sp-git-row {
+  padding-left: var(--sp-space-md);
+}
+
+.sp-git-branches .sp-git-nested {
+  padding-left: calc(var(--sp-space-md) + var(--sp-icon-size));
+}
+
+.sp-git-commit-list .sp-git-commit-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) minmax(60px, 18%) minmax(90px, 20%);
+  align-items: center;
+  gap: var(--sp-space-sm);
+  height: var(--sp-row-height);
+  padding: 0 var(--sp-space-sm);
+  white-space: nowrap;
+  cursor: default;
+}
+
+.sp-git-commit-list .sp-git-commit-row > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sp-git-commit-list .sp-git-commit-row:not(.sp-git-commit-head):hover {
+  background: var(--sp-surface-2);
+}
+
+.sp-git-commit-list .sp-git-commit-row.sp-git-selected {
+  background: var(--sp-accent-soft);
+}
+
+.sp-git-commit-list .sp-git-commit-row:focus {
+  outline: none;
+}
+
+.sp-git-commit-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--sp-surface-1);
+  border-bottom: 1px solid var(--sp-border);
+  color: var(--sp-text-muted);
+  font-weight: 600;
+}
+
+.sp-git-hash {
+  font-family: var(--sp-font-mono);
+  color: var(--sp-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.sp-git-author,
+.sp-git-date {
+  color: var(--sp-text-muted);
+}
+
+.sp-git-ref {
+  display: inline-block;
+  margin-right: var(--sp-space-xs);
+  padding: 0 var(--sp-space-xs);
+  border: 1px solid var(--sp-accent);
+  border-radius: var(--sp-radius-xs);
+  color: var(--sp-accent);
+  font-size: 0.85em;
+  line-height: 1.3;
+}
+
+.sp-git-load-more {
+  display: flex;
+  justify-content: center;
+  padding: var(--sp-space-sm);
+}
+
+.sp-git-details-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-2xs);
+  flex: 0 0 auto;
+  padding: var(--sp-space-sm);
+  border-bottom: 1px solid var(--sp-border);
+  overflow-wrap: anywhere;
+}
+
+.sp-git-details-subject {
+  font-weight: 600;
+}
+
+.sp-git-details .sp-git-row {
+  padding-left: var(--sp-space-sm);
+}
+
+/* ── Diff tab ── */
+
+.sp-git-diff-header {
+  gap: var(--sp-space-xs);
+}
+
+.sp-git-diff-side {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 25%;
+  padding: 1px var(--sp-space-xs);
+  border-radius: var(--sp-radius-xs);
+  background: var(--sp-surface-2);
+  font-family: var(--sp-font-mono);
+  font-size: 0.92em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sp-git-diff-arrow {
+  flex: 0 0 auto;
+  color: var(--sp-text-faint);
+}
+
+.sp-git-diff-path {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-left: var(--sp-space-sm);
+  color: var(--sp-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sp-git-diff-header .sp-icon-btn {
+  flex: 0 0 auto;
+}
+
+.sp-git-diff-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
