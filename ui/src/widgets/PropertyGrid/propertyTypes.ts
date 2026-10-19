@@ -3,7 +3,12 @@
 
 import type { ReactNode } from "react";
 
-export type PropertyKind = "string" | "text" | "number" | "bool" | "enum" | "vector" | "custom";
+/** How a property's value is shown and edited. */
+export const PROPERTY_KIND = { string: "string", text: "text", number: "number", bool: "bool", enum: "enum", vector: "vector", custom: "custom" } as const;
+export type PropertyKind = (typeof PROPERTY_KIND)[keyof typeof PROPERTY_KIND];
+
+/** The order categories and properties show in (see `PropertyGridProps.order`). */
+export const PROPERTY_ORDER = { sorted: "sorted", declared: "declared" } as const;
 /**
  * A vector (`"vector"`) is a tuple of numbers — a position, a size, a turn;
  * a `"text"` is a string of several lines (a page's text, a description).
@@ -79,7 +84,7 @@ export interface PropertyGridProps {
    * position before rotation before scale. The Alphabetical view sorts
    * either way.
    */
-  order?: "sorted" | "declared";
+  order?: (typeof PROPERTY_ORDER)[keyof typeof PROPERTY_ORDER];
   /** Hides the toolbar (view mode, search) — an inspector inside an editor, short lists the author ordered. */
   compact?: boolean;
 }

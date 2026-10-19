@@ -2,9 +2,11 @@
 // and committed.
 
 import { t } from "../../infra/i18n";
-import type { PropertyDescriptor, PropertyKind, PropertyValue } from "./propertyTypes";
+import { PROPERTY_KIND, PROPERTY_ORDER, type PropertyDescriptor, type PropertyGridProps, type PropertyKind, type PropertyValue } from "./propertyTypes";
 
-export type ViewMode = "categorized" | "alphabetical";
+/** The grid's view modes: by category, or every property by name. */
+export const VIEW_MODE = { categorized: "categorized", alphabetical: "alphabetical" } as const;
+export type ViewMode = (typeof VIEW_MODE)[keyof typeof VIEW_MODE];
 
 /** A row of the grid as laid out for the current view mode and search — what keyboard navigation steps through. */
 export type GridItem = { type: "category"; key: string; name: string; collapsed: boolean } | { type: "property"; key: string; property: PropertyDescriptor };
@@ -14,14 +16,28 @@ export const MIN_SPLIT = 0.15;
 export const MAX_SPLIT = 0.85;
 export const MIN_DESCRIPTION = 36;
 export const MAX_DESCRIPTION = 320;
+/** The name column's share of the width at first. */
+export const DEFAULT_SPLIT = 0.4;
+/** The description pane's height at first, in pixels. */
+export const DEFAULT_DESCRIPTION = 64;
+/** What a grid's remembered state is kept under unless `persistKey` says otherwise. */
+export const DEFAULT_PERSIST_KEY = "properties";
+/** A multi-line text box's height in lines: its text's, plus one, within these. */
+export const MIN_TEXT_ROWS = 3;
+export const MAX_TEXT_ROWS = 10;
+/** Scrubbing a number: pixels per step, and the step's share with Shift held. */
+export const SCRUB_PIXELS = 4;
+export const SCRUB_FINE = 0.1;
+/** The precision numbers keep (no float noise): 4 decimal places. */
+const NUMBER_PRECISION = 10000;
 
 export function kindOf(p: PropertyDescriptor): PropertyKind {
   if (p.kind) return p.kind;
-  if (p.render) return "custom";
-  if (Array.isArray(p.value)) return "vector";
-  if (typeof p.value === "boolean") return "bool";
-  if (typeof p.value === "number") return "number";
-  return p.options ? "enum" : "string";
+  if (p.render) return PROPERTY_KIND.custom;
+  if (Array.isArray(p.value)) return PROPERTY_KIND.vector;
+  if (typeof p.value === "boolean") return PROPERTY_KIND.bool;
+  if (typeof p.value === "number") return PROPERTY_KIND.number;
+  return p.options ? PROPERTY_KIND.enum : PROPERTY_KIND.string;
 }
 
 export function isEditable(p: PropertyDescriptor): boolean {
@@ -33,9 +49,9 @@ export function displayText(p: PropertyDescriptor): string {
   if (p.value === null) return "";
   if (Array.isArray(p.value)) return p.value.join(", ");
   if (typeof p.value === "boolean") return p.value ? t("True") : t("False");
-  if (p.optionLabel && kindOf(p) === "enum") return p.optionLabel(String(p.value));
+  if (p.optionLabel && kindOf(p) === PROPERTY_KIND.enum) return p.optionLabel(String(p.value));
   // A text shows its first line; the rest is there once it's edited.
-  if (kindOf(p) === "text") {
+  if (kindOf(p) === PROPERTY_KIND.text) {
     const lines = String(p.value).split("\n");
     return lines.length > 1 ? `${lines[0]} …` : lines[0];
   }
@@ -55,9 +71,14 @@ export function sameValue(a: PropertyValue | null, b: PropertyValue | null): boo
   return a === b;
 }
 
+/** `n` without float noise. */
+export function roundNumber(n: number): number {
+  return Math.round(n * NUMBER_PRECISION) / NUMBER_PRECISION;
+}
+
 /** A number as a field shows it: no float noise (0.30000000000000004 → 0.3). */
 export function shortNumber(n: number): string {
-  return String(Math.round(n * 10000) / 10000);
+  return String(roundNumber(n));
 }
 
 /** Runs `validate` then `onCommit` — resolves the rejection message, or `null` once applied. */
@@ -72,20 +93,40 @@ export async function applyEdit(p: PropertyDescriptor, value: PropertyValue): Pr
   }
 }
 
-/**
- * Visual Studio's Properties window body: an object selector line (bold
- * name + type), a Categorized/Alphabetical toggle and search box, a
- * two-column name/value grid with collapsible categories and a draggable
- * column splitter, and a resizable, hideable description pane for the
- * selected property. Purely presentational — what's shown comes from
- * `properties` (a product typically builds them from the global
- * `useSelection()`), and edits go back through each property's own
- * `onCommit`.
- *
- * Editing follows VS: a click on an editable value (or Enter/F2) opens a
- * text box that commits on Enter or blur and cancels on Esc; booleans and
- * enums are dropdowns that commit on pick, and double-clicking one cycles
- * its value. A rejected edit keeps the text box open with the message
- * under the row (one rejected by leaving the box is reported as a
- * notification instead, since the box is gone).
- */
+/** A property row's key (its cursor position). */
+export function propertyKey(p: PropertyDescriptor): string {
+  return `p:${p.id}`;
+}
+
+function categoryKey(name: string): string {
+  return `c:${name}`;
+}
+
+/** The rows the grid shows: `properties` matching `query`, by category (collapsed ones closed) or by name. */
+export function layoutItems(properties: readonly PropertyDescriptor[], mode: ViewMode, query: string, collapsed: ReadonlySet<string>, order: PropertyGridProps["order"]): GridItem[] {
+  const needle = query.trim().toLowerCase();
+  const searching = needle !== "";
+  const row = (property: PropertyDescriptor): GridItem => ({ type: "property", key: propertyKey(property), property });
+  const shown = properties.filter((p) => !needle || p.name.toLowerCase().includes(needle));
+  if (mode === VIEW_MODE.alphabetical) return [...shown].sort(byName).map(row);
+  const groups = new Map<string, PropertyDescriptor[]>();
+  for (const p of shown) {
+    const category = p.category ?? DEFAULT_CATEGORY;
+    groups.set(category, [...(groups.get(category) ?? []), p]);
+  }
+  const sorted = order === PROPERTY_ORDER.sorted;
+  const names = [...groups.keys()];
+  if (sorted) names.sort((a, b) => a.localeCompare(b));
+  return names.flatMap((name): GridItem[] => {
+    // While searching every match shows, collapsed or not.
+    const isCollapsed = !searching && collapsed.has(name);
+    const members = groups.get(name) ?? [];
+    if (sorted) members.sort(byName);
+    return [{ type: "category", key: categoryKey(name), name, collapsed: isCollapsed }, ...(isCollapsed ? [] : members.map(row))];
+  });
+}
+
+/** A category's name as shown: the default one is "Misc", translated. */
+export function categoryLabel(name: string): string {
+  return name === DEFAULT_CATEGORY ? t("Misc") : name;
+}
