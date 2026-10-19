@@ -1,7 +1,7 @@
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import type { DirEntry } from "../../widgets/FileTree/useDirectoryTree";
-import { events } from "./host.generated";
-import { invokeSubstrate } from "./invokeSubstrate";
+import { events, substrate } from "./host.generated";
+import { invokeCommand } from "./invokeCommand";
 
 /**
  * Folders and files through the host plugin (feature `fs`): writes stay in
@@ -9,17 +9,17 @@ import { invokeSubstrate } from "./invokeSubstrate";
  * the IDE through `onChanged`.
  */
 export const hostFiles = {
-  read: (path: string) => invokeSubstrate<string>("file_read", { path }),
-  write: (path: string, contents: string) => invokeSubstrate<void>("file_write", { path, contents }),
-  list: (path: string) => invokeSubstrate<DirEntry[]>("dir_list", { path }),
-  createFile: (path: string) => invokeSubstrate<void>("dir_create_file", { path }),
-  createDir: (path: string) => invokeSubstrate<void>("dir_create_dir", { path }),
-  rename: (from: string, to: string) => invokeSubstrate<void>("dir_rename", { from, to }),
-  copy: (from: string, to: string) => invokeSubstrate<void>("dir_copy", { from, to }),
-  remove: (path: string) => invokeSubstrate<void>("dir_remove", { path }),
+  read: (path: string) => invokeCommand<string>(substrate.fs.fileRead, { path }),
+  write: (path: string, contents: string) => invokeCommand<void>(substrate.fs.fileWrite, { path, contents }),
+  list: (path: string) => invokeCommand<DirEntry[]>(substrate.fs.dirList, { path }),
+  createFile: (path: string) => invokeCommand<void>(substrate.fs.dirCreateFile, { path }),
+  createDir: (path: string) => invokeCommand<void>(substrate.fs.dirCreateDir, { path }),
+  rename: (from: string, to: string) => invokeCommand<void>(substrate.fs.dirRename, { from, to }),
+  copy: (from: string, to: string) => invokeCommand<void>(substrate.fs.dirCopy, { from, to }),
+  remove: (path: string) => invokeCommand<void>(substrate.fs.dirRemove, { path }),
   /** A folder or file the user picked joins the workspace. */
-  allow: (path: string) => invokeSubstrate<void>("allow_path", { path }),
+  allow: (path: string) => invokeCommand<void>(substrate.fs.allowPath, { path }),
   /** Watches exactly `folders` (replacing what was watched). */
-  watch: (folders: string[]) => invokeSubstrate<void>("fs_watch", { folders }),
+  watch: (folders: string[]) => invokeCommand<void>(substrate.fs.fsWatch, { folders }),
   onChanged: (handler: (paths: string[]) => void): Promise<UnlistenFn> => listen<string[]>(events.filesChanged, (e) => handler(e.payload)),
 };

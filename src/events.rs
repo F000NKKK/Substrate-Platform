@@ -1,9 +1,5 @@
-//! What Substrate's host and UI share by name — its plugin and the events
-//! it sends — named once here; the UI gets them generated with the message
-//! templates (`substrate-messages`).
-
-/// The host plugin's name: its commands are `plugin:<this>|<command>`.
-pub const PLUGIN: &str = "substrate";
+//! The events Substrate's host sends its UI, named once here; the UI gets
+//! them generated with the message templates (`substrate-messages`).
 
 /// The General output: what the IDE itself reports (errors, notices).
 pub const IDE_OUTPUT: &str = "substrate://ide-output";
@@ -28,3 +24,14 @@ pub const ALL: &[(&str, &str)] = &[
     ("terminalOutput", TERMINAL_OUTPUT),
     ("terminalExit", TERMINAL_EXIT),
 ];
+
+/// `events` — (name in code, event) — as a TypeScript constant `name`; `doc`
+/// is its comment. A product's own events go to its UI the same way.
+pub fn typescript(name: &str, doc: &str, events: &[(&str, &str)]) -> String {
+    let mut out = format!("/** {doc} */\nexport const {name} = {{\n");
+    for (key, event) in events {
+        out.push_str(&format!("  {key}: {event:?},\n"));
+    }
+    out.push_str("} as const;\n");
+    out
+}

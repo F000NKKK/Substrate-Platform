@@ -22,7 +22,7 @@ use tauri::Manager;
 use tauri::plugin::{Builder, TauriPlugin};
 
 /// The plugin's name: its commands are `plugin:substrate|<command>`.
-pub use substrate_platform::events::PLUGIN as NAME;
+pub use substrate_platform::commands::SUBSTRATE_PLUGIN as NAME;
 
 /// Runs `work` off the UI thread.
 #[cfg(feature = "git")]

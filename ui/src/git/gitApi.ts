@@ -1,4 +1,5 @@
-import { invokeSubstrate } from "../infra/host/invokeSubstrate";
+import { substrate } from "../infra/host/host.generated";
+import { invokeCommand } from "../infra/host/invokeCommand";
 
 // The `git_*` commands (`src-tauri/src/git.rs`), typed. Paths in a
 // `FileChange` are repo-relative and `/`-separated; `absPath` is the file on
@@ -83,32 +84,32 @@ export interface GlobalConfig {
 }
 
 export const gitApi = {
-  status: (root: string) => invokeSubstrate<RepoStatus | null>("git_status", { root }),
-  stage: (root: string, paths: string[]) => invokeSubstrate<void>("git_stage", { root, paths }),
-  unstage: (root: string, paths: string[]) => invokeSubstrate<void>("git_unstage", { root, paths }),
+  status: (root: string) => invokeCommand<RepoStatus | null>(substrate.git.gitStatus, { root }),
+  stage: (root: string, paths: string[]) => invokeCommand<void>(substrate.git.gitStage, { root, paths }),
+  unstage: (root: string, paths: string[]) => invokeCommand<void>(substrate.git.gitUnstage, { root, paths }),
   discard: (root: string, items: { path: string; origPath: string | null; kind: ChangeKind; staged: boolean }[]) =>
-    invokeSubstrate<void>("git_discard", { root, items }),
+    invokeCommand<void>(substrate.git.gitDiscard, { root, items }),
   commit: (root: string, message: string, amend: boolean, stageAll: boolean) =>
-    invokeSubstrate<{ hash: string; subject: string }>("git_commit", { root, message, amend, stageAll }),
-  lastMessage: (root: string) => invokeSubstrate<string>("git_last_message", { root }),
-  diffTexts: (root: string, left: DiffSide, right: DiffSide) => invokeSubstrate<DiffTexts>("git_diff_texts", { root, left, right }),
-  headText: (root: string, path: string) => invokeSubstrate<string | null>("git_head_text", { root, path }),
-  log: (root: string, rev: string, skip: number, max: number) => invokeSubstrate<CommitInfo[]>("git_log", { root, rev, skip, max }),
-  commitFiles: (root: string, hash: string) => invokeSubstrate<FileChange[]>("git_commit_files", { root, hash }),
-  branches: (root: string) => invokeSubstrate<BranchInfo[]>("git_branches", { root }),
-  switchTo: (root: string, name: string, remote: boolean) => invokeSubstrate<void>("git_switch", { root, name, remote }),
-  createBranch: (root: string, name: string, start: string, checkout: boolean) => invokeSubstrate<void>("git_branch_create", { root, name, start, checkout }),
-  deleteBranch: (root: string, name: string, force: boolean) => invokeSubstrate<void>("git_branch_delete", { root, name, force }),
-  remote: (root: string, op: RemoteOp) => invokeSubstrate<void>("git_remote", { root, op }),
-  integrate: (root: string, op: "merge" | "rebase", branch: string) => invokeSubstrate<void>("git_integrate", { root, op, branch }),
-  operation: (root: string, goOn: boolean) => invokeSubstrate<void>("git_operation", { root, goOn }),
-  clone: (url: string, parent: string, name: string) => invokeSubstrate<string>("git_clone", { url, parent, name }),
-  init: (root: string, branch: string) => invokeSubstrate<void>("git_init", { root, branch }),
-  stashList: (root: string) => invokeSubstrate<StashInfo[]>("git_stash_list", { root }),
-  stashPush: (root: string, message: string, mode: StashMode) => invokeSubstrate<void>("git_stash_push", { root, message, mode }),
-  stashOp: (root: string, index: number, op: "apply" | "pop" | "drop") => invokeSubstrate<void>("git_stash_op", { root, index, op }),
-  configGet: () => invokeSubstrate<GlobalConfig>("git_config_get"),
-  configSet: (key: string, value: string) => invokeSubstrate<void>("git_config_set", { key, value }),
+    invokeCommand<{ hash: string; subject: string }>(substrate.git.gitCommit, { root, message, amend, stageAll }),
+  lastMessage: (root: string) => invokeCommand<string>(substrate.git.gitLastMessage, { root }),
+  diffTexts: (root: string, left: DiffSide, right: DiffSide) => invokeCommand<DiffTexts>(substrate.git.gitDiffTexts, { root, left, right }),
+  headText: (root: string, path: string) => invokeCommand<string | null>(substrate.git.gitHeadText, { root, path }),
+  log: (root: string, rev: string, skip: number, max: number) => invokeCommand<CommitInfo[]>(substrate.git.gitLog, { root, rev, skip, max }),
+  commitFiles: (root: string, hash: string) => invokeCommand<FileChange[]>(substrate.git.gitCommitFiles, { root, hash }),
+  branches: (root: string) => invokeCommand<BranchInfo[]>(substrate.git.gitBranches, { root }),
+  switchTo: (root: string, name: string, remote: boolean) => invokeCommand<void>(substrate.git.gitSwitch, { root, name, remote }),
+  createBranch: (root: string, name: string, start: string, checkout: boolean) => invokeCommand<void>(substrate.git.gitBranchCreate, { root, name, start, checkout }),
+  deleteBranch: (root: string, name: string, force: boolean) => invokeCommand<void>(substrate.git.gitBranchDelete, { root, name, force }),
+  remote: (root: string, op: RemoteOp) => invokeCommand<void>(substrate.git.gitRemote, { root, op }),
+  integrate: (root: string, op: "merge" | "rebase", branch: string) => invokeCommand<void>(substrate.git.gitIntegrate, { root, op, branch }),
+  operation: (root: string, goOn: boolean) => invokeCommand<void>(substrate.git.gitOperation, { root, goOn }),
+  clone: (url: string, parent: string, name: string) => invokeCommand<string>(substrate.git.gitClone, { url, parent, name }),
+  init: (root: string, branch: string) => invokeCommand<void>(substrate.git.gitInit, { root, branch }),
+  stashList: (root: string) => invokeCommand<StashInfo[]>(substrate.git.gitStashList, { root }),
+  stashPush: (root: string, message: string, mode: StashMode) => invokeCommand<void>(substrate.git.gitStashPush, { root, message, mode }),
+  stashOp: (root: string, index: number, op: "apply" | "pop" | "drop") => invokeCommand<void>(substrate.git.gitStashOp, { root, index, op }),
+  configGet: () => invokeCommand<GlobalConfig>(substrate.git.gitConfigGet),
+  configSet: (key: string, value: string) => invokeCommand<void>(substrate.git.gitConfigSet, { key, value }),
 };
 
 /** The status letter Git Changes shows for a change, Visual Studio's. */

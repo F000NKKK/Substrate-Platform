@@ -13,6 +13,7 @@
 //! depends on this crate the same way, and brings its own UI (e.g. a Tauri +
 //! React frontend) and its own project standards/workflow templates.
 
+pub mod commands;
 pub mod events;
 pub mod message;
 pub mod process;

@@ -45,8 +45,59 @@ export const messages = {
   },
 } as const;
 
-/** The host plugin's name: its commands are `plugin:<this>|<command>`. */
-export const plugin = "substrate";
+/** Substrate's host commands by domain: `substrate.<domain>.<command>`, for `invokeCommand`. */
+export const substrate = {
+  open: {
+    openUrl: { plugin: "substrate", command: "open_url" },
+    openPath: { plugin: "substrate", command: "open_path" },
+    revealPath: { plugin: "substrate", command: "reveal_path" },
+  },
+  fs: {
+    dirList: { plugin: "substrate", command: "dir_list" },
+    dirCreateFile: { plugin: "substrate", command: "dir_create_file" },
+    dirCreateDir: { plugin: "substrate", command: "dir_create_dir" },
+    dirRename: { plugin: "substrate", command: "dir_rename" },
+    dirRemove: { plugin: "substrate", command: "dir_remove" },
+    dirCopy: { plugin: "substrate", command: "dir_copy" },
+    fileRead: { plugin: "substrate", command: "file_read" },
+    fileWrite: { plugin: "substrate", command: "file_write" },
+    allowPath: { plugin: "substrate", command: "allow_path" },
+    fsWatch: { plugin: "substrate", command: "fs_watch" },
+  },
+  git: {
+    gitStatus: { plugin: "substrate", command: "git_status" },
+    gitStage: { plugin: "substrate", command: "git_stage" },
+    gitUnstage: { plugin: "substrate", command: "git_unstage" },
+    gitDiscard: { plugin: "substrate", command: "git_discard" },
+    gitCommit: { plugin: "substrate", command: "git_commit" },
+    gitLastMessage: { plugin: "substrate", command: "git_last_message" },
+    gitDiffTexts: { plugin: "substrate", command: "git_diff_texts" },
+    gitHeadText: { plugin: "substrate", command: "git_head_text" },
+    gitLog: { plugin: "substrate", command: "git_log" },
+    gitCommitFiles: { plugin: "substrate", command: "git_commit_files" },
+    gitBranches: { plugin: "substrate", command: "git_branches" },
+    gitSwitch: { plugin: "substrate", command: "git_switch" },
+    gitBranchCreate: { plugin: "substrate", command: "git_branch_create" },
+    gitBranchDelete: { plugin: "substrate", command: "git_branch_delete" },
+    gitRemote: { plugin: "substrate", command: "git_remote" },
+    gitIntegrate: { plugin: "substrate", command: "git_integrate" },
+    gitOperation: { plugin: "substrate", command: "git_operation" },
+    gitClone: { plugin: "substrate", command: "git_clone" },
+    gitInit: { plugin: "substrate", command: "git_init" },
+    gitStashList: { plugin: "substrate", command: "git_stash_list" },
+    gitStashPush: { plugin: "substrate", command: "git_stash_push" },
+    gitStashOp: { plugin: "substrate", command: "git_stash_op" },
+    gitConfigGet: { plugin: "substrate", command: "git_config_get" },
+    gitConfigSet: { plugin: "substrate", command: "git_config_set" },
+  },
+  terminal: {
+    terminalShells: { plugin: "substrate", command: "terminal_shells" },
+    terminalSpawn: { plugin: "substrate", command: "terminal_spawn" },
+    terminalWrite: { plugin: "substrate", command: "terminal_write" },
+    terminalResize: { plugin: "substrate", command: "terminal_resize" },
+    terminalKill: { plugin: "substrate", command: "terminal_kill" },
+  },
+} as const;
 
 /** The events Substrate's host sends its UI. */
 export const events = {

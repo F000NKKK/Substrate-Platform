@@ -102,15 +102,19 @@ pub fn typescript() -> String {
         }
         out.push_str("  },\n");
     }
-    out.push_str(&format!("}} as const;\n\n/** The host plugin's name: its commands are `plugin:<this>|<command>`. */\nexport const plugin = {:?};\n\n/** The events Substrate's host sends its UI. */\nexport const events = {{\n", crate::events::PLUGIN));
-    for (name, event) in crate::events::ALL {
-        out.push_str(&format!("  {name}: {event:?},\n"));
-    }
-    out.push_str("} as const;\n");
+    out.push_str("} as const;\n\n");
+    out.push_str(&crate::commands::typescript(
+        "substrate",
+        "Substrate's host commands by domain: `substrate.<domain>.<command>`, for `invokeCommand`.",
+        crate::commands::SUBSTRATE,
+    ));
+    out.push('\n');
+    out.push_str(&crate::events::typescript("events", "The events Substrate's host sends its UI.", crate::events::ALL));
     out
 }
 
-fn camel(name: &str) -> String {
+/// `NOT_A_REPOSITORY`, `path_info` → `notARepository`, `pathInfo`.
+pub(crate) fn camel(name: &str) -> String {
     let mut out = String::new();
     for (i, word) in name.split('_').enumerate() {
         let lower = word.to_lowercase();
