@@ -13,6 +13,7 @@
 
 pub mod dir;
 pub mod log;
+pub mod process;
 pub mod project;
 pub mod pty;
 pub mod shell;

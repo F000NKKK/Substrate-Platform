@@ -5,7 +5,7 @@
 
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
-use std::process::{Child, Command, Stdio};
+use std::process::{Child, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc;
 use std::sync::{Arc, Condvar, Mutex};
@@ -173,7 +173,7 @@ fn spawn_streaming(
     envs: &[(String, String)],
     sink: &LogSink,
 ) -> std::io::Result<StreamingChild> {
-    let mut cmd = Command::new(program);
+    let mut cmd = crate::process::command(program);
     cmd.args(args).stdout(Stdio::piped()).stderr(Stdio::piped());
     // Its own process group (pgid = its pid), so cancelling can take down
     // everything it spawned too — see `kill_tree`.
@@ -239,7 +239,7 @@ fn kill_tree(child: &mut Child) {
         use std::os::windows::process::CommandExt;
         /// Don't flash a console window for `taskkill` from a GUI host.
         const CREATE_NO_WINDOW: u32 = 0x0800_0000;
-        let _ = Command::new("taskkill")
+        let _ = crate::process::command("taskkill")
             .args(["/T", "/F", "/PID", &child.id().to_string()])
             .stdout(Stdio::null())
             .stderr(Stdio::null())
