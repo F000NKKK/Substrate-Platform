@@ -33,46 +33,54 @@ fn exists_in_path(name: &str) -> bool {
     })
 }
 
-fn clear_command_for(id: &str) -> &'static str {
-    // `\r`, not `\n` — that's the literal byte a physical Enter key sends
-    // over the pty. Bash's readline happens to also bind plain `\n` to
-    // accept-line, which is why that worked, but PSReadLine (pwsh) only
-    // submits on `\r`; without it the command sits typed but unsubmitted
-    // until a real Enter keypress arrives.
-    match id {
-        "pwsh" | "powershell" => "Clear-Host\r",
-        "cmd" => "cls\r",
-        _ => "clear\r",
+/// The shells worth offering, where installed: (program, label). Labels
+/// are English — a UI translates them.
+#[cfg(windows)]
+const CANDIDATES: &[(&str, &str)] = &[("pwsh", "PowerShell"), ("powershell", "Windows PowerShell"), ("cmd", "Command Prompt")];
+#[cfg(not(windows))]
+const CANDIDATES: &[(&str, &str)] = &[("bash", "Bash"), ("zsh", "Zsh"), ("fish", "Fish"), ("pwsh", "PowerShell")];
+
+/// What a shell clears its screen with, by its program — the rest: `clear`.
+/// `\r`, not `\n`: the byte a physical Enter key sends over the pty.
+/// Bash's readline also takes `\n`, PSReadLine (pwsh) only `\r`.
+const CLEAR_COMMANDS: &[(&[&str], &str)] = &[(&["pwsh", "powershell"], "Clear-Host\r"), (&["cmd"], "cls\r")];
+const CLEAR: &str = "clear\r";
+
+/// The label of the system's default shell, when none of [`CANDIDATES`] is installed.
+const DEFAULT_LABEL: &str = "Terminal";
+
+fn clear_command_for(program: &str) -> &'static str {
+    CLEAR_COMMANDS
+        .iter()
+        .find(|(programs, _)| programs.contains(&program))
+        .map_or(CLEAR, |(_, command)| command)
+}
+
+fn shell(program: &str, label: &str) -> ShellInfo {
+    ShellInfo {
+        id: program.to_string(),
+        label: label.to_string(),
+        command: program.to_string(),
+        clear_command: clear_command_for(program).to_string(),
     }
 }
 
-/// Every shell worth offering, filtered down to the ones actually resolvable
-/// via `PATH` on this machine — never assumes zsh/fish/pwsh/etc. are present
-/// just because they're common.
+/// Every shell worth offering that `PATH` resolves on this machine — never
+/// assumes zsh/fish/pwsh are there because they're common. Never empty:
+/// with none of them, the system's default shell ([`super::default_shell`]).
 pub fn detect_shells() -> Vec<ShellInfo> {
-    let candidates: &[(&str, &str)] = if cfg!(target_os = "windows") {
-        &[
-            ("pwsh", "PowerShell"),
-            ("powershell", "Windows PowerShell"),
-            ("cmd", "Command Prompt"),
-        ]
-    } else {
-        &[
-            ("bash", "Bash"),
-            ("zsh", "Zsh"),
-            ("fish", "Fish"),
-            ("pwsh", "PowerShell"),
-        ]
-    };
-
-    candidates
+    let found: Vec<ShellInfo> = CANDIDATES
         .iter()
-        .filter(|(bin, _)| exists_in_path(bin))
-        .map(|(bin, label)| ShellInfo {
-            id: bin.to_string(),
-            label: label.to_string(),
-            command: bin.to_string(),
-            clear_command: clear_command_for(bin).to_string(),
-        })
-        .collect()
+        .filter(|(program, _)| exists_in_path(program))
+        .map(|(program, label)| shell(program, label))
+        .collect();
+    if !found.is_empty() {
+        return found;
+    }
+    let default = super::default_shell();
+    let program = std::path::Path::new(&default)
+        .file_stem()
+        .map(|s| s.to_string_lossy().to_lowercase())
+        .unwrap_or_default();
+    vec![ShellInfo { command: default, ..shell(&program, DEFAULT_LABEL) }]
 }

@@ -10,6 +10,8 @@
 #[cfg(feature = "git")]
 mod git;
 mod open;
+#[cfg(feature = "terminal")]
+mod terminal;
 
 #[cfg(any(feature = "git"))]
 use substrate_platform::message::Message;
@@ -32,12 +34,24 @@ pub fn init<R: tauri::Runtime>() -> TauriPlugin<R> {
     Builder::new(NAME)
         .setup(|app, _api| {
             app.manage(Workspace::default());
+            #[cfg(feature = "terminal")]
+            app.manage(terminal::Terminals::default());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             open::open_url,
             open::open_path,
             open::reveal_path,
+            #[cfg(feature = "terminal")]
+            terminal::terminal_shells,
+            #[cfg(feature = "terminal")]
+            terminal::terminal_spawn,
+            #[cfg(feature = "terminal")]
+            terminal::terminal_write,
+            #[cfg(feature = "terminal")]
+            terminal::terminal_resize,
+            #[cfg(feature = "terminal")]
+            terminal::terminal_kill,
             #[cfg(feature = "git")]
             git::changes::git_status,
             #[cfg(feature = "git")]

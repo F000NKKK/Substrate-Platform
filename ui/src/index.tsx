@@ -18,5 +18,6 @@ export * from "./widgets";
 export * from "./output";
 export * from "./documents";
 export * from "./git";
+export * from "./terminal";
 export * from "./windows";
 export * from "./pages";

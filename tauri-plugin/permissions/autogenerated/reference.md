@@ -5,6 +5,8 @@ Every command Substrate's UI calls.
 #### This default permission set includes the following:
 
 - `allow-open-url`
+- `allow-open-path`
+- `allow-reveal-path`
 - `allow-git-status`
 - `allow-git-stage`
 - `allow-git-unstage`
@@ -29,6 +31,11 @@ Every command Substrate's UI calls.
 - `allow-git-stash-op`
 - `allow-git-config-get`
 - `allow-git-config-set`
+- `allow-terminal-shells`
+- `allow-terminal-spawn`
+- `allow-terminal-write`
+- `allow-terminal-resize`
+- `allow-terminal-kill`
 
 ## Permission Table
 
@@ -666,6 +673,32 @@ Denies the git_unstage command without any pre-configured scope.
 <tr>
 <td>
 
+`substrate:allow-open-path`
+
+</td>
+<td>
+
+Enables the open_path command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-open-path`
+
+</td>
+<td>
+
+Denies the open_path command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
 `substrate:allow-open-url`
 
 </td>
@@ -685,6 +718,162 @@ Enables the open_url command without any pre-configured scope.
 <td>
 
 Denies the open_url command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-reveal-path`
+
+</td>
+<td>
+
+Enables the reveal_path command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-reveal-path`
+
+</td>
+<td>
+
+Denies the reveal_path command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-terminal-kill`
+
+</td>
+<td>
+
+Enables the terminal_kill command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-terminal-kill`
+
+</td>
+<td>
+
+Denies the terminal_kill command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-terminal-resize`
+
+</td>
+<td>
+
+Enables the terminal_resize command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-terminal-resize`
+
+</td>
+<td>
+
+Denies the terminal_resize command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-terminal-shells`
+
+</td>
+<td>
+
+Enables the terminal_shells command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-terminal-shells`
+
+</td>
+<td>
+
+Denies the terminal_shells command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-terminal-spawn`
+
+</td>
+<td>
+
+Enables the terminal_spawn command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-terminal-spawn`
+
+</td>
+<td>
+
+Denies the terminal_spawn command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-terminal-write`
+
+</td>
+<td>
+
+Enables the terminal_write command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-terminal-write`
+
+</td>
+<td>
+
+Denies the terminal_write command without any pre-configured scope.
 
 </td>
 </tr>

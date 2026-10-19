@@ -3,6 +3,7 @@
 //! ([`Utf8Chunker`]). Feature `terminal`.
 
 mod chunker;
+pub mod messages;
 mod session;
 mod shell;
 

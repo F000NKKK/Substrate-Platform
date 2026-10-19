@@ -28,6 +28,10 @@ export const messages = {
     notALink: "{url} isn't a web or mail link.",
     cantStart: "Couldn't start {program}: {error}",
   },
+  terminal: {
+    cantStart: "Couldn't start the shell: {error}",
+    failed: "The terminal failed: {error}",
+  },
   workspace: {
     nothingOpen: "No project is open.",
     notOnDisk: "{path} doesn't resolve to anything on disk.",
@@ -42,4 +46,6 @@ export const plugin = "substrate";
 export const events = {
   ideOutput: "substrate://ide-output",
   gitOutput: "substrate://git-output",
+  terminalOutput: "substrate://terminal-output",
+  terminalExit: "substrate://terminal-exit",
 } as const;

@@ -29,4 +29,9 @@ permissions = [
   "allow-git-stash-op",
   "allow-git-config-get",
   "allow-git-config-set",
+  "allow-terminal-shells",
+  "allow-terminal-spawn",
+  "allow-terminal-write",
+  "allow-terminal-resize",
+  "allow-terminal-kill",
 ]

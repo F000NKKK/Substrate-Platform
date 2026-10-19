@@ -7,7 +7,7 @@ export interface WorkflowSummary {
   description?: string;
 }
 
-/** Tauri command/event names — injected so this hook stays product-agnostic, same "commands as props" shape `TerminalPanel` already uses. */
+/** Tauri command/event names — injected so this hook stays product-agnostic. */
 export interface WorkflowRunnerCommands {
   list?: string;
   run?: string;

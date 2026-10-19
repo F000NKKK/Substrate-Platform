@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-terminal-shells"
+description = "Enables the terminal_shells command without any pre-configured scope."
+commands.allow = ["terminal_shells"]
+
+[[permission]]
+identifier = "deny-terminal-shells"
+description = "Denies the terminal_shells command without any pre-configured scope."
+commands.deny = ["terminal_shells"]

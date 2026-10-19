@@ -51,8 +51,6 @@ export { ErrorList, filterDiagnostics, DEFAULT_ERROR_LIST_FILTER } from "./Error
 export type { ErrorListProps, ErrorListFilter, ErrorListScope, ErrorListOrigins, ErrorListContext } from "./ErrorList";
 export { StatusBar, StatusBarButton } from "./StatusBar";
 export type { StatusBarProps, StatusBarButtonProps } from "./StatusBar";
-export { TerminalPanel, openTerminalIn } from "./TerminalPanel";
-export type { TerminalPanelProps } from "./TerminalPanel";
 export { DialogHost, showDialog, confirmDialog, promptDialog, messageDialog } from "./Dialog";
 export type { DialogButton, DialogInput, DialogOptions, DialogResult } from "./Dialog";
 export { NotificationHost, notify } from "./Notifications";

@@ -11,5 +11,16 @@ pub const IDE_OUTPUT: &str = "substrate://ide-output";
 /// A Source Control run's lines, as [`crate::message::Message`]s.
 pub const GIT_OUTPUT: &str = "substrate://git-output";
 
+/// A terminal's output: `{ id, data }`.
+pub const TERMINAL_OUTPUT: &str = "substrate://terminal-output";
+
+/// A terminal's shell exited: `{ id }`.
+pub const TERMINAL_EXIT: &str = "substrate://terminal-exit";
+
 /// Every event, for the UI's generated copy: (name in code, event).
-pub const ALL: &[(&str, &str)] = &[("ideOutput", IDE_OUTPUT), ("gitOutput", GIT_OUTPUT)];
+pub const ALL: &[(&str, &str)] = &[
+    ("ideOutput", IDE_OUTPUT),
+    ("gitOutput", GIT_OUTPUT),
+    ("terminalOutput", TERMINAL_OUTPUT),
+    ("terminalExit", TERMINAL_EXIT),
+];

@@ -39,7 +39,10 @@ const DEFAULT_PERMISSIONS: &str = "permissions/default.toml";
 /// Every group's commands. Their permissions don't depend on the features
 /// a build turns on: the generated files stay the same whoever builds, and
 /// granting a command that isn't compiled in allows nothing.
-const GROUPS: &[&[&str]] = &[CORE, GIT];
+/// Feature `terminal`: shell sessions.
+const TERMINAL: &[&str] = &["terminal_shells", "terminal_spawn", "terminal_write", "terminal_resize", "terminal_kill"];
+
+const GROUPS: &[&[&str]] = &[CORE, GIT, TERMINAL];
 
 fn main() {
     let commands: &'static [&'static str] = Box::leak(GROUPS.concat().into_boxed_slice());
