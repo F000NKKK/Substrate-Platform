@@ -2,10 +2,11 @@
 //! chooses; their output and exit go to the UI as
 //! [`events::TERMINAL_OUTPUT`] / [`events::TERMINAL_EXIT`]. Feature `terminal`.
 
+use substrate_platform::sync::Locked;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::{Mutex, MutexGuard, PoisonError};
+use std::sync::{Mutex, MutexGuard};
 use substrate_platform::events;
 use substrate_platform::message::Message;
 use substrate_platform::terminal::messages::{CANT_START, FAILED};
@@ -19,7 +20,7 @@ pub struct Terminals(Mutex<HashMap<String, PtySession>>);
 
 impl Terminals {
     fn sessions(&self) -> MutexGuard<'_, HashMap<String, PtySession>> {
-        self.0.lock().unwrap_or_else(PoisonError::into_inner)
+        self.0.locked()
     }
 }
 

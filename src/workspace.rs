@@ -3,6 +3,7 @@
 //! a process in must resolve under one of them — an IDE never reaches
 //! outside what the user opened.
 
+use crate::sync::Locked;
 use crate::message::Message;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
@@ -60,14 +61,14 @@ impl Workspace {
 
     /// The folders now (see [`Roots`]).
     pub fn roots(&self) -> Roots {
-        Roots(self.roots.lock().unwrap_or_else(|p| p.into_inner()).clone())
+        Roots(self.roots.locked().clone())
     }
 
     /// Lets the host touch `path` too — a file the user picked in a native
     /// dialog outside every open project (the picking is the trust signal).
     pub fn allow(&self, path: &Path) -> Result<PathBuf, Message> {
         let canonical = path.canonicalize()?;
-        let mut roots = self.roots.lock().unwrap_or_else(|p| p.into_inner());
+        let mut roots = self.roots.locked();
         if !roots.iter().any(|root| canonical.starts_with(root)) {
             roots.push(canonical.clone());
         }
@@ -77,17 +78,17 @@ impl Workspace {
     /// `root` opened as the current project.
     pub fn open(&self, root: &Path) -> Result<PathBuf, Message> {
         let canonical = self.allow(root)?;
-        *self.current.lock().unwrap_or_else(|p| p.into_inner()) = Some(canonical.clone());
+        *self.current.locked() = Some(canonical.clone());
         Ok(canonical)
     }
 
     /// Nothing shown anymore. Its root stays allowed (a tab still open from it can be saved).
     pub fn close(&self) {
-        *self.current.lock().unwrap_or_else(|p| p.into_inner()) = None;
+        *self.current.locked() = None;
     }
 
     pub fn current(&self) -> Option<PathBuf> {
-        self.current.lock().unwrap_or_else(|p| p.into_inner()).clone()
+        self.current.locked().clone()
     }
 }
 

@@ -3,6 +3,7 @@
 //! its own build/run tool is (`cargo build`, `make`, `npm run dev`, ...);
 //! this crate has no idea what command it's running.
 
+use crate::sync::Locked;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Stdio};
@@ -79,16 +80,16 @@ impl<T: Clone> Completion<T> {
     }
 
     pub(crate) fn set(&self, value: T) {
-        *self.value.lock().unwrap_or_else(|e| e.into_inner()) = Some(value);
+        *self.value.locked() = Some(value);
         self.ready.notify_all();
     }
 
     pub(crate) fn get(&self) -> Option<T> {
-        self.value.lock().unwrap_or_else(|e| e.into_inner()).clone()
+        self.value.locked().clone()
     }
 
     pub(crate) fn wait(&self) -> T {
-        let mut guard = self.value.lock().unwrap_or_else(|e| e.into_inner());
+        let mut guard = self.value.locked();
         loop {
             if let Some(value) = guard.as_ref() {
                 return value.clone();

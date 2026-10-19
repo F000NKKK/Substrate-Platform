@@ -11,6 +11,7 @@
 //! host has already received every line, so retaining them too would only
 //! grow memory for a buffer nobody drains.
 
+use crate::sync::Locked;
 use std::collections::VecDeque;
 use std::sync::{Arc, Mutex, MutexGuard};
 
@@ -88,7 +89,7 @@ impl LogSink {
     /// consistent (every mutation is a single push/clear), so keep going
     /// rather than cascading the panic into every later push.
     fn state(&self) -> MutexGuard<'_, LogSinkState> {
-        self.0.lock().unwrap_or_else(|e| e.into_inner())
+        self.0.locked()
     }
 
     /// Registers a callback fired synchronously every time a line is pushed
@@ -197,10 +198,10 @@ mod tests {
         sink.info("before");
         let seen = Arc::new(Mutex::new(Vec::new()));
         let seen_cb = seen.clone();
-        sink.on_push(move |line| seen_cb.lock().unwrap().push(line.text.clone()));
+        sink.on_push(move |line| seen_cb.locked().push(line.text.clone()));
         sink.info("after");
 
-        assert_eq!(*seen.lock().unwrap(), ["after"]);
+        assert_eq!(*seen.locked(), ["after"]);
         assert_eq!(
             sink.lines()
                 .iter()
