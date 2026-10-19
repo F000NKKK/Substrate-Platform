@@ -18,6 +18,7 @@ export * from "./widgets";
 export * from "./output";
 export * from "./documents";
 export * from "./git";
+export * from "./search";
 export * from "./terminal";
 export * from "./workspace";
 export * from "./windows";

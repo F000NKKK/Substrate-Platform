@@ -8,7 +8,7 @@ import { GIT_CHANGES_PANEL } from "./GitChangesWindow";
 import { gitApi } from "./gitApi";
 import { openGitRepository, useRevealedGitDocument } from "./gitDocuments";
 import { gitState, refreshGit, setGitRoot, useGit } from "./gitStore";
-import { useSourceControlHost } from "./sourceControlHost";
+import { useIdeHost } from "../infra/host/ideHost";
 
 const POLL_MS = 5000;
 const SAVE_DEBOUNCE_MS = 400;
@@ -21,7 +21,7 @@ const SAVE_DEBOUNCE_MS = 400;
  * changed on disk, and the editors' change markers against HEAD.
  */
 export function GitHost() {
-  const { root, openFiles, reloadFromDisk } = useSourceControlHost();
+  const { root, documents, reloadFromDisk } = useIdeHost();
   const shell = useShell();
   const git = useGit();
 
@@ -41,7 +41,7 @@ export function GitHost() {
   }, []);
 
   // A save (any tab's disk content changing) — debounced, a Save All is one refresh.
-  const diskKey = openFiles.map((file) => `${file.path}\u0000${file.diskContent.length}\u0000${hash(file.diskContent)}`).join("\u0001");
+  const diskKey = documents.map((file) => `${file.path}\u0000${file.diskContent.length}\u0000${hash(file.diskContent)}`).join("\u0001");
   useEffect(() => {
     const timer = window.setTimeout(() => void refreshGit(), SAVE_DEBOUNCE_MS);
     return () => window.clearTimeout(timer);
@@ -68,7 +68,7 @@ export function GitHost() {
   return (
     <>
       <BranchPickerHost />
-      <ChangeMarkers paths={openFiles.map((file) => file.path)} />
+      <ChangeMarkers paths={documents.map((file) => file.path)} />
     </>
   );
 }

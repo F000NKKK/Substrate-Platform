@@ -5,7 +5,7 @@ import { MenuBarItem } from "../widgets/MenuBarItem/MenuBarItem";
 import { openBranchPicker } from "./BranchPicker";
 import { GIT_CHANGES_PANEL } from "./GitChangesWindow";
 import { openGitRepository } from "./gitDocuments";
-import { useSourceControlHost } from "./sourceControlHost";
+import { useIdeHost } from "../infra/host/ideHost";
 import { cloneRepository, initRepository, openGitSettings, promptNewBranch, remote, useGit } from "./gitStore";
 
 /**
@@ -16,7 +16,7 @@ export function GitMenu() {
   const t = useT();
   const shell = useShell();
   const { status, busy, root } = useGit();
-  const host = useSourceControlHost();
+  const host = useIdeHost();
   const repo = !!status;
   const ready = repo && !busy;
 
