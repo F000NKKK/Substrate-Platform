@@ -10,7 +10,7 @@ export { Tab } from "./Tab";
 export type { TabProps, TabOrientation } from "./Tab";
 export { ContextMenu } from "./ContextMenu";
 export type { ContextMenuItem, ContextMenuProps, ContextMenuPlacement } from "./ContextMenu";
-export { useContextMenu } from "./ContextMenu";
+export { belowButton, useContextMenu } from "./ContextMenu";
 export type { ContextMenuTarget } from "./ContextMenu";
 export { DataGrid } from "./DataGrid";
 export type { DataGridProps, DataGridColumn, DataGridSortState, DataGridHandle } from "./DataGrid";

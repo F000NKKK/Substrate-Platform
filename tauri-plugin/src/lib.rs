@@ -13,7 +13,7 @@ mod open;
 #[cfg(feature = "terminal")]
 mod terminal;
 
-#[cfg(any(feature = "git"))]
+#[cfg(feature = "git")]
 use substrate_platform::message::Message;
 pub use substrate_platform::workspace::Workspace;
 use tauri::Manager;
@@ -23,7 +23,7 @@ use tauri::plugin::{Builder, TauriPlugin};
 pub use substrate_platform::events::PLUGIN as NAME;
 
 /// Runs `work` off the UI thread.
-#[cfg(any(feature = "git"))]
+#[cfg(feature = "git")]
 pub(crate) async fn blocking<T: Send + 'static>(work: impl FnOnce() -> Result<T, Message> + Send + 'static) -> Result<T, Message> {
     tauri::async_runtime::spawn_blocking(work).await.map_err(Message::verbatim)?
 }
