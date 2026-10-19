@@ -34,6 +34,12 @@ export const messages = {
     notALink: "{url} isn't a web or mail link.",
     cantStart: "Couldn't start {program}: {error}",
   },
+  search: {
+    empty: "The search text is empty.",
+    badPattern: "Invalid regular expression: {error}",
+    badMask: "Invalid file mask {mask}: {error}",
+    writeFailed: "{path}: {error}",
+  },
   terminal: {
     cantStart: "Couldn't start the shell: {error}",
     failed: "The terminal failed: {error}",
@@ -89,6 +95,13 @@ export const substrate = {
     gitStashOp: { plugin: "substrate", command: "git_stash_op" },
     gitConfigGet: { plugin: "substrate", command: "git_config_get" },
     gitConfigSet: { plugin: "substrate", command: "git_config_set" },
+  },
+  search: {
+    findInFiles: { plugin: "substrate", command: "find_in_files" },
+    findCancel: { plugin: "substrate", command: "find_cancel" },
+    replaceInFiles: { plugin: "substrate", command: "replace_in_files" },
+    projectItems: { plugin: "substrate", command: "project_items" },
+    projectFilesContaining: { plugin: "substrate", command: "project_files_containing" },
   },
   terminal: {
     terminalShells: { plugin: "substrate", command: "terminal_shells" },

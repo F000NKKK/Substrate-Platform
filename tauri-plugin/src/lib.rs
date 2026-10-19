@@ -12,10 +12,12 @@ mod fs;
 #[cfg(feature = "git")]
 mod git;
 mod open;
+#[cfg(feature = "search")]
+mod search;
 #[cfg(feature = "terminal")]
 mod terminal;
 
-#[cfg(feature = "git")]
+#[cfg(any(feature = "git", feature = "search"))]
 use substrate_platform::message::Message;
 pub use substrate_platform::workspace::Workspace;
 use tauri::Manager;
@@ -25,27 +27,57 @@ use tauri::plugin::{Builder, TauriPlugin};
 pub use substrate_platform::commands::SUBSTRATE_PLUGIN as NAME;
 
 /// Runs `work` off the UI thread.
-#[cfg(feature = "git")]
+#[cfg(any(feature = "git", feature = "search"))]
 pub(crate) async fn blocking<T: Send + 'static>(work: impl FnOnce() -> Result<T, Message> + Send + 'static) -> Result<T, Message> {
     tauri::async_runtime::spawn_blocking(work).await.map_err(Message::verbatim)?
 }
 
-/// The plugin, with the commands of each feature turned on (`build.rs`
-/// lists the same names for their permissions).
+/// What a product tells the plugin about itself.
+#[derive(Default)]
+pub struct Options {
+    /// What a search keeps out of the walk, and where generated code lives.
+    #[cfg(feature = "search")]
+    pub search: substrate_platform::search::Layout,
+}
+
+/// The plugin with no product options.
 pub fn init<R: tauri::Runtime>() -> TauriPlugin<R> {
+    init_with(Options::default())
+}
+
+/// The plugin, with the commands of each feature turned on (Substrate's
+/// domains, `substrate_platform::commands`, list the same ones).
+pub fn init_with<R: tauri::Runtime>(options: Options) -> TauriPlugin<R> {
     Builder::new(NAME)
-        .setup(|app, _api| {
+        .setup(move |app, _api| {
             app.manage(Workspace::default());
             #[cfg(feature = "terminal")]
             app.manage(terminal::Terminals::default());
             #[cfg(feature = "fs")]
             app.manage(fs::Watcher::default());
+            #[cfg(feature = "search")]
+            {
+                app.manage(search::Searches::default());
+                app.manage(options.search);
+            }
+            #[cfg(not(feature = "search"))]
+            let _ = options;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             open::open_url,
             open::open_path,
             open::reveal_path,
+            #[cfg(feature = "search")]
+            search::find_in_files,
+            #[cfg(feature = "search")]
+            search::find_cancel,
+            #[cfg(feature = "search")]
+            search::replace_in_files,
+            #[cfg(feature = "search")]
+            search::project_items,
+            #[cfg(feature = "search")]
+            search::project_files_containing,
             #[cfg(feature = "fs")]
             fs::dir_list,
             #[cfg(feature = "fs")]

@@ -19,11 +19,15 @@ fs = ["dep:notify"]
 git = []
 project = []
 run = ["dep:anyhow", "dep:toml", "dep:libc"]
+search = ["dep:globset", "dep:ignore", "dep:regex"]
 terminal = ["dep:anyhow", "dep:portable-pty"]
-full = ["fs", "git", "project", "run", "terminal"]
+full = ["fs", "git", "project", "run", "search", "terminal"]
 
 [dependencies]
 anyhow = { version = "1", optional = true }
+globset = { version = "0.4.20", optional = true }
+ignore = { version = "0.4.33", optional = true }
+regex = { version = "1.13.1", optional = true }
 notify = { version = "8", optional = true }
 portable-pty = { version = "0.9", optional = true }
 serde = { version = "1", features = ["derive"] }

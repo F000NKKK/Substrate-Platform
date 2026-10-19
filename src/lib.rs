@@ -7,9 +7,9 @@
 //! module behind a feature of its name: `run` (processes streamed into a
 //! log, multi-step workflows), `terminal` (pty sessions, shells), `fs`
 //! (folders and files, watching them), `project` (projects and solutions),
-//! `git` (Source Control). Nothing here knows about any
-//! specific product (no product or domain concepts, no UI framework, and no
-//! concrete project standards) — that's the whole point: every IDE product
+//! `git` (Source Control), `search` (Find and Replace in Files). Nothing
+//! here knows about any specific product (no product or domain concepts, no
+//! UI framework, and no concrete project standards) — that's the whole point: every IDE product
 //! depends on this crate the same way, and brings its own UI (e.g. a Tauri +
 //! React frontend) and its own project standards/workflow templates.
 
@@ -28,5 +28,7 @@ pub mod git;
 pub mod project;
 #[cfg(feature = "run")]
 pub mod run;
+#[cfg(feature = "search")]
+pub mod search;
 #[cfg(feature = "terminal")]
 pub mod terminal;

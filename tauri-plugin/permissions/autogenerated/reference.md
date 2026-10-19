@@ -41,6 +41,11 @@ Every command Substrate's UI calls.
 - `allow-git-stash-op`
 - `allow-git-config-get`
 - `allow-git-config-set`
+- `allow-find-in-files`
+- `allow-find-cancel`
+- `allow-replace-in-files`
+- `allow-project-items`
+- `allow-project-files-containing`
 - `allow-terminal-shells`
 - `allow-terminal-spawn`
 - `allow-terminal-write`
@@ -286,6 +291,58 @@ Enables the file_write command without any pre-configured scope.
 <td>
 
 Denies the file_write command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-find-cancel`
+
+</td>
+<td>
+
+Enables the find_cancel command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-find-cancel`
+
+</td>
+<td>
+
+Denies the find_cancel command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-find-in-files`
+
+</td>
+<td>
+
+Enables the find_in_files command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-find-in-files`
+
+</td>
+<td>
+
+Denies the find_in_files command without any pre-configured scope.
 
 </td>
 </tr>
@@ -988,6 +1045,84 @@ Enables the open_url command without any pre-configured scope.
 <td>
 
 Denies the open_url command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-project-files-containing`
+
+</td>
+<td>
+
+Enables the project_files_containing command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-project-files-containing`
+
+</td>
+<td>
+
+Denies the project_files_containing command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-project-items`
+
+</td>
+<td>
+
+Enables the project_items command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-project-items`
+
+</td>
+<td>
+
+Denies the project_items command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-replace-in-files`
+
+</td>
+<td>
+
+Enables the replace_in_files command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-replace-in-files`
+
+</td>
+<td>
+
+Denies the replace_in_files command without any pre-configured scope.
 
 </td>
 </tr>

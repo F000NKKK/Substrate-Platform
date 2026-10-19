@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-find-in-files"
+description = "Enables the find_in_files command without any pre-configured scope."
+commands.allow = ["find_in_files"]
+
+[[permission]]
+identifier = "deny-find-in-files"
+description = "Denies the find_in_files command without any pre-configured scope."
+commands.deny = ["find_in_files"]

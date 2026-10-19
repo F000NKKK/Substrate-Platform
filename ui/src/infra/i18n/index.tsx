@@ -13,6 +13,7 @@ import "./locales/ru.files";
 import "./locales/ru.git";
 import "./locales/ru.output";
 import "./locales/ru.project";
+import "./locales/ru.search";
 import "./locales/ru.settings";
 import "./locales/ru.shell";
 import "./locales/ru.terminal";

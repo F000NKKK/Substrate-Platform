@@ -7,6 +7,7 @@
 pub mod fs;
 pub mod git;
 pub mod open;
+pub mod search;
 pub mod terminal;
 
 /// The host plugin's name: Substrate's commands are `plugin:substrate|<command>`.
@@ -20,7 +21,7 @@ pub struct Domain {
 }
 
 /// Substrate's own domains: every command of its host plugin.
-pub const SUBSTRATE: &[&Domain] = &[&open::DOMAIN, &fs::DOMAIN, &git::DOMAIN, &terminal::DOMAIN];
+pub const SUBSTRATE: &[&Domain] = &[&open::DOMAIN, &fs::DOMAIN, &git::DOMAIN, &search::DOMAIN, &terminal::DOMAIN];
 
 /// Every command of `domains`, in order — a plugin's permissions.
 pub fn names(domains: &[&Domain]) -> Vec<&'static str> {
