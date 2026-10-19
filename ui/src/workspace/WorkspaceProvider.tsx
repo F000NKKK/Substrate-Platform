@@ -79,7 +79,7 @@ const GlobalStateContext = createContext<StateStore>(loadingStore);
  * flushed on project switch and window close; a missing or corrupt file
  * just means defaults.
  */
-export function WorkspaceProvider({ root, children }: { root: string | null; children: ReactNode }) {
+export function WorkspaceProvider({ root, children }: { root: string | null; children?: ReactNode }) {
   const [globalStore, setGlobalStore] = useState<FileStateStore | null>(null);
   const [workspace, setWorkspace] = useState<FileStateStore | null>(null);
 
