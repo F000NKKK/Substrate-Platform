@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-git-last-message"
+description = "Enables the git_last_message command without any pre-configured scope."
+commands.allow = ["git_last_message"]
+
+[[permission]]
+identifier = "deny-git-last-message"
+description = "Denies the git_last_message command without any pre-configured scope."
+commands.deny = ["git_last_message"]

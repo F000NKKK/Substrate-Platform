@@ -111,7 +111,10 @@ mod tests {
         d.canonicalize().unwrap()
     }
 
-    fn wait_for(batches: &Mutex<Vec<Vec<PathBuf>>>, what: impl Fn(&[Vec<PathBuf>]) -> bool) -> bool {
+    fn wait_for(
+        batches: &Mutex<Vec<Vec<PathBuf>>>,
+        what: impl Fn(&[Vec<PathBuf>]) -> bool,
+    ) -> bool {
         let until = Instant::now() + Duration::from_secs(5);
         while Instant::now() < until {
             if what(&batches.lock().unwrap()) {
@@ -129,16 +132,29 @@ mod tests {
         std::fs::create_dir(&other).unwrap();
         let batches = Arc::new(Mutex::new(Vec::new()));
         let sink = batches.clone();
-        let w = DirWatcher::new(Duration::from_millis(50), move |b| sink.lock().unwrap().push(b)).unwrap();
+        let w = DirWatcher::new(Duration::from_millis(50), move |b| {
+            sink.lock().unwrap().push(b)
+        })
+        .unwrap();
         w.set([dir.clone()]);
-        assert_eq!(w.watched(), [dir.clone()]);
+        assert_eq!(w.watched(), std::slice::from_ref(&dir));
 
         std::fs::write(other.join("ignored.txt"), "x").unwrap();
         let file = dir.join("a.txt");
         std::fs::write(&file, "one").unwrap();
         std::fs::write(&file, "two").unwrap();
-        assert!(wait_for(&batches, |b| b.iter().flatten().any(|p| p == &file)));
-        assert!(batches.lock().unwrap().iter().flatten().all(|p| !p.starts_with(&other) || p == &other));
+        assert!(wait_for(&batches, |b| b
+            .iter()
+            .flatten()
+            .any(|p| p == &file)));
+        assert!(
+            batches
+                .lock()
+                .unwrap()
+                .iter()
+                .flatten()
+                .all(|p| !p.starts_with(&other) || p == &other)
+        );
 
         // Unwatched: no more batches for it.
         w.set([]);
@@ -155,12 +171,20 @@ mod tests {
         let dir = temp_dir("burst");
         let batches = Arc::new(Mutex::new(Vec::new()));
         let sink = batches.clone();
-        let w = DirWatcher::new(Duration::from_millis(200), move |b| sink.lock().unwrap().push(b)).unwrap();
+        let w = DirWatcher::new(Duration::from_millis(200), move |b| {
+            sink.lock().unwrap().push(b)
+        })
+        .unwrap();
         w.set([dir.clone()]);
         for i in 0..20 {
             std::fs::write(dir.join(format!("f{i}.txt")), "x").unwrap();
         }
-        assert!(wait_for(&batches, |b| b.iter().flatten().filter(|p| p.extension().is_some()).count() >= 20));
+        assert!(wait_for(&batches, |b| b
+            .iter()
+            .flatten()
+            .filter(|p| p.extension().is_some())
+            .count()
+            >= 20));
         assert_eq!(batches.lock().unwrap().len(), 1);
         let _ = std::fs::remove_dir_all(&dir);
     }

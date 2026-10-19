@@ -14,9 +14,14 @@ const APPIMAGE_VARS: [&str; 4] = ["APPDIR", "APPIMAGE", "ARGV0", "OWD"];
 /// The variables a started program mustn't inherit: the AppImage's own, and
 /// every one pointing into its mount. None outside an AppImage.
 pub fn foreign_vars() -> Vec<OsString> {
-    let Some(appdir) = std::env::var_os("APPDIR").filter(|d| !d.is_empty()) else { return Vec::new() };
+    let Some(appdir) = std::env::var_os("APPDIR").filter(|d| !d.is_empty()) else {
+        return Vec::new();
+    };
     let appdir = appdir.to_string_lossy().into_owned();
-    let mut out: Vec<OsString> = std::env::vars_os().filter(|(_, v)| v.to_string_lossy().contains(&appdir)).map(|(k, _)| k).collect();
+    let mut out: Vec<OsString> = std::env::vars_os()
+        .filter(|(_, v)| v.to_string_lossy().contains(&appdir))
+        .map(|(k, _)| k)
+        .collect();
     out.extend(APPIMAGE_VARS.map(OsString::from));
     out
 }

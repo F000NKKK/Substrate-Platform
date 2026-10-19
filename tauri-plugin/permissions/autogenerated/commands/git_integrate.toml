@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-git-integrate"
+description = "Enables the git_integrate command without any pre-configured scope."
+commands.allow = ["git_integrate"]
+
+[[permission]]
+identifier = "deny-git-integrate"
+description = "Denies the git_integrate command without any pre-configured scope."
+commands.deny = ["git_integrate"]

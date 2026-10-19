@@ -12,7 +12,10 @@
 //! React frontend) and its own project standards/workflow templates.
 
 pub mod dir;
+pub mod events;
+pub mod git;
 pub mod log;
+pub mod message;
 pub mod process;
 pub mod project;
 pub mod pty;
@@ -20,14 +23,15 @@ pub mod shell;
 pub mod task;
 pub mod watch;
 pub mod workflow;
+pub mod workspace;
 
 pub use dir::{DirEntryInfo, EntryKind};
 pub use log::{Level, LogLine, LogSink};
 pub use project::{Project, ProjectStandard, Solution};
 pub use pty::{PtyOptions, PtySession, Utf8Chunker};
 pub use shell::{ShellInfo, detect_shells};
-pub use watch::DirWatcher;
 pub use task::{Task, TaskExit, TaskHandle, spawn as spawn_task};
+pub use watch::DirWatcher;
 pub use workflow::{
     WorkflowDef, WorkflowFile, WorkflowHandle, WorkflowResult, WorkflowStep, run as run_workflow,
 };

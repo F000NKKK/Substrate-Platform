@@ -1,0 +1,19 @@
+[package]
+name = "tauri-plugin-substrate"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+license = "AGPL-3.0-only"
+description = "Substrate Platform's host commands for a Tauri app: the workspace boundary, Source Control — what Substrate's UI calls, the same in every product."
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+# Tauri wants a plugin's links key: its permissions are found by it.
+links = "tauri-plugin-substrate"
+
+[dependencies]
+substrate-platform = { path = ".." }
+tauri = "2"
+serde = { version = "1", features = ["derive"] }
+
+[build-dependencies]
+tauri-plugin = { version = "2", features = ["build"] }

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-git-stash-op"
+description = "Enables the git_stash_op command without any pre-configured scope."
+commands.allow = ["git_stash_op"]
+
+[[permission]]
+identifier = "deny-git-stash-op"
+description = "Denies the git_stash_op command without any pre-configured scope."
+commands.deny = ["git_stash_op"]

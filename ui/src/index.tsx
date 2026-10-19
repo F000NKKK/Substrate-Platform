@@ -8,6 +8,7 @@ export * from "./infra/state";
 export * from "./infra/selection";
 export * from "./infra/keys";
 export * from "./infra/i18n";
+export * from "./infra/host";
 export * from "./infra/dnd";
 export * from "./infra/diagnostics";
 export * from "./infra/fileTypes";

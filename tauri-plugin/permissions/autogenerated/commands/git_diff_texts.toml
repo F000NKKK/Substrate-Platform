@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-git-diff-texts"
+description = "Enables the git_diff_texts command without any pre-configured scope."
+commands.allow = ["git_diff_texts"]
+
+[[permission]]
+identifier = "deny-git-diff-texts"
+description = "Denies the git_diff_texts command without any pre-configured scope."
+commands.deny = ["git_diff_texts"]

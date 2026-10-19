@@ -1,4 +1,5 @@
 import { listen } from "@tauri-apps/api/event";
+import { isBackendMessage, messageText, type BackendMessage } from "../../infra/i18n";
 
 /**
  * Keeps each event name's accumulated lines outside any component's
@@ -20,7 +21,8 @@ const listening = new Set<string>();
 function ensureListening(eventName: string, maxLines: number) {
   if (listening.has(eventName)) return;
   listening.add(eventName);
-  listen<string>(eventName, (event) => appendOutputLine(eventName, event.payload, maxLines));
+  // A line is text, or a backend message — shown in the user's language.
+  listen<string | BackendMessage>(eventName, (event) => appendOutputLine(eventName, isBackendMessage(event.payload) ? messageText(event.payload) : event.payload, maxLines));
 }
 
 /** Appends one line to `eventName`'s buffer (dropping the oldest beyond `maxLines`) and tells its subscribers. */
