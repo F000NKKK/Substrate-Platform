@@ -87,7 +87,7 @@ test("data grid 20k rows", async ({ bench }) => {
       filterRows(rows, { name: "File_1" }, byKey);
     }),
     bench("group by kind with sums", () => {
-      buildDisplayItems(rows, ["kind"], byKey, new Set(), 0, "");
+      buildDisplayItems(rows, ["kind"], byKey, new Set());
     }),
   );
 });

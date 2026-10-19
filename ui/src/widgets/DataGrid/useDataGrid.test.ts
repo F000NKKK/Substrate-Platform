@@ -53,7 +53,7 @@ describe("DataGrid row pipeline", () => {
   });
 
   it("groups with per-group sums", () => {
-    const items = buildDisplayItems(rows, ["size"], byKey, new Set(), 0, "");
+    const items = buildDisplayItems(rows, ["size"], byKey, new Set());
     const groups = items.filter((i) => i.kind === "group");
     expect(groups.map((g) => g.label)).toEqual(Array.from({ length: 13 }, (_, i) => String(i)));
     for (const g of groups) if (g.kind === "group") expect(g.aggregates.size).toBe(Number(g.label) * g.count);
