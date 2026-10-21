@@ -319,8 +319,18 @@ fn finish_streamed(mut running: StreamingChild, cancel: &AtomicBool, sink: &LogS
 /// a chain of steps strictly one after another instead of firing them all in
 /// parallel like [`spawn`] does. Reports its own "exited with ..." line into
 /// `sink`, same as [`spawn`]; setting `cancel` kills the child early.
-pub(crate) fn run_streamed(task: &Task, sink: &LogSink, cancel: &AtomicBool) -> std::io::Result<TaskExit> {
-    let running = spawn_streaming(&task.program, &task.args, task.cwd.as_deref(), &task.envs, sink)?;
+pub(crate) fn run_streamed(
+    task: &Task,
+    sink: &LogSink,
+    cancel: &AtomicBool,
+) -> std::io::Result<TaskExit> {
+    let running = spawn_streaming(
+        &task.program,
+        &task.args,
+        task.cwd.as_deref(),
+        &task.envs,
+        sink,
+    )?;
     Ok(finish_streamed(running, cancel, sink))
 }
 

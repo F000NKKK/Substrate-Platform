@@ -82,8 +82,11 @@ pub fn run_replace(
                     continue;
                 }
                 let written = may_write(path).and_then(|()| {
-                    std::fs::write(path, &new_text)
-                        .map_err(|err| Message::new(messages::WRITE_FAILED).arg("path", path.display()).arg("error", err))
+                    std::fs::write(path, &new_text).map_err(|err| {
+                        Message::new(messages::WRITE_FAILED)
+                            .arg("path", path.display())
+                            .arg("error", err)
+                    })
                 });
                 match written {
                     Ok(()) => {

@@ -44,27 +44,41 @@ impl Formats {
     }
 
     pub fn solution_format(&self, path: &Path) -> Option<&dyn SolutionFormat> {
-        self.solutions.iter().map(Box::as_ref).find(|f| f.reads(path))
+        self.solutions
+            .iter()
+            .map(Box::as_ref)
+            .find(|f| f.reads(path))
     }
 
     pub fn project_format(&self, path: &Path) -> Option<&dyn ProjectFormat> {
-        self.projects.iter().map(Box::as_ref).find(|f| f.reads(path))
+        self.projects
+            .iter()
+            .map(Box::as_ref)
+            .find(|f| f.reads(path))
     }
 
     pub fn load_solution(&self, path: &Path) -> Result<Solution, Message> {
-        self.solution_format(path).ok_or_else(|| no_format(path))?.load(path)
+        self.solution_format(path)
+            .ok_or_else(|| no_format(path))?
+            .load(path)
     }
 
     pub fn save_solution(&self, solution: &Solution, path: &Path) -> Result<(), Message> {
-        self.solution_format(path).ok_or_else(|| no_format(path))?.save(solution, path)
+        self.solution_format(path)
+            .ok_or_else(|| no_format(path))?
+            .save(solution, path)
     }
 
     pub fn load_project(&self, path: &Path) -> Result<Project, Message> {
-        self.project_format(path).ok_or_else(|| no_format(path))?.load(path)
+        self.project_format(path)
+            .ok_or_else(|| no_format(path))?
+            .load(path)
     }
 
     pub fn save_project(&self, project: &Project, path: &Path) -> Result<(), Message> {
-        self.project_format(path).ok_or_else(|| no_format(path))?.save(project, path)
+        self.project_format(path)
+            .ok_or_else(|| no_format(path))?
+            .save(project, path)
     }
 }
 
@@ -89,7 +103,10 @@ mod tests {
         }
 
         fn load(&self, _path: &Path) -> Result<Solution, Message> {
-            Ok(Solution { name: self.0.into(), ..Default::default() })
+            Ok(Solution {
+                name: self.0.into(),
+                ..Default::default()
+            })
         }
 
         fn save(&self, _solution: &Solution, _path: &Path) -> Result<(), Message> {
@@ -99,9 +116,23 @@ mod tests {
 
     #[test]
     fn a_file_opens_with_the_format_that_reads_it() {
-        let formats = Formats::default().with_solution(ByExtension("sln")).with_solution(ByExtension("slnx"));
-        assert_eq!(formats.load_solution(Path::new("App.slnx")).unwrap().name, "slnx");
-        assert_eq!(formats.load_solution(Path::new("App.sln")).unwrap().name, "sln");
-        assert_eq!(formats.load_solution(Path::new("App.toml")).unwrap_err().text, messages::NO_FORMAT);
+        let formats = Formats::default()
+            .with_solution(ByExtension("sln"))
+            .with_solution(ByExtension("slnx"));
+        assert_eq!(
+            formats.load_solution(Path::new("App.slnx")).unwrap().name,
+            "slnx"
+        );
+        assert_eq!(
+            formats.load_solution(Path::new("App.sln")).unwrap().name,
+            "sln"
+        );
+        assert_eq!(
+            formats
+                .load_solution(Path::new("App.toml"))
+                .unwrap_err()
+                .text,
+            messages::NO_FORMAT
+        );
     }
 }

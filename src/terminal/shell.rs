@@ -36,14 +36,26 @@ fn exists_in_path(name: &str) -> bool {
 /// The shells worth offering, where installed: (program, label). Labels
 /// are English — a UI translates them.
 #[cfg(windows)]
-const CANDIDATES: &[(&str, &str)] = &[("pwsh", "PowerShell"), ("powershell", "Windows PowerShell"), ("cmd", "Command Prompt")];
+const CANDIDATES: &[(&str, &str)] = &[
+    ("pwsh", "PowerShell"),
+    ("powershell", "Windows PowerShell"),
+    ("cmd", "Command Prompt"),
+];
 #[cfg(not(windows))]
-const CANDIDATES: &[(&str, &str)] = &[("bash", "Bash"), ("zsh", "Zsh"), ("fish", "Fish"), ("pwsh", "PowerShell")];
+const CANDIDATES: &[(&str, &str)] = &[
+    ("bash", "Bash"),
+    ("zsh", "Zsh"),
+    ("fish", "Fish"),
+    ("pwsh", "PowerShell"),
+];
 
 /// What a shell clears its screen with, by its program — the rest: `clear`.
 /// `\r`, not `\n`: the byte a physical Enter key sends over the pty.
 /// Bash's readline also takes `\n`, PSReadLine (pwsh) only `\r`.
-const CLEAR_COMMANDS: &[(&[&str], &str)] = &[(&["pwsh", "powershell"], "Clear-Host\r"), (&["cmd"], "cls\r")];
+const CLEAR_COMMANDS: &[(&[&str], &str)] = &[
+    (&["pwsh", "powershell"], "Clear-Host\r"),
+    (&["cmd"], "cls\r"),
+];
 const CLEAR: &str = "clear\r";
 
 /// The label of the system's default shell, when none of [`CANDIDATES`] is installed.
@@ -82,5 +94,8 @@ pub fn detect_shells() -> Vec<ShellInfo> {
         .file_stem()
         .map(|s| s.to_string_lossy().to_lowercase())
         .unwrap_or_default();
-    vec![ShellInfo { command: default, ..shell(&program, DEFAULT_LABEL) }]
+    vec![ShellInfo {
+        command: default,
+        ..shell(&program, DEFAULT_LABEL)
+    }]
 }

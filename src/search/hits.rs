@@ -62,7 +62,12 @@ pub(super) fn floor_char(s: &str, mut i: usize) -> usize {
     i
 }
 
-pub(super) fn display_line(raw: &str, matches: &[(usize, usize)], line: u32, column: u32) -> LineHit {
+pub(super) fn display_line(
+    raw: &str,
+    matches: &[(usize, usize)],
+    line: u32,
+    column: u32,
+) -> LineHit {
     let indent = raw.len() - raw.trim_start().len();
     let mut start = indent.min(matches[0].0);
     let mut end = raw.len();

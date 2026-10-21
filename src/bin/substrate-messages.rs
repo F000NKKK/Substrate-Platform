@@ -6,7 +6,9 @@
 const DEFAULT_OUT: &str = "ui/src/infra/host/host.generated.ts";
 
 fn main() -> Result<(), String> {
-    let path = std::env::args().nth(1).unwrap_or_else(|| DEFAULT_OUT.to_string());
+    let path = std::env::args()
+        .nth(1)
+        .unwrap_or_else(|| DEFAULT_OUT.to_string());
     let text = substrate_platform::message::typescript();
     if std::fs::read_to_string(&path).ok().as_deref() == Some(text.as_str()) {
         return Ok(());

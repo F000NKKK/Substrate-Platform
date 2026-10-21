@@ -67,12 +67,19 @@ pub fn project_entries(root: &Path, layout: &Layout) -> Vec<ProjectEntry> {
 }
 
 /// The project files whose text matches `query`, at most `limit` of them.
-pub fn files_containing(root: &Path, query: &SearchQuery, limit: usize, layout: &Layout) -> Result<Vec<String>, Message> {
+pub fn files_containing(
+    root: &Path,
+    query: &SearchQuery,
+    limit: usize,
+    layout: &Layout,
+) -> Result<Vec<String>, Message> {
     let matcher = Matcher::new(query)?;
     let mask = FileMask::parse(&query.file_mask)?;
     Ok(project_files(root, &mask, layout)
         .into_iter()
-        .filter(|path| read_text(path, false).is_some_and(|text| !matcher.find_all(&text, 1).is_empty()))
+        .filter(|path| {
+            read_text(path, false).is_some_and(|text| !matcher.find_all(&text, 1).is_empty())
+        })
         .take(limit)
         .map(|path| path.to_string_lossy().into_owned())
         .collect())
@@ -89,7 +96,9 @@ pub fn generated_files(root: &Path, mask: &FileMask, layout: &Layout) -> Vec<Pat
             continue;
         }
         let mut builder = ignore::WalkBuilder::new(&dir);
-        builder.standard_filters(false).sort_by_file_name(|a, b| a.cmp(b));
+        builder
+            .standard_filters(false)
+            .sort_by_file_name(|a, b| a.cmp(b));
         out.extend(
             builder
                 .build()

@@ -22,11 +22,21 @@ pub struct Domain {
 }
 
 /// Substrate's own domains: every command of its host plugin.
-pub const SUBSTRATE: &[&Domain] = &[&open::DOMAIN, &fs::DOMAIN, &git::DOMAIN, &search::DOMAIN, &state::DOMAIN, &terminal::DOMAIN];
+pub const SUBSTRATE: &[&Domain] = &[
+    &open::DOMAIN,
+    &fs::DOMAIN,
+    &git::DOMAIN,
+    &search::DOMAIN,
+    &state::DOMAIN,
+    &terminal::DOMAIN,
+];
 
 /// Every command of `domains`, in order — a plugin's permissions.
 pub fn names(domains: &[&Domain]) -> Vec<&'static str> {
-    domains.iter().flat_map(|d| d.commands.iter().copied()).collect()
+    domains
+        .iter()
+        .flat_map(|d| d.commands.iter().copied())
+        .collect()
 }
 
 /// `domains` as a TypeScript constant `name`: `name.<domain>.<command>` is
@@ -53,7 +63,11 @@ pub fn typescript(name: &str, doc: &str, domains: &[&Domain]) -> String {
 mod tests {
     use super::*;
 
-    const DEMO: Domain = Domain { key: "demo", plugin: "app", commands: &["path_info"] };
+    const DEMO: Domain = Domain {
+        key: "demo",
+        plugin: "app",
+        commands: &["path_info"],
+    };
 
     #[test]
     fn a_domain_turns_into_typescript() {

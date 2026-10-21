@@ -30,8 +30,12 @@ pub use substrate_platform::commands::SUBSTRATE_PLUGIN as NAME;
 
 /// Runs `work` off the UI thread.
 #[cfg(any(feature = "git", feature = "search"))]
-pub(crate) async fn blocking<T: Send + 'static>(work: impl FnOnce() -> Result<T, Message> + Send + 'static) -> Result<T, Message> {
-    tauri::async_runtime::spawn_blocking(work).await.map_err(Message::verbatim)?
+pub(crate) async fn blocking<T: Send + 'static>(
+    work: impl FnOnce() -> Result<T, Message> + Send + 'static,
+) -> Result<T, Message> {
+    tauri::async_runtime::spawn_blocking(work)
+        .await
+        .map_err(Message::verbatim)?
 }
 
 /// What a product tells the plugin about itself.

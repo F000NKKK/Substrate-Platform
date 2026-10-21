@@ -172,7 +172,10 @@ impl Runner<'_> {
                             .map(|c| self.cwd.join(substitute(c, vars)))
                             .unwrap_or_else(|| self.cwd.to_path_buf()),
                     ),
-                    envs: env.iter().map(|(k, v)| (k.clone(), substitute(v, vars))).collect(),
+                    envs: env
+                        .iter()
+                        .map(|(k, v)| (k.clone(), substitute(v, vars)))
+                        .collect(),
                 };
                 match run_streamed(&task, self.sink, self.cancel) {
                     Ok(exit) => exit.success,
@@ -207,7 +210,13 @@ pub fn run(
     let thread_shared = shared.clone();
 
     std::thread::spawn(move || {
-        let runner = Runner { file: &file, vars: &vars, cwd: &cwd, sink: &sink, cancel: &thread_shared.cancel };
+        let runner = Runner {
+            file: &file,
+            vars: &vars,
+            cwd: &cwd,
+            sink: &sink,
+            cancel: &thread_shared.cancel,
+        };
         let ok = runner.run_named(&name, &mut Vec::new());
         let result = if thread_shared.cancel.load(Ordering::Acquire) {
             sink.warn(format!("workflow '{name}' cancelled"));

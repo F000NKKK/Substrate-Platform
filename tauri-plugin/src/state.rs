@@ -5,7 +5,9 @@
 use serde_json::Value;
 use std::path::{Path, PathBuf};
 use substrate_platform::message::Message;
-use substrate_platform::state::{APP_STATE_FILE, WORKSPACE_FILE, private_dir, read_json, write_json};
+use substrate_platform::state::{
+    APP_STATE_FILE, WORKSPACE_FILE, private_dir, read_json, write_json,
+};
 use substrate_platform::workspace::Workspace;
 use tauri::{AppHandle, Manager, Runtime, State};
 
@@ -26,17 +28,31 @@ fn project_dir(ws: &Workspace, options: &StateOptions, project_root: &str) -> Re
 }
 
 fn app_state_file<R: Runtime>(app: &AppHandle<R>) -> Res<PathBuf> {
-    app.path().app_config_dir().map(|dir| dir.join(APP_STATE_FILE)).map_err(Message::verbatim)
+    app.path()
+        .app_config_dir()
+        .map(|dir| dir.join(APP_STATE_FILE))
+        .map_err(Message::verbatim)
 }
 
 /// The project's remembered state (open files, layout, expanded folders…).
 #[tauri::command]
-pub fn workspace_load(ws: State<'_, Workspace>, options: State<'_, StateOptions>, project_root: String) -> Res<Value> {
-    Ok(read_json(&project_dir(&ws, &options, &project_root)?.join(WORKSPACE_FILE)))
+pub fn workspace_load(
+    ws: State<'_, Workspace>,
+    options: State<'_, StateOptions>,
+    project_root: String,
+) -> Res<Value> {
+    Ok(read_json(
+        &project_dir(&ws, &options, &project_root)?.join(WORKSPACE_FILE),
+    ))
 }
 
 #[tauri::command]
-pub fn workspace_save(ws: State<'_, Workspace>, options: State<'_, StateOptions>, project_root: String, value: Value) -> Res<()> {
+pub fn workspace_save(
+    ws: State<'_, Workspace>,
+    options: State<'_, StateOptions>,
+    project_root: String,
+    value: Value,
+) -> Res<()> {
     let dir = project_dir(&ws, &options, &project_root)?;
     private_dir(&dir)?;
     write_json(&dir.join(WORKSPACE_FILE), &value)

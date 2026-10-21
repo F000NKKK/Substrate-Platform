@@ -2,10 +2,10 @@
 
 use super::{Res, checked};
 use crate::blocking;
-use substrate_platform::workspace::Workspace;
-use tauri::State;
 use substrate_platform::git::config::{self, GlobalConfig};
 use substrate_platform::git::stash::{self, StashInfo, StashMode, StashOp};
+use substrate_platform::workspace::Workspace;
+use tauri::State;
 
 #[tauri::command]
 pub async fn git_stash_list(ws: State<'_, Workspace>, root: String) -> Res<Vec<StashInfo>> {
@@ -14,13 +14,23 @@ pub async fn git_stash_list(ws: State<'_, Workspace>, root: String) -> Res<Vec<S
 }
 
 #[tauri::command]
-pub async fn git_stash_push(ws: State<'_, Workspace>, root: String, message: String, mode: StashMode) -> Res<()> {
+pub async fn git_stash_push(
+    ws: State<'_, Workspace>,
+    root: String,
+    message: String,
+    mode: StashMode,
+) -> Res<()> {
     let root = checked(&ws, &root)?;
     blocking(move || stash::push(&root, &message, mode)).await
 }
 
 #[tauri::command]
-pub async fn git_stash_op(ws: State<'_, Workspace>, root: String, index: u32, op: StashOp) -> Res<()> {
+pub async fn git_stash_op(
+    ws: State<'_, Workspace>,
+    root: String,
+    index: u32,
+    op: StashOp,
+) -> Res<()> {
     let root = checked(&ws, &root)?;
     blocking(move || stash::op(&root, index, op)).await
 }

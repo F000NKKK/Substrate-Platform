@@ -113,7 +113,11 @@ pub fn typescript() -> String {
         crate::commands::SUBSTRATE,
     ));
     out.push('\n');
-    out.push_str(&crate::events::typescript("events", "The events Substrate's host sends its UI.", crate::events::ALL));
+    out.push_str(&crate::events::typescript(
+        "events",
+        "The events Substrate's host sends its UI.",
+        crate::events::ALL,
+    ));
     out
 }
 
