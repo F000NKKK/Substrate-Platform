@@ -2,6 +2,7 @@ import { fileTypeOf } from "../../infra/fileTypes";
 import { useEffect, useState } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import type { EditorProps } from "./EditorBase";
+import { ZoomView } from "../ZoomView";
 import "./ImageEditor.css";
 
 export interface ImageEditorProps extends EditorProps {
@@ -14,10 +15,13 @@ export interface ImageEditorProps extends EditorProps {
   loadBytes?: (path: string) => Promise<ArrayBuffer | Uint8Array | number[]>;
 }
 
+/** The size a browser gives an image without its own (an SVG without width/height). */
+const UNSIZED: [number, number] = [300, 150];
+
 /**
  * A sibling branch off `EditorBase`, not a `TextEditor` specialization —
  * images aren't text, so there's no `content`/`onChange` round-trip here,
- * just a read-only view; `content` is ignored, so a host shouldn't read
+ * just a read-only view, zoomed and panned (`ZoomView`); `content` is ignored, so a host shouldn't read
  * the file as text first (see `isBinaryFile`). By default uses Tauri's
  * asset protocol to display the file directly rather than round-tripping
  * bytes through IPC; pass `loadBytes` to go through IPC anyway.
@@ -28,6 +32,7 @@ export function ImageEditor({ path, loadBytes, contentVersion }: ImageEditorProp
   const url = () => `${convertFileSrc(path)}?v=${contentVersion ?? 0}`;
   const [src, setSrc] = useState<string | null>(loadBytes ? null : url());
   const [error, setError] = useState<string | null>(null);
+  const [size, setSize] = useState<[number, number] | null>(null);
 
   useEffect(() => {
     if (!loadBytes) {
@@ -55,9 +60,29 @@ export function ImageEditor({ path, loadBytes, contentVersion }: ImageEditorProp
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path, loadBytes, contentVersion]);
 
+  // The image's own size, for the zoom's 100%.
+  useEffect(() => {
+    setSize(null);
+    if (!src) return;
+    const img = new Image();
+    img.onload = () => setSize([img.naturalWidth || UNSIZED[0], img.naturalHeight || UNSIZED[1]]);
+    img.onerror = () => setError(path);
+    img.src = src;
+    return () => void (img.onload = img.onerror = null);
+  }, [src, path]);
+
   return (
     <div className="sp-image-editor">
-      {error ? <p className="sp-image-editor-error">{error}</p> : src && <img src={src} alt={path} />}
+      {error ? (
+        <p className="sp-image-editor-error">{error}</p>
+      ) : (
+        src &&
+        size && (
+          <ZoomView width={size[0]} height={size[1]}>
+            <img src={src} alt={path} draggable={false} />
+          </ZoomView>
+        )
+      )}
     </div>
   );
 }

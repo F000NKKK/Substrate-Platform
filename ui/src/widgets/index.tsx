@@ -7,6 +7,7 @@ export type { LabelProps } from "./Label";
 export { TextField } from "./TextField";
 export type { TextFieldProps } from "./TextField";
 export { SuggestingInput } from "./SuggestingInput";
+export { ZoomView, ZOOM_STEPS, stepZoom, fitZoom, zoomPercent, parseZoomPercent } from "./ZoomView";
 export type { SuggestingInputProps } from "./SuggestingInput";
 export { Tab } from "./Tab";
 export type { TabProps, TabOrientation } from "./Tab";

@@ -10,23 +10,58 @@
 /* Tabs wrap into as many rows as they need, as Visual Studio's do. */
 .sp-center-tabs {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: flex-start;
   flex: 0 0 auto;
-  gap: var(--sp-space-2xs);
-  padding: var(--sp-space-xs) var(--sp-space-xs) 0;
   background: var(--sp-surface-1);
   border-bottom: 1px solid var(--sp-border);
   transition: background var(--sp-duration-fast) var(--sp-easing);
 }
 
+/* The tabs side by side, flat, each divided from the next (Visual Studio's document well). */
+.sp-center-tab-strip {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.sp-center-tab-strip[data-rows="single"] {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.sp-center-tab-strip[data-rows="single"]::-webkit-scrollbar {
+  display: none;
+}
+
+/* Wrapped rows: every row carries its own baseline, so rows read as rows, not tabs piled on tabs. */
+.sp-center-tab-strip[data-rows="multiple"] {
+  flex-wrap: wrap;
+  margin-bottom: -1px;
+}
+
+.sp-center-tab-strip > .sp-tab {
+  flex: none;
+}
+
+/* A background line, so the active tab's and a drop's box-shadow marks still show; the last row's lies on the bar's border. */
+.sp-center-tab-strip[data-rows="multiple"] > .sp-tab {
+  background-image: linear-gradient(var(--sp-border), var(--sp-border));
+  background-size: 100% 1px;
+  background-position: bottom;
+  background-repeat: no-repeat;
+}
+
+.sp-center-tab-list {
+  flex: none;
+  margin: var(--sp-space-2xs);
+}
+
 .sp-center-actions {
   display: flex;
+  flex: none;
   align-items: center;
-  align-self: stretch;
   gap: var(--sp-space-2xs);
-  margin-left: auto;
-  margin-top: calc(-1 * var(--sp-space-xs));
+  height: var(--sp-control-height);
   padding: 0 var(--sp-space-2xs);
 }
 

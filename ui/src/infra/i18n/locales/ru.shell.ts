@@ -14,6 +14,8 @@ registerTranslations(RU, {
   Pin: "Закрепить",
   "Auto Hide": "Автоматически скрывать",
   Float: "Плавающее окно",
+  "Show All Tabs": "Показать все вкладки",
+  "Multiple Rows of Tabs": "Вкладки в несколько рядов",
   Unpin: "Открепить",
   "Unpin tab": "Открепить вкладку",
   "Close tab": "Закрыть вкладку",
