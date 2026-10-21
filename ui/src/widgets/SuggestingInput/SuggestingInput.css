@@ -2,6 +2,7 @@
   position: fixed;
   z-index: 300;
   max-height: 260px;
+  max-width: calc(100vw - 2 * var(--sp-space-xs));
   overflow-y: auto;
   padding: var(--sp-space-2xs);
   background: var(--sp-surface-glass);
@@ -19,6 +20,8 @@
   padding: var(--sp-space-2xs) var(--sp-space-xs);
   border-radius: var(--sp-radius-xs);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   cursor: default;
 }
 

@@ -1,37 +1,44 @@
 import { useEffect, useMemo, useRef, useState, type InputHTMLAttributes, type KeyboardEvent, type Ref } from "react";
 import { createPortal } from "react-dom";
+import { useViewportPosition } from "../../infra/portal";
 import "./SuggestingInput.css";
 
-/** The most suggestions shown at once. */
-const MAX_SHOWN = 200;
+/** The most suggestions shown at once (a game's items and a mod's, all of them). */
+const MAX_SHOWN = 2000;
 /** The popup's gap below its input, pixels. */
 const GAP = 2;
 
 export interface SuggestingInputProps extends InputHTMLAttributes<HTMLInputElement> {
   ref?: Ref<HTMLInputElement>;
-  /** What the field offers; those containing what's typed are shown. */
+  /** What the field offers: all of them until something's typed, then those containing it. */
   suggestions?: readonly string[];
 }
 
 /**
  * A text input with suggestions in the platform's look (not the browser's
  * `<datalist>`, which ignores the theme and closes on its own terms): they
- * open on focus and typing, close on a click outside, a second click,
+ * open on focus (all of them, the current value marked, as Visual
+ * Studio's lists) and narrow as one types; close on a click outside, a second click,
  * Escape or leaving; arrows move, Enter picks. A pick is typed into the
  * input as the user would, so a controlled input's `onChange` and an
  * uncontrolled one both see it.
  */
 export function SuggestingInput({ suggestions, ref, onKeyDown, onFocus, onBlur, onMouseDown, ...props }: SuggestingInputProps) {
   const input = useRef<HTMLInputElement | null>(null);
-  const popup = useRef<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);
-  const [typed, setTyped] = useState("");
+  // What's been typed since the field was entered; none: show every suggestion.
+  const [typed, setTyped] = useState<string | null>(null);
   const [at, setAt] = useState(-1);
   const shown = useMemo(() => {
+    const all = suggestions ?? [];
+    if (typed === null) return all.slice(0, MAX_SHOWN);
     const q = typed.toLowerCase();
-    return (suggestions ?? []).filter((s) => s.toLowerCase().includes(q) && s !== typed).slice(0, MAX_SHOWN);
+    return all.filter((s) => s.toLowerCase().includes(q) && s !== typed).slice(0, MAX_SHOWN);
   }, [suggestions, typed]);
   const visible = open && shown.length > 0;
+  // Under the input, kept inside the window.
+  const box = visible ? input.current?.getBoundingClientRect() : undefined;
+  const { ref: popup, style: placed } = useViewportPosition(box ? { x: box.left, y: box.bottom + GAP } : null);
 
   // A press outside the input and the popup closes it.
   useEffect(() => {
@@ -43,6 +50,11 @@ export function SuggestingInput({ suggestions, ref, onKeyDown, onFocus, onBlur, 
     document.addEventListener("mousedown", away, true);
     return () => document.removeEventListener("mousedown", away, true);
   }, [visible]);
+
+  // The marked one in view (the current value on entering, the arrows' after).
+  useEffect(() => {
+    if (visible && at >= 0) popup.current?.children[at]?.scrollIntoView({ block: "nearest" });
+  }, [visible, at]);
 
   const pick = (s: string) => {
     const el = input.current;
@@ -75,7 +87,6 @@ export function SuggestingInput({ suggestions, ref, onKeyDown, onFocus, onBlur, 
     onKeyDown?.(e);
   };
 
-  const box = visible ? input.current?.getBoundingClientRect() : undefined;
   return (
     <>
       <input
@@ -89,7 +100,8 @@ export function SuggestingInput({ suggestions, ref, onKeyDown, onFocus, onBlur, 
         aria-autocomplete={suggestions ? "list" : undefined}
         aria-expanded={suggestions ? visible : undefined}
         onFocus={(e) => {
-          setTyped(e.currentTarget.value);
+          setTyped(null);
+          setAt((suggestions ?? []).slice(0, MAX_SHOWN).indexOf(e.currentTarget.value));
           setOpen(true);
           onFocus?.(e);
         }}
@@ -116,7 +128,7 @@ export function SuggestingInput({ suggestions, ref, onKeyDown, onFocus, onBlur, 
             ref={popup}
             className="sp-suggestions"
             role="listbox"
-            style={{ left: box.left, top: box.bottom + GAP, minWidth: box.width }}
+            style={{ ...placed, minWidth: box.width }}
             // Picking mustn't blur the input first.
             onMouseDown={(e) => e.preventDefault()}
           >

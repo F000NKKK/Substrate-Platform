@@ -66,6 +66,15 @@ export function ZoomView({ width, height, children, className }: { width: number
     return () => port.removeEventListener("wheel", onWheel);
   }, []);
 
+  // A zoom chosen on the bar keeps the point at the view's centre in place.
+  const zoomAtCentre = (to: number | null) => {
+    const r = portRef.current!.getBoundingClientRect();
+    const page = pageRef.current!.getBoundingClientRect();
+    const [clientX, clientY] = [r.left + r.width / 2, r.top + r.height / 2];
+    anchor.current = { x: (clientX - page.left) / zoom, y: (clientY - page.top) / zoom, clientX, clientY };
+    setChosen(to);
+  };
+
   const startPan = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (e.button !== PAN_BUTTON) return;
     const port = e.currentTarget;
@@ -94,7 +103,7 @@ export function ZoomView({ width, height, children, className }: { width: number
           {children}
         </div>
       </div>
-      <ZoomBar zoom={zoom} fitted={chosen === null} onZoom={setChosen} />
+      <ZoomBar zoom={zoom} fitted={chosen === null} onZoom={zoomAtCentre} />
     </div>
   );
 }

@@ -84,10 +84,14 @@ export function CenterDock({ layout }: CenterDockProps) {
   // One row scrolls: the active tab is kept in view, the wheel scrolls it along.
   const stripRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (rows !== "single" || !layout.centerActiveId) return;
-    stripRef.current
-      ?.querySelector<HTMLElement>('[data-active="true"]')
-      ?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    const strip = stripRef.current;
+    if (rows !== "single" || !strip) return;
+    const reveal = () => strip.querySelector<HTMLElement>('[data-active="true"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    reveal();
+    // Narrowed (a tool window opened beside): still in view.
+    const ro = new ResizeObserver(reveal);
+    ro.observe(strip);
+    return () => ro.disconnect();
   }, [rows, layout.centerActiveId, orderedIds.length]);
   const actions =
     (layout.centerActiveId &&
