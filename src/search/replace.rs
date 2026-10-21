@@ -82,7 +82,11 @@ pub fn run_replace(
                     continue;
                 }
                 let written = may_write(path).and_then(|()| {
-                    std::fs::write(path, &new_text).map_err(|err| {
+                    match text_view(path) {
+                        Some(view) => (view.write)(path, &new_text),
+                        None => std::fs::write(path, &new_text).map_err(|e| e.to_string()),
+                    }
+                    .map_err(|err| {
                         Message::new(messages::WRITE_FAILED)
                             .arg("path", path.display())
                             .arg("error", err)

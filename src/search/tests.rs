@@ -372,3 +372,23 @@ fn replace_writes_files_and_returns_buffers() {
     );
     std::fs::remove_dir_all(dir).unwrap();
 }
+
+/// A kind of file kept reversed on disk, read and written through its view.
+#[test]
+fn a_registered_view_is_what_search_reads() {
+    fn read(p: &Path) -> Option<String> {
+        Some(std::fs::read_to_string(p).ok()?.chars().rev().collect())
+    }
+    fn write(p: &Path, text: &str) -> Result<(), String> {
+        std::fs::write(p, text.chars().rev().collect::<String>()).map_err(|e| e.to_string())
+    }
+    register_text_view("reversed", TextView { read, write });
+    let dir = std::env::temp_dir().join(format!("substrate-views-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let file = dir.join("a.reversed");
+    std::fs::write(&file, "olleh").unwrap();
+    assert_eq!(read_text(&file, true).as_deref(), Some("hello"));
+    (text_view(&file).unwrap().write)(&file, "bye").unwrap();
+    assert_eq!(std::fs::read_to_string(&file).unwrap(), "eyb");
+    std::fs::remove_dir_all(&dir).unwrap();
+}

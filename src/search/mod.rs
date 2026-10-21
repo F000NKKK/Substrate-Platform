@@ -18,6 +18,8 @@ use crate::message::Message;
 
 mod files;
 pub use files::*;
+mod views;
+pub use views::{TextView, register_text_view, text_view};
 mod hits;
 pub use hits::*;
 mod run;
