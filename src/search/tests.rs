@@ -382,6 +382,7 @@ fn a_registered_view_is_what_search_reads() {
     fn write(p: &Path, text: &str) -> Result<(), String> {
         std::fs::write(p, text.chars().rev().collect::<String>()).map_err(|e| e.to_string())
     }
+    use crate::text_view::{TextView, register_text_view, text_view};
     register_text_view("reversed", TextView { read, write });
     let dir = std::env::temp_dir().join(format!("substrate-views-{}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();

@@ -19,6 +19,7 @@ pub mod events;
 pub mod message;
 pub mod process;
 pub mod sync;
+pub mod text_view;
 pub mod workspace;
 
 #[cfg(feature = "fs")]

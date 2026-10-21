@@ -34,22 +34,30 @@ pub struct DiffTexts {
     pub binary: bool,
 }
 
-/// A blob's text, `None` if it doesn't exist there; `Err` only for binary content.
+/// A blob's text (through its text view or the repository's textconv),
+/// `None` if it doesn't exist there; `Err` only for binary content.
 fn side_text(top: &Path, side: &DiffSide) -> Result<Option<String>, ()> {
     let bytes = match side.rev.as_str() {
         "" => return Ok(None),
-        WORKTREE => match std::fs::read(absolute(top, &side.path)) {
-            Ok(bytes) => bytes,
-            Err(_) => return Ok(None),
-        },
+        WORKTREE => {
+            let file = absolute(top, &side.path);
+            if let Some(view) = crate::text_view::text_view(Path::new(&file)) {
+                return Ok((view.read)(Path::new(&file)));
+            }
+            match std::fs::read(&file) {
+                Ok(bytes) => bytes,
+                Err(_) => return Ok(None),
+            }
+        }
         rev => {
             let spec = if rev == INDEX {
                 format!(":{}", side.path)
             } else {
                 format!("{rev}:{}", side.path)
             };
+            // As the repository shows it: through its textconv, if the path has one.
             match git(top)
-                .args(["cat-file", "blob", &spec])
+                .args(["cat-file", "--textconv", &spec])
                 .stdout(Stdio::piped())
                 .stderr(Stdio::null())
                 .output()

@@ -124,7 +124,7 @@ pub fn relative(root: &Path, path: &Path) -> String {
 /// `None` for one that's too large, binary, unreadable — or, when `strict`,
 /// not valid UTF-8 (a replace mustn't mangle it).
 pub fn read_text(path: &Path, strict: bool) -> Option<String> {
-    if let Some(view) = text_view(path) {
+    if let Some(view) = crate::text_view::text_view(path) {
         return (view.read)(path);
     }
     let meta = std::fs::metadata(path).ok()?;
