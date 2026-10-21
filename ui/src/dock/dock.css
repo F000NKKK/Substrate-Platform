@@ -7,8 +7,10 @@
 }
 
 /* Tabs sit on the strip's bottom border; the strip is exactly tab + top inset tall, so the active tab meets the document below with no gap. */
+/* Tabs wrap into as many rows as they need, as Visual Studio's do. */
 .sp-center-tabs {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   flex: 0 0 auto;
   gap: var(--sp-space-2xs);
@@ -35,6 +37,15 @@
 
 .sp-center-tabs[data-drag-over="true"] {
   background: var(--sp-accent-soft);
+}
+
+/* Where a tab dragged along the strip lands. */
+.sp-center-tabs [data-drop="before"] {
+  box-shadow: inset 2px 0 0 var(--sp-accent);
+}
+
+.sp-center-tabs [data-drop="after"] {
+  box-shadow: inset -2px 0 0 var(--sp-accent);
 }
 
 /*

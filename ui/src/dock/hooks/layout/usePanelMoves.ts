@@ -36,6 +36,20 @@ export function usePanelMoves(options: ShellLayoutOptions, panelIndex: PanelInde
     [main.id]
   );
 
+  // The center's tabs are its placements in order: `id` goes in before `before` (or last).
+  const placeInCenter = useCallback(
+    (id: string, before: string | null) => {
+      setPlacements((prev) => {
+        const entries = Object.entries(prev).filter(([key]) => key !== id);
+        const at = before === null ? -1 : entries.findIndex(([key]) => key === before);
+        entries.splice(at < 0 ? entries.length : at, 0, [id, { anchor: "center", mode: "pinned" }]);
+        return Object.fromEntries(entries);
+      });
+      setCenterActive(id);
+    },
+    [main.id]
+  );
+
   const floatAt = useCallback(
     (id: string, x: number, y: number) => {
       setPlacements((prev) => {
@@ -75,7 +89,7 @@ export function usePanelMoves(options: ShellLayoutOptions, panelIndex: PanelInde
     store.set(storeKey, { placements, sizes, centerActiveId } satisfies PersistedShellLayoutState);
   }, [store, storeKey, placements, sizes, centerActiveId]);
 
-  return { dockTo, floatAt, moveFloat, resizeFloat };
+  return { dockTo, placeInCenter, floatAt, moveFloat, resizeFloat };
 }
 
 /** What `usePanelMoves` gives. */

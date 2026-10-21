@@ -2,7 +2,8 @@ import { Tab } from "../../widgets/Tab";
 import { IconButton } from "../../widgets/IconButton";
 import { Icon } from "../../infra/icons";
 import { ContextMenu, useContextMenu } from "../../widgets/ContextMenu";
-import { startPanelDrag, endPanelDrag } from "../dnd";
+import { useState, type DragEvent } from "react";
+import { startPanelDrag, endPanelDrag, isPanelDrag, readPanelDrag } from "../dnd";
 import { useDropTarget } from "../hooks/useDropTarget";
 import type { ShellLayout } from "../hooks/useShellLayout";
 
@@ -28,6 +29,31 @@ export function CenterDock({ layout }: CenterDockProps) {
   const isPinned = (id: string) => !!layout.panelsById[id]?.pinned;
   const orderedIds = [...shownIds.filter(isPinned), ...shownIds.filter((id) => !isPinned(id))];
   const menuPanel = menu.target ? layout.panelsById[menu.target.node] : undefined;
+  // Where a tab dragged along the strip goes: before or after the tab under the pointer.
+  const [dropAt, setDropAt] = useState<{ id: string; after: boolean } | null>(null);
+  const side = (e: DragEvent, id: string) => {
+    const box = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    return { id, after: e.clientX > box.left + box.width / 2 };
+  };
+  const onTabDragOver = (e: DragEvent, id: string) => {
+    if (!isPanelDrag(e)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+    const at = side(e, id);
+    if (dropAt?.id !== at.id || dropAt.after !== at.after) setDropAt(at);
+  };
+  const onTabDrop = (e: DragEvent, id: string) => {
+    const dragged = readPanelDrag(e);
+    setDropAt(null);
+    if (!dragged) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const { after } = side(e, id);
+    const at = orderedIds.indexOf(id) + (after ? 1 : 0);
+    const before = orderedIds.slice(at).find((other) => other !== dragged) ?? null;
+    if (dragged !== id) layout.placeInCenter(dragged, before);
+  };
   const actions = (layout.centerActiveId && layout.panelsById[layout.centerActiveId]?.actions) || [];
 
   return (
@@ -44,7 +70,14 @@ export function CenterDock({ layout }: CenterDockProps) {
               title={panel.tooltip}
               draggable
               onDragStart={(e) => startPanelDrag(e, id)}
-              onDragEnd={endPanelDrag}
+              onDragEnd={(e) => {
+                endPanelDrag(e);
+                setDropAt(null);
+              }}
+              onDragOver={(e) => onTabDragOver(e, id)}
+              onDragLeave={() => setDropAt((cur) => (cur?.id === id ? null : cur))}
+              onDrop={(e) => onTabDrop(e, id)}
+              data-drop={dropAt?.id === id ? (dropAt.after ? "after" : "before") : undefined}
               onClick={() => layout.setCenterActive(id)}
               // Middle-click closes, as in every tabbed editor.
               onAuxClick={(e) => {
