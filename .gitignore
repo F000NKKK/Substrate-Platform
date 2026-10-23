@@ -24,7 +24,7 @@ dist-ssr
 *.sw?
 
 # Rust
-/obj/
+/target
 
 # design-sync (staged scripts, generated build output, machine state)
 .ds-sync/
@@ -32,4 +32,3 @@ ds-bundle/
 .design-sync/.cache/
 .design-sync/learnings/
 .design-sync/node_modules
-/target/
