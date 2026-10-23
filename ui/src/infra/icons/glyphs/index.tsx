@@ -39,6 +39,8 @@ export { IconSearch } from "./IconSearch";
 export { IconBranch } from "./IconBranch";
 export { IconArrowDown } from "./IconArrowDown";
 export { IconArrowUp } from "./IconArrowUp";
+export { IconEye } from "./IconEye";
+export { IconEyeOff } from "./IconEyeOff";
 export { IconFetch } from "./IconFetch";
 export { IconSync } from "./IconSync";
 export { IconMinus } from "./IconMinus";
