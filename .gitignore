@@ -24,7 +24,7 @@ dist-ssr
 *.sw?
 
 # Rust
-/target
+/obj/
 
 # design-sync (staged scripts, generated build output, machine state)
 .ds-sync/
