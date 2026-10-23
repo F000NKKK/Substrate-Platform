@@ -1,7 +1,7 @@
 import type { ContextMenuItem } from "../ContextMenu";
 import { t } from "../../infra/i18n";
 import type { DataGridColumn, DataGridSortState } from "./DataGrid";
-import type { DataGridMenuTarget } from "./useDataGrid";
+import type { DataGridMenuTarget } from "./state/useDataGrid";
 
 interface MenuGrid<T> {
   orderedColumns: DataGridColumn<T>[];

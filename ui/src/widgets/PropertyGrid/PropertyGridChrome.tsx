@@ -2,9 +2,9 @@ import { Icon } from "../../infra/icons";
 import { useT } from "../../infra/i18n";
 import { IconButton } from "../IconButton";
 import { TextField } from "../TextField";
-import type { PropertyGridProps } from "./propertyTypes";
-import { categoryLabel, VIEW_MODE, type ViewMode } from "./propertyValues";
-import type { PropertyGridModel } from "./usePropertyGrid";
+import type { PropertyGridProps } from "./state/propertyTypes";
+import { categoryLabel, VIEW_MODE, type ViewMode } from "./state/propertyValues";
+import type { PropertyGridModel } from "./state/usePropertyGrid";
 
 /** The object selector line: the object's name in bold, then its type. */
 export function ObjectLine({ objectName, objectType, objectDescription }: Pick<PropertyGridProps, "objectName" | "objectType" | "objectDescription">) {

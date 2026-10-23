@@ -1,8 +1,8 @@
-import type { GridCommits } from "./dataGridCommits";
-import type { GridEditing } from "./dataGridEditing";
-import type { GridNavigation } from "./dataGridNavigation";
-import type { GridProps, GridState } from "./useDataGridState";
-import type { GridView } from "./useDataGridView";
+import type { GridCommits } from "./state/dataGridCommits";
+import type { GridEditing } from "./state/dataGridEditing";
+import type { GridNavigation } from "./state/dataGridNavigation";
+import type { GridProps, GridState } from "./state/useDataGridState";
+import type { GridView } from "./state/useDataGridView";
 
 /** The grid's parts, as the later ones (keys) use the earlier. */
 export interface GridParts<T> {

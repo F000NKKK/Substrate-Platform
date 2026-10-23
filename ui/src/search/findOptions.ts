@@ -1,6 +1,6 @@
 import { t } from "../infra/i18n/i18n";
 import type { SearchOptions } from "../widgets/SearchField/SearchField";
-import { getEditorView } from "../widgets/Editor/editorRegistry";
+import { getEditorView } from "../widgets/Editor/registry/editorRegistry";
 import { LOOK_IN, type LookIn } from "./findStore";
 
 /** Where the window's options and the replacement are remembered (global state). */
