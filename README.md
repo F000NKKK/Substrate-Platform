@@ -60,7 +60,7 @@ flowchart LR
 
 ## 🦀 Rust Crate
 
-Always there: `message` (user-facing text as templates the UI translates), `events`, `process` (what a started program's environment should be) and `workspace` (the folders the user opened; paths outside them are refused). Every other module is a Cargo feature of its name, so a product builds only what it uses (`full` turns on all):
+Always there: `message` (user-facing text as templates the UI translates), `events`, `process` (what a started program's environment should be) `workspace` (the folders the user opened; paths outside them are refused), `sync` (locks that outlive a panic), `text_view` (a product's binary formats read and written as text, so search, replace and diffs see what the editor shows) and `commands` (the host commands by domain: the one list permissions, handlers and the UI's copy come from). Every other module is a Cargo feature of its name, so a product builds only what it uses (`full` turns on all):
 
 | Feature / module | What it does |
 |---|---|
@@ -69,8 +69,10 @@ Always there: `message` (user-facing text as templates the UI translates), `even
 | `fs` | `fs::dir`: one-level directory listing (folders first, case-insensitive), create/rename/remove, read/write as text or bytes. `fs::watch`: `DirWatcher`, debounced change notifications. |
 | `project` | The project and solution model and its API — no format of its own, and it reads no files. `Solution`: solution folders, configurations and platforms, each project's configuration per solution configuration, build dependencies (`build_order`), plus ordered properties and sections for everything else a format keeps; `Project`: properties (per configuration too), target frameworks, items, references. The product implements `SolutionFormat` / `ProjectFormat` for its files (`.sln`, `.slnx`, `.csproj`, its own) and registers them in `Formats`; `ProjectStandard` tells a project's kind from the file list the product gives it. |
 | `git` | Source Control over the `git` CLI: status, staging, commits, diffs, history, branches, remotes, stashes, settings. |
+| `search` | Find and Replace in Files: a `.gitignore`-aware walk of the project (or only the open documents' unsaved buffers), results file by file; what the walk leaves out is the product's `Layout`. |
+| `state` | What an IDE remembers between runs: a project's and the app's JSON state; reading never fails, writing is atomic. |
 
-The Tauri plugin `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) has the same features for its commands (`git`).
+The Tauri plugin `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) has the same features for its commands (`fs`, `git`, `search`, `state`, `terminal`).
 
 Which paths a host may touch is deliberately left to the host, one layer up.
 
@@ -149,6 +151,9 @@ import { PlatformShell, ThemeProvider, StatusBar } from "substrate-platform-ui";
   and code editors (breakpoint gutter, per-language highlighting), Markdown
   with preview (GFM, KaTeX, Mermaid), a `.properties` grid and an image viewer
 - `DiffEditor` for side-by-side diffs
+- Source Control windows (`GitHost`) and Find and Replace in Files (`FindHost`,
+  `FindInFilesWindow`, `FindResultsPanel`) over the crate's `git` and `search`
+- `WorkspaceProvider`: the open folders, and what happens when the window closes
 
 ### 🧩 Widgets
 | Group | Widgets |
@@ -165,6 +170,7 @@ import { PlatformShell, ThemeProvider, StatusBar } from "substrate-platform-ui";
   and editor color schemes, an icon registry, color utilities
 - `StateStore` for UI state that survives restarts, selection and keyboard
   shortcut helpers, drag-and-drop helpers, an outline model
+- Diagnostics (problems placed in a document), file types, undo history
 - i18n with English and Russian built in
 - `SettingsWindow` and `ColorPickerWindow`, with ready Appearance, Editor and
   International settings pages
