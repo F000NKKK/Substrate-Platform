@@ -78,6 +78,10 @@ export function RunBar({ targets, running, onRun, emptyLabel, modes, selectedMod
   const groups = [...new Map(targets.map((t) => [groupOf(t), t])).values()];
   const variants = current ? targets.filter((t) => groupOf(t) === groupOf(current) && t.variant) : [];
 
+  /** Whether `group` has the current variant: one without it isn't offered (a loader that doesn't exist for that game version). */
+  const hasCurrentVariant = (group: string) =>
+    !current?.variant || targets.some((t) => groupOf(t) === group && t.variant === current.variant);
+
   /** Switching group keeps the variant when the new group has it, else takes its last (newest). */
   function pickGroup(group: string) {
     const members = targets.filter((t) => groupOf(t) === group);
@@ -103,7 +107,12 @@ export function RunBar({ targets, running, onRun, emptyLabel, modes, selectedMod
           <Picker
             text={current ? (current.groupLabel ?? groupOf(current)) : nothing}
             disabled={targets.length === 0}
-            items={groups.map((g) => ({ label: g.groupLabel ?? groupOf(g), checked: current !== undefined && groupOf(g) === groupOf(current), onSelect: () => pickGroup(groupOf(g)) }))}
+            items={groups.map((g) => ({
+              label: g.groupLabel ?? groupOf(g),
+              checked: current !== undefined && groupOf(g) === groupOf(current),
+              disabled: !hasCurrentVariant(groupOf(g)),
+              onSelect: () => pickGroup(groupOf(g)),
+            }))}
           />
           {variants.length > 0 && (
             <Picker
@@ -132,6 +141,7 @@ export function RunBar({ targets, running, onRun, emptyLabel, modes, selectedMod
 interface PickerItem {
   label: string;
   checked: boolean;
+  disabled?: boolean;
   onSelect: () => void;
 }
 
