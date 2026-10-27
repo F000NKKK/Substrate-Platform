@@ -1,7 +1,8 @@
 //! Stashes: listing, stashing, applying, popping, dropping.
 
 use super::GitError;
-use super::run::{git, require_repo, run, write_lock};
+use super::WriteLock;
+use super::run::{git, require_repo, run};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
@@ -62,9 +63,9 @@ pub enum StashMode {
 /// # Errors
 ///
 /// No repository at the folder, or what `git` reports.
-pub fn push(root: &Path, message: &str, mode: StashMode) -> Result<(), GitError> {
+pub fn push(lock: &WriteLock, root: &Path, message: &str, mode: StashMode) -> Result<(), GitError> {
     let top = require_repo(root)?;
-    let _lock = write_lock();
+    let _lock = lock.hold();
     let mut command = git(&top);
     command.args(["stash", "push", "--quiet"]);
     match mode {
@@ -91,9 +92,14 @@ pub enum StashOperation {
 /// # Errors
 ///
 /// No repository at the folder, or what `git` reports.
-pub fn perform(root: &Path, index: u32, operation: StashOperation) -> Result<(), GitError> {
+pub fn perform(
+    lock: &WriteLock,
+    root: &Path,
+    index: u32,
+    operation: StashOperation,
+) -> Result<(), GitError> {
     let top = require_repo(root)?;
-    let _lock = write_lock();
+    let _lock = lock.hold();
     let verb = match operation {
         StashOperation::Apply => "apply",
         StashOperation::Pop => "pop",

@@ -2,6 +2,8 @@
 
 use std::path::Path;
 
+use crate::text_view::TextViews;
+
 /// Files larger than this are assumed not to be source and skipped.
 const MAX_FILE_BYTES: u64 = 8 * 1024 * 1024;
 /// A NUL byte this early in a file marks it as binary.
@@ -16,12 +18,12 @@ pub enum Decoding {
     Strict,
 }
 
-/// A file's text (through its [`TextView`](crate::text_view::TextView), if its kind has one), or
+/// A file's text (through its [`TextView`](crate::text_view::TextView) in `views`, if its kind has one), or
 /// `None` for one that's too large, binary, unreadable — or not valid UTF-8,
 /// when `decoding` is strict.
 #[must_use]
-pub fn read_text(path: &Path, decoding: Decoding) -> Option<String> {
-    if let Some(view) = crate::text_view::find(path) {
+pub fn read_text(path: &Path, decoding: Decoding, views: &TextViews) -> Option<String> {
+    if let Some(view) = views.find(path) {
         return (view.read)(path);
     }
     let meta = std::fs::metadata(path).ok()?;

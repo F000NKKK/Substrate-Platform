@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use super::{Decoding, Layout, read_text};
 use crate::search::SearchError;
 use crate::search::{FileMask, Matcher, SearchQuery};
+use crate::text_view::TextViews;
 
 /// The walk over a project's own files: .gitignore'd entries (whether or
 /// not the folder is a git repository) and what `layout` skips are left out,
@@ -47,13 +48,14 @@ pub fn files_containing(
     query: &SearchQuery,
     limit: usize,
     layout: &Layout,
+    views: &TextViews,
 ) -> Result<Vec<String>, SearchError> {
     let matcher = Matcher::new(query)?;
     let mask = FileMask::parse(&query.file_mask)?;
     Ok(project_files(root, &mask, layout)
         .into_iter()
         .filter(|path| {
-            read_text(path, Decoding::Lossy)
+            read_text(path, Decoding::Lossy, views)
                 .is_some_and(|text| !matcher.find_all(&text, 1).is_empty())
         })
         .take(limit)

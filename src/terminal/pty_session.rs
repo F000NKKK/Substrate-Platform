@@ -107,19 +107,19 @@ impl PtySession {
         let exit_state = state.clone();
         let on_bytes = move |bytes: Vec<u8>| {
             let mut guard = state.locked();
-            let (chunker, on_output) = &mut *guard;
+            let (chunker, forward) = &mut *guard;
             let text = chunker.push(&bytes);
             if !text.is_empty() {
-                on_output(text);
+                forward(text);
             }
         };
         let on_end = move || {
             {
                 let mut guard = exit_state.locked();
-                let (chunker, on_output) = &mut *guard;
+                let (chunker, forward) = &mut *guard;
                 let text = chunker.finish();
                 if !text.is_empty() {
-                    on_output(text);
+                    forward(text);
                 }
             }
             on_exit();

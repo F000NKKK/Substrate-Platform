@@ -1,6 +1,7 @@
 //! Status parsing's tests.
 
 use super::*;
+use crate::git::WriteLock;
 use crate::git::run::{absolute, git, run};
 
 #[test]
@@ -115,7 +116,7 @@ fn status_of_a_scratch_repository() {
             ..FileChange::new("a.txt", None, ChangeKind::Untracked)
         }]
     );
-    stage(&dir, &["a.txt".into()]).unwrap();
+    stage(&WriteLock::new(), &dir, &["a.txt".into()]).unwrap();
     let staged = read(&dir).unwrap().unwrap().staged;
     assert_eq!((staged.len(), staged[0].kind), (1, ChangeKind::Added));
     std::fs::remove_dir_all(&dir).ok();

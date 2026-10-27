@@ -11,6 +11,7 @@ use substrate_platform::search::{
     DEFAULT_MAX_LINES, FindSummary, Layout, ReplaceRequest, ReplaceSummary, Scope, Search,
     SearchQuery, WalkEntry, files_containing, find, project_entries, replace,
 };
+use substrate_platform::text_view::TextViews;
 use substrate_platform::workspace::{NOTHING_OPEN, Workspace};
 use tauri::State;
 use tauri::ipc::Channel;
@@ -40,6 +41,7 @@ pub async fn find_in_files(
     workspace: State<'_, Workspace>,
     searches: State<'_, Searches>,
     layout: State<'_, Layout>,
+    views: State<'_, TextViews>,
     request: FindRequest,
     on_batch: Channel<FindBatch>,
 ) -> Result<FindSummary, Message> {
@@ -47,6 +49,7 @@ pub async fn find_in_files(
     let current = Arc::clone(&searches.current);
     current.store(request.search_id, Ordering::SeqCst);
     let layout = layout.inner().clone();
+    let views = views.inner().clone();
     blocking(move || {
         let id = request.search_id;
         // The UI dropped its end of the channel: nobody to search for.
@@ -61,6 +64,7 @@ pub async fn find_in_files(
             documents: &request.documents,
             max_lines: request.max_lines.unwrap_or(DEFAULT_MAX_LINES),
             layout: &layout,
+            views: &views,
         };
         let summary = find(&search, &keep_going, &mut |file| {
             pending.push(file);
@@ -93,13 +97,15 @@ pub fn find_cancel(searches: State<'_, Searches>) {
 pub async fn replace_in_files(
     workspace: State<'_, Workspace>,
     layout: State<'_, Layout>,
+    views: State<'_, TextViews>,
     request: ReplaceRequest,
 ) -> Result<ReplaceSummary, Message> {
     check_root(&workspace, request.root.as_deref(), request.scope)?;
     let roots = workspace.roots();
     let layout = layout.inner().clone();
+    let views = views.inner().clone();
     blocking(move || {
-        replace(&request, &layout, &|path| {
+        replace(&request, &layout, &views, &|path| {
             roots.check(path).map_err(Message::from)
         })
     })
@@ -126,11 +132,21 @@ pub async fn project_items(
 pub async fn project_files_containing(
     workspace: State<'_, Workspace>,
     layout: State<'_, Layout>,
+    views: State<'_, TextViews>,
     root: String,
     query: SearchQuery,
 ) -> Result<Vec<String>, Message> {
     workspace.check(Path::new(&root))?;
     let layout = layout.inner().clone();
-    blocking(move || files_containing(Path::new(&root), &query, MAX_CONTAINING_FILES, &layout))
-        .await
+    let views = views.inner().clone();
+    blocking(move || {
+        files_containing(
+            Path::new(&root),
+            &query,
+            MAX_CONTAINING_FILES,
+            &layout,
+            &views,
+        )
+    })
+    .await
 }

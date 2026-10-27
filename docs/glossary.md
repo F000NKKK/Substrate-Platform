@@ -26,7 +26,8 @@ renames the other in the same change. Contexts are listed in
 | Entry kind | File or directory. | `fs::EntryKind` |
 | Directory watcher | Watches named folders and delivers changed paths in batches. | `fs::DirectoryWatcher` |
 | Quiet period | How long a burst of changes may stay quiet before its batch is delivered. | `fs::watch::DEFAULT_QUIET` |
-| Text view | How a product's binary format is read as text and written from it, by extension. | `text_view::TextView` |
+| Text view | How a product's binary format is read as text and written from it. | `text_view::TextView` |
+| Text views | A product's text views by extension, built at startup and handed to what reads files as text. | `text_view::TextViews` |
 
 ## Source control
 
@@ -48,6 +49,7 @@ renames the other in the same change. Contexts are listed in
 | Diff side | One side of a file's diff: a revision, the index or the working tree. | `git::diff::DiffSide` |
 | Diff texts | Both sides of a file's diff, as text. | `git::diff::DiffTexts` |
 | Output | Where a long run's lines go (the host's Output window). | `git::Output` |
+| Write lock | Held by every write to a repository, so two never race for `index.lock`; one per host, passed to each write. | `git::WriteLock` |
 
 ## Search
 

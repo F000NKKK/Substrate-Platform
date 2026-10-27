@@ -9,6 +9,8 @@ pub struct Options {
     /// The languages the product knows, and their servers.
     #[cfg(feature = "lsp")]
     pub languages: substrate_platform::lsp::Languages,
+    /// How the product's own file kinds are read and written as text.
+    pub text_views: substrate_platform::text_view::TextViews,
     /// Where the product keeps its own data in a project.
     #[cfg(feature = "state")]
     pub state: Option<crate::state::StateOptions>,

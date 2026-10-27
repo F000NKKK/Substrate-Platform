@@ -13,9 +13,9 @@ impl From<SearchError> for Message {
             SearchError::BadMask { mask, source } => Message::new(messages::BAD_MASK)
                 .arg("mask", mask)
                 .arg("error", source),
-            SearchError::WriteFailed { path, reason } => Message::new(messages::WRITE_FAILED)
+            SearchError::WriteFailed { path, source } => Message::new(messages::WRITE_FAILED)
                 .arg("path", path.display())
-                .arg("error", reason),
+                .arg("error", source),
         }
     }
 }
@@ -28,7 +28,7 @@ mod tests {
     fn a_failed_write_names_its_file() {
         let message = Message::from(SearchError::WriteFailed {
             path: "/p/a.rs".into(),
-            reason: "read-only".into(),
+            source: std::io::Error::other("read-only"),
         });
         assert_eq!(message.text, messages::WRITE_FAILED);
         assert_eq!(message.args["path"], "/p/a.rs");
@@ -37,7 +37,7 @@ mod tests {
 
     #[test]
     fn a_bad_pattern_carries_the_regex_error() {
-        let error = regex::Regex::new("(").unwrap_err();
+        let error = regex::Regex::new(std::hint::black_box("(")).unwrap_err();
         let message = Message::from(SearchError::BadPattern(error));
         assert_eq!(message.text, messages::BAD_PATTERN);
     }

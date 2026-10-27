@@ -36,6 +36,9 @@ pub fn init_with<R: Runtime>(options: Options) -> TauriPlugin<R> {
 /// Puts the state each feature's commands share under the app's management.
 fn manage<R: Runtime>(app: &AppHandle<R>, options: Options) {
     app.manage(Workspace::default());
+    app.manage(options.text_views);
+    #[cfg(feature = "git")]
+    app.manage(substrate_platform::git::WriteLock::new());
     #[cfg(feature = "terminal")]
     app.manage(terminal::Terminals::default());
     #[cfg(feature = "fs")]
@@ -54,8 +57,6 @@ fn manage<R: Runtime>(app: &AppHandle<R>, options: Options) {
         app.manage(lsp::Servers::default());
         app.manage(options.languages);
     }
-    #[cfg(not(any(feature = "lsp", feature = "search", feature = "state")))]
-    drop(options);
 }
 
 /// Language servers don't outlive the app.

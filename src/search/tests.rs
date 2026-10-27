@@ -3,6 +3,7 @@
 use std::path::{Path, PathBuf};
 
 use super::*;
+use crate::text_view::{TextView, TextViews};
 
 fn query(pattern: &str) -> SearchQuery {
     SearchQuery {
@@ -28,6 +29,7 @@ fn find_in(
         documents,
         max_lines,
         layout: &layout(),
+        views: &TextViews::default(),
     };
     let summary = find(&search, keep_going, &mut |f| {
         files.push((f.relative_path, f.hits.len()));
@@ -107,6 +109,7 @@ fn generated_code_is_searched_only_when_asked() {
                 documents: &[],
                 max_lines: 100,
                 layout: &layout(),
+                views: &TextViews::default(),
             },
             &|| true,
             &mut |f| files.push(f.relative_path),
@@ -145,14 +148,15 @@ fn project_entries_and_content_matches_skip_what_search_skips() {
             ("src/other.rs".to_string(), WalkEntryKind::File),
         ]
     );
-    let containing: Vec<_> = files_containing(&dir, &query("needle"), 10, &layout())
-        .unwrap()
-        .iter()
-        .map(|p| rel(p))
-        .collect();
+    let containing: Vec<_> =
+        files_containing(&dir, &query("needle"), 10, &layout(), &TextViews::default())
+            .unwrap()
+            .iter()
+            .map(|p| rel(p))
+            .collect();
     assert_eq!(containing, ["notes.md", "src/lib.rs"]);
     assert_eq!(
-        files_containing(&dir, &query("needle"), 1, &layout())
+        files_containing(&dir, &query("needle"), 1, &layout(), &TextViews::default())
             .unwrap()
             .len(),
         1
@@ -245,6 +249,7 @@ fn a_documents_search_reads_only_the_buffers_its_mask_covers() {
         documents: &documents,
         max_lines: 10,
         layout: &Layout::default(),
+        views: &TextViews::default(),
     };
 
     find(&search, &|| true, &mut |f| files.push(f.relative_path)).unwrap();
@@ -261,6 +266,7 @@ fn a_project_search_without_a_root_finds_nothing() {
         documents: &[],
         max_lines: 10,
         layout: &Layout::default(),
+        views: &TextViews::default(),
     };
 
     let summary = find(&search, &|| true, &mut |_| {}).unwrap();
@@ -279,7 +285,7 @@ fn a_file_replace_may_not_write_is_reported() {
         documents: Vec::new(),
     };
 
-    let summary = replace(&request, &layout(), &|path| {
+    let summary = replace(&request, &layout(), &TextViews::default(), &|path| {
         Err(crate::message::Message::verbatim(path.display()))
     })
     .unwrap();
@@ -309,7 +315,7 @@ fn replace_writes_files_and_returns_buffers() {
             text: "needle, needles".to_string(),
         }],
     };
-    let summary = replace(&request, &layout(), &|_| Ok(())).unwrap();
+    let summary = replace(&request, &layout(), &TextViews::default(), &|_| Ok(())).unwrap();
     assert_eq!(summary.total, 2);
     assert_eq!(summary.documents.len(), 1);
     assert_eq!(summary.documents[0].text, "pin, needles");
@@ -335,17 +341,19 @@ fn a_registered_view_is_what_search_reads() {
     fn read(p: &Path) -> Option<String> {
         Some(std::fs::read_to_string(p).ok()?.chars().rev().collect())
     }
-    fn write(p: &Path, text: &str) -> Result<(), String> {
-        std::fs::write(p, text.chars().rev().collect::<String>()).map_err(|e| e.to_string())
+    fn write(p: &Path, text: &str) -> std::io::Result<()> {
+        std::fs::write(p, text.chars().rev().collect::<String>())
     }
-    use crate::text_view::{TextView, find, register};
-    register("reversed", TextView { read, write });
+    let views = TextViews::default().with("reversed", TextView { read, write });
     let dir = std::env::temp_dir().join(format!("substrate-views-{}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();
     let file = dir.join("a.reversed");
     std::fs::write(&file, "olleh").unwrap();
-    assert_eq!(read_text(&file, Decoding::Strict).as_deref(), Some("hello"));
-    (find(&file).unwrap().write)(&file, "bye").unwrap();
+    assert_eq!(
+        read_text(&file, Decoding::Strict, &views).as_deref(),
+        Some("hello")
+    );
+    (views.find(&file).unwrap().write)(&file, "bye").unwrap();
     assert_eq!(std::fs::read_to_string(&file).unwrap(), "eyb");
     std::fs::remove_dir_all(&dir).unwrap();
 }

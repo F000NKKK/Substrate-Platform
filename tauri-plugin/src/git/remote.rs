@@ -3,6 +3,7 @@
 use super::{checked, output};
 use crate::blocking;
 use std::path::Path;
+use substrate_platform::git::WriteLock;
 use substrate_platform::git::remote::{self, Integration, RemoteOperation, Resolution};
 use substrate_platform::message::Message;
 use substrate_platform::workspace::Workspace;
@@ -13,24 +14,32 @@ use tauri::{AppHandle, Runtime, State};
 pub async fn git_remote<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
+    lock: State<'_, WriteLock>,
     root: String,
     op: RemoteOperation,
 ) -> Result<(), Message> {
     let root = checked(&workspace, &root)?;
-    blocking(move || remote::synchronize(&root, op, &output(&app))).await
+    let lock = lock.inner().clone();
+    blocking(move || remote::synchronize(&lock, &root, op, &output(&app))).await
 }
 
 /// Merge into Current / Rebase onto, streamed.
 #[tauri::command]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "Tauri injects state as separate parameters; the UI sends the rest"
+)]
 pub async fn git_integrate<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
+    lock: State<'_, WriteLock>,
     root: String,
     op: Integration,
     branch: String,
 ) -> Result<(), Message> {
     let root = checked(&workspace, &root)?;
-    blocking(move || remote::integrate(&root, op, &branch, &output(&app))).await
+    let lock = lock.inner().clone();
+    blocking(move || remote::integrate(&lock, &root, op, &branch, &output(&app))).await
 }
 
 /// Continues (`go_on`, the UI's flag) or aborts the
@@ -39,6 +48,7 @@ pub async fn git_integrate<R: Runtime>(
 pub async fn git_operation<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
+    lock: State<'_, WriteLock>,
     root: String,
     go_on: bool,
 ) -> Result<(), Message> {
@@ -48,7 +58,8 @@ pub async fn git_operation<R: Runtime>(
     } else {
         Resolution::Abort
     };
-    blocking(move || remote::resolve(&root, resolution, &output(&app))).await
+    let lock = lock.inner().clone();
+    blocking(move || remote::resolve(&lock, &root, resolution, &output(&app))).await
 }
 
 /// Clone a Repository into `parent` — a folder the user picked in the native

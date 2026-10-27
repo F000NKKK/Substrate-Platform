@@ -43,16 +43,16 @@ mod tests {
         assert_eq!(message.text, messages::CLONE_TARGET_NOT_EMPTY);
         assert_eq!(message.args["path"], "/work/app");
 
-        let message = Message::from(GitError::NotSettable { key: "x.y".into() });
+        let message_1 = Message::from(GitError::NotSettable { key: "x.y".into() });
         assert_eq!(
-            (message.text, message.args["key"].as_str()),
+            (message_1.text, message_1.args["key"].as_str()),
             (messages::NOT_SETTABLE, "x.y")
         );
 
-        let message = Message::from(GitError::Failed {
+        let message_2 = Message::from(GitError::Failed {
             text: "boom".into(),
         });
-        assert_eq!(message, Message::verbatim("boom"));
+        assert_eq!(message_2, Message::verbatim("boom"));
 
         let io = std::io::Error::other("denied");
         assert_eq!(

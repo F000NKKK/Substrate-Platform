@@ -2,6 +2,7 @@
 
 use super::checked;
 use crate::blocking;
+use substrate_platform::git::WriteLock;
 use substrate_platform::git::branch::{self, Branch, BranchCheckout, BranchSource, DeleteMode};
 use substrate_platform::git::history::{self, Commit};
 use substrate_platform::git::status::FileChange;
@@ -44,6 +45,7 @@ pub async fn git_branches(
 #[tauri::command]
 pub async fn git_switch(
     workspace: State<'_, Workspace>,
+    lock: State<'_, WriteLock>,
     root: String,
     name: String,
     remote: bool,
@@ -54,13 +56,19 @@ pub async fn git_switch(
     } else {
         BranchSource::Local
     };
-    blocking(move || branch::switch(&root, &name, source)).await
+    let lock = lock.inner().clone();
+    blocking(move || branch::switch(&lock, &root, &name, source)).await
 }
 
 /// New Branch from `start`; `checkout` (the UI's flag) switches to it.
 #[tauri::command]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "Tauri injects state as separate parameters; the UI sends the rest"
+)]
 pub async fn git_branch_create(
     workspace: State<'_, Workspace>,
+    lock: State<'_, WriteLock>,
     root: String,
     name: String,
     start: String,
@@ -72,13 +80,15 @@ pub async fn git_branch_create(
     } else {
         BranchCheckout::Stay
     };
-    blocking(move || branch::create(&root, &name, &start, checkout)).await
+    let lock = lock.inner().clone();
+    blocking(move || branch::create(&lock, &root, &name, &start, checkout)).await
 }
 
 /// Deletes a local branch; `force` (the UI's flag) even when it isn't merged.
 #[tauri::command]
 pub async fn git_branch_delete(
     workspace: State<'_, Workspace>,
+    lock: State<'_, WriteLock>,
     root: String,
     name: String,
     force: bool,
@@ -89,5 +99,6 @@ pub async fn git_branch_delete(
     } else {
         DeleteMode::Merged
     };
-    blocking(move || branch::delete(&root, &name, mode)).await
+    let lock = lock.inner().clone();
+    blocking(move || branch::delete(&lock, &root, &name, mode)).await
 }

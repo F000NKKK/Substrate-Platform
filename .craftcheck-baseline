@@ -8,7 +8,6 @@ src/git/branch.rs	C108	BranchCheckout	1
 src/git/branch.rs	C108	BranchSource	1
 src/git/branch.rs	C108	DeleteMode	1
 src/git/config.rs	C108	GlobalConfig	1
-src/git/diff.rs	A501	VIEW_SEQ	1
 src/git/diff.rs	C108	DiffSide	1
 src/git/diff.rs	C108	DiffTexts	1
 src/git/diff.rs	S701		1
@@ -17,8 +16,6 @@ src/git/history.rs	C108	Commit	1
 src/git/remote.rs	C108	Integration	1
 src/git/remote.rs	C108	RemoteOperation	1
 src/git/remote.rs	C108	Resolution	1
-src/git/run.rs	A501	WRITE_LOCK	1
-src/git/run.rs	C101		1
 src/git/stash.rs	C108	StashEntry	1
 src/git/stash.rs	C108	StashMode	1
 src/git/stash.rs	C108	StashOperation	1
@@ -33,7 +30,9 @@ src/search/find.rs	C108	Search	1
 src/search/tests.rs	C101		1
 src/sync.rs	C108	Locked	1
 src/sync.rs	C108	ReadWrite	1
-src/text_view.rs	A501	VIEWS	1
+src/text_view/view.rs	C108	TextView	1
+src/text_view/views.rs	C108	TextViews	1
 src/workspace.rs	C108	Roots	1
+tauri-plugin/Cargo.toml	R801	tauri-plugin-substrate	1
 tauri-plugin/src/fs.rs	C108	Entry	1
 tauri-plugin/src/fs.rs	C108	Watcher	1

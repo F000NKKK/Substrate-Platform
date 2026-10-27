@@ -22,11 +22,12 @@ pub enum SearchError {
         source: globset::Error,
     },
     /// A file could not be written.
-    #[error("{}: {reason}", .path.display())]
+    #[error("{}: {source}", .path.display())]
     WriteFailed {
         /// The file.
         path: PathBuf,
-        /// Why, in the writer's words.
-        reason: String,
+        /// Why.
+        #[source]
+        source: std::io::Error,
     },
 }

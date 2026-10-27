@@ -6,7 +6,6 @@ use crate::message::Message;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use std::sync::Mutex;
 
 /// Where a long run's lines go (the host's Output window): git's own as
 /// they are ([`Message::verbatim`]), ours to translate.
@@ -24,16 +23,6 @@ const AUTH_SIGNS: [&str; 5] = [
 const IDENTITY_SIGNS: [&str; 2] = ["please tell me who you are", "empty ident name"];
 /// … and when the folder isn't a working tree.
 const NO_REPO_SIGNS: [&str; 2] = ["not a git repository", "must be run in a work tree"];
-
-/// Held by every command that writes to the repository, so two of them (a
-/// commit while a fetch runs) never race for `index.lock`.
-static WRITE_LOCK: Mutex<()> = Mutex::new(());
-
-pub(crate) fn write_lock() -> std::sync::MutexGuard<'static, ()> {
-    WRITE_LOCK
-        .lock()
-        .unwrap_or_else(|poisoned| poisoned.into_inner())
-}
 
 /// A `git` invocation in `dir`, set up for a GUI host: no prompts, no
 /// editor, no colors or quoted paths, pathspecs taken literally, no console

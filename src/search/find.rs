@@ -10,6 +10,7 @@ use super::{
     line_hits, read_text,
 };
 use crate::search::SearchError;
+use crate::text_view::TextViews;
 
 /// Default cap on matching lines per search.
 pub const DEFAULT_MAX_LINES: usize = 20_000;
@@ -33,6 +34,8 @@ pub struct Search<'a> {
     pub max_lines: usize,
     /// What the product keeps out of the walk.
     pub layout: &'a Layout,
+    /// How the product's own file kinds are read as text.
+    pub views: &'a TextViews,
 }
 
 /// Runs a search, handing each matching file to `emit` as it's found;
@@ -61,7 +64,7 @@ pub fn find(
             summary.cancelled = true;
             break;
         }
-        let Some(hits) = search_file(&matcher, path, source, search.max_lines, &mut summary) else {
+        let Some(hits) = search_file(&matcher, path, source, search, &mut summary) else {
             continue;
         };
         emit(FileResult {
@@ -82,19 +85,19 @@ fn search_file(
     matcher: &Matcher,
     path: &Path,
     source: &Source<'_>,
-    max_lines: usize,
+    search: &Search<'_>,
     summary: &mut FindSummary,
 ) -> Option<Vec<crate::search::LineHit>> {
     let owned;
     let text = match source {
         Source::Buffer(text) => *text,
         Source::Disk => {
-            owned = read_text(path, Decoding::Lossy)?;
+            owned = read_text(path, Decoding::Lossy, search.views)?;
             &owned
         }
     };
     summary.files_searched += 1;
-    let remaining = max_lines - summary.matching_lines;
+    let remaining = search.max_lines - summary.matching_lines;
     let matches = matcher.find_all(
         text,
         remaining.saturating_mul(MATCHES_PER_LINE).max(MIN_MATCHES),

@@ -25,6 +25,8 @@ pub mod remote;
 mod run;
 pub mod stash;
 pub mod status;
+mod write_lock;
 
 pub use error::GitError;
 pub use run::{Output, absolute, repo_root};
+pub use write_lock::WriteLock;

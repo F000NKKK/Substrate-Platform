@@ -10,6 +10,7 @@ use super::{
     ReplacedFile, ReplacementMode, SearchError, read_text,
 };
 use crate::message::Message;
+use crate::text_view::TextViews;
 
 /// Replace All over the same set of files a search would cover: open
 /// documents' new text comes back for the frontend to apply to their
@@ -23,11 +24,13 @@ use crate::message::Message;
 pub fn replace(
     request: &ReplaceRequest,
     layout: &Layout,
+    views: &TextViews,
     may_write: &dyn Fn(&Path) -> Result<(), Message>,
 ) -> Result<ReplaceSummary, SearchError> {
     let replacer = Replacer {
         matcher: Matcher::new(&request.query)?,
         replacement: &request.replacement,
+        views,
         mode: if request.query.regex {
             ReplacementMode::Expand
         } else {
@@ -58,6 +61,7 @@ struct Replacer<'a> {
     matcher: Matcher,
     replacement: &'a str,
     mode: ReplacementMode,
+    views: &'a TextViews,
 }
 
 impl Replacer<'_> {
@@ -82,14 +86,15 @@ impl Replacer<'_> {
         may_write: &dyn Fn(&Path) -> Result<(), Message>,
         summary: &mut ReplaceSummary,
     ) {
-        let Some(text) = read_text(path, Decoding::Strict) else {
+        let Some(text) = read_text(path, Decoding::Strict, self.views) else {
             return;
         };
         let (text, count) = self.matcher.replace_all(&text, self.replacement, self.mode);
         if count == 0 {
             return;
         }
-        let written = may_write(path).and_then(|()| write_text(path, &text).map_err(Message::from));
+        let written = may_write(path)
+            .and_then(|()| write_text(path, &text, self.views).map_err(Message::from));
         match written {
             Ok(()) => {
                 summary.total += count;
@@ -104,13 +109,13 @@ impl Replacer<'_> {
 }
 
 /// Writes `text` to `path`, through its text view if its kind has one.
-fn write_text(path: &Path, text: &str) -> Result<(), SearchError> {
-    match crate::text_view::find(path) {
+fn write_text(path: &Path, text: &str, views: &TextViews) -> Result<(), SearchError> {
+    match views.find(path) {
         Some(view) => (view.write)(path, text),
-        None => std::fs::write(path, text).map_err(|e| e.to_string()),
+        None => std::fs::write(path, text),
     }
-    .map_err(|reason| SearchError::WriteFailed {
+    .map_err(|source| SearchError::WriteFailed {
         path: path.to_path_buf(),
-        reason,
+        source,
     })
 }

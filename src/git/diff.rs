@@ -2,8 +2,9 @@
 
 use super::GitError;
 use super::run::{absolute, git, repo_of, require_repo};
+use crate::text_view::{TextView, TextViews};
 use serde::{Deserialize, Serialize};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Stdio;
 
 /// Files larger than this aren't shown in a diff.
@@ -36,12 +37,12 @@ pub struct DiffTexts {
 
 /// A blob's text (through its text view or the repository's textconv),
 /// `None` if it doesn't exist there; `Err` only for binary content.
-fn side_text(top: &Path, side: &DiffSide) -> Result<Option<String>, ()> {
+fn side_text(top: &Path, side: &DiffSide, views: &TextViews) -> Result<Option<String>, ()> {
     let bytes = match side.rev.as_str() {
         "" => return Ok(None),
         WORKTREE => {
             let file = absolute(top, &side.path);
-            if let Some(view) = crate::text_view::find(Path::new(&file)) {
+            if let Some(view) = views.find(Path::new(&file)) {
                 return Ok((view.read)(Path::new(&file)));
             }
             match std::fs::read(&file) {
@@ -57,7 +58,7 @@ fn side_text(top: &Path, side: &DiffSide) -> Result<Option<String>, ()> {
             };
             // A file the product reads as text: through the same view as on
             // disk, so both sides of its diff are the same text of it.
-            if let Some(view) = crate::text_view::find(Path::new(&side.path)) {
+            if let Some(view) = views.find(Path::new(&side.path)) {
                 return Ok(
                     blob(top, &spec).and_then(|bytes| through_view(view, &side.path, &bytes))
                 );
@@ -93,16 +94,29 @@ fn blob(top: &Path, spec: &str) -> Option<Vec<u8>> {
 
 /// Where a blob is put for a text view to read it: a folder of its own, its file's name kept.
 const VIEW_DIR: &str = "substrate-diff";
-static VIEW_SEQ: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+/// A scratch folder no one else has: made by this call, or not at all.
+fn scratch_dir() -> std::io::Result<PathBuf> {
+    let base = std::env::temp_dir();
+    let mut attempt = 0_u32;
+    loop {
+        let dir = base.join(format!("{VIEW_DIR}-{}-{attempt}", std::process::id()));
+        match std::fs::create_dir(&dir) {
+            Ok(()) => return Ok(dir),
+            // Taken (by another diff running now): the next name.
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => attempt += 1,
+            Err(error) => return Err(error),
+        }
+    }
+}
 
 /// `bytes` (a blob of `path`) as `view` reads its file: written under its
 /// own name in a scratch folder (views go by the name), read, removed.
-fn through_view(view: crate::text_view::TextView, path: &str, bytes: &[u8]) -> Option<String> {
-    let seq = VIEW_SEQ.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-    let dir = std::env::temp_dir().join(format!("{VIEW_DIR}-{}-{seq}", std::process::id()));
-    let file = dir.join(Path::new(path).file_name()?);
-    let text = std::fs::create_dir_all(&dir)
-        .and_then(|()| std::fs::write(&file, bytes))
+fn through_view(view: TextView, path: &str, bytes: &[u8]) -> Option<String> {
+    let name = Path::new(path).file_name()?;
+    let dir = scratch_dir().ok()?;
+    let file = dir.join(name);
+    let text = std::fs::write(&file, bytes)
         .ok()
         .and_then(|()| (view.read)(&file));
     std::fs::remove_dir_all(&dir).ok();
@@ -114,19 +128,26 @@ fn through_view(view: crate::text_view::TextView, path: &str, bytes: &[u8]) -> O
 /// # Errors
 ///
 /// No repository at the folder, or what `git` reports.
-pub fn texts(root: &Path, left: &DiffSide, right: &DiffSide) -> Result<DiffTexts, GitError> {
+pub fn texts(
+    root: &Path,
+    left: &DiffSide,
+    right: &DiffSide,
+    views: &TextViews,
+) -> Result<DiffTexts, GitError> {
     let top = require_repo(root)?;
-    Ok(match (side_text(&top, left), side_text(&top, right)) {
-        (Ok(left), Ok(right)) => DiffTexts {
-            left,
-            right,
-            binary: false,
+    Ok(
+        match (side_text(&top, left, views), side_text(&top, right, views)) {
+            (Ok(left), Ok(right)) => DiffTexts {
+                left,
+                right,
+                binary: false,
+            },
+            _ => DiffTexts {
+                binary: true,
+                ..DiffTexts::default()
+            },
         },
-        _ => DiffTexts {
-            binary: true,
-            ..DiffTexts::default()
-        },
-    })
+    )
 }
 
 /// What `path` (absolute) holds in the last commit — the editor's change
@@ -136,7 +157,7 @@ pub fn texts(root: &Path, left: &DiffSide, right: &DiffSide) -> Result<DiffTexts
 /// # Errors
 ///
 /// No repository at the folder, or what `git` reports.
-pub fn head_text(root: &Path, path: &Path) -> Result<Option<String>, GitError> {
+pub fn head_text(root: &Path, path: &Path, views: &TextViews) -> Result<Option<String>, GitError> {
     let Some((top, _)) = repo_of(root)? else {
         return Ok(None);
     };
@@ -154,6 +175,7 @@ pub fn head_text(root: &Path, path: &Path) -> Result<Option<String>, GitError> {
             rev: HEAD.into(),
             path: rel.join("/"),
         },
+        views,
     )
     .unwrap_or(None))
 }
@@ -161,14 +183,14 @@ pub fn head_text(root: &Path, path: &Path) -> Result<Option<String>, GitError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::text_view::{TextView, register};
+    use crate::text_view::TextView;
 
     fn upper(path: &Path) -> Option<String> {
         std::fs::read_to_string(path).ok().map(|s| s.to_uppercase())
     }
 
-    fn no_write(_: &Path, _: &str) -> Result<(), String> {
-        Ok(())
+    fn no_write(_: &Path, _: &str) -> std::io::Result<()> {
+        Err(std::io::Error::other("read-only"))
     }
 
     #[test]
@@ -177,7 +199,6 @@ mod tests {
             read: upper,
             write: no_write,
         };
-        register("difftest", view);
         let text = through_view(view, "dir/a.difftest", b"binary-ish");
         assert_eq!(text.as_deref(), Some("BINARY-ISH"));
     }

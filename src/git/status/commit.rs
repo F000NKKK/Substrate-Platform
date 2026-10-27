@@ -1,10 +1,11 @@
 //! Committing, and the message Amend starts from.
 
 use crate::git::GitError;
+use crate::git::WriteLock;
 use std::path::Path;
 
 use super::{CommitMode, CommitResult, CommitScope};
-use crate::git::run::{git, require_repo, run, run_with_input, write_lock};
+use crate::git::run::{git, require_repo, run, run_with_input};
 
 /// Commits what `scope` takes in, as a new commit or amending the last (`mode`).
 ///
@@ -12,13 +13,14 @@ use crate::git::run::{git, require_repo, run, run_with_input, write_lock};
 ///
 /// No repository at `root`, or what `git` reports.
 pub fn commit(
+    lock: &WriteLock,
     root: &Path,
     message: &str,
     mode: CommitMode,
     scope: CommitScope,
 ) -> Result<CommitResult, GitError> {
     let top = require_repo(root)?;
-    let _lock = write_lock();
+    let _lock = lock.hold();
     if scope == CommitScope::All {
         run(git(&top).args(["add", "--all"]))?;
     }

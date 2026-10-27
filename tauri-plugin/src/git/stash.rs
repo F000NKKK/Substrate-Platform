@@ -2,6 +2,7 @@
 
 use super::checked;
 use crate::blocking;
+use substrate_platform::git::WriteLock;
 use substrate_platform::git::config::{self, GlobalConfig};
 use substrate_platform::git::stash::{self, StashEntry, StashMode, StashOperation};
 use substrate_platform::message::Message;
@@ -20,23 +21,27 @@ pub async fn git_stash_list(
 #[tauri::command]
 pub async fn git_stash_push(
     workspace: State<'_, Workspace>,
+    lock: State<'_, WriteLock>,
     root: String,
     message: String,
     mode: StashMode,
 ) -> Result<(), Message> {
     let root = checked(&workspace, &root)?;
-    blocking(move || stash::push(&root, &message, mode)).await
+    let lock = lock.inner().clone();
+    blocking(move || stash::push(&lock, &root, &message, mode)).await
 }
 
 #[tauri::command]
 pub async fn git_stash_op(
     workspace: State<'_, Workspace>,
+    lock: State<'_, WriteLock>,
     root: String,
     index: u32,
     op: StashOperation,
 ) -> Result<(), Message> {
     let root = checked(&workspace, &root)?;
-    blocking(move || stash::perform(&root, index, op)).await
+    let lock = lock.inner().clone();
+    blocking(move || stash::perform(&lock, &root, index, op)).await
 }
 
 #[tauri::command]

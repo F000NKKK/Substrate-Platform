@@ -2,8 +2,9 @@
 //! rebase; finishing or aborting what's in progress; clone and init.
 
 use super::GitError;
+use super::WriteLock;
 use super::branch::{current, has_upstream};
-use super::run::{Output, git, repo_of, require_repo, run, stream, stream_git, write_lock};
+use super::run::{Output, git, repo_of, require_repo, run, stream, stream_git};
 use super::status::Operation;
 use serde::Deserialize;
 use std::path::Path;
@@ -77,9 +78,14 @@ pub enum RemoteOperation {
 /// # Errors
 ///
 /// No repository at the folder, or what `git` reports.
-pub fn synchronize(root: &Path, operation: RemoteOperation, out: Output) -> Result<(), GitError> {
+pub fn synchronize(
+    lock: &WriteLock,
+    root: &Path,
+    operation: RemoteOperation,
+    out: Output,
+) -> Result<(), GitError> {
     let top = require_repo(root)?;
-    let _lock = write_lock();
+    let _lock = lock.hold();
     match operation {
         RemoteOperation::Fetch => stream_git(out, &top, &["fetch", "--all", "--progress"]),
         RemoteOperation::Pull => pull(out, &top),
@@ -103,13 +109,14 @@ pub enum Integration {
 ///
 /// No repository at the folder, or what `git` reports.
 pub fn integrate(
+    lock: &WriteLock,
     root: &Path,
     integration: Integration,
     branch: &str,
     out: Output,
 ) -> Result<(), GitError> {
     let top = require_repo(root)?;
-    let _lock = write_lock();
+    let _lock = lock.hold();
     match integration {
         Integration::Merge => stream_git(out, &top, &["merge", "--no-edit", branch]),
         Integration::Rebase => stream_git(out, &top, &["rebase", branch]),
@@ -130,11 +137,16 @@ pub enum Resolution {
 /// # Errors
 ///
 /// No repository at the folder, or what `git` reports.
-pub fn resolve(root: &Path, resolution: Resolution, out: Output) -> Result<(), GitError> {
+pub fn resolve(
+    lock: &WriteLock,
+    root: &Path,
+    resolution: Resolution,
+    out: Output,
+) -> Result<(), GitError> {
     let Some((top, git_dir)) = repo_of(root)? else {
         return Err(GitError::NotARepository);
     };
-    let _lock = write_lock();
+    let _lock = lock.hold();
     let operation = Operation::in_progress(&git_dir).ok_or(GitError::NothingInProgress)?;
     // A merge is continued by committing it.
     if resolution == Resolution::Continue && operation == Operation::Merge {

@@ -1,7 +1,8 @@
 //! Branches: listing, switching, creating, deleting.
 
 use super::GitError;
-use super::run::{git, require_repo, run, write_lock};
+use super::WriteLock;
+use super::run::{git, require_repo, run};
 use serde::Serialize;
 use std::path::Path;
 
@@ -115,9 +116,14 @@ pub fn list(root: &Path) -> Result<Vec<Branch>, GitError> {
 /// # Errors
 ///
 /// No repository at the folder, or what `git` reports.
-pub fn switch(root: &Path, name: &str, source: BranchSource) -> Result<(), GitError> {
+pub fn switch(
+    lock: &WriteLock,
+    root: &Path,
+    name: &str,
+    source: BranchSource,
+) -> Result<(), GitError> {
     let top = require_repo(root)?;
-    let _lock = write_lock();
+    let _lock = lock.hold();
     let mut command = git(&top);
     command.arg("switch");
     if source == BranchSource::Remote {
@@ -132,13 +138,14 @@ pub fn switch(root: &Path, name: &str, source: BranchSource) -> Result<(), GitEr
 ///
 /// No repository at the folder, or what `git` reports.
 pub fn create(
+    lock: &WriteLock,
     root: &Path,
     name: &str,
     start: &str,
     checkout: BranchCheckout,
 ) -> Result<(), GitError> {
     let top = require_repo(root)?;
-    let _lock = write_lock();
+    let _lock = lock.hold();
     let mut command = git(&top);
     match checkout {
         BranchCheckout::Switch => command.args(["switch", "-c", name]),
@@ -155,9 +162,9 @@ pub fn create(
 /// # Errors
 ///
 /// No repository at the folder, or what `git` reports.
-pub fn delete(root: &Path, name: &str, mode: DeleteMode) -> Result<(), GitError> {
+pub fn delete(lock: &WriteLock, root: &Path, name: &str, mode: DeleteMode) -> Result<(), GitError> {
     let top = require_repo(root)?;
-    let _lock = write_lock();
+    let _lock = lock.hold();
     let flag = match mode {
         DeleteMode::Merged => "-d",
         DeleteMode::Force => "-D",
