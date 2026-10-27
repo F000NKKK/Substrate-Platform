@@ -13,7 +13,7 @@ renames the other in the same change. Contexts are listed in
 | Message | Text for the user: an English template with `{name}` placeholders, and their values. The template is the key the UI's translation catalogs use. | `message::Message` |
 | Template | One message's English text, declared once in its module's `messages!` block. | `messages!`, `*::messages::*` |
 | Verbatim | Text that is not ours to translate: a tool's own output. | `Message::verbatim` |
-| Error | Why an operation failed, as a typed enum per family; the interface turns it into a `Message` once, on the way out. | `git::GitError`, `search::SearchError`, `lsp::LspError`, `dap::DapError`, `fs::FsError`, `state::StateError`, `process::ProcessError`, `project::ProjectError`, `workspace::WorkspaceError`, `terminal::PtyError`, `run::workflow::FileError` |
+| Error | Why an operation failed, as a typed enum per family; the interface turns it into a `Message` once, on the way out. | `substrate_git_domain::GitError`, `substrate_search_domain::SearchError`, `lsp::LspError`, `dap::DapError`, `fs::FsError`, `state::StateError`, `substrate_process::ProcessError`, `project::ProjectError`, `workspace::WorkspaceError`, `terminal::PtyError`, `substrate_run_toml::FileError` |
 
 ## Workspace
 
@@ -33,54 +33,54 @@ renames the other in the same change. Contexts are listed in
 
 | Term | Meaning | In code |
 |---|---|---|
-| Repository status | A repository's state for Git Changes: branch, head, upstream, changes, operation. | `git::status::RepoStatus`, `git::status::read` |
-| File change | One changed file: path, original path, kind. | `git::status::FileChange` |
-| Change kind | Modified, added, deleted, renamed, copied, type changed, untracked, conflicted. | `git::status::ChangeKind` |
-| Operation | A merge, rebase, cherry-pick or revert waiting to be finished or aborted. | `git::status::Operation` |
-| Discard | Undo Changes: back to what is staged, or to the last commit. | `git::status::discard` |
-| Commit mode, scope | A new commit or an amend; what is staged or every change. | `git::status::CommitMode`, `git::status::CommitScope` |
-| Resolution | Continue or abort the operation in progress. | `git::remote::Resolution`, `git::remote::resolve` |
-| Remote operation | Fetch, pull, push, sync. | `git::remote::RemoteOperation`, `git::remote::synchronize` |
-| Integration | Merge a branch into the current one, or rebase onto it. | `git::remote::Integration` |
-| Branch | A local or remote-tracking branch and its tracking state. | `git::branch::Branch` |
-| Branch source, checkout, delete mode | Switch to a local or remote branch; check a new one out or not; delete only merged or force. | `git::branch::{BranchSource, BranchCheckout, DeleteMode}` |
-| Commit | One commit of a history page. | `git::history::Commit` |
-| Stash entry | One stash of the stash list. | `git::stash::StashEntry` |
-| Diff side | One side of a file's diff: a revision, the index or the working tree. | `git::diff::DiffSide` |
-| Diff texts | Both sides of a file's diff, as text. | `git::diff::DiffTexts` |
-| Output | Where a long run's lines go (the host's Output window). | `git::Output` |
-| Write lock | Held by every write to a repository, so two never race for `index.lock`; one per host, passed to each write. | `git::WriteLock` |
+| Repository status | A repository's state for Git Changes: branch, head, upstream, changes, operation. | `substrate_git_domain::status::RepoStatus`, `WorkingTree::status` |
+| File change | One changed file: path, original path, kind. | `substrate_git_domain::status::FileChange` |
+| Change kind | Modified, added, deleted, renamed, copied, type changed, untracked, conflicted. | `substrate_git_domain::status::ChangeKind` |
+| Operation | A merge, rebase, cherry-pick or revert waiting to be finished or aborted. | `substrate_git_domain::status::Operation` |
+| Discard | Undo Changes: back to what is staged, or to the last commit. | `substrate_git_app::changes::discard` |
+| Commit mode, scope | A new commit or an amend; what is staged or every change. | `substrate_git_domain::commits::{CommitMode, CommitScope}` |
+| Resolution | Continue or abort the operation in progress. | `substrate_git_domain::remotes::Resolution`, `substrate_git_app::syncing::resolve` |
+| Remote operation | Fetch, pull, push, sync. | `substrate_git_domain::remotes::RemoteOperation`, `substrate_git_app::syncing::synchronize` |
+| Integration | Merge a branch into the current one, or rebase onto it. | `substrate_git_domain::remotes::Integration` |
+| Branch | A local or remote-tracking branch and its tracking state. | `substrate_git_domain::branches::Branch` |
+| Branch source, checkout, delete mode | Switch to a local or remote branch; check a new one out or not; delete only merged or force. | `substrate_git_domain::branches::{BranchSource, BranchCheckout, DeleteMode}` |
+| Commit | One commit of a history page. | `substrate_git_domain::commits::Commit` |
+| Stash entry | One stash of the stash list. | `substrate_git_domain::stashes::StashEntry` |
+| Diff side | One side of a file's diff: a revision, the index or the working tree. | `substrate_git_domain::diffs::DiffSide` |
+| Diff texts | Both sides of a file's diff, as text. | `substrate_git_domain::diffs::DiffTexts` |
+| Output | Where a long run's lines go (the host's Output window). | `substrate_git_app::Output` |
+| Write lock | Held by every write to a repository, so two never race for `index.lock`; one per host, passed to each write. | `substrate_git_app::WriteLock` |
 
 ## Search
 
 | Term | Meaning | In code |
 |---|---|---|
-| Search query | What to look for: pattern, match case, whole word, regex, file mask. | `search::SearchQuery` |
-| Matcher | A compiled search query. | `search::Matcher` |
-| Replacement mode | A replacement taken literally or with `$1` expanded. | `search::ReplacementMode` |
-| Decoding | Invalid UTF-8 replaced (search) or refused (replace). | `search::Decoding` |
-| Walk entry | A file or folder the project walk keeps. | `search::WalkEntry` |
-| Find, replace | Find in Files and Replace in Files. | `search::find`, `search::replace` |
-| File mask | Which files a search covers: `*.rs;*.toml`, `!*.lock`. | `search::FileMask` |
-| Layout | What a product keeps out of the walk and where its generated code lives. | `search::Layout` |
-| Scope | Open documents, or the whole project. | `search::Scope` |
-| Open document | An editor's buffer, searched instead of its file on disk. | `search::OpenDocument` |
-| Line hit | One matching line as Find Results show it. | `search::LineHit` |
-| Find summary | The totals of one search. | `search::FindSummary` |
-| Replace summary | What Replace All changed. | `search::ReplaceSummary` |
+| Search query | What to look for: pattern, case sensitivity, word match, pattern syntax, file mask, generated code (each an enum, not a flag). | `substrate_search_domain::query::SearchQuery` |
+| Matcher | A compiled search query. | `substrate_search_domain::pattern::Matcher` |
+| Replacement mode | A replacement taken literally or with `$1` expanded. | `substrate_search_domain::pattern::ReplacementMode` |
+| Decoding | Invalid UTF-8 replaced (search) or refused (replace). | `substrate_search_app::ports::Decoding` |
+| Walk entry | A file or folder the project walk keeps. | `substrate_search_domain::project::WalkEntry` |
+| Find, replace | Find in Files and Replace in Files. | `substrate_search_app::{find, replace}` |
+| File mask | Which files a search covers: `*.rs;*.toml`, `!*.lock`. | `substrate_search_domain::pattern::FileMask` |
+| Layout | What a product keeps out of the walk and where its generated code lives. | `substrate_search_domain::project::Layout` |
+| Scope | Open documents, or the whole project. | `substrate_search_domain::project::Scope` |
+| Open document | An editor's buffer, searched instead of its file on disk. | `substrate_search_domain::project::OpenDocument` |
+| Line hit | One matching line as Find Results show it. | `substrate_search_domain::results::LineHit` |
+| Find summary | The totals of one search. | `substrate_search_domain::results::FindSummary` |
+| Replace summary | What Replace All changed. | `substrate_search_domain::results::ReplaceSummary` |
 
 ## Run
 
 | Term | Meaning | In code |
 |---|---|---|
-| Task | One external command, its output streamed into a log. | `run::Task` |
-| Task exit | How a task ended. | `run::TaskExit` |
-| Workflow | Named steps run one after another, stopping at the first failure. | `run::workflow::run`, `run::workflow::Handle` |
-| Workflow file | One `workflow.toml`: named workflows, each a definition of steps. | `run::workflow::File`, `run::workflow::Definition` |
-| Step | Runs one command, or composes another workflow. | `run::workflow::Step` |
-| Outcome | How a workflow run ended: succeeded, failed, cancelled. | `run::workflow::Outcome` |
-| Log sink | An append-only log any feature pushes lines into. | `run::LogSink` |
-| Log line, level | One line of a log and its severity (info, warn, error). | `run::LogLine`, `run::Level` |
+| Task | One external command, its output streamed into a log. | `substrate_run_domain::Task` |
+| Task exit | How a task ended. | `substrate_run_domain::TaskExit` |
+| Workflow | Named steps run one after another, stopping at the first failure. | `substrate_run_app::workflow::run`, `substrate_run_app::workflow::Handle` |
+| Workflow file | One `workflow.toml`: named workflows, each a definition of steps. | `substrate_run_domain::workflow::File`, `substrate_run_domain::workflow::Definition` |
+| Step | Runs one command, or composes another workflow. | `substrate_run_domain::workflow::Step` |
+| Outcome | How a workflow run ended: succeeded, failed, cancelled. | `substrate_run_domain::workflow::Outcome` |
+| Log sink | An append-only log any feature pushes lines into. | `substrate_run_app::LogSink` |
+| Log line, level | One line of a log and its severity (info, warn, error). | `substrate_run_domain::LogLine`, `substrate_run_domain::Level` |
 
 ## Terminal
 
@@ -139,6 +139,9 @@ renames the other in the same change. Contexts are listed in
 
 | Term | Meaning | In code |
 |---|---|---|
-| Host environment | How a started program's environment differs from this process's (an AppImage's variables removed). | `process::host_environment` |
+| Host environment | How a started program's environment differs from this process's (an AppImage's variables removed). | `substrate_process::host_environment` |
 | Command domain | A group of host commands under a plugin. | `commands::Domain` |
 | Event | A message the host sends its UI, by name. | `events` |
+| Port | A trait a context's app crate declares and an adapter crate implements. | `substrate_git_app::ports::{WorkingTree, History, Diffs, Branches, Stashes, Remotes, Settings}` |
+| Adapter | An infrastructure crate that implements ports with an outside tool. | `substrate_git_gitcli::GitCli` |
+| DTO | A `serde` struct at the interface that mirrors a domain type for the wire; the name ends in `Dto`. | `RepoStatusDto`, `DiscardItemDto` |

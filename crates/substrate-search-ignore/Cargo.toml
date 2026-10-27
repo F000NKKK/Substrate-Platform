@@ -1,0 +1,22 @@
+[package]
+name = "substrate-search-ignore"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "Find and Replace in Files over the file system: a .gitignore-aware walk of a project, and text read and written through the product's text views."
+license = "AGPL-3.0-only"
+readme = "README.md"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]
+ignore = "0.4.33"
+substrate-platform = { version = "0.4.0", path = "../.." }
+substrate-search-app = { version = "0.1.0", path = "../substrate-search-app" }
+substrate-search-domain = { version = "0.1.0", path = "../substrate-search-domain" }
+
+[dev-dependencies]
+substrate-message = { version = "0.1.0", path = "../substrate-message" }

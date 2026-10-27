@@ -3272,21 +3272,135 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
 
 [[package]]
+name = "substrate-git-app"
+version = "0.1.0"
+dependencies = [
+ "substrate-git-domain",
+ "substrate-message",
+]
+
+[[package]]
+name = "substrate-git-domain"
+version = "0.1.0"
+dependencies = [
+ "substrate-message",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "substrate-git-gitcli"
+version = "0.1.0"
+dependencies = [
+ "substrate-git-app",
+ "substrate-git-domain",
+ "substrate-message",
+ "substrate-platform",
+ "substrate-process",
+]
+
+[[package]]
+name = "substrate-host-contract"
+version = "0.1.0"
+dependencies = [
+ "substrate-git-domain",
+ "substrate-message",
+ "substrate-platform",
+ "substrate-process",
+ "substrate-search-domain",
+]
+
+[[package]]
+name = "substrate-message"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "substrate-platform"
 version = "0.4.0"
 dependencies = [
  "anyhow",
  "criterion",
- "globset",
- "ignore",
- "libc",
  "notify",
  "portable-pty",
- "regex",
  "serde",
  "serde_json",
+ "substrate-message",
+ "substrate-process",
+ "substrate-run-app",
+ "substrate-run-domain",
+ "substrate-run-process",
  "thiserror 2.0.21",
  "toml 1.1.3+spec-1.1.0",
+]
+
+[[package]]
+name = "substrate-process"
+version = "0.1.0"
+dependencies = [
+ "substrate-message",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "substrate-run-app"
+version = "0.1.0"
+dependencies = [
+ "substrate-run-domain",
+]
+
+[[package]]
+name = "substrate-run-domain"
+version = "0.1.0"
+
+[[package]]
+name = "substrate-run-process"
+version = "0.1.0"
+dependencies = [
+ "libc",
+ "substrate-process",
+ "substrate-run-app",
+ "substrate-run-domain",
+]
+
+[[package]]
+name = "substrate-run-toml"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "substrate-run-domain",
+ "thiserror 2.0.21",
+ "toml 1.1.3+spec-1.1.0",
+]
+
+[[package]]
+name = "substrate-search-app"
+version = "0.1.0"
+dependencies = [
+ "substrate-message",
+ "substrate-search-domain",
+]
+
+[[package]]
+name = "substrate-search-domain"
+version = "0.1.0"
+dependencies = [
+ "globset",
+ "regex",
+ "substrate-message",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "substrate-search-ignore"
+version = "0.1.0"
+dependencies = [
+ "ignore",
+ "substrate-message",
+ "substrate-platform",
+ "substrate-search-app",
+ "substrate-search-domain",
 ]
 
 [[package]]
@@ -3559,7 +3673,17 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
+ "substrate-git-app",
+ "substrate-git-domain",
+ "substrate-git-gitcli",
+ "substrate-host-contract",
+ "substrate-message",
  "substrate-platform",
+ "substrate-process",
+ "substrate-run-app",
+ "substrate-search-app",
+ "substrate-search-domain",
+ "substrate-search-ignore",
  "tauri",
  "tauri-plugin",
 ]

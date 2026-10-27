@@ -1,7 +1,8 @@
 //! An [`FsError`] as the user sees it.
 
+use substrate_message::Message;
+
 use super::{FsError, messages};
-use crate::message::Message;
 
 impl From<FsError> for Message {
     fn from(error: FsError) -> Self {

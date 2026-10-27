@@ -3,7 +3,7 @@
 use std::path::PathBuf;
 
 /// Why remembering state failed — what the UI says is
-/// [`crate::message::Message::from`].
+/// [`substrate_message::Message::from`].
 #[derive(Debug, thiserror::Error)]
 pub enum StateError {
     /// A file or folder could not be written.

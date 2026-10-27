@@ -11,10 +11,10 @@ use std::sync::{Arc, mpsc};
 use std::time::Duration;
 
 use serde_json::{Value, json};
+use substrate_run_app::LogSink;
 
 use super::connection::Connection;
 use super::{LspError, Notification, ServerDefinition, capabilities, uri};
-use crate::run::LogSink;
 use crate::sync::Locked;
 
 /// How long [`Client::request`] waits for an answer.
@@ -52,7 +52,7 @@ impl Client {
             server: server.name().to_string(),
             source,
         };
-        let mut command = crate::process::command(&server.command);
+        let mut command = substrate_process::command(&server.command);
         command
             .args(&server.args)
             .envs(&server.env)
@@ -61,14 +61,14 @@ impl Client {
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
         // Its own process group, so stopping it takes down what it started
-        // (`cargo check` under rust-analyzer) — see `run::kill_tree`.
+        // (`cargo check` under rust-analyzer) — see `substrate_run_process::kill_tree`.
         #[cfg(unix)]
         std::os::unix::process::CommandExt::process_group(&mut command, 0);
         let mut child = command.spawn().map_err(cant_start)?;
         let (Some(stdin), Some(stdout), Some(stderr)) =
             (child.stdin.take(), child.stdout.take(), child.stderr.take())
         else {
-            crate::run::kill_tree(&mut child);
+            substrate_run_process::kill_tree(&mut child);
             return Err(cant_start(std::io::Error::other("no pipes")));
         };
         std::thread::spawn(move || {
@@ -282,7 +282,7 @@ impl Client {
                 }
                 std::thread::sleep(EXIT_POLL);
             }
-            crate::run::kill_tree(&mut child);
+            substrate_run_process::kill_tree(&mut child);
             child.wait().ok();
         }
     }

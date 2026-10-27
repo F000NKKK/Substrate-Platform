@@ -1,6 +1,6 @@
 # The core and its Tauri plugin (`tauri-plugin/`): one target dir.
 [workspace]
-members = ["tauri-plugin"]
+members = ["tauri-plugin", "crates/*"]
 
 # Craftbook's lint set (templates/workspace-lints.toml). Wave 0 of the
 # migration (craftbook adoption/substrate-platform.md §4) turns every `deny`
@@ -51,57 +51,48 @@ edition = "2024"
 rust-version = "1.99"
 authors = ["F000NK"]
 description = "Brand-neutral IDE platform core (task/workflow runner, log sink, PTY sessions, directory + project/solution engines) — the shared backend foundation for future IDE-style tools."
+readme = "README.md"
 license = "AGPL-3.0-only"
 repository = "https://github.com/F000NKKK/Substrate-Platform"
 
 # Each module beyond the core is a feature of its name; a product turns on
 # what it uses.
 [features]
-# The debug adapters: `dap` starts them through `run` and reads their
+# The debug adapters: `dap` starts them through the run crates and reads their
 # adapter list from TOML.
-dap = ["run", "dep:serde_json"]
+dap = ["dep:serde_json", "dep:substrate-run-app", "dep:substrate-run-process", "dep:toml"]
 fs = ["dep:notify"]
-git = []
-# The language servers: `lsp` starts them through `run` and reads their
+# The language servers: `lsp` starts them through the run crates and reads their
 # language list from TOML.
-lsp = ["run", "dep:serde_json"]
+lsp = ["dep:serde_json", "dep:substrate-run-app", "dep:substrate-run-process", "dep:toml"]
 project = []
-run = ["dep:toml", "dep:libc"]
-search = ["dep:globset", "dep:ignore", "dep:regex"]
 state = ["dep:serde_json"]
 terminal = ["dep:anyhow", "dep:portable-pty"]
-full = ["dap", "fs", "git", "lsp", "project", "run", "search", "state", "terminal"]
+full = ["dap", "fs", "lsp", "project", "state", "terminal"]
 
 [lints]
 workspace = true
 
 [dependencies]
 anyhow = { version = "1", optional = true }
-globset = { version = "0.4.20", optional = true }
-ignore = { version = "0.4.33", optional = true }
-regex = { version = "1.13.1", optional = true }
 notify = { version = "8", optional = true }
 portable-pty = { version = "0.9", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", optional = true }
+substrate-message = { version = "0.1.0", path = "crates/substrate-message" }
+substrate-process = { version = "0.1.0", path = "crates/substrate-process" }
+substrate-run-app = { version = "0.1.0", path = "crates/substrate-run-app", optional = true }
+substrate-run-process = { version = "0.1.0", path = "crates/substrate-run-process", optional = true }
 thiserror = "2"
 toml = { version = "1", optional = true }
-
-# `kill(-pgid, ...)` — cancelling a task kills its whole process group (see
-# `run::task::kill_tree`).
-[target.'cfg(unix)'.dependencies]
-libc = { version = "0.2", optional = true }
 
 [dev-dependencies]
 criterion = { version = "0.8", default-features = false, features = ["cargo_bench_support"] }
 toml = "1"
-
-# The UI's generated copy covers every module's messages.
-[[bin]]
-name = "substrate-messages"
-required-features = ["full"]
+substrate-run-app = { version = "0.1.0", path = "crates/substrate-run-app" }
+substrate-run-domain = { version = "0.1.0", path = "crates/substrate-run-domain" }
 
 [[bench]]
 name = "core"
 harness = false
-required-features = ["fs", "run", "terminal"]
+required-features = ["fs", "terminal"]

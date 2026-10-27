@@ -3,7 +3,7 @@
 use super::{AdapterId, Command};
 
 /// Why talking to a debug adapter failed — what the UI says is
-/// [`crate::message::Message::from`].
+/// [`substrate_message::Message::from`].
 #[derive(Debug, thiserror::Error)]
 pub enum DapError {
     /// The product's list of adapters is not valid TOML of the shape.

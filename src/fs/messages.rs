@@ -1,6 +1,6 @@
-//! What file operations say to the user (see [`crate::message`]).
+//! What file operations say to the user (see [`substrate_message`]).
 
-crate::messages! {
+substrate_message::messages! {
     fs {
         NOT_A_FILE = "{path} isn't a file.",
         ALREADY_EXISTS = "{path} already exists.",

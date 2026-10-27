@@ -6,10 +6,11 @@
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
-use crate::message::Message;
+use substrate_message::Message;
+
 use crate::sync::Locked;
 
-crate::messages! {
+substrate_message::messages! {
     workspace {
         NOTHING_OPEN = "No project is open.",
         NOT_ON_DISK = "{path} doesn't resolve to anything on disk.",

@@ -2,7 +2,7 @@
 
 use std::path::PathBuf;
 
-use crate::message::Message;
+use substrate_message::Message;
 
 /// Why a solution or project could not be opened, saved or ordered — what
 /// the UI says is [`Message::from`].

@@ -1,7 +1,7 @@
 //! A long run's lines, to the UI.
 
-use substrate_platform::events;
-use substrate_platform::message::Message;
+use substrate_host_contract::events;
+use substrate_message::Message;
 use tauri::{AppHandle, Emitter, Runtime};
 
 /// A long run's lines, to the UI.

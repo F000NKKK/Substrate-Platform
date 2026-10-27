@@ -1,0 +1,13 @@
+//! What to look for, as the product states it.
+
+mod case_sensitivity;
+mod generated_code;
+mod pattern_syntax;
+mod search_query;
+mod word_match;
+
+pub use case_sensitivity::CaseSensitivity;
+pub use generated_code::GeneratedCode;
+pub use pattern_syntax::PatternSyntax;
+pub use search_query::SearchQuery;
+pub use word_match::WordMatch;

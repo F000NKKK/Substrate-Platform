@@ -51,7 +51,7 @@ flowchart LR
     end
     subgraph sp["Substrate Platform"]
         spui["substrate-platform-ui<br/>оболочка · редакторы · виджеты"]
-        sprs["substrate-platform<br/>run · terminal · fs · project · git"]
+        sprs["substrate-platform<br/>terminal · fs · project · state"]
     end
     ui --> spui
     be --> sprs
@@ -60,19 +60,19 @@ flowchart LR
 
 ## 🦀 Rust-крейт
 
-Всегда есть: `message` (тексты для пользователя в виде шаблонов, которые переводит UI), `events`, `process` (каким должно быть окружение запущенной программы) `workspace` (открытые пользователем папки; пути вне их отклоняются), `sync` (блокировки, переживающие панику), `text_view` (бинарные форматы продукта читаются и пишутся как текст, чтобы поиск, замена и сравнения видели то же, что редактор; продукт собирает значение `TextViews` и передаёт его в `Options` плагина) и `commands` (команды хоста по доменам: единый список, из которого получаются разрешения, обработчики и копия для UI). Остальные модули — Cargo features с тем же именем, продукт собирает только то, чем пользуется (`full` включает все):
+Всегда есть: `workspace` (открытые пользователем папки; пути вне их отклоняются), `sync` (блокировки, переживающие панику), `text_view` (бинарные форматы продукта читаются и пишутся как текст, чтобы поиск, замена и сравнения видели то же, что редактор; продукт собирает значение `TextViews` и передаёт его в `Options` плагина). Рядом [`crates/substrate-process`](crates/substrate-process) запускает программы с окружением системы и открывает ссылки и файлы, а [`crates/substrate-message`](crates/substrate-message) — общее ядро (`Message`: тексты для пользователя в виде шаблонов, которые переводит UI, и макрос `messages!`), а [`crates/substrate-host-contract`](crates/substrate-host-contract) — контракт с UI (`commands`: команды хоста по доменам, единый список, из которого получаются разрешения, обработчики и копия для UI; `events`; генератор `cargo run -p substrate-host-contract --all-features --bin substrate-messages`). Остальные модули — Cargo features с тем же именем, продукт собирает только то, чем пользуется (`full` включает все):
 
 | Feature / модуль | Что делает |
 |---|---|
-| `run` | `run::spawn_task` запускает внешний процесс без блокировки и построчно передаёт stdout/stderr в `LogSink`; у `TaskHandle` есть `is_running`, `exit_status`, `wait` и `cancel` (завершает всё дерево процессов). `run::workflow`: именованные многошаговые сценарии из TOML — шаги идут по порядку и останавливаются на первой ошибке, шаг может вызвать другой сценарий (циклы обнаруживаются), подставляется `${var}`. `run::LogSink`: клонируемый журнал `LogSink` только на добавление, с ограниченным хранением. |
+| `run` (не модуль этого крейта) | Запуск инструментов в четырёх крейтах: [`substrate-run-domain`](crates/substrate-run-domain) (`Task`, `TaskExit`, `LogLine`, `Level` и типы `workflow`: `File`, `Definition`, `Step`, `Outcome`), [`substrate-run-app`](crates/substrate-run-app) (`spawn` запускает внешний процесс без блокировки и построчно передаёт stdout/stderr в `LogSink`; у `TaskHandle` есть `is_running`, `exit_status`, `wait` и `cancel` (завершает всё дерево процессов); `workflow::run`: шаги идут по порядку и останавливаются на первой ошибке, шаг может вызвать другой сценарий (циклы обнаруживаются), подставляется `${var}`; порт `ports::ProcessLauncher`), [`substrate-run-process`](crates/substrate-run-process) (`SystemLauncher` и `kill_tree`; единственный `unsafe`) и [`substrate-run-toml`](crates/substrate-run-toml) (`parse_workflow`: файл сценариев в `File` домена). `LogSink` — клонируемый журнал только на добавление, с ограниченным хранением. |
 | `terminal` | Настоящий кроссплатформенный псевдотерминал (`PtySession`, через `portable-pty`) с `PtyOptions`; `Utf8Chunker`, чтобы вывод не разрывал многобайтовые символы; `detect_shells()` перечисляет установленные оболочки. |
 | `fs` | `fs::dir`: список содержимого папки (сначала папки, без учёта регистра), создание/переименование/удаление, чтение/запись текста или байтов. `fs::watch`: `DirectoryWatcher`, уведомления об изменениях с подавлением дребезга. |
 | `project` | Модель проектов и решений и API к ней — без собственного формата и без чтения файлов. `Solution`: папки решения, конфигурации и платформы, конфигурация каждого проекта для каждой конфигурации решения, зависимости сборки (`build_order`), а также упорядоченные свойства и секции для всего остального, что хранит формат; `Project`: свойства (в том числе по конфигурациям), целевые платформы, элементы, ссылки. Продукт реализует `SolutionFormat` / `ProjectFormat` для своих файлов (`.sln`, `.slnx`, `.csproj`, свои) и регистрирует их в `Formats`; `ProjectStandard` определяет вид проекта по списку файлов, который передаёт продукт. |
 | `lsp` | Языковые серверы по Language Server Protocol. `Languages`: TOML-список языков продукта — расширения, имена файлов и сервер (`command`, `args`, `env`, `initialization_options`). `lsp::Client` запускает сервер или подключается к любому потоку: запросы с ответами и таймаутом, уведомления сервера в обратный вызов, его собственные запросы отвечаются, `did_open`/`did_change`/`did_save`/`did_close`. Параметры и результаты остаются JSON, поэтому новый язык — строка в списке. `uri`: пути как `file://` и обратно. |
 | `dap` | Адаптеры отладки по Debug Adapter Protocol — отладочный двойник `lsp`. `Adapters`: TOML-список продукта — `[adapter.<id>]` с `languages`, `command`, `args`, `env` и `launch_defaults` (с чего начинается каждый `launch`). `dap::Client` запускает адаптер (stderr в `LogSink`) или подключается к любому потоку: запросы с номерами `Seq` и таймаутом (ждать могут несколько сразу: многие адаптеры отвечают на `launch` только после `configurationDone`), типизированные запросы (`initialize`, `launch`, `attach`, `set_breakpoints`, `configuration_done`, `stack_trace`, `scopes`, `variables`, `resume`, `step_over`/`step_in`/`step_out`, `pause`, `evaluate`, `disconnect`…), результаты — JSON адаптера. То, что адаптер сообщает сам, — типизированное `Event` (`Stopped`, `Output`, `Terminated`…; неизвестное хранится как `Other { name, body }`); его собственные запросы (`runInTerminal`, `startDebugging`) получают ответ-ошибку. Кадрирование — то же, что у `lsp`. |
-| `search` | Поиск и замена в файлах: обход проекта с учётом `.gitignore` (или только несохранённых буферов открытых документов), результаты по файлам; что обход пропускает, задаёт `Layout` продукта. |
+| `search` (feature плагина; в этом крейте модуля нет) | Поиск и замена в файлах, в [`substrate-search-domain`](crates/substrate-search-domain), [`substrate-search-app`](crates/substrate-search-app) и [`substrate-search-ignore`](crates/substrate-search-ignore): обход проекта с учётом `.gitignore` (или только несохранённых буферов открытых документов), результаты по файлам; что обход пропускает, задаёт `Layout` продукта. |
 | `state` | Что IDE помнит между запусками: JSON-состояние проекта и приложения; чтение никогда не падает, запись атомарна. |
-| `git` | Система управления версиями через CLI `git`: состояние, индексирование, фиксации, сравнения, история, ветви, удалённые репозитории, спрятанные изменения, параметры. |
+| `git` (feature плагина; в этом крейте модуля нет) | Система управления версиями через CLI `git` тремя крейтами: [`substrate-git-domain`](crates/substrate-git-domain) (состояние, изменения, ветви, фиксации, спрятанные изменения, сравнения, `GitError`), [`substrate-git-app`](crates/substrate-git-app) (порты и `WriteLock`, который берут операции записи) и [`substrate-git-gitcli`](crates/substrate-git-gitcli) (`GitCli`: запускает `git` и разбирает его porcelain). |
 
 У Tauri-плагина `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) те же features для его команд (`dap`, `fs`, `git`, `lsp`, `search`, `state`, `terminal`); список языков `lsp` и адаптеров `dap` передаёт продукт в `Options::languages` и `Options::adapters`.
 
@@ -81,12 +81,15 @@ flowchart LR
 ### Запуск задачи
 
 ```rust
-use substrate_platform::run::{LogSink, Task, spawn_task};
+use substrate_run_app::{LogSink, spawn};
+use substrate_run_domain::Task;
+use substrate_run_process::SystemLauncher;
 
 let sink = LogSink::new();
 sink.on_push(|line| println!("{:?} {}", line.level, line.text));
 
-let handle = spawn_task(Task::new("cargo").arg("build").cwd("/path/to/project"), sink)?;
+let task = Task::new("cargo").arg("build").cwd("/path/to/project");
+let handle = spawn(&SystemLauncher, &task, sink)?;
 let exit = handle.wait();
 println!("success: {}, code: {:?}", exit.success, exit.code);
 ```
@@ -109,11 +112,16 @@ steps = [
 
 ```rust
 use std::collections::HashMap;
-use substrate_platform::run::{LogSink, workflow};
+use std::sync::Arc;
+use substrate_run_app::LogSink;
+use substrate_run_app::workflow::{Request, run};
+use substrate_run_process::SystemLauncher;
+use substrate_run_toml::parse_workflow;
 
-let file = workflow::File::parse(&std::fs::read_to_string("workflow.toml")?)?;
+let file = parse_workflow(&std::fs::read_to_string("workflow.toml")?)?;
 let vars = HashMap::from([("log".to_string(), "debug".to_string())]);
-let result = workflow::run(file, "ci", vars, ".", LogSink::new()).wait();
+let request = Request { file, name: "ci".to_string(), vars, cwd: ".".into() };
+let result = run(Arc::new(SystemLauncher), request, LogSink::new()).wait();
 assert!(result.is_success());
 ```
 
@@ -156,7 +164,7 @@ import { PlatformShell, ThemeProvider, StatusBar } from "substrate-platform-ui";
   `.properties` и просмотр изображений
 - `DiffEditor` для сравнения двух версий
 - Окна системы управления версиями (`GitHost`) и поиска с заменой в файлах
-  (`FindHost`, `FindInFilesWindow`, `FindResultsPanel`) поверх `git` и `search` крейта
+  (`FindHost`, `FindInFilesWindow`, `FindResultsPanel`) поверх `git` и `search` плагина
 - `WorkspaceProvider`: открытые папки и то, что происходит при закрытии окна
 
 ### 🧩 Виджеты

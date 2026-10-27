@@ -51,7 +51,7 @@ flowchart LR
     end
     subgraph sp["Substrate Platform"]
         spui["substrate-platform-ui<br/>shell · editors · widgets"]
-        sprs["substrate-platform<br/>run · terminal · fs · project · git"]
+        sprs["substrate-platform<br/>terminal · fs · project · state"]
     end
     ui --> spui
     be --> sprs
@@ -60,18 +60,18 @@ flowchart LR
 
 ## 🦀 Rust Crate
 
-Always there: `message` (user-facing text as templates the UI translates), `events`, `process` (what a started program's environment should be) `workspace` (the folders the user opened; paths outside them are refused), `sync` (locks that outlive a panic), `text_view` (a product's binary formats read and written as text, so search, replace and diffs see what the editor shows; the product builds a `TextViews` value and hands it to the plugin's `Options`) and `commands` (the host commands by domain: the one list permissions, handlers and the UI's copy come from). Every other module is a Cargo feature of its name, so a product builds only what it uses (`full` turns on all):
+Always there: `workspace` (the folders the user opened; paths outside them are refused), `sync` (locks that outlive a panic), `text_view` (a product's binary formats read and written as text, so search, replace and diffs see what the editor shows; the product builds a `TextViews` value and hands it to the plugin's `Options`). Beside it, [`crates/substrate-process`](crates/substrate-process) starts programs with the system's own environment and opens links and files, and [`crates/substrate-message`](crates/substrate-message) is the shared kernel (`Message`: user-facing text as templates the UI translates, and the `messages!` macro) and [`crates/substrate-host-contract`](crates/substrate-host-contract) is the contract with the UI (`commands`: the host commands by domain, the one list permissions, handlers and the UI's copy come from; `events`; the generator `cargo run -p substrate-host-contract --all-features --bin substrate-messages`). Every other module is a Cargo feature of its name, so a product builds only what it uses (`full` turns on all):
 
 | Feature / module | What it does |
 |---|---|
-| `run` | `run::spawn_task` runs an external process without blocking and streams stdout/stderr line by line into a `LogSink`; `TaskHandle` has `is_running`, `exit_status`, `wait` and `cancel` (which kills the whole process tree). `run::workflow`: named multi-step flows from a TOML file — steps run in order and stop at the first failure, a step can call another workflow (cycles are detected), `${var}` is substituted. `run::LogSink`: a cloneable, append-only `LogSink` with bounded retention. |
+| `run` (no module of this crate) | Running tools, in four crates: [`substrate-run-domain`](crates/substrate-run-domain) (`Task`, `TaskExit`, `LogLine`, `Level`, and the `workflow` types `File`, `Definition`, `Step`, `Outcome`), [`substrate-run-app`](crates/substrate-run-app) (`spawn` runs an external process without blocking and streams stdout/stderr line by line into a `LogSink`; `TaskHandle` has `is_running`, `exit_status`, `wait` and `cancel`, which kills the whole process tree; `workflow::run`: steps run in order and stop at the first failure, a step can call another workflow (cycles are detected), `${var}` is substituted; the `ports::ProcessLauncher` port), [`substrate-run-process`](crates/substrate-run-process) (`SystemLauncher`, and `kill_tree`; the only `unsafe`) and [`substrate-run-toml`](crates/substrate-run-toml) (`parse_workflow`: a workflow file into the domain's `File`). `LogSink` is a cloneable, append-only log with bounded retention. |
 | `terminal` | A real cross-platform pseudo-terminal (`PtySession`, via `portable-pty`) with `PtyOptions`; `Utf8Chunker` so output never splits a multi-byte character; `detect_shells()` lists the shells that are installed. |
 | `fs` | `fs::dir`: one-level directory listing (folders first, case-insensitive), create/rename/remove, read/write as text or bytes. `fs::watch`: `DirectoryWatcher`, debounced change notifications. |
 | `project` | The project and solution model and its API — no format of its own, and it reads no files. `Solution`: solution folders, configurations and platforms, each project's configuration per solution configuration, build dependencies (`build_order`), plus ordered properties and sections for everything else a format keeps; `Project`: properties (per configuration too), target frameworks, items, references. The product implements `SolutionFormat` / `ProjectFormat` for its files (`.sln`, `.slnx`, `.csproj`, its own) and registers them in `Formats`; `ProjectStandard` tells a project's kind from the file list the product gives it. |
 | `lsp` | Language servers over the Language Server Protocol. `Languages`: the product's TOML list of languages — extensions, file names and the server that serves each (`command`, `args`, `env`, `initialization_options`); `for_path` picks a file's language. `lsp::Client`: starts a server (stderr into a `LogSink`) or connects to any stream, `initialize`/`shutdown`, requests matched to their responses with a timeout (and `$/cancelRequest`), the server's notifications to a callback, its own requests (`workspace/configuration`, progress, registration) answered; `did_open`/`did_change`/`did_save`/`did_close` with full-text sync. Params and results stay JSON, so a new language is a line in the list. `uri`: paths as `file://` URIs and back. |
 | `dap` | Debug adapters over the Debug Adapter Protocol, the debugging counterpart of `lsp`. `Adapters`: the product's TOML list — `[adapter.<id>]` with the `languages` it debugs, `command`, `args`, `env` and `launch_defaults` (what every `launch` starts from); `AdapterId` names an adapter. `dap::Client`: starts an adapter (stderr into a `LogSink`) or connects to any stream, requests numbered with a `Seq` and matched to their responses with a timeout (several can wait at once: many adapters answer `launch` only after `configurationDone`), typed requests (`initialize`, `launch`, `attach`, `set_breakpoints`, `set_exception_breakpoints`, `configuration_done`, `threads`, `stack_trace`, `scopes`, `variables`, `resume`, `step_over`/`step_in`/`step_out`, `pause`, `evaluate`, `disconnect`, `terminate`) with `ThreadId`/`FrameId`/`VariablesReference` arguments, results as the adapter's JSON. What the adapter says unasked is a typed `Event` (`Initialized`, `Stopped`, `Continued`, `Output`, `Terminated`, `Exited`, `Breakpoint`, `Thread`; any other, or one with a body that does not fit, is kept as `Other { name, body }`); its own requests (`runInTerminal`, `startDebugging`) are answered with an error, since the client says in `initialize` that it does not do them. The framing is the one `lsp` uses. |
-| `git` | Source Control over the `git` CLI: status, staging, commits, diffs, history, branches, remotes, stashes, settings. |
-| `search` | Find and Replace in Files: a `.gitignore`-aware walk of the project (or only the open documents' unsaved buffers), results file by file; what the walk leaves out is the product's `Layout`. |
+| `git` (the plugin's feature; no module of this crate) | Source Control over the `git` CLI, in three crates: [`substrate-git-domain`](crates/substrate-git-domain) (status, changes, branches, commits, stashes, diffs, `GitError`), [`substrate-git-app`](crates/substrate-git-app) (the ports, and the `WriteLock` the write operations take) and [`substrate-git-gitcli`](crates/substrate-git-gitcli) (`GitCli`, which runs `git` and parses its porcelain). |
+| `search` (the plugin's feature; no module of this crate) | Find and Replace in Files, in [`substrate-search-domain`](crates/substrate-search-domain), [`substrate-search-app`](crates/substrate-search-app) and [`substrate-search-ignore`](crates/substrate-search-ignore): a `.gitignore`-aware walk of the project (or only the open documents' unsaved buffers), results file by file; what the walk leaves out is the product's `Layout`. |
 | `state` | What an IDE remembers between runs: a project's and the app's JSON state; reading never fails, writing is atomic. |
 
 The Tauri plugin `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) has the same features for its commands (`dap`, `fs`, `git`, `lsp`, `search`, `state`, `terminal`); `lsp`'s languages and `dap`'s adapters are the product's, passed in `Options::languages` and `Options::adapters`. `dap` has four commands (`dap_adapters`, `dap_start`, `dap_request`, `dap_stop`) and two events (`substrate://dap-event`, `substrate://dap-output`); the UI's `ui/src/dap` has the host, the shared `DapSession` (breakpoints per file, launch, run control, call stack, variables), a CodeMirror extension for the breakpoint gutter and the current line, and a small debug toolbar, call stack and variables panel.
@@ -81,12 +81,15 @@ Which paths a host may touch is deliberately left to the host, one layer up.
 ### Run a task
 
 ```rust
-use substrate_platform::run::{LogSink, Task, spawn_task};
+use substrate_run_app::{LogSink, spawn};
+use substrate_run_domain::Task;
+use substrate_run_process::SystemLauncher;
 
 let sink = LogSink::new();
 sink.on_push(|line| println!("{:?} {}", line.level, line.text));
 
-let handle = spawn_task(Task::new("cargo").arg("build").cwd("/path/to/project"), sink)?;
+let task = Task::new("cargo").arg("build").cwd("/path/to/project");
+let handle = spawn(&SystemLauncher, &task, sink)?;
 let exit = handle.wait();
 println!("success: {}, code: {:?}", exit.success, exit.code);
 ```
@@ -109,11 +112,16 @@ steps = [
 
 ```rust
 use std::collections::HashMap;
-use substrate_platform::run::{LogSink, workflow};
+use std::sync::Arc;
+use substrate_run_app::LogSink;
+use substrate_run_app::workflow::{Request, run};
+use substrate_run_process::SystemLauncher;
+use substrate_run_toml::parse_workflow;
 
-let file = workflow::File::parse(&std::fs::read_to_string("workflow.toml")?)?;
+let file = parse_workflow(&std::fs::read_to_string("workflow.toml")?)?;
 let vars = HashMap::from([("log".to_string(), "debug".to_string())]);
-let result = workflow::run(file, "ci", vars, ".", LogSink::new()).wait();
+let request = Request { file, name: "ci".to_string(), vars, cwd: ".".into() };
+let result = run(Arc::new(SystemLauncher), request, LogSink::new()).wait();
 assert!(result.is_success());
 ```
 
@@ -154,7 +162,7 @@ import { PlatformShell, ThemeProvider, StatusBar } from "substrate-platform-ui";
   with preview (GFM, KaTeX, Mermaid), a `.properties` grid and an image viewer
 - `DiffEditor` for side-by-side diffs
 - Source Control windows (`GitHost`) and Find and Replace in Files (`FindHost`,
-  `FindInFilesWindow`, `FindResultsPanel`) over the crate's `git` and `search`
+  `FindInFilesWindow`, `FindResultsPanel`) over the plugin's `git` and `search`
 - `WorkspaceProvider`: the open folders, and what happens when the window closes
 
 ### 🧩 Widgets

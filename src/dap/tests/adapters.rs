@@ -3,9 +3,9 @@
 use std::path::Path;
 
 use serde_json::{Value, json};
+use substrate_message::Message;
 
 use crate::dap::*;
-use crate::message::Message;
 
 const LIST: &str = r#"
     [adapter.lldb]
@@ -69,7 +69,7 @@ fn an_adapter_that_is_not_there_does_not_start() {
     let Err(error) = Client::start(
         &definition,
         Path::new("."),
-        crate::run::LogSink::new(),
+        substrate_run_app::LogSink::new(),
         |_| {},
     ) else {
         panic!("started");

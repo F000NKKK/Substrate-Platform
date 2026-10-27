@@ -186,7 +186,7 @@ mod tests {
         let error = solution.build_order(&debug()).unwrap_err();
         assert!(matches!(error, ProjectError::DependencyCycle { .. }));
         assert_eq!(
-            crate::message::Message::from(error).text,
+            substrate_message::Message::from(error).text,
             crate::project::messages::DEPENDENCY_CYCLE
         );
     }

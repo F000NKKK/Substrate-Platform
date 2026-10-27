@@ -2,7 +2,8 @@
 
 use std::path::Path;
 
-use crate::message::Message;
+use substrate_message::Message;
+
 use crate::project::Solution;
 
 /// A solution file format: `.sln`, `.slnx`, a product's own.

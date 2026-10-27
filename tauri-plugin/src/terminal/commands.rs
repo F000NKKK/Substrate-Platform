@@ -2,8 +2,8 @@
 
 use std::path::PathBuf;
 
-use substrate_platform::events;
-use substrate_platform::message::Message;
+use substrate_host_contract::events;
+use substrate_message::Message;
 use substrate_platform::terminal::messages::{CANT_START, FAILED};
 use substrate_platform::terminal::{PtyOptions, PtySession, Shell, TerminalSize, detect_shells};
 use substrate_platform::workspace::Workspace;
