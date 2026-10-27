@@ -1,7 +1,8 @@
 //! An [`LspError`] as the user sees it.
 
-use super::{LspError, messages};
 use substrate_message::Message;
+
+use super::{LspError, messages};
 
 impl From<LspError> for Message {
     fn from(error: LspError) -> Self {

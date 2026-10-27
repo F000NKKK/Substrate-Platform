@@ -2,8 +2,9 @@
 //! of it ([`StateOptions::project_dir`]), the app's in its config folder.
 //! The UI owns the keys of both. Feature `state`.
 
-use serde_json::Value;
 use std::path::{Path, PathBuf};
+
+use serde_json::Value;
 use substrate_message::Message;
 use substrate_platform::state::{
     APP_STATE_FILE, WORKSPACE_FILE, private_dir, read_json, write_json,

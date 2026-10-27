@@ -1,7 +1,8 @@
 //! A [`StateError`] as the user sees it.
 
-use super::{StateError, messages};
 use substrate_message::Message;
+
+use super::{StateError, messages};
 
 impl From<StateError> for Message {
     fn from(error: StateError) -> Self {
@@ -17,8 +18,9 @@ impl From<StateError> for Message {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::path::Path;
+
+    use super::*;
 
     #[test]
     fn a_failure_names_its_path_and_reason() {

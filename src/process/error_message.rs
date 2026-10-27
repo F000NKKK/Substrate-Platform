@@ -1,7 +1,8 @@
 //! A [`ProcessError`] as the user sees it.
 
-use super::{CANT_START, NOT_A_LINK, ProcessError};
 use substrate_message::Message;
+
+use super::{CANT_START, NOT_A_LINK, ProcessError};
 
 impl From<ProcessError> for Message {
     fn from(error: ProcessError) -> Self {

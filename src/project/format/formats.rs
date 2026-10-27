@@ -103,9 +103,10 @@ fn no_format(path: &Path) -> ProjectError {
 
 #[cfg(test)]
 mod tests {
+    use substrate_message::Message;
+
     use super::*;
     use crate::project::messages;
-    use substrate_message::Message;
 
     /// A format reading files of one extension, into an empty solution named by it.
     struct ByExtension(&'static str);

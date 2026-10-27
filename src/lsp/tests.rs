@@ -6,10 +6,10 @@ use std::sync::mpsc;
 use std::time::Duration;
 
 use serde_json::{Value, json};
+use substrate_message::Message;
 
 use super::*;
 use crate::framing;
-use substrate_message::Message;
 
 /// A client wired to a fake server on this thread's other end: what the
 /// client wrote is read from `from_client`, what the server says goes into

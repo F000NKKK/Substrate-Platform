@@ -1,7 +1,8 @@
 //! A [`DapError`] as the user sees it.
 
-use super::{DapError, messages};
 use substrate_message::Message;
+
+use super::{DapError, messages};
 
 impl From<DapError> for Message {
     fn from(error: DapError) -> Self {

@@ -4,10 +4,10 @@ use std::path::Path;
 use std::time::Duration;
 
 use serde_json::{Value, json};
+use substrate_message::Message;
 
 use super::fake_adapter::{asking, asking_threads, connected, exchange};
 use crate::dap::*;
-use substrate_message::Message;
 
 #[test]
 fn a_request_gets_its_own_response() {

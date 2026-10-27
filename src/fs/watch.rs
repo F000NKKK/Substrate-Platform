@@ -5,8 +5,6 @@
 //! nobody looks at costs nothing. Events are coalesced: a burst (a
 //! checkout, a build writing many files) arrives as one batch of paths.
 
-use super::FsError;
-use crate::sync::Locked;
 use std::collections::{BTreeSet, HashSet};
 use std::path::PathBuf;
 use std::sync::Mutex;
@@ -15,6 +13,9 @@ use std::time::Duration;
 
 use notify::event::{AccessKind, AccessMode, EventKind};
 use notify::{RecommendedWatcher, RecursiveMode, Watcher};
+
+use super::FsError;
+use crate::sync::Locked;
 
 /// How long a burst may stay quiet before its batch is delivered.
 pub const DEFAULT_QUIET: Duration = Duration::from_millis(150);
@@ -106,9 +107,10 @@ fn changes_content(kind: &EventKind) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::sync::{Arc, Mutex};
     use std::time::Instant;
+
+    use super::*;
 
     fn temp_dir(name: &str) -> PathBuf {
         let d = std::env::temp_dir().join(format!("substrate-watch-{name}-{}", std::process::id()));

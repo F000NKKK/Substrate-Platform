@@ -3,9 +3,10 @@
 //! file the user picked). Changes made outside the IDE come back as
 //! [`events::FILES_CHANGED`]. Feature `fs`.
 
-use serde::Serialize;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
+
+use serde::Serialize;
 use substrate_host_contract::events;
 use substrate_message::Message;
 use substrate_platform::fs::watch::DEFAULT_QUIET;

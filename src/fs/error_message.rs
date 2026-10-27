@@ -1,7 +1,8 @@
 //! An [`FsError`] as the user sees it.
 
-use super::{FsError, messages};
 use substrate_message::Message;
+
+use super::{FsError, messages};
 
 impl From<FsError> for Message {
     fn from(error: FsError) -> Self {
@@ -23,8 +24,9 @@ impl From<FsError> for Message {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::path::Path;
+
+    use super::*;
 
     #[test]
     fn io_failures_name_their_path() {

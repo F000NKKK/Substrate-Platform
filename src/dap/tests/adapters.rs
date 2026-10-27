@@ -3,9 +3,9 @@
 use std::path::Path;
 
 use serde_json::{Value, json};
+use substrate_message::Message;
 
 use crate::dap::*;
-use substrate_message::Message;
 
 const LIST: &str = r#"
     [adapter.lldb]

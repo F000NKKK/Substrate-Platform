@@ -2,8 +2,9 @@
 
 use std::path::Path;
 
-use crate::project::Solution;
 use substrate_message::Message;
+
+use crate::project::Solution;
 
 /// A solution file format: `.sln`, `.slnx`, a product's own.
 pub trait SolutionFormat: Send + Sync {
