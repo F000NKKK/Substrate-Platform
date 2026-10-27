@@ -18,6 +18,8 @@ export interface ShellController {
   showToolWindow: (id: string) => void;
   /** Collapses a tool window back to its edge's strip — or, for a transient one (`PanelDef.floatSize`), closes it. */
   hideToolWindow: (id: string) => void;
+  /** Takes a tool window off screen entirely, strip tab included, like its × — `showToolWindow` (or View) brings it back. */
+  closeToolWindow: (id: string) => void;
   /** Whether the tool window is currently floating free of every dock. */
   isToolWindowFloating: (id: string) => boolean;
   /** The center dock's active tab — `main`'s id when nothing else is. */
