@@ -58,6 +58,10 @@ fn cancel_kills_the_process() {
 }
 
 #[test]
+#[expect(
+    unsafe_code,
+    reason = "`kill(2)` with signal 0 probes whether the grandchild lives"
+)]
 fn cancel_kills_grandchildren_too() {
     let sink = LogSink::new();
     // The grandchild inherits the pipes and outlives a plain kill of `sh`;

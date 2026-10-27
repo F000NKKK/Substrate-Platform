@@ -11,7 +11,7 @@ use crate::run::completion::Completion;
 /// (or [`Self::result`]) from the UI thread, or block on [`Self::wait`];
 /// output arrives in the [`LogSink`](crate::run::LogSink) passed to
 /// [`run`](super::run).
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Handle {
     shared: Arc<Shared>,
 }

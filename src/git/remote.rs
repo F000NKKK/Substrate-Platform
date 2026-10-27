@@ -43,7 +43,7 @@ fn push_remote(top: &Path, branch: &str) -> Result<String, GitError> {
     }
 }
 
-fn push(out: Output, top: &Path) -> Result<(), GitError> {
+fn push(out: Output<'_>, top: &Path) -> Result<(), GitError> {
     if has_upstream(top) {
         return stream_git(out, top, &["push", "--progress"]);
     }
@@ -57,18 +57,22 @@ fn push(out: Output, top: &Path) -> Result<(), GitError> {
     )
 }
 
-fn pull(out: Output, top: &Path) -> Result<(), GitError> {
+fn pull(out: Output<'_>, top: &Path) -> Result<(), GitError> {
     if !has_upstream(top) {
         return Err(GitError::NoUpstream);
     }
     stream_git(out, top, &["pull", "--progress"])
 }
 
-#[derive(Deserialize, Clone, Copy)]
+/// What [`synchronize`] does.
+#[derive(Debug, Deserialize, Clone, Copy)]
 #[serde(rename_all = "camelCase")]
 pub enum RemoteOperation {
+    /// Fetch every remote.
     Fetch,
+    /// Pull the current branch.
     Pull,
+    /// Push the current branch.
     Push,
     /// Pull, then push.
     Sync,
@@ -83,7 +87,7 @@ pub fn synchronize(
     lock: &WriteLock,
     root: &Path,
     operation: RemoteOperation,
-    out: Output,
+    out: Output<'_>,
 ) -> Result<(), GitError> {
     let top = require_repo(root)?;
     let _lock = lock.hold();
@@ -95,7 +99,8 @@ pub fn synchronize(
     }
 }
 
-#[derive(Deserialize, Clone, Copy)]
+/// How a branch is brought into the current one.
+#[derive(Debug, Deserialize, Clone, Copy)]
 #[serde(rename_all = "camelCase")]
 pub enum Integration {
     /// Merge the branch into the current one.
@@ -114,7 +119,7 @@ pub fn integrate(
     root: &Path,
     integration: Integration,
     branch: &str,
-    out: Output,
+    out: Output<'_>,
 ) -> Result<(), GitError> {
     let top = require_repo(root)?;
     let _lock = lock.hold();
@@ -142,7 +147,7 @@ pub fn resolve(
     lock: &WriteLock,
     root: &Path,
     resolution: Resolution,
-    out: Output,
+    out: Output<'_>,
 ) -> Result<(), GitError> {
     let Some((top, git_dir)) = repo_of(root)? else {
         return Err(GitError::NotARepository);
@@ -178,7 +183,7 @@ pub fn clone_directory_name(url: &str) -> String {
 /// # Errors
 ///
 /// No repository at the folder, or what `git` reports.
-pub fn clone(url: &str, parent: &Path, name: &str, out: Output) -> Result<String, GitError> {
+pub fn clone(url: &str, parent: &Path, name: &str, out: Output<'_>) -> Result<String, GitError> {
     let name = if name.trim().is_empty() {
         clone_directory_name(url)
     } else {
@@ -206,7 +211,7 @@ pub fn clone(url: &str, parent: &Path, name: &str, out: Output) -> Result<String
 /// # Errors
 ///
 /// No repository at the folder, or what `git` reports.
-pub fn init(root: &Path, branch: &str, out: Output) -> Result<(), GitError> {
+pub fn init(root: &Path, branch: &str, out: Output<'_>) -> Result<(), GitError> {
     let mut args = vec!["init"];
     if !branch.trim().is_empty() {
         args.extend(["--initial-branch", branch.trim()]);

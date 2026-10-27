@@ -14,6 +14,7 @@ mod task_handle;
 mod task_shared;
 pub mod workflow;
 
+#[cfg(any(feature = "dap", feature = "lsp"))]
 pub(crate) use kill_tree::kill_tree;
 pub use level::Level;
 pub use log_line::LogLine;

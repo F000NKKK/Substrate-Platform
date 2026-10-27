@@ -55,7 +55,7 @@ impl From<WorkspaceError> for Message {
 }
 
 /// The workspace: the folders the user opened and the project shown now.
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Workspace {
     roots: Mutex<Vec<PathBuf>>,
     /// The project shown now — new terminals start in it.
@@ -154,6 +154,7 @@ impl Workspace {
         *self.current.locked() = None;
     }
 
+    /// The project shown now.
     pub fn current(&self) -> Option<PathBuf> {
         self.current.locked().clone()
     }
@@ -182,7 +183,7 @@ mod error_tests {
 
     #[test]
     fn a_path_outside_is_worded_with_it() {
-        let outside = std::path::PathBuf::from("/definitely/not/open");
+        let outside = PathBuf::from("/definitely/not/open");
         let message = Message::from(WorkspaceError::Outside { path: outside });
         assert_eq!(message.text, OUTSIDE);
         assert_eq!(message.args["path"], "/definitely/not/open");

@@ -16,6 +16,7 @@ pub(crate) fn kill_tree(child: &mut Child) {
         if let Ok(pgid) = libc::pid_t::try_from(child.id()) {
             // SAFETY: plain syscall with no memory arguments — a negative pid
             // addresses the process group `pgid`, which the child leads.
+            #[expect(unsafe_code, reason = "`kill(2)` has no safe wrapper in `libc`")]
             unsafe {
                 libc::kill(-pgid, libc::SIGKILL);
             }

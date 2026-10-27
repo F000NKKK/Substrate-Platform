@@ -120,7 +120,7 @@ pub(crate) fn run_with_input(command: &mut Command, input: &str) -> Result<Strin
 
 /// Runs `command` with its output streamed line by line to `out`, headed by the
 /// command line itself. Progress meters (`\r` rewrites) only show their final state.
-pub(crate) fn stream(out: Output, command: &mut Command, shown: &str) -> Result<(), GitError> {
+pub(crate) fn stream(out: Output<'_>, command: &mut Command, shown: &str) -> Result<(), GitError> {
     out(Message::new(messages::RUNNING).arg("command", shown));
     let mut child = command
         .stdout(Stdio::piped())
@@ -160,7 +160,7 @@ pub(crate) fn stream(out: Output, command: &mut Command, shown: &str) -> Result<
 /// Forwards `reader`'s lines to `out` as they come — a progress meter's
 /// `\r` rewrites by their final state, empty lines dropped — and returns
 /// them, for the failure message.
-fn forward_lines(reader: impl Read, out: Output) -> String {
+fn forward_lines(reader: impl Read, out: Output<'_>) -> String {
     let mut lines = Vec::new();
     for line in BufReader::new(reader).split(b'\n').map_while(Result::ok) {
         let line = String::from_utf8_lossy(&line);
@@ -179,7 +179,7 @@ fn forward_lines(reader: impl Read, out: Output) -> String {
 }
 
 /// Streams a `git args` run in `top` to `out` (see [`stream`]).
-pub(crate) fn stream_git(out: Output, top: &Path, args: &[&str]) -> Result<(), GitError> {
+pub(crate) fn stream_git(out: Output<'_>, top: &Path, args: &[&str]) -> Result<(), GitError> {
     stream(out, git(top).args(args), &args.join(" "))
 }
 
