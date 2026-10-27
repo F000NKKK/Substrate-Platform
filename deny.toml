@@ -5,6 +5,10 @@ all-features = true
 [advisories]
 version = 2
 yanked = "deny"
+# Pulled in only by Tauri's GTK3 bindings (glib-macros); not ours to replace.
+ignore = [
+    { id = "RUSTSEC-2024-0370", reason = "proc-macro-error is a build-time dependency of glib-macros under tauri; no upstream replacement yet" },
+]
 
 [licenses]
 version = 2
@@ -17,6 +21,7 @@ allow = [
     "BSD-3-Clause",
     "ISC",
     "Unicode-3.0",
+    "Zlib",
     "Unicode-DFS-2016",
     "CC0-1.0",
     "MPL-2.0",
@@ -27,10 +32,6 @@ confidence-threshold = 0.9
 # published one is an exception by name; third-party crates stay checked.
 [licenses.private]
 ignore = true
-
-[[licenses.exceptions]]
-allow = ["AGPL-3.0-only"]
-crate = "substrate-platform"
 
 [[licenses.exceptions]]
 allow = ["AGPL-3.0-only"]
@@ -87,6 +88,78 @@ crate = "substrate-run-process"
 [[licenses.exceptions]]
 allow = ["AGPL-3.0-only"]
 crate = "substrate-run-toml"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-dap-app"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-dap-domain"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-dap-toml"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-framing"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-lock"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-lsp-app"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-lsp-domain"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-lsp-toml"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-project-app"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-project-domain"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-project-toml"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-state-json"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-terminal-app"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-terminal-domain"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-terminal-pty"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-workspace-app"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-workspace-domain"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-workspace-fs"
 
 [bans]
 multiple-versions = "warn"

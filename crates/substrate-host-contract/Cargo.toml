@@ -15,9 +15,9 @@ dap = ["dep:substrate-dap-domain"]
 fs = ["dep:substrate-workspace-fs"]
 git = ["dep:substrate-git-domain"]
 lsp = ["dep:substrate-lsp-domain"]
-project = ["substrate-platform/project"]
+project = ["dep:substrate-project-domain"]
 search = ["dep:substrate-search-domain"]
-state = ["substrate-platform/state"]
+state = ["dep:substrate-state-json"]
 terminal = ["dep:substrate-terminal-domain"]
 full = ["dap", "fs", "git", "lsp", "project", "search", "state", "terminal"]
 
@@ -34,7 +34,8 @@ substrate-workspace-fs = { version = "0.1.0", path = "../substrate-workspace-fs"
 substrate-message = { version = "0.1.0", path = "../substrate-message" }
 substrate-process = { version = "0.1.0", path = "../substrate-process" }
 substrate-workspace-domain = { version = "0.1.0", path = "../substrate-workspace-domain" }
-substrate-platform = { version = "0.4.0", path = "../..", optional = true }
+substrate-project-domain = { version = "0.1.0", path = "../substrate-project-domain", optional = true }
+substrate-state-json = { version = "0.1.0", path = "../substrate-state-json", optional = true }
 
 # The UI's generated copy covers every module's messages.
 [[bin]]

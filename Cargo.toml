@@ -1,6 +1,7 @@
-# The core and its Tauri plugin (`tauri-plugin/`): one target dir.
+# The crates (`crates/`) and the Tauri plugin (`tauri-plugin/`): one target dir.
 [workspace]
 members = ["tauri-plugin", "crates/*"]
+resolver = "3"
 
 # Craftbook's lint set (templates/workspace-lints.toml). Wave 0 of the
 # migration (craftbook adoption/substrate-platform.md §4) turns every `deny`
@@ -45,32 +46,3 @@ mod_module_files = "allow"
 self_named_module_files = "warn"
 large_types_passed_by_value = "warn"
 shadow_unrelated = "warn"
-
-[package]
-name = "substrate-platform"
-version = "0.4.0"
-edition = "2024"
-rust-version = "1.99"
-authors = ["F000NK"]
-description = "Brand-neutral IDE platform core (task/workflow runner, log sink, PTY sessions, directory + project/solution engines) — the shared backend foundation for future IDE-style tools."
-readme = "README.md"
-license = "AGPL-3.0-only"
-repository = "https://github.com/F000NKKK/Substrate-Platform"
-
-# Each module is a feature of its name; a product turns on what it uses.
-[features]
-project = []
-state = ["dep:serde_json"]
-full = ["project", "state"]
-
-[lints]
-workspace = true
-
-[dependencies]
-serde = { version = "1", features = ["derive"] }
-serde_json = { version = "1", optional = true }
-substrate-message = { version = "0.1.0", path = "crates/substrate-message" }
-thiserror = "2"
-
-[dev-dependencies]
-serde_json = "1"

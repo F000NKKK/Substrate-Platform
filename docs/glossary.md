@@ -13,21 +13,21 @@ renames the other in the same change. Contexts are listed in
 | Message | Text for the user: an English template with `{name}` placeholders, and their values. The template is the key the UI's translation catalogs use. | `message::Message` |
 | Template | One message's English text, declared once in its module's `messages!` block. | `messages!`, `*::messages::*` |
 | Verbatim | Text that is not ours to translate: a tool's own output. | `Message::verbatim` |
-| Error | Why an operation failed, as a typed enum per family; the interface turns it into a `Message` once, on the way out. | `substrate_git_domain::GitError`, `substrate_search_domain::SearchError`, `lsp::LspError`, `dap::DapError`, `fs::FsError`, `state::StateError`, `substrate_process::ProcessError`, `project::ProjectError`, `workspace::WorkspaceError`, `terminal::PtyError`, `substrate_run_toml::FileError` |
+| Error | Why an operation failed, as a typed enum per family; the interface turns it into a `Message` once, on the way out. | `substrate_git_domain::GitError`, `substrate_search_domain::SearchError`, `substrate_lsp_domain::LspError`, `substrate_dap_domain::DapError`, `substrate_workspace_fs::FsError`, `substrate_state_json::StateError`, `substrate_process::ProcessError`, `substrate_project_domain::ProjectError`, `substrate_workspace_domain::WorkspaceError`, `substrate_terminal_domain::TerminalError`, `substrate_run_toml::FileError` |
 
 ## Workspace
 
 | Term | Meaning | In code |
 |---|---|---|
-| Workspace | The folders an IDE may touch: the projects the user opened and files they picked. | `workspace::Workspace` |
-| Roots | The workspace's folders at one moment, to check paths with on another thread. | `workspace::Roots` |
+| Workspace | The folders an IDE may touch: the projects the user opened and files they picked. | `substrate_workspace_app::Workspace` |
+| Roots | The workspace's folders at one moment, to check paths with on another thread. | `substrate_workspace_domain::Roots` |
 | Current project | The project shown now; new terminals start in it. | `Workspace::current` |
-| Directory entry | One file or folder of a listed directory level. | `fs::DirectoryEntry` |
-| Entry kind | File or directory. | `fs::EntryKind` |
-| Directory watcher | Watches named folders and delivers changed paths in batches. | `fs::DirectoryWatcher` |
-| Quiet period | How long a burst of changes may stay quiet before its batch is delivered. | `fs::watch::DEFAULT_QUIET` |
-| Text view | How a product's binary format is read as text and written from it. | `text_view::TextView` |
-| Text views | A product's text views by extension, built at startup and handed to what reads files as text. | `text_view::TextViews` |
+| Directory entry | One file or folder of a listed directory level. | `substrate_workspace_domain::DirectoryEntry` |
+| Entry kind | File or directory. | `substrate_workspace_domain::EntryKind` |
+| Directory watcher | Watches named folders and delivers changed paths in batches. | `substrate_workspace_fs::DirectoryWatcher` |
+| Quiet period | How long a burst of changes may stay quiet before its batch is delivered. | `substrate_workspace_fs::DEFAULT_QUIET` |
+| Text view | How a product's binary format is read as text and written from it. | `substrate_workspace_domain::TextView` |
+| Text views | A product's text views by extension, built at startup and handed to what reads files as text. | `substrate_workspace_domain::TextViews` |
 
 ## Source control
 
@@ -86,54 +86,54 @@ renames the other in the same change. Contexts are listed in
 
 | Term | Meaning | In code |
 |---|---|---|
-| Pty session | A shell running on a real OS pseudo-terminal. | `terminal::PtySession` |
-| Terminal size | A terminal's columns and rows. | `terminal::TerminalSize` |
-| Shell | One installed shell a terminal can start. | `terminal::Shell` |
-| UTF-8 chunker | Turns arbitrarily split bytes into whole characters. | `terminal::Utf8Chunker` |
+| Pty session | A shell running on a real OS pseudo-terminal. | `substrate_terminal_app::ports::Session` |
+| Terminal size | A terminal's columns and rows. | `substrate_terminal_domain::TerminalSize` |
+| Shell | One installed shell a terminal can start. | `substrate_terminal_domain::Shell` |
+| UTF-8 chunker | Turns arbitrarily split bytes into whole characters. | `substrate_terminal_domain::Utf8Chunker` |
 
 ## Language server
 
 | Term | Meaning | In code |
 |---|---|---|
-| Language | The files that are in it and its server, if any. | `lsp::Language` |
-| Languages | A product's languages, from its TOML list. | `lsp::Languages` |
-| Server definition | How a language server is started. | `lsp::ServerDefinition` |
-| Client | A connection to one running language server. | `lsp::Client` |
-| Notification | What the server said without being asked. | `lsp::Notification` |
+| Language | The files that are in it and its server, if any. | `substrate_lsp_domain::Language` |
+| Languages | A product's languages, from its TOML list. | `substrate_lsp_domain::Languages` |
+| Server definition | How a language server is started. | `substrate_lsp_domain::ServerDefinition` |
+| Client | A connection to one running language server. | `substrate_lsp_app::Client` |
+| Notification | What the server said without being asked. | `substrate_lsp_domain::Notification` |
 
 ## Debug adapter
 
 | Term | Meaning | In code |
 |---|---|---|
-| Adapter | One debug adapter of the product's list: the languages it debugs and how it is started. | `dap::Adapter` |
-| Adapters | A product's debug adapters, from its TOML list. | `dap::Adapters` |
-| Adapter definition | How a debug adapter is started and what a launch starts from. | `dap::AdapterDefinition` |
-| Client | A connection to one running debug adapter. | `dap::Client` |
-| Command | What a request to the adapter asks for (`launch`, `stackTrace`…). | `dap::Command` |
-| Event | What the adapter said without being asked. | `dap::Event` |
-| Seq | The sequence number of a message; a response names its request by it. | `dap::Seq` |
-| Debuggee | The program being debugged; `disconnect` ends it or leaves it running. | `dap::Debuggee` |
+| Adapter | One debug adapter of the product's list: the languages it debugs and how it is started. | `substrate_dap_domain::Adapter` |
+| Adapters | A product's debug adapters, from its TOML list. | `substrate_dap_domain::Adapters` |
+| Adapter definition | How a debug adapter is started and what a launch starts from. | `substrate_dap_domain::AdapterDefinition` |
+| Client | A connection to one running debug adapter. | `substrate_dap_app::Client` |
+| Command | What a request to the adapter asks for (`launch`, `stackTrace`…). | `substrate_dap_domain::Command` |
+| Event | What the adapter said without being asked. | `substrate_dap_domain::Event` |
+| Seq | The sequence number of a message; a response names its request by it. | `substrate_dap_domain::Seq` |
+| Debuggee | The program being debugged; `disconnect` ends it or leaves it running. | `substrate_dap_domain::Debuggee` |
 
 ## Project model
 
 | Term | Meaning | In code |
 |---|---|---|
-| Solution | Projects and how they are built together. | `project::Solution` |
-| Project | A project's contents as its project file describes them. | `project::Project` |
-| Project entry | A project as its solution lists it. | `project::ProjectEntry` |
-| Solution folder | A folder of the solution's tree that is not one on disk. | `project::SolutionFolder` |
-| Configuration | A build configuration on a platform: `Debug|Any CPU`. | `project::Configuration` |
-| Section | Settings a format keeps beyond the model, in order. | `project::Section` |
-| Format | How a solution or project file is read and written; the product's. | `project::SolutionFormat`, `project::ProjectFormat` |
-| Project standard | A kind of project, told by marker files. | `project::ProjectStandard` |
+| Solution | Projects and how they are built together. | `substrate_project_domain::Solution` |
+| Project | A project's contents as its project file describes them. | `substrate_project_domain::Project` |
+| Project entry | A project as its solution lists it. | `substrate_project_domain::ProjectEntry` |
+| Solution folder | A folder of the solution's tree that is not one on disk. | `substrate_project_domain::SolutionFolder` |
+| Configuration | A build configuration on a platform: `Debug|Any CPU`. | `substrate_project_domain::Configuration` |
+| Section | Settings a format keeps beyond the model, in order. | `substrate_project_domain::Section` |
+| Format | How a solution or project file is read and written; the product's. | `substrate_project_app::ports::SolutionFormat`, `substrate_project_app::ports::ProjectFormat` |
+| Project standard | A kind of project, told by marker files. | `substrate_project_domain::ProjectStandard` |
 
 ## IDE state
 
 | Term | Meaning | In code |
 |---|---|---|
-| Workspace state | A project's remembered state, in the product's private folder of it. | `state::WORKSPACE_FILE` |
-| App state | What the app remembers outside any project. | `state::APP_STATE_FILE` |
-| Private folder | A product's machine-local folder in a project, kept out of version control. | `state::private_dir` |
+| Workspace state | A project's remembered state, in the product's private folder of it. | `substrate_state_json::WORKSPACE_FILE` |
+| App state | What the app remembers outside any project. | `substrate_state_json::APP_STATE_FILE` |
+| Private folder | A product's machine-local folder in a project, kept out of version control. | `substrate_state_json::private_dir` |
 
 ## Host
 

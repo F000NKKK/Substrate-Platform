@@ -1,7 +1,7 @@
 # Craftbook quality gates (craftbook rust/08-testing-and-quality.md §8.5),
 # adapted from craftbook templates/ci.yml for the migration in
 # craftbook adoption/substrate-platform.md. While the lint set is at `warn`
-# (waves 0–10), clippy fails only on its correctness and suspicious groups;
+# (until wave 11), clippy fails only on its correctness and suspicious groups;
 # wave 11 turns the lint set to `deny` and this job to `-D warnings`.
 name: quality
 
@@ -73,10 +73,13 @@ jobs:
       # Every module is a feature: default features would skip most tests.
       - run: cargo test --workspace --all-features
       - run: cargo test --workspace --all-features --doc
-      # Both crates are below their layer's threshold (infra 70 %); the floor
-      # is the measured baseline of the adoption page and only goes up.
-      - name: coverage floor (chapter 8 §8.1)
-        run: cargo llvm-cov --package substrate-platform --all-features --lib --summary-only --fail-under-lines 69 --fail-under-regions 68
+      # Floors by layer (chapter 8 §8.1): shared kernel 95 %, domain 90 %, app
+      # 85 %, adapters 70 % of lines. A crate below its floor is reported and
+      # held to its measured ratchet (.github/scripts/coverage_floors.py).
+      - name: coverage floors by layer
+        run: |
+          cargo llvm-cov --workspace --all-features --json --summary-only --output-path coverage.json
+          python3 .github/scripts/coverage_floors.py coverage.json
       - run: cargo deny check
       - run: cargo doc --workspace --no-deps --all-features
 

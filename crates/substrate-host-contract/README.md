@@ -36,7 +36,7 @@ is what the binary needs.
 ## Depends on / used by
 
 Depends on [`substrate-message`](../substrate-message/README.md) and
-[`substrate-platform`](../../README.md) (for the module catalogs). Used by
+the context crates' domain crates (for the message catalogs). Used by
 [`tauri-plugin-substrate`](../../tauri-plugin/README.md), whose build script
 reads the command list.
 

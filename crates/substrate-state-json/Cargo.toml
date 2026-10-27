@@ -1,0 +1,18 @@
+[package]
+name = "substrate-state-json"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "What an IDE remembers between runs as JSON files: atomic writes, reads that never fail, a private folder kept out of version control."
+license = "AGPL-3.0-only"
+readme = "README.md"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]
+serde_json = "1"
+substrate-message = { version = "0.1.0", path = "../substrate-message" }
+thiserror = "2"

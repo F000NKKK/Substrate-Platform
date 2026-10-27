@@ -44,6 +44,7 @@ export const messages = {
     error: "{server} couldn't do {method}: {error}",
   },
   project: {
+    invalidStandards: "The list of project standards is invalid: {error}",
     noFormat: "No format this app knows reads {path}.",
     dependencyCycle: "{project} depends on itself through its build dependencies.",
     unknownDependency: "{project} depends on {dependency}, which isn't in the solution.",
