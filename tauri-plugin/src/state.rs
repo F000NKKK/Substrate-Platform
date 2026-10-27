@@ -5,7 +5,7 @@
 use std::path::{Path, PathBuf};
 
 use serde_json::Value;
-use substrate_platform::message::Message;
+use substrate_message::Message;
 use substrate_platform::state::{
     APP_STATE_FILE, WORKSPACE_FILE, private_dir, read_json, write_json,
 };

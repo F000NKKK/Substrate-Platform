@@ -9,3 +9,17 @@
 *::after {
   box-sizing: border-box;
 }
+
+/*
+ * The app owns the whole window: no UA body margin (it made `100vh` content
+ * 16px taller than the viewport — a page scrollbar and a clipped status bar),
+ * and no page-level scrolling — every scrollable region is a panel's own.
+ */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}

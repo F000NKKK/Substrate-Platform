@@ -6,10 +6,10 @@ use std::sync::mpsc;
 use std::time::Duration;
 
 use serde_json::{Value, json};
+use substrate_message::Message;
 
 use super::*;
 use crate::framing;
-use crate::message::Message;
 
 /// A client wired to a fake server on this thread's other end: what the
 /// client wrote is read from `from_client`, what the server says goes into
@@ -282,7 +282,7 @@ fn rust_analyzer_answers_a_hover() {
         env: Default::default(),
         initialization_options: None,
     };
-    let client = Client::start(&server, &dir, crate::run::LogSink::new(), |_| {}).unwrap();
+    let client = Client::start(&server, &dir, substrate_run_app::LogSink::new(), |_| {}).unwrap();
     let capabilities = client.initialize(&dir, None).unwrap();
     assert!(capabilities.get("hoverProvider").is_some());
     client.did_open(&main, "rust", 1, text).unwrap();

@@ -2,17 +2,18 @@
 
 use std::path::Path;
 
-use substrate_platform::git::WriteLock;
-use substrate_platform::git::diff::{self, DiffSide, DiffTexts};
-use substrate_platform::git::status::{
-    self, CommitMode, CommitResult, CommitScope, DiscardItem, RepoStatus,
-};
-use substrate_platform::message::Message;
-use substrate_platform::text_view::TextViews;
+use substrate_git_app::changes;
+use substrate_git_app::ports::{Diffs, History, WorkingTree};
+use substrate_git_domain::commits::{CommitMode, CommitScope};
+use substrate_git_domain::status::DiscardItem;
+use substrate_message::Message;
 use substrate_platform::workspace::Workspace;
 use tauri::State;
 
-use super::checked;
+use super::wire::commits::CommitResultDto;
+use super::wire::diffs::{DiffSideDto, DiffTextsDto};
+use super::wire::status::{DiscardItemDto, RepoStatusDto};
+use super::{SourceControl, checked};
 use crate::blocking;
 
 /// The repository's state for Git Changes and the status bar — `None` when
@@ -20,46 +21,53 @@ use crate::blocking;
 #[tauri::command]
 pub(crate) async fn git_status(
     workspace: State<'_, Workspace>,
+    source: State<'_, SourceControl>,
     root: String,
-) -> Result<Option<RepoStatus>, Message> {
+) -> Result<Option<RepoStatusDto>, Message> {
     let root = checked(&workspace, &root)?;
-    blocking(move || status::read(&root)).await
+    let source = source.inner().clone();
+    blocking(move || {
+        let status = source.adapter.status(&root)?;
+        Ok::<_, substrate_git_domain::GitError>(status.map(RepoStatusDto::from))
+    })
+    .await
 }
 
 #[tauri::command]
 pub(crate) async fn git_stage(
     workspace: State<'_, Workspace>,
-    lock: State<'_, WriteLock>,
+    source: State<'_, SourceControl>,
     root: String,
     paths: Vec<String>,
 ) -> Result<(), Message> {
     let root = checked(&workspace, &root)?;
-    let lock = lock.inner().clone();
-    blocking(move || status::stage(&lock, &root, &paths)).await
+    let source = source.inner().clone();
+    blocking(move || changes::stage(&source.adapter, &source.lock, &root, &paths)).await
 }
 
 #[tauri::command]
 pub(crate) async fn git_unstage(
     workspace: State<'_, Workspace>,
-    lock: State<'_, WriteLock>,
+    source: State<'_, SourceControl>,
     root: String,
     paths: Vec<String>,
 ) -> Result<(), Message> {
     let root = checked(&workspace, &root)?;
-    let lock = lock.inner().clone();
-    blocking(move || status::unstage(&lock, &root, &paths)).await
+    let source = source.inner().clone();
+    blocking(move || changes::unstage(&source.adapter, &source.lock, &root, &paths)).await
 }
 
 #[tauri::command]
 pub(crate) async fn git_discard(
     workspace: State<'_, Workspace>,
-    lock: State<'_, WriteLock>,
+    source: State<'_, SourceControl>,
     root: String,
-    items: Vec<DiscardItem>,
+    items: Vec<DiscardItemDto>,
 ) -> Result<(), Message> {
     let root = checked(&workspace, &root)?;
-    let lock = lock.inner().clone();
-    blocking(move || status::discard(&lock, &root, items)).await
+    let source = source.inner().clone();
+    let items: Vec<DiscardItem> = items.into_iter().map(DiscardItem::from).collect();
+    blocking(move || changes::discard(&source.adapter, &source.lock, &root, &items)).await
 }
 
 /// Commit (`stage_all`: Commit All), or amend the last commit (`amend`).
@@ -71,12 +79,12 @@ pub(crate) async fn git_discard(
 )]
 pub(crate) async fn git_commit(
     workspace: State<'_, Workspace>,
-    lock: State<'_, WriteLock>,
+    source: State<'_, SourceControl>,
     root: String,
     message: String,
     amend: bool,
     stage_all: bool,
-) -> Result<CommitResult, Message> {
+) -> Result<CommitResultDto, Message> {
     let root = checked(&workspace, &root)?;
     let mode = if amend {
         CommitMode::Amend
@@ -88,40 +96,56 @@ pub(crate) async fn git_commit(
     } else {
         CommitScope::Staged
     };
-    let lock = lock.inner().clone();
-    blocking(move || status::commit(&lock, &root, &message, mode, scope)).await
+    let source = source.inner().clone();
+    blocking(move || {
+        let made = changes::commit(
+            &source.adapter,
+            &source.lock,
+            &root,
+            &message,
+            (mode, scope),
+        )?;
+        Ok::<_, substrate_git_domain::GitError>(CommitResultDto::from(made))
+    })
+    .await
 }
 
 #[tauri::command]
 pub(crate) async fn git_last_message(
     workspace: State<'_, Workspace>,
+    source: State<'_, SourceControl>,
     root: String,
 ) -> Result<String, Message> {
     let root = checked(&workspace, &root)?;
-    blocking(move || status::last_message(&root)).await
+    let source = source.inner().clone();
+    blocking(move || source.adapter.last_message(&root)).await
 }
 
 #[tauri::command]
 pub(crate) async fn git_diff_texts(
     workspace: State<'_, Workspace>,
-    views: State<'_, TextViews>,
+    source: State<'_, SourceControl>,
     root: String,
-    left: DiffSide,
-    right: DiffSide,
-) -> Result<DiffTexts, Message> {
+    left: DiffSideDto,
+    right: DiffSideDto,
+) -> Result<DiffTextsDto, Message> {
     let root = checked(&workspace, &root)?;
-    let views = views.inner().clone();
-    blocking(move || diff::texts(&root, &left, &right, &views)).await
+    let source = source.inner().clone();
+    blocking(move || {
+        let texts = source.adapter.texts(&root, &left.into(), &right.into())?;
+        Ok::<_, substrate_git_domain::GitError>(DiffTextsDto::from(texts))
+    })
+    .await
 }
 
 #[tauri::command]
 pub(crate) async fn git_head_text(
     workspace: State<'_, Workspace>,
-    views: State<'_, TextViews>,
+    source: State<'_, SourceControl>,
     root: String,
     path: String,
 ) -> Result<Option<String>, Message> {
     let root = checked(&workspace, &root)?;
-    let views = views.inner().clone();
-    blocking(move || diff::head_text(&root, Path::new(&path), &views)).await
+    let source = source.inner().clone();
+    blocking(move || source.adapter.head_text(&root, Path::new(&path))).await
 }

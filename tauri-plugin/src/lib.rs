@@ -6,6 +6,8 @@
 //! The commands run in the [`Workspace`] the plugin manages: whatever they
 //! touch must be in a folder the user opened. A product's own commands
 //! check their paths against the same one ([`Workspace::check`]).
+//!
+#![doc = include_str!("../README.md")]
 
 mod blocking;
 #[cfg(feature = "dap")]
@@ -34,5 +36,5 @@ pub use options::Options;
 #[cfg(feature = "state")]
 pub use state::StateOptions;
 /// The plugin's name: its commands are `plugin:substrate|<command>`.
-pub use substrate_platform::commands::SUBSTRATE_PLUGIN as NAME;
+pub use substrate_host_contract::commands::SUBSTRATE_PLUGIN as NAME;
 pub use substrate_platform::workspace::Workspace;

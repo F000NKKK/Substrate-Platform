@@ -1,0 +1,25 @@
+[package]
+name = "substrate-run-process"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "Starting real processes for substrate-run-app: its own process group, piped output, and killing a whole process tree."
+license = "AGPL-3.0-only"
+readme = "README.md"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]
+substrate-process = { version = "0.1.0", path = "../substrate-process" }
+substrate-run-app = { version = "0.1.0", path = "../substrate-run-app" }
+substrate-run-domain = { version = "0.1.0", path = "../substrate-run-domain" }
+
+# `kill(-pgid, ...)` — cancelling a task kills its whole process group.
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[dev-dependencies]
+libc = "0.2"

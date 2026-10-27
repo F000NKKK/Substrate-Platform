@@ -1,7 +1,7 @@
 //! Running blocking work off the UI thread.
 
 #[cfg(any(feature = "dap", feature = "git", feature = "lsp", feature = "search"))]
-use substrate_platform::message::Message;
+use substrate_message::Message;
 
 /// Runs `work` off the UI thread.
 ///

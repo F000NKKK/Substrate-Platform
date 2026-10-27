@@ -6,6 +6,128 @@ name = "substrate-platform"
 layer = "infra"      # really mixed: shared-kernel + domain + app + infra + interface (commands, events)
 context = "substrate"
 [[crate]]
+name = "substrate-git-domain"
+layer = "domain"
+context = "source-control"
+[[crate]]
+name = "substrate-git-app"
+layer = "app"
+context = "source-control"
+[[crate]]
+name = "substrate-git-gitcli"
+layer = "infra"
+context = "source-control"
+[[crate]]
+name = "substrate-search-domain"
+layer = "domain"
+context = "search"
+[[crate]]
+name = "substrate-search-app"
+layer = "app"
+context = "search"
+[[crate]]
+name = "substrate-search-ignore"
+layer = "infra"
+context = "search"
+[[crate]]
+name = "substrate-process"
+layer = "infra"
+context = "process"
+[[crate]]
+name = "substrate-run-domain"
+layer = "domain"
+context = "run"
+[[crate]]
+name = "substrate-run-app"
+layer = "app"
+context = "run"
+[[crate]]
+name = "substrate-run-process"
+layer = "infra"
+context = "run"
+[[crate]]
+name = "substrate-run-toml"
+layer = "infra"
+context = "run"
+[[crate]]
 name = "tauri-plugin-substrate"
 layer = "interface"
-context = "substrate"
+context = "host-ui-contract"
+[[crate]]
+name = "substrate-message"
+layer = "shared-kernel"
+context = "message"
+[[crate]]
+name = "substrate-host-contract"
+layer = "interface"
+context = "host-ui-contract"
+
+# The core is one context until the split reaches it (waves 6-10).
+[[context_edge]]
+from = "host-ui-contract"
+to = "substrate"
+relation = "customer-supplier"
+[[context_edge]]
+from = "host-ui-contract"
+to = "message"
+relation = "published-language"
+[[context_edge]]
+from = "substrate"
+to = "message"
+relation = "shared-kernel"
+[[context_edge]]
+from = "source-control"
+to = "substrate"
+relation = "customer-supplier"
+[[context_edge]]
+from = "source-control"
+to = "message"
+relation = "shared-kernel"
+[[context_edge]]
+from = "host-ui-contract"
+to = "source-control"
+relation = "customer-supplier"
+[[context_edge]]
+from = "search"
+to = "substrate"
+relation = "customer-supplier"
+[[context_edge]]
+from = "search"
+to = "message"
+relation = "shared-kernel"
+[[context_edge]]
+from = "host-ui-contract"
+to = "search"
+relation = "customer-supplier"
+[[context_edge]]
+from = "run"
+to = "process"
+relation = "customer-supplier"
+[[context_edge]]
+from = "run"
+to = "message"
+relation = "shared-kernel"
+[[context_edge]]
+from = "process"
+to = "message"
+relation = "shared-kernel"
+[[context_edge]]
+from = "host-ui-contract"
+to = "process"
+relation = "customer-supplier"
+[[context_edge]]
+from = "host-ui-contract"
+to = "run"
+relation = "customer-supplier"
+[[context_edge]]
+from = "substrate"
+to = "run"
+relation = "customer-supplier"
+[[context_edge]]
+from = "substrate"
+to = "process"
+relation = "customer-supplier"
+[[context_edge]]
+from = "source-control"
+to = "process"
+relation = "customer-supplier"

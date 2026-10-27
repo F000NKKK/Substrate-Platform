@@ -1,56 +1,72 @@
 //! Stashes and the global Git settings.
 
-use substrate_platform::git::WriteLock;
-use substrate_platform::git::config::{self, GlobalConfig};
-use substrate_platform::git::stash::{self, StashEntry, StashMode, StashOperation};
-use substrate_platform::message::Message;
+use substrate_git_app::ports::{Settings, Stashes};
+use substrate_git_app::stashing;
+use substrate_git_domain::GitError;
+use substrate_message::Message;
 use substrate_platform::workspace::Workspace;
 use tauri::State;
 
-use super::checked;
+use super::wire::settings::GlobalConfigDto;
+use super::wire::stashes::{StashEntryDto, StashModeDto, StashOperationDto};
+use super::{SourceControl, checked};
 use crate::blocking;
 
 #[tauri::command]
-pub(crate) async fn git_stash_list(
+pub async fn git_stash_list(
     workspace: State<'_, Workspace>,
+    source: State<'_, SourceControl>,
     root: String,
-) -> Result<Vec<StashEntry>, Message> {
+) -> Result<Vec<StashEntryDto>, Message> {
     let root = checked(&workspace, &root)?;
-    blocking(move || stash::list(&root)).await
+    let source = source.inner().clone();
+    blocking(move || {
+        let stashes = Stashes::list(&source.adapter, &root)?;
+        Ok::<_, GitError>(stashes.into_iter().map(StashEntryDto::from).collect())
+    })
+    .await
 }
 
 #[tauri::command]
-pub(crate) async fn git_stash_push(
+pub async fn git_stash_push(
     workspace: State<'_, Workspace>,
-    lock: State<'_, WriteLock>,
+    source: State<'_, SourceControl>,
     root: String,
     message: String,
-    mode: StashMode,
+    mode: StashModeDto,
 ) -> Result<(), Message> {
     let root = checked(&workspace, &root)?;
-    let lock = lock.inner().clone();
-    blocking(move || stash::push(&lock, &root, &message, mode)).await
+    let source = source.inner().clone();
+    blocking(move || stashing::push(&source.adapter, &source.lock, &root, &message, mode.into()))
+        .await
 }
 
 #[tauri::command]
-pub(crate) async fn git_stash_op(
+pub async fn git_stash_op(
     workspace: State<'_, Workspace>,
-    lock: State<'_, WriteLock>,
+    source: State<'_, SourceControl>,
     root: String,
     index: u32,
-    op: StashOperation,
+    op: StashOperationDto,
 ) -> Result<(), Message> {
     let root = checked(&workspace, &root)?;
-    let lock = lock.inner().clone();
-    blocking(move || stash::perform(&lock, &root, index, op)).await
+    let source = source.inner().clone();
+    blocking(move || stashing::perform(&source.adapter, &source.lock, &root, index, op.into()))
+        .await
 }
 
 #[tauri::command]
-pub(crate) async fn git_config_get() -> Result<GlobalConfig, Message> {
-    blocking(|| Ok::<_, Message>(config::get())).await
+pub async fn git_config_get(source: State<'_, SourceControl>) -> Result<GlobalConfigDto, Message> {
+    let source = source.inner().clone();
+    blocking(move || Ok::<_, Message>(GlobalConfigDto::from(source.adapter.get()))).await
 }
 
 #[tauri::command]
-pub(crate) async fn git_config_set(key: String, value: String) -> Result<(), Message> {
-    blocking(move || config::set(&key, &value)).await
+pub async fn git_config_set(
+    source: State<'_, SourceControl>,
+    key: String,
+    value: String,
+) -> Result<(), Message> {
+    let source = source.inner().clone();
+    blocking(move || source.adapter.set(&key, &value)).await
 }

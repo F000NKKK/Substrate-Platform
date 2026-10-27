@@ -179,7 +179,7 @@ impl PtySession {
 /// AppImage's (see `process`).
 fn command(options: PtyOptions) -> CommandBuilder {
     let mut command = CommandBuilder::new(options.shell.unwrap_or_else(default_shell));
-    for (key, value) in crate::process::host_environment() {
+    for (key, value) in substrate_process::host_environment() {
         match value {
             Some(value) => command.env(key, value),
             None => command.env_remove(key),

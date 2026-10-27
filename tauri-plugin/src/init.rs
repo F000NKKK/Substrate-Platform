@@ -22,7 +22,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
 }
 
 /// The plugin, with the commands of each feature turned on (Substrate's
-/// domains, `substrate_platform::commands`, list the same ones).
+/// domains, `substrate_host_contract::commands`, list the same ones).
 #[must_use]
 pub fn init_with<R: Runtime>(options: Options) -> TauriPlugin<R> {
     Builder::new(NAME)
@@ -38,9 +38,8 @@ pub fn init_with<R: Runtime>(options: Options) -> TauriPlugin<R> {
 /// Puts the state each feature's commands share under the app's management.
 fn manage<R: Runtime>(app: &AppHandle<R>, options: Options) {
     app.manage(Workspace::default());
-    app.manage(options.text_views);
     #[cfg(feature = "git")]
-    app.manage(substrate_platform::git::WriteLock::new());
+    app.manage(crate::git::SourceControl::new(options.text_views.clone()));
     #[cfg(feature = "terminal")]
     app.manage(terminal::Terminals::default());
     #[cfg(feature = "fs")]
@@ -49,6 +48,9 @@ fn manage<R: Runtime>(app: &AppHandle<R>, options: Options) {
     {
         app.manage(search::Searches::default());
         app.manage(options.search);
+        app.manage(substrate_search_ignore::DiskDocuments::new(
+            options.text_views.clone(),
+        ));
     }
     #[cfg(feature = "state")]
     if let Some(state) = options.state {
@@ -64,6 +66,8 @@ fn manage<R: Runtime>(app: &AppHandle<R>, options: Options) {
         app.manage(dap::Sessions::default());
         app.manage(options.adapters);
     }
+    // The product's own commands read it too (`State<TextViews>`).
+    app.manage(options.text_views);
 }
 
 /// Language servers and debug sessions don't outlive the app.

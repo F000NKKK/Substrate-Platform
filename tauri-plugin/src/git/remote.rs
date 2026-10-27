@@ -2,55 +2,62 @@
 
 use std::path::Path;
 
-use substrate_platform::git::WriteLock;
-use substrate_platform::git::remote::{self, Integration, RemoteOperation, Resolution};
-use substrate_platform::message::Message;
+use substrate_git_app::ports::Remotes;
+use substrate_git_app::syncing;
+use substrate_git_domain::remotes::Resolution;
+use substrate_message::Message;
 use substrate_platform::workspace::Workspace;
 use tauri::{AppHandle, Runtime, State};
 
-use super::{checked, output};
+use super::wire::remotes::{IntegrationDto, RemoteOperationDto};
+use super::{SourceControl, checked, output};
 use crate::blocking;
 
 /// Fetch / Pull / Push / Sync, streamed.
 #[tauri::command]
-pub(crate) async fn git_remote<R: Runtime>(
+pub async fn git_remote<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
-    lock: State<'_, WriteLock>,
+    source: State<'_, SourceControl>,
     root: String,
-    op: RemoteOperation,
+    op: RemoteOperationDto,
 ) -> Result<(), Message> {
     let root = checked(&workspace, &root)?;
-    let lock = lock.inner().clone();
-    blocking(move || remote::synchronize(&lock, &root, op, &output(&app))).await
+    let source = source.inner().clone();
+    blocking(move || {
+        let out = output(&app);
+        syncing::synchronize(&source.adapter, &source.lock, &root, op.into(), &out)
+    })
+    .await
 }
 
 /// Merge into Current / Rebase onto, streamed.
 #[tauri::command]
-#[expect(
-    clippy::too_many_arguments,
-    reason = "Tauri injects state as separate parameters; the UI sends the rest"
-)]
-pub(crate) async fn git_integrate<R: Runtime>(
+pub async fn git_integrate<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
-    lock: State<'_, WriteLock>,
+    source: State<'_, SourceControl>,
     root: String,
-    op: Integration,
+    op: IntegrationDto,
     branch: String,
 ) -> Result<(), Message> {
     let root = checked(&workspace, &root)?;
-    let lock = lock.inner().clone();
-    blocking(move || remote::integrate(&lock, &root, op, &branch, &output(&app))).await
+    let source = source.inner().clone();
+    blocking(move || {
+        let out = output(&app);
+        let how = (op.into(), branch.as_str());
+        syncing::integrate(&source.adapter, &source.lock, &root, how, &out)
+    })
+    .await
 }
 
 /// Continues (`go_on`, the UI's flag) or aborts the
 /// merge/rebase/cherry-pick/revert in progress, streamed.
 #[tauri::command]
-pub(crate) async fn git_operation<R: Runtime>(
+pub async fn git_operation<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
-    lock: State<'_, WriteLock>,
+    source: State<'_, SourceControl>,
     root: String,
     go_on: bool,
 ) -> Result<(), Message> {
@@ -60,33 +67,46 @@ pub(crate) async fn git_operation<R: Runtime>(
     } else {
         Resolution::Abort
     };
-    let lock = lock.inner().clone();
-    blocking(move || remote::resolve(&lock, &root, resolution, &output(&app))).await
+    let source = source.inner().clone();
+    blocking(move || {
+        let out = output(&app);
+        syncing::resolve(&source.adapter, &source.lock, &root, resolution, &out)
+    })
+    .await
 }
 
 /// Clone a Repository into `parent` — a folder the user picked in the native
 /// dialog, so it joins the workspace the way Open Folder's does. The new
 /// working tree's path, to open.
 #[tauri::command]
-pub(crate) async fn git_clone<R: Runtime>(
+pub async fn git_clone<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
+    source: State<'_, SourceControl>,
     url: String,
     parent: String,
     name: String,
 ) -> Result<String, Message> {
     let parent = workspace.allow(Path::new(&parent))?;
-    blocking(move || remote::clone(&url, &parent, &name, &output(&app))).await
+    let source = source.inner().clone();
+    blocking(move || {
+        source
+            .adapter
+            .clone_repository(&url, &parent, &name, &output(&app))
+    })
+    .await
 }
 
 /// Create Git Repository in the project folder.
 #[tauri::command]
-pub(crate) async fn git_init<R: Runtime>(
+pub async fn git_init<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
+    source: State<'_, SourceControl>,
     root: String,
     branch: String,
 ) -> Result<(), Message> {
     let root = checked(&workspace, &root)?;
-    blocking(move || remote::init(&root, &branch, &output(&app))).await
+    let source = source.inner().clone();
+    blocking(move || source.adapter.init(&root, &branch, &output(&app))).await
 }

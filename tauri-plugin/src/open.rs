@@ -4,9 +4,9 @@
 
 use std::path::Path;
 
-use substrate_platform::message::Message;
-use substrate_platform::process;
+use substrate_message::Message;
 use substrate_platform::workspace::Workspace;
+use substrate_process as process;
 use tauri::State;
 
 /// Opens a web or mail link.

@@ -1,7 +1,7 @@
 //! Terminals: shell sessions on real ptys, each addressed by an id the UI
 //! chooses; their output and exit go to the UI as
-//! [`events::TERMINAL_OUTPUT`](substrate_platform::events::TERMINAL_OUTPUT) /
-//! [`events::TERMINAL_EXIT`](substrate_platform::events::TERMINAL_EXIT).
+//! [`events::TERMINAL_OUTPUT`](substrate_host_contract::events::TERMINAL_OUTPUT) /
+//! [`events::TERMINAL_EXIT`](substrate_host_contract::events::TERMINAL_EXIT).
 //! Feature `terminal`.
 
 pub(crate) mod commands;

@@ -14,7 +14,7 @@ use crate::dap::*;
 fn installed_adapter() -> Option<&'static str> {
     ["lldb-dap", "lldb-dap-18"]
         .into_iter()
-        .find(|c| crate::process::command(c).arg("--help").output().is_ok())
+        .find(|c| substrate_process::command(c).arg("--help").output().is_ok())
 }
 
 /// A program with debug info whose line 3 prints `answer`: its source and
@@ -75,9 +75,14 @@ fn lldb_dap_stops_at_a_breakpoint_and_shows_a_variable() {
         launch_defaults: None,
     };
     let (tx, events) = mpsc::channel();
-    let client = Client::start(&definition, &dir, crate::run::LogSink::new(), move |e| {
-        tx.send(e).ok();
-    })
+    let client = Client::start(
+        &definition,
+        &dir,
+        substrate_run_app::LogSink::new(),
+        move |e| {
+            tx.send(e).ok();
+        },
+    )
     .unwrap();
     client.initialize(&AdapterId::new("lldb")).unwrap();
     // Most adapters answer `launch` only after `configurationDone`.

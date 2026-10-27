@@ -1,7 +1,8 @@
 //! A find request from the UI.
 
 use serde::Deserialize;
-use substrate_platform::search::{OpenDocument, Scope, SearchQuery};
+
+use super::wire::request::{OpenDocumentDto, ScopeDto, SearchQueryDto};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -12,12 +13,12 @@ pub(crate) struct FindRequest {
     /// The project root — required for `Project` scope, used for relative paths otherwise.
     pub(super) root: Option<String>,
     /// Open documents only, or the whole project.
-    pub(super) scope: Scope,
+    pub(super) scope: ScopeDto,
     /// What to look for.
-    pub(super) query: SearchQuery,
+    pub(super) query: SearchQueryDto,
     #[serde(default)]
     /// Open documents: searched instead of their files.
-    pub(super) documents: Vec<OpenDocument>,
+    pub(super) documents: Vec<OpenDocumentDto>,
     /// The most matching lines to return.
     pub(super) max_lines: Option<usize>,
 }

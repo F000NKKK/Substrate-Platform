@@ -1,0 +1,16 @@
+[package]
+name = "substrate-message"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "Substrate's shared kernel: the user-facing Message (an English template with placeholders) and the macro that declares a module's templates."
+readme = "README.md"
+license = "AGPL-3.0-only"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }

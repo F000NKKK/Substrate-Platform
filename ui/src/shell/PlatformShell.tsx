@@ -56,11 +56,12 @@ export function PlatformShell({
       isToolWindowVisible: layout.isVisible,
       showToolWindow: layout.show,
       hideToolWindow: layout.hide,
+      closeToolWindow: layout.close,
       isToolWindowFloating: (id) => layout.placements[id]?.anchor === "float",
       activeCenterId: layout.centerActiveId,
       activateCenterPanel: layout.setCenterActive,
     }),
-    [toolWindows, layout.isVisible, layout.show, layout.hide, layout.placements, layout.centerActiveId, layout.setCenterActive]
+    [toolWindows, layout.isVisible, layout.show, layout.hide, layout.close, layout.placements, layout.centerActiveId, layout.setCenterActive]
   );
 
   // An edge gets a dock if the product declared tool windows for it, OR if
@@ -72,9 +73,11 @@ export function PlatformShell({
   const hasRight = hasDock("right");
   const hasBottom = hasDock("bottom");
 
+  // Only a side that has something docked on it is inset: an empty dock (everything dragged away) has no strip to line up with.
+  const occupied = (anchor: ToolWindowAnchor) => layout.idsByAnchor(anchor).length > 0;
   const bottomInsetStyle: CSSProperties = {
-    marginLeft: hasLeft ? "calc(var(--sp-toolwindow-strip) + var(--sp-space-xs))" : undefined,
-    marginRight: hasRight ? "calc(var(--sp-toolwindow-strip) + var(--sp-space-xs))" : undefined,
+    marginLeft: hasLeft && occupied("left") ? "calc(var(--sp-toolwindow-strip) + var(--sp-space-xs))" : undefined,
+    marginRight: hasRight && occupied("right") ? "calc(var(--sp-toolwindow-strip) + var(--sp-space-xs))" : undefined,
   };
 
   function handleMainDragOver(e: DragEvent) {
