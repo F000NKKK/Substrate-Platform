@@ -1,7 +1,8 @@
 //! A [`GitError`] as the user sees it.
 
-use super::{GitError, messages};
 use substrate_message::Message;
+
+use super::{GitError, messages};
 
 impl From<&GitError> for Message {
     fn from(error: &GitError) -> Self {

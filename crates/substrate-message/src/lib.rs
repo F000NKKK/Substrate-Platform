@@ -9,9 +9,10 @@
 //!
 #![doc = include_str!("../README.md")]
 
-use serde::Serialize;
 use std::collections::BTreeMap;
 use std::fmt;
+
+use serde::Serialize;
 
 /// The template of text that isn't ours to translate: a tool's own output.
 pub const VERBATIM: &str = "{detail}";

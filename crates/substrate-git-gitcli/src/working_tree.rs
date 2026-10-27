@@ -7,10 +7,9 @@ use substrate_git_domain::GitError;
 use substrate_git_domain::commits::{CommitMode, CommitResult, CommitScope};
 use substrate_git_domain::status::{ChangeKind, DiscardItem, RepoStatus};
 
-use crate::GitCli;
 use crate::cli::{git, has_head, repo_of, require_repo, run, run_with_input};
-use crate::operation;
 use crate::porcelain::parse_status;
+use crate::{GitCli, operation};
 
 impl WorkingTree for GitCli {
     fn status(&self, root: &Path) -> Result<Option<RepoStatus>, GitError> {

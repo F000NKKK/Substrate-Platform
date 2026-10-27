@@ -10,11 +10,10 @@ use substrate_git_domain::remotes::{
 };
 use substrate_git_domain::status::Operation;
 
-use crate::GitCli;
 use crate::cli::{
     current_branch, git, has_upstream, repo_of, require_repo, run, stream, stream_git,
 };
-use crate::operation;
+use crate::{GitCli, operation};
 
 /// The remote a branch pushes to when nothing else says: git's convention.
 const ORIGIN: &str = "origin";

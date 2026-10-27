@@ -111,8 +111,9 @@ fn through_view(view: TextView, path: &str, bytes: &[u8]) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use substrate_platform::text_view::TextView;
+
+    use super::*;
 
     fn upper(path: &Path) -> Option<String> {
         std::fs::read_to_string(path).ok().map(|s| s.to_uppercase())

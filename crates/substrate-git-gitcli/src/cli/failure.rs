@@ -51,9 +51,10 @@ pub(crate) fn friendly(text: &str) -> GitError {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use substrate_git_domain::messages;
     use substrate_message::Message;
+
+    use super::*;
 
     #[test]
     fn explains_auth_and_identity_failures() {

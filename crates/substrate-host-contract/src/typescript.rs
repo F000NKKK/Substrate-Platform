@@ -1,7 +1,8 @@
 //! The UI's copy: messages, commands and events as one TypeScript module.
 
-use crate::catalog;
 use substrate_message::camel;
+
+use crate::catalog;
 
 /// The templates as a TypeScript module: `messages.<group>.<name>`.
 pub fn typescript() -> String {
