@@ -2,6 +2,15 @@
 
 /** Substrate's message templates: the i18n catalogs' keys for what the backend says. */
 export const messages = {
+  dap: {
+    invalidList: "The list of debug adapters is invalid: {error}",
+    noAdapter: "There's no debug adapter {adapter}.",
+    cantStart: "Couldn't start the debug adapter {adapter}: {error}",
+    failed: "The debug adapter {adapter} failed: {error}",
+    stopped: "The debug adapter {adapter} has stopped.",
+    timedOut: "{adapter} didn't answer {command} in time.",
+    error: "{adapter} couldn't do {command}: {error}",
+  },
   fs: {
     notAFile: "{path} isn't a file.",
     alreadyExists: "{path} already exists.",
@@ -139,6 +148,12 @@ export const substrate = {
     lspDidClose: { plugin: "substrate", command: "lsp_did_close" },
     lspStop: { plugin: "substrate", command: "lsp_stop" },
   },
+  dap: {
+    dapAdapters: { plugin: "substrate", command: "dap_adapters" },
+    dapStart: { plugin: "substrate", command: "dap_start" },
+    dapRequest: { plugin: "substrate", command: "dap_request" },
+    dapStop: { plugin: "substrate", command: "dap_stop" },
+  },
 } as const;
 
 /** The events Substrate's host sends its UI. */
@@ -150,4 +165,6 @@ export const events = {
   terminalExit: "substrate://terminal-exit",
   lspNotification: "substrate://lsp-notification",
   lspOutput: "substrate://lsp-output",
+  dapEvent: "substrate://dap-event",
+  dapOutput: "substrate://dap-output",
 } as const;

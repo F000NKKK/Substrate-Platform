@@ -331,6 +331,54 @@
           "markdownDescription": "Denies the app_state_save command without any pre-configured scope."
         },
         {
+          "description": "Enables the dap_adapters command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dap-adapters",
+          "markdownDescription": "Enables the dap_adapters command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dap_adapters command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dap-adapters",
+          "markdownDescription": "Denies the dap_adapters command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the dap_request command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dap-request",
+          "markdownDescription": "Enables the dap_request command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dap_request command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dap-request",
+          "markdownDescription": "Denies the dap_request command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the dap_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dap-start",
+          "markdownDescription": "Enables the dap_start command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dap_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dap-start",
+          "markdownDescription": "Denies the dap_start command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the dap_stop command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dap-stop",
+          "markdownDescription": "Enables the dap_stop command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dap_stop command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dap-stop",
+          "markdownDescription": "Denies the dap_stop command without any pre-configured scope."
+        },
+        {
           "description": "Enables the dir_copy command without any pre-configured scope.",
           "type": "string",
           "const": "allow-dir-copy",
@@ -1015,10 +1063,10 @@
           "markdownDescription": "Denies the workspace_save command without any pre-configured scope."
         },
         {
-          "description": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-open-url`\n- `allow-open-path`\n- `allow-reveal-path`\n- `allow-dir-list`\n- `allow-dir-create-file`\n- `allow-dir-create-dir`\n- `allow-dir-rename`\n- `allow-dir-remove`\n- `allow-dir-copy`\n- `allow-file-read`\n- `allow-file-write`\n- `allow-allow-path`\n- `allow-fs-watch`\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`\n- `allow-find-in-files`\n- `allow-find-cancel`\n- `allow-replace-in-files`\n- `allow-project-items`\n- `allow-project-files-containing`\n- `allow-workspace-load`\n- `allow-workspace-save`\n- `allow-app-state-load`\n- `allow-app-state-save`\n- `allow-terminal-shells`\n- `allow-terminal-spawn`\n- `allow-terminal-write`\n- `allow-terminal-resize`\n- `allow-terminal-kill`\n- `allow-lsp-languages`\n- `allow-lsp-start`\n- `allow-lsp-request`\n- `allow-lsp-notify`\n- `allow-lsp-did-open`\n- `allow-lsp-did-change`\n- `allow-lsp-did-save`\n- `allow-lsp-did-close`\n- `allow-lsp-stop`",
+          "description": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-open-url`\n- `allow-open-path`\n- `allow-reveal-path`\n- `allow-dir-list`\n- `allow-dir-create-file`\n- `allow-dir-create-dir`\n- `allow-dir-rename`\n- `allow-dir-remove`\n- `allow-dir-copy`\n- `allow-file-read`\n- `allow-file-write`\n- `allow-allow-path`\n- `allow-fs-watch`\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`\n- `allow-find-in-files`\n- `allow-find-cancel`\n- `allow-replace-in-files`\n- `allow-project-items`\n- `allow-project-files-containing`\n- `allow-workspace-load`\n- `allow-workspace-save`\n- `allow-app-state-load`\n- `allow-app-state-save`\n- `allow-terminal-shells`\n- `allow-terminal-spawn`\n- `allow-terminal-write`\n- `allow-terminal-resize`\n- `allow-terminal-kill`\n- `allow-lsp-languages`\n- `allow-lsp-start`\n- `allow-lsp-request`\n- `allow-lsp-notify`\n- `allow-lsp-did-open`\n- `allow-lsp-did-change`\n- `allow-lsp-did-save`\n- `allow-lsp-did-close`\n- `allow-lsp-stop`\n- `allow-dap-adapters`\n- `allow-dap-start`\n- `allow-dap-request`\n- `allow-dap-stop`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-open-url`\n- `allow-open-path`\n- `allow-reveal-path`\n- `allow-dir-list`\n- `allow-dir-create-file`\n- `allow-dir-create-dir`\n- `allow-dir-rename`\n- `allow-dir-remove`\n- `allow-dir-copy`\n- `allow-file-read`\n- `allow-file-write`\n- `allow-allow-path`\n- `allow-fs-watch`\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`\n- `allow-find-in-files`\n- `allow-find-cancel`\n- `allow-replace-in-files`\n- `allow-project-items`\n- `allow-project-files-containing`\n- `allow-workspace-load`\n- `allow-workspace-save`\n- `allow-app-state-load`\n- `allow-app-state-save`\n- `allow-terminal-shells`\n- `allow-terminal-spawn`\n- `allow-terminal-write`\n- `allow-terminal-resize`\n- `allow-terminal-kill`\n- `allow-lsp-languages`\n- `allow-lsp-start`\n- `allow-lsp-request`\n- `allow-lsp-notify`\n- `allow-lsp-did-open`\n- `allow-lsp-did-change`\n- `allow-lsp-did-save`\n- `allow-lsp-did-close`\n- `allow-lsp-stop`"
+          "markdownDescription": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-open-url`\n- `allow-open-path`\n- `allow-reveal-path`\n- `allow-dir-list`\n- `allow-dir-create-file`\n- `allow-dir-create-dir`\n- `allow-dir-rename`\n- `allow-dir-remove`\n- `allow-dir-copy`\n- `allow-file-read`\n- `allow-file-write`\n- `allow-allow-path`\n- `allow-fs-watch`\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`\n- `allow-find-in-files`\n- `allow-find-cancel`\n- `allow-replace-in-files`\n- `allow-project-items`\n- `allow-project-files-containing`\n- `allow-workspace-load`\n- `allow-workspace-save`\n- `allow-app-state-load`\n- `allow-app-state-save`\n- `allow-terminal-shells`\n- `allow-terminal-spawn`\n- `allow-terminal-write`\n- `allow-terminal-resize`\n- `allow-terminal-kill`\n- `allow-lsp-languages`\n- `allow-lsp-start`\n- `allow-lsp-request`\n- `allow-lsp-notify`\n- `allow-lsp-did-open`\n- `allow-lsp-did-change`\n- `allow-lsp-did-save`\n- `allow-lsp-did-close`\n- `allow-lsp-stop`\n- `allow-dap-adapters`\n- `allow-dap-start`\n- `allow-dap-request`\n- `allow-dap-stop`"
         }
       ]
     }

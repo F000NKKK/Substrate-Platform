@@ -23,6 +23,7 @@ until the split (wave 5 onwards).
 | run | `run` | tasks streamed into a log, workflows of them | `substrate-run-domain`, `substrate-run-app`, `substrate-run-process`, `substrate-run-toml` (infra) |
 | terminal | `terminal` | pty sessions, the installed shells | `substrate-terminal-domain`, `substrate-terminal-pty` (infra) |
 | language-server | `lsp` | the product's languages and their servers, spoken to over LSP | not planned yet: added to the adoption page with the split |
+| debug-adapter | `dap` | the product's debug adapters, spoken to over DAP | not planned yet: added to the adoption page with the split |
 | project-model | `project` | solutions and projects as an IDE models them | `substrate-project-domain`, `substrate-project-app` |
 | ide-state | `state` | what the IDE remembers between runs | `substrate-state-app`, `substrate-state-json` (infra) |
 | host | `process` | starting programs with the system's own environment, opening links and files | `substrate-host-app`, `substrate-host-os` (infra) |
@@ -42,6 +43,8 @@ call sites when the crates split.
 | terminal | host | customer–supplier | shells start with the system's environment |
 | language-server | run | customer–supplier | a server's log is a `LogSink`; stopping it kills its process group |
 | language-server | host | customer–supplier | servers start with the system's environment |
+| debug-adapter | run | customer–supplier | an adapter's log is a `LogSink`; stopping it kills its process group |
+| debug-adapter | host | customer–supplier | adapters start with the system's environment |
 | host-ui-contract | message | published language | the UI's generated copy of every template |
 | every context | message | shared kernel | what it says to the user |
 

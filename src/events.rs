@@ -22,6 +22,13 @@ pub const LSP_NOTIFICATION: &str = "substrate://lsp-notification";
 /// A language server's own log (its stderr), a line: `{ root, language, line }`.
 pub const LSP_OUTPUT: &str = "substrate://lsp-output";
 
+/// What a debug adapter said unasked, an [`crate::dap::Event`]:
+/// `{ root, adapter, event: { event, body } }`.
+pub const DAP_EVENT: &str = "substrate://dap-event";
+
+/// A debug adapter's own log (its stderr), a line: `{ root, adapter, line }`.
+pub const DAP_OUTPUT: &str = "substrate://dap-output";
+
 /// Every event, for the UI's generated copy: (name in code, event).
 pub const ALL: &[(&str, &str)] = &[
     ("ideOutput", IDE_OUTPUT),
@@ -31,6 +38,8 @@ pub const ALL: &[(&str, &str)] = &[
     ("terminalExit", TERMINAL_EXIT),
     ("lspNotification", LSP_NOTIFICATION),
     ("lspOutput", LSP_OUTPUT),
+    ("dapEvent", DAP_EVENT),
+    ("dapOutput", DAP_OUTPUT),
 ];
 
 /// `events` — (name in code, event) — as a TypeScript constant `name`; `doc`

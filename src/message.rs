@@ -74,6 +74,8 @@ macro_rules! messages {
 /// Every template Substrate declares, for the export.
 pub fn catalog() -> Vec<(&'static str, &'static str, &'static str)> {
     let groups: &[&[(&str, &str, &str)]] = &[
+        #[cfg(feature = "dap")]
+        crate::dap::messages::ALL,
         #[cfg(feature = "fs")]
         crate::fs::messages::ALL,
         #[cfg(feature = "git")]

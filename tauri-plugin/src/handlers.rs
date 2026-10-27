@@ -1,5 +1,7 @@
 //! The plugin's command list.
 
+#[cfg(feature = "dap")]
+use super::dap;
 #[cfg(feature = "fs")]
 use super::fs;
 #[cfg(feature = "git")]
@@ -92,6 +94,14 @@ pub(crate) fn commands<R: tauri::Runtime>()
         lsp::commands::lsp_did_close,
         #[cfg(feature = "lsp")]
         lsp::commands::lsp_stop,
+        #[cfg(feature = "dap")]
+        dap::commands::dap_adapters,
+        #[cfg(feature = "dap")]
+        dap::commands::dap_start,
+        #[cfg(feature = "dap")]
+        dap::commands::dap_request,
+        #[cfg(feature = "dap")]
+        dap::commands::dap_stop,
         #[cfg(feature = "git")]
         git::changes::git_status,
         #[cfg(feature = "git")]

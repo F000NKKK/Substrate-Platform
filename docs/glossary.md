@@ -13,7 +13,7 @@ renames the other in the same change. Contexts are listed in
 | Message | Text for the user: an English template with `{name}` placeholders, and their values. The template is the key the UI's translation catalogs use. | `message::Message` |
 | Template | One message's English text, declared once in its module's `messages!` block. | `messages!`, `*::messages::*` |
 | Verbatim | Text that is not ours to translate: a tool's own output. | `Message::verbatim` |
-| Error | Why an operation failed, as a typed enum per family; the interface turns it into a `Message` once, on the way out. | `git::GitError`, `search::SearchError`, `lsp::LspError`, `fs::FsError`, `state::StateError`, `process::ProcessError`, `project::ProjectError`, `workspace::WorkspaceError`, `terminal::PtyError`, `run::workflow::FileError` |
+| Error | Why an operation failed, as a typed enum per family; the interface turns it into a `Message` once, on the way out. | `git::GitError`, `search::SearchError`, `lsp::LspError`, `dap::DapError`, `fs::FsError`, `state::StateError`, `process::ProcessError`, `project::ProjectError`, `workspace::WorkspaceError`, `terminal::PtyError`, `run::workflow::FileError` |
 
 ## Workspace
 
@@ -100,6 +100,19 @@ renames the other in the same change. Contexts are listed in
 | Server definition | How a language server is started. | `lsp::ServerDefinition` |
 | Client | A connection to one running language server. | `lsp::Client` |
 | Notification | What the server said without being asked. | `lsp::Notification` |
+
+## Debug adapter
+
+| Term | Meaning | In code |
+|---|---|---|
+| Adapter | One debug adapter of the product's list: the languages it debugs and how it is started. | `dap::Adapter` |
+| Adapters | A product's debug adapters, from its TOML list. | `dap::Adapters` |
+| Adapter definition | How a debug adapter is started and what a launch starts from. | `dap::AdapterDefinition` |
+| Client | A connection to one running debug adapter. | `dap::Client` |
+| Command | What a request to the adapter asks for (`launch`, `stackTrace`…). | `dap::Command` |
+| Event | What the adapter said without being asked. | `dap::Event` |
+| Seq | The sequence number of a message; a response names its request by it. | `dap::Seq` |
+| Debuggee | The program being debugged; `disconnect` ends it or leaves it running. | `dap::Debuggee` |
 
 ## Project model
 

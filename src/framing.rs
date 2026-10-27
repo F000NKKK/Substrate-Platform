@@ -1,5 +1,5 @@
-//! The base protocol's framing: a `Content-Length` header, a blank line,
-//! then that many bytes of JSON.
+//! The framing the Language Server and Debug Adapter protocols share: a
+//! `Content-Length` header, a blank line, then that many bytes of JSON.
 
 use std::io::{self, BufRead, Write};
 
@@ -53,4 +53,28 @@ pub(crate) fn read(input: &mut impl BufRead) -> io::Result<Option<Value>> {
 
 fn invalid(detail: String) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, detail)
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Cursor;
+
+    use serde_json::json;
+
+    use super::*;
+
+    #[test]
+    fn frames_round_trip_and_skip_other_headers() {
+        let mut out = Vec::new();
+        write(&mut out, &json!({ "a": "ü" })).unwrap();
+        assert!(out.starts_with(b"Content-Length: 10\r\n\r\n"));
+
+        let text = b"Content-Type: application/vscode-jsonrpc; charset=utf-8\r\ncontent-length: 2\r\n\r\n{}";
+        let mut input = Cursor::new(text.to_vec());
+        assert_eq!(read(&mut input).unwrap(), Some(json!({})));
+        assert_eq!(read(&mut input).unwrap(), None);
+
+        let mut cut = Cursor::new(b"Content-Length: 9\r\n\r\n{}".to_vec());
+        assert!(read(&mut cut).is_err());
+    }
 }

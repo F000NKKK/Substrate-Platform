@@ -3,6 +3,8 @@
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{AppHandle, Manager, Runtime};
 
+#[cfg(feature = "dap")]
+use super::dap;
 #[cfg(feature = "fs")]
 use super::fs;
 #[cfg(feature = "lsp")]
@@ -57,14 +59,23 @@ fn manage<R: Runtime>(app: &AppHandle<R>, options: Options) {
         app.manage(lsp::Servers::default());
         app.manage(options.languages);
     }
+    #[cfg(feature = "dap")]
+    {
+        app.manage(dap::Sessions::default());
+        app.manage(options.adapters);
+    }
 }
 
-/// Language servers don't outlive the app.
+/// Language servers and debug sessions don't outlive the app.
 fn stop_servers<R: Runtime>(app: &AppHandle<R>) {
+    #[cfg(feature = "dap")]
+    if let Some(sessions) = app.try_state::<dap::Sessions>() {
+        sessions.stop_all();
+    }
     #[cfg(feature = "lsp")]
     if let Some(servers) = app.try_state::<lsp::Servers>() {
         servers.stop_all();
     }
-    #[cfg(not(feature = "lsp"))]
+    #[cfg(not(any(feature = "dap", feature = "lsp")))]
     let _ = app;
 }

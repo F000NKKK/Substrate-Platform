@@ -1,6 +1,6 @@
 //! Language-server tests: framing, the client, languages and URIs.
 
-use std::io::{BufReader, Cursor, PipeReader, PipeWriter};
+use std::io::{BufReader, PipeReader, PipeWriter};
 use std::path::Path;
 use std::sync::mpsc;
 use std::time::Duration;
@@ -8,6 +8,7 @@ use std::time::Duration;
 use serde_json::{Value, json};
 
 use super::*;
+use crate::framing;
 use crate::message::Message;
 
 /// A client wired to a fake server on this thread's other end: what the
@@ -40,22 +41,6 @@ fn connected() -> (Client, FakeServer, mpsc::Receiver<Notification>) {
         to_client: server_out,
     };
     (client, server, rx)
-}
-
-#[test]
-fn frames_round_trip_and_skip_other_headers() {
-    let mut out = Vec::new();
-    framing::write(&mut out, &json!({ "a": "ü" })).unwrap();
-    assert!(out.starts_with(b"Content-Length: 10\r\n\r\n"));
-
-    let text =
-        b"Content-Type: application/vscode-jsonrpc; charset=utf-8\r\ncontent-length: 2\r\n\r\n{}";
-    let mut input = Cursor::new(text.to_vec());
-    assert_eq!(framing::read(&mut input).unwrap(), Some(json!({})));
-    assert_eq!(framing::read(&mut input).unwrap(), None);
-
-    let mut cut = Cursor::new(b"Content-Length: 9\r\n\r\n{}".to_vec());
-    assert!(framing::read(&mut cut).is_err());
 }
 
 #[test]

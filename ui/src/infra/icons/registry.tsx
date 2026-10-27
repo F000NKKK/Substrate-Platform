@@ -38,6 +38,7 @@ const defaultIcons: Record<string, IconComponent> = {
   collapse: glyphs.IconCollapse,
   expand: glyphs.IconExpand,
   play: glyphs.IconPlay,
+  pause: glyphs.IconPause,
   save: glyphs.IconSave,
   undo: glyphs.IconUndo,
   redo: glyphs.IconRedo,

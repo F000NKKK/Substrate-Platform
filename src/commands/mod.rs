@@ -4,6 +4,7 @@
 //! and the UI's copy (`typescript`) are made from. Substrate's own domains —
 //! its host plugin's commands — are here too ([`SUBSTRATE`]).
 
+pub mod dap;
 mod domain;
 pub mod fs;
 pub mod git;
