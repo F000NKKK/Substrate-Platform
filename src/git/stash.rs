@@ -7,11 +7,15 @@ use serde::{Deserialize, Serialize};
 use super::run::{git, require_repo, run};
 use super::{GitError, WriteLock};
 
+/// One entry of the stash list.
 #[derive(Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StashEntry {
+    /// Its position, `stash@{index}`.
     pub index: u32,
+    /// What it was saved with.
     pub message: String,
+    /// When it was saved (unix seconds).
     pub date: i64,
 }
 
@@ -48,7 +52,8 @@ pub fn list(root: &Path) -> Result<Vec<StashEntry>, GitError> {
     ]))?))
 }
 
-#[derive(Deserialize, Clone, Copy)]
+/// What [`push`] stashes.
+#[derive(Debug, Deserialize, Clone, Copy)]
 #[serde(rename_all = "camelCase")]
 pub enum StashMode {
     /// Stash All — untracked files included.
@@ -80,11 +85,15 @@ pub fn push(lock: &WriteLock, root: &Path, message: &str, mode: StashMode) -> Re
     run(&mut command).map(drop)
 }
 
-#[derive(Deserialize, Clone, Copy)]
+/// What [`perform`] does with a stash entry.
+#[derive(Debug, Deserialize, Clone, Copy)]
 #[serde(rename_all = "camelCase")]
 pub enum StashOperation {
+    /// Apply it and keep it.
     Apply,
+    /// Apply it and drop it.
     Pop,
+    /// Drop it.
     Drop,
 }
 

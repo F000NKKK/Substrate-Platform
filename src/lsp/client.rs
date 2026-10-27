@@ -3,6 +3,7 @@
 //! document lifecycle (`didOpen`/`didChange`/`didClose`) and the
 //! `initialize`…`exit` handshake.
 
+use std::fmt;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::path::Path;
 use std::process::Stdio;
@@ -31,6 +32,14 @@ const EXIT_POLL: Duration = Duration::from_millis(20);
 #[derive(Clone)]
 pub struct Client {
     connection: Arc<Connection>,
+}
+
+impl fmt::Debug for Client {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Client")
+            .field("name", &self.connection.name)
+            .finish_non_exhaustive()
+    }
 }
 
 impl Client {

@@ -3,7 +3,7 @@
 use serde::Serialize;
 
 /// The commit just made, for the UI to show.
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CommitResult {
     /// Its short hash.

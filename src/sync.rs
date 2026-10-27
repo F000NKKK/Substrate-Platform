@@ -6,6 +6,7 @@ use std::sync::{Mutex, MutexGuard, PoisonError, RwLock, RwLockReadGuard, RwLockW
 
 /// [`Mutex::lock`], poisoned or not.
 pub trait Locked<T: ?Sized> {
+    /// Locks, ignoring poison.
     fn locked(&self) -> MutexGuard<'_, T>;
 }
 
@@ -17,7 +18,9 @@ impl<T: ?Sized> Locked<T> for Mutex<T> {
 
 /// [`RwLock::read`] and [`RwLock::write`], poisoned or not.
 pub trait ReadWrite<T: ?Sized> {
+    /// Locks for reading, ignoring poison.
     fn read_locked(&self) -> RwLockReadGuard<'_, T>;
+    /// Locks for writing, ignoring poison.
     fn write_locked(&self) -> RwLockWriteGuard<'_, T>;
 }
 

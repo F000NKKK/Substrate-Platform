@@ -5,7 +5,7 @@ use serde::Deserialize;
 use super::{OpenDocument, Scope, SearchQuery};
 
 /// Replace All's input: what a search would cover, and the replacement.
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReplaceRequest {
     /// The project root — required for `Project` scope, used for relative paths otherwise.

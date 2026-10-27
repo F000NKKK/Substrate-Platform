@@ -8,18 +8,25 @@ use super::GitError;
 use super::run::{absolute, git, has_head, require_repo, run};
 use super::status::{ChangeKind, FileChange};
 
+/// One commit of the log.
 #[derive(Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Commit {
+    /// Its full hash.
     pub hash: String,
+    /// Its abbreviated hash.
     pub short_hash: String,
+    /// The full hashes of its parents.
     pub parents: Vec<String>,
+    /// The author's name.
     pub author: String,
+    /// The author's email.
     pub email: String,
     /// Unix seconds.
     pub date: i64,
     /// Branch and tag names pointing here (`%D`).
     pub refs: Vec<String>,
+    /// Its message's first line.
     pub subject: String,
 }
 

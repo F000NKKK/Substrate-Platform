@@ -10,8 +10,11 @@ use serde::Serialize;
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Shell {
+    /// Its stable id.
     pub id: String,
+    /// What the UI calls it.
     pub label: String,
+    /// The program to spawn.
     pub command: String,
     /// What to type into this shell to clear its screen. Must be an actual
     /// command the shell executes (not a client-side terminal clear) — the

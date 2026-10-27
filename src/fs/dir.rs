@@ -11,6 +11,7 @@ use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 
+/// What a folder's entry is.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum EntryKind {
@@ -21,10 +22,14 @@ pub enum EntryKind {
     Directory,
 }
 
+/// One entry of a folder.
 #[derive(Debug, Clone, Serialize)]
 pub struct DirectoryEntry {
+    /// Its file name.
     pub name: String,
+    /// Its full path.
     pub path: PathBuf,
+    /// File or directory.
     pub kind: EntryKind,
 }
 

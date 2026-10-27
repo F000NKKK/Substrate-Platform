@@ -29,9 +29,12 @@ use super::LspError;
 /// How a language server is started.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct ServerDefinition {
+    /// The program to start.
     pub command: String,
+    /// Its arguments.
     #[serde(default)]
     pub args: Vec<String>,
+    /// Environment variables to set for it.
     #[serde(default)]
     pub env: BTreeMap<String, String>,
     /// What `initialize` passes on to it as `initializationOptions`.
@@ -59,15 +62,19 @@ impl ServerDefinition {
 /// One language: the files that are in it and its server, if any.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Language {
+    /// Its id, as the list names it.
     pub id: String,
     /// Extensions without the dot, compared ignoring case.
     pub extensions: Vec<String>,
     /// Whole file names (`Dockerfile`, `Cargo.lock`), compared exactly.
     pub file_names: Vec<String>,
+    /// How to start its server, if it has one.
     pub server: Option<ServerDefinition>,
 }
 
 impl Language {
+    /// Whether `path` is a file of this language.
+    #[must_use]
     pub fn contains(&self, path: &Path) -> bool {
         let name = path.file_name().and_then(|n| n.to_str());
         if name.is_some_and(|n| self.file_names.iter().any(|f| f == n)) {
@@ -126,10 +133,14 @@ impl Languages {
         Ok(Self { languages })
     }
 
+    /// Every language, in the list's order.
+    #[must_use]
     pub fn all(&self) -> &[Language] {
         &self.languages
     }
 
+    /// The language with this id.
+    #[must_use]
     pub fn get(&self, id: &str) -> Option<&Language> {
         self.languages.iter().find(|l| l.id == id)
     }

@@ -5,7 +5,7 @@ use serde::Deserialize;
 use super::ChangeKind;
 
 /// A change to undo.
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DiscardItem {
     /// Repo-relative, `/`-separated.

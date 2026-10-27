@@ -20,7 +20,7 @@ const MATCHES_PER_LINE: usize = 4;
 const MIN_MATCHES: usize = 64;
 
 /// What one search covers.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Search<'a> {
     /// The project root — required for `Project` scope, used for relative paths otherwise.
     pub root: Option<&'a str>,

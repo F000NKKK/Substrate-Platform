@@ -2,6 +2,7 @@
 
 use super::{Domain, SUBSTRATE_PLUGIN};
 
+/// The folder and file commands.
 pub const DOMAIN: Domain = Domain {
     key: "fs",
     plugin: SUBSTRATE_PLUGIN,

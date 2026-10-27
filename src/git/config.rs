@@ -17,7 +17,8 @@ pub const GLOBAL_KEYS: &[&str] = &[
     "pull.rebase",
 ];
 
-#[derive(Serialize)]
+/// The global git configuration the UI shows.
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GlobalConfig {
     /// `git --version`'s output — `None` when git can't be run.
@@ -34,6 +35,8 @@ fn home() -> PathBuf {
         .unwrap_or_else(std::env::temp_dir)
 }
 
+/// The git version and the global values of the keys the UI edits.
+#[must_use]
 pub fn get() -> GlobalConfig {
     let home = home();
     let Ok(version) = run(git(&home).arg("--version")) else {

@@ -9,14 +9,27 @@ use serde::{Deserialize, Serialize};
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum Reference {
     /// Another project, by its file or folder.
-    Project { path: PathBuf },
+    Project {
+        /// Its file or folder.
+        path: PathBuf,
+    },
     /// A package from a feed (NuGet, crates.io, npm).
     Package {
+        /// The package's name.
         name: String,
+        /// The version it asks for, if it names one.
         version: Option<String>,
     },
     /// A file: an assembly, a library.
-    File { path: PathBuf },
+    File {
+        /// Where it is.
+        path: PathBuf,
+    },
     /// Another kind the format has.
-    Other { name: String, value: String },
+    Other {
+        /// What the format calls this kind.
+        name: String,
+        /// Its value.
+        value: String,
+    },
 }

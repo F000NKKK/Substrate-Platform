@@ -14,7 +14,9 @@ const SEPARATOR: char = '/';
 /// match. A name may hold `*` (`*.csproj`, `src/*.sln`).
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ProjectStandard {
+    /// Its id.
     pub id: String,
+    /// The paths whose presence, all together, signals it.
     pub detect_files: Vec<String>,
 }
 

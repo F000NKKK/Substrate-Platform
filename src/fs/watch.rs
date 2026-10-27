@@ -6,6 +6,7 @@
 //! checkout, a build writing many files) arrives as one batch of paths.
 
 use std::collections::{BTreeSet, HashSet};
+use std::fmt;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use std::sync::mpsc::{self, RecvTimeoutError};
@@ -25,6 +26,14 @@ pub const DEFAULT_QUIET: Duration = Duration::from_millis(150);
 pub struct DirectoryWatcher {
     watcher: Mutex<RecommendedWatcher>,
     watched: Mutex<HashSet<PathBuf>>,
+}
+
+impl fmt::Debug for DirectoryWatcher {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("DirectoryWatcher")
+            .field("watched", &*self.watched.locked())
+            .finish_non_exhaustive()
+    }
 }
 
 impl DirectoryWatcher {

@@ -1,6 +1,7 @@
 //! A group of commands.
 
 /// A domain of commands: its key in the UI's copy, its plugin, its commands.
+#[derive(Debug)]
 pub struct Domain {
     /// Its key in the UI's copy.
     pub key: &'static str,

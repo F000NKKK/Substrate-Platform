@@ -1,5 +1,6 @@
 //! The formats a product registers, and opening a file with the one that reads it.
 
+use std::fmt;
 use std::path::Path;
 
 use super::{ProjectFormat, SolutionFormat};
@@ -10,6 +11,15 @@ use crate::project::{Project, ProjectError, Solution};
 pub struct Formats {
     solutions: Vec<Box<dyn SolutionFormat>>,
     projects: Vec<Box<dyn ProjectFormat>>,
+}
+
+impl fmt::Debug for Formats {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Formats")
+            .field("solutions", &self.solutions.len())
+            .field("projects", &self.projects.len())
+            .finish_non_exhaustive()
+    }
 }
 
 impl Formats {

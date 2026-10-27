@@ -21,17 +21,21 @@ const HEAD: &str = "HEAD";
 /// One side of a diff: `rev` is a commit (anything `git rev-parse` takes),
 /// `"INDEX"` for what's staged, `"WORKTREE"` for the file on disk, or empty
 /// for nothing (the file didn't exist there).
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct DiffSide {
+    /// The commit, `INDEX`, `WORKTREE` or empty.
     pub rev: String,
     /// Repo-relative.
     pub path: String,
 }
 
-#[derive(Serialize, Default)]
+/// The two sides of a diff as text.
+#[derive(Debug, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct DiffTexts {
+    /// The left side's text, `None` when it doesn't exist.
     pub left: Option<String>,
+    /// The right side's text, `None` when it doesn't exist.
     pub right: Option<String>,
     /// Either side isn't text (or is too large to show).
     pub binary: bool,

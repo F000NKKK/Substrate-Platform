@@ -7,21 +7,29 @@ use serde::Serialize;
 use super::run::{git, require_repo, run};
 use super::{GitError, WriteLock};
 
+/// A local or remote branch.
 #[derive(Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Branch {
     /// `main`, `origin/main`.
     pub name: String,
+    /// It is a remote-tracking branch.
     pub remote: bool,
+    /// It is the checked-out branch.
     pub current: bool,
+    /// The branch it tracks.
     pub upstream: Option<String>,
+    /// Commits it has that its upstream lacks.
     pub ahead: u32,
+    /// Commits its upstream has that it lacks.
     pub behind: u32,
     /// The upstream was deleted on the remote.
     pub gone: bool,
+    /// The tip commit's short hash.
     pub hash: String,
     /// The tip commit's date (unix seconds) and subject.
     pub date: i64,
+    /// The tip commit's subject.
     pub subject: String,
 }
 

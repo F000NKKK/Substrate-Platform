@@ -11,6 +11,8 @@ pub struct Utf8Chunker {
 }
 
 impl Utf8Chunker {
+    /// A chunker with nothing held back.
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
