@@ -9,7 +9,7 @@ The measured gap and the migration plan are in Craftbook's
 
 `substrate-message` (shared kernel) and `substrate-host-contract` (the
 command and event catalog, the generator of the UI's copy) are split out
-(wave 5), and source-control is split into `substrate-git-domain`, `substrate-git-app` and `substrate-git-gitcli` (wave 6). `substrate-platform` still holds every other context, each behind a
+(wave 5), and source-control is split into `substrate-git-domain`, `substrate-git-app` and `substrate-git-gitcli` (wave 6) and search into `substrate-search-domain`, `-app` and `-ignore` (wave 7). `substrate-platform` still holds every other context, each behind a
 Cargo feature of its name; `tauri-plugin-substrate` is the interface layer
 (Tauri commands, the composition root). The split goes on context by context.
 
@@ -20,7 +20,7 @@ Cargo feature of its name; `tauri-plugin-substrate` is the interface layer
 | message (shared kernel) | `substrate-message`, every `*/messages.rs` | user-facing text as templates the UI translates | `substrate-message` (shared kernel) |
 | workspace | `workspace`, `fs`, `text_view` | the folders the user opened; listing, changing and watching them; product formats read as text | `substrate-workspace-domain`, `substrate-workspace-fs` (infra) |
 | source-control | `substrate-git-domain`, `substrate-git-app`, `substrate-git-gitcli` (wave 6; feature `git` of the plugin) | status, staging, commits, branches, remotes, stashes, diffs, through the `git` executable | as split: the gitcli adapter is the anticorruption layer for git's porcelain |
-| search | `search` | Find and Replace in Files, the project walk | `substrate-search-domain`, `substrate-search-app`, `substrate-search-ignore` (infra) |
+| search | `substrate-search-domain`, `substrate-search-app`, `substrate-search-ignore` (wave 7; feature `search` of the plugin) | Find and Replace in Files, the project walk | `substrate-search-domain`, `substrate-search-app`, `substrate-search-ignore` (infra) |
 | run | `run` | tasks streamed into a log, workflows of them | `substrate-run-domain`, `substrate-run-app`, `substrate-run-process`, `substrate-run-toml` (infra) |
 | terminal | `terminal` | pty sessions, the installed shells | `substrate-terminal-domain`, `substrate-terminal-pty` (infra) |
 | language-server | `lsp` | the product's languages and their servers, spoken to over LSP | not planned yet: added to the adoption page with the split |

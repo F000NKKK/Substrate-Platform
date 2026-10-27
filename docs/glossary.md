@@ -13,7 +13,7 @@ renames the other in the same change. Contexts are listed in
 | Message | Text for the user: an English template with `{name}` placeholders, and their values. The template is the key the UI's translation catalogs use. | `message::Message` |
 | Template | One message's English text, declared once in its module's `messages!` block. | `messages!`, `*::messages::*` |
 | Verbatim | Text that is not ours to translate: a tool's own output. | `Message::verbatim` |
-| Error | Why an operation failed, as a typed enum per family; the interface turns it into a `Message` once, on the way out. | `substrate_git_domain::GitError`, `search::SearchError`, `lsp::LspError`, `dap::DapError`, `fs::FsError`, `state::StateError`, `process::ProcessError`, `project::ProjectError`, `workspace::WorkspaceError`, `terminal::PtyError`, `run::workflow::FileError` |
+| Error | Why an operation failed, as a typed enum per family; the interface turns it into a `Message` once, on the way out. | `substrate_git_domain::GitError`, `substrate_search_domain::SearchError`, `lsp::LspError`, `dap::DapError`, `fs::FsError`, `state::StateError`, `process::ProcessError`, `project::ProjectError`, `workspace::WorkspaceError`, `terminal::PtyError`, `run::workflow::FileError` |
 
 ## Workspace
 
@@ -55,19 +55,19 @@ renames the other in the same change. Contexts are listed in
 
 | Term | Meaning | In code |
 |---|---|---|
-| Search query | What to look for: pattern, match case, whole word, regex, file mask. | `search::SearchQuery` |
-| Matcher | A compiled search query. | `search::Matcher` |
-| Replacement mode | A replacement taken literally or with `$1` expanded. | `search::ReplacementMode` |
-| Decoding | Invalid UTF-8 replaced (search) or refused (replace). | `search::Decoding` |
-| Walk entry | A file or folder the project walk keeps. | `search::WalkEntry` |
-| Find, replace | Find in Files and Replace in Files. | `search::find`, `search::replace` |
-| File mask | Which files a search covers: `*.rs;*.toml`, `!*.lock`. | `search::FileMask` |
-| Layout | What a product keeps out of the walk and where its generated code lives. | `search::Layout` |
-| Scope | Open documents, or the whole project. | `search::Scope` |
-| Open document | An editor's buffer, searched instead of its file on disk. | `search::OpenDocument` |
-| Line hit | One matching line as Find Results show it. | `search::LineHit` |
-| Find summary | The totals of one search. | `search::FindSummary` |
-| Replace summary | What Replace All changed. | `search::ReplaceSummary` |
+| Search query | What to look for: pattern, case sensitivity, word match, pattern syntax, file mask, generated code (each an enum, not a flag). | `substrate_search_domain::query::SearchQuery` |
+| Matcher | A compiled search query. | `substrate_search_domain::pattern::Matcher` |
+| Replacement mode | A replacement taken literally or with `$1` expanded. | `substrate_search_domain::pattern::ReplacementMode` |
+| Decoding | Invalid UTF-8 replaced (search) or refused (replace). | `substrate_search_app::ports::Decoding` |
+| Walk entry | A file or folder the project walk keeps. | `substrate_search_domain::project::WalkEntry` |
+| Find, replace | Find in Files and Replace in Files. | `substrate_search_app::{find, replace}` |
+| File mask | Which files a search covers: `*.rs;*.toml`, `!*.lock`. | `substrate_search_domain::pattern::FileMask` |
+| Layout | What a product keeps out of the walk and where its generated code lives. | `substrate_search_domain::project::Layout` |
+| Scope | Open documents, or the whole project. | `substrate_search_domain::project::Scope` |
+| Open document | An editor's buffer, searched instead of its file on disk. | `substrate_search_domain::project::OpenDocument` |
+| Line hit | One matching line as Find Results show it. | `substrate_search_domain::results::LineHit` |
+| Find summary | The totals of one search. | `substrate_search_domain::results::FindSummary` |
+| Replace summary | What Replace All changed. | `substrate_search_domain::results::ReplaceSummary` |
 
 ## Run
 

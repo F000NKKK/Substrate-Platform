@@ -15,7 +15,7 @@ pub fn catalog() -> Vec<(&'static str, &'static str, &'static str)> {
         substrate_platform::project::messages::ALL,
         substrate_platform::process::ALL,
         #[cfg(feature = "search")]
-        substrate_platform::search::messages::ALL,
+        substrate_search_domain::messages::ALL,
         #[cfg(feature = "state")]
         substrate_platform::state::messages::ALL,
         #[cfg(feature = "terminal")]

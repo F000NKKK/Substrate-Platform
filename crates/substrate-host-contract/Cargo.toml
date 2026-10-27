@@ -16,7 +16,7 @@ fs = ["substrate-platform/fs"]
 git = ["dep:substrate-git-domain"]
 lsp = ["substrate-platform/lsp"]
 project = ["substrate-platform/project"]
-search = ["substrate-platform/search"]
+search = ["dep:substrate-search-domain"]
 state = ["substrate-platform/state"]
 terminal = ["substrate-platform/terminal"]
 full = ["dap", "fs", "git", "lsp", "project", "search", "state", "terminal"]
@@ -26,6 +26,7 @@ workspace = true
 
 [dependencies]
 substrate-git-domain = { version = "0.1.0", path = "../substrate-git-domain", optional = true }
+substrate-search-domain = { version = "0.1.0", path = "../substrate-search-domain", optional = true }
 substrate-message = { version = "0.1.0", path = "../substrate-message" }
 substrate-platform = { version = "0.4.0", path = "../.." }
 

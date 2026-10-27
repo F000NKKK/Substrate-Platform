@@ -57,6 +57,18 @@ crate = "substrate-git-app"
 allow = ["AGPL-3.0-only"]
 crate = "substrate-git-gitcli"
 
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-search-domain"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-search-app"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-search-ignore"
+
 [bans]
 multiple-versions = "warn"
 wildcards = "deny"

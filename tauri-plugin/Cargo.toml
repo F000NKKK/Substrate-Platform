@@ -17,7 +17,7 @@ dap = ["substrate-platform/dap", "dep:serde_json"]
 fs = ["substrate-platform/fs"]
 git = ["dep:substrate-git-app", "dep:substrate-git-domain", "dep:substrate-git-gitcli"]
 lsp = ["substrate-platform/lsp", "dep:serde_json"]
-search = ["substrate-platform/search"]
+search = ["dep:substrate-search-app", "dep:substrate-search-domain", "dep:substrate-search-ignore"]
 state = ["substrate-platform/state", "dep:serde_json"]
 terminal = ["substrate-platform/terminal"]
 
@@ -28,6 +28,9 @@ workspace = true
 substrate-git-app = { version = "0.1.0", path = "../crates/substrate-git-app", optional = true }
 substrate-git-domain = { version = "0.1.0", path = "../crates/substrate-git-domain", optional = true }
 substrate-git-gitcli = { version = "0.1.0", path = "../crates/substrate-git-gitcli", optional = true }
+substrate-search-app = { version = "0.1.0", path = "../crates/substrate-search-app", optional = true }
+substrate-search-domain = { version = "0.1.0", path = "../crates/substrate-search-domain", optional = true }
+substrate-search-ignore = { version = "0.1.0", path = "../crates/substrate-search-ignore", optional = true }
 substrate-host-contract = { version = "0.1.0", path = "../crates/substrate-host-contract" }
 substrate-message = { version = "0.1.0", path = "../crates/substrate-message" }
 substrate-platform = { version = "0.4.0", path = ".." }

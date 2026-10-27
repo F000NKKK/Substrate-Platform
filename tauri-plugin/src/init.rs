@@ -40,7 +40,6 @@ fn manage<R: Runtime>(app: &AppHandle<R>, options: Options) {
     app.manage(Workspace::default());
     #[cfg(feature = "git")]
     app.manage(crate::git::SourceControl::new(options.text_views.clone()));
-    app.manage(options.text_views);
     #[cfg(feature = "terminal")]
     app.manage(terminal::Terminals::default());
     #[cfg(feature = "fs")]
@@ -49,6 +48,9 @@ fn manage<R: Runtime>(app: &AppHandle<R>, options: Options) {
     {
         app.manage(search::Searches::default());
         app.manage(options.search);
+        app.manage(substrate_search_ignore::DiskDocuments::new(
+            options.text_views.clone(),
+        ));
     }
     #[cfg(feature = "state")]
     if let Some(state) = options.state {
@@ -64,6 +66,8 @@ fn manage<R: Runtime>(app: &AppHandle<R>, options: Options) {
         app.manage(dap::Sessions::default());
         app.manage(options.adapters);
     }
+    // The product's own commands read it too (`State<TextViews>`).
+    app.manage(options.text_views);
 }
 
 /// Language servers and debug sessions don't outlive the app.

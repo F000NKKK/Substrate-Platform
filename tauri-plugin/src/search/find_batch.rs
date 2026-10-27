@@ -1,11 +1,12 @@
 //! Files found since the last batch.
 
 use serde::Serialize;
-use substrate_platform::search::FileResult;
+
+use super::wire::result::FileResultDto;
 
 /// Files found since the last batch.
-#[derive(Clone, Serialize)]
+#[derive(Serialize)]
 pub struct FindBatch {
     /// The files found.
-    pub(super) files: Vec<FileResult>,
+    pub(super) files: Vec<FileResultDto>,
 }

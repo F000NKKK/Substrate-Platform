@@ -1,3 +1,4 @@
+crates/substrate-search-ignore/tests/search_in_projects.rs	C101		1
 src/fs/dir.rs	C108	DirectoryEntry	1
 src/fs/dir.rs	C108	EntryKind	1
 src/fs/watch.rs	C108	DirectoryWatcher	1
@@ -7,8 +8,6 @@ src/lsp/languages.rs	C108	Language	1
 src/lsp/languages.rs	C108	ServerDefinition	1
 src/lsp/tests.rs	C101		1
 src/project/model.rs	C108	Project	1
-src/search/find.rs	C108	Search	1
-src/search/tests.rs	C101		1
 src/sync.rs	C108	Locked	1
 src/sync.rs	C108	ReadWrite	1
 src/text_view/view.rs	C108	TextView	1

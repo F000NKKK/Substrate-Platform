@@ -18,6 +18,18 @@ name = "substrate-git-gitcli"
 layer = "infra"
 context = "source-control"
 [[crate]]
+name = "substrate-search-domain"
+layer = "domain"
+context = "search"
+[[crate]]
+name = "substrate-search-app"
+layer = "app"
+context = "search"
+[[crate]]
+name = "substrate-search-ignore"
+layer = "infra"
+context = "search"
+[[crate]]
 name = "tauri-plugin-substrate"
 layer = "interface"
 context = "host-ui-contract"
@@ -54,4 +66,16 @@ relation = "shared-kernel"
 [[context_edge]]
 from = "host-ui-contract"
 to = "source-control"
+relation = "customer-supplier"
+[[context_edge]]
+from = "search"
+to = "substrate"
+relation = "customer-supplier"
+[[context_edge]]
+from = "search"
+to = "message"
+relation = "shared-kernel"
+[[context_edge]]
+from = "host-ui-contract"
+to = "search"
 relation = "customer-supplier"

@@ -67,19 +67,15 @@ fs = ["dep:notify"]
 lsp = ["run", "dep:serde_json"]
 project = []
 run = ["dep:toml", "dep:libc"]
-search = ["dep:globset", "dep:ignore", "dep:regex"]
 state = ["dep:serde_json"]
 terminal = ["dep:anyhow", "dep:portable-pty"]
-full = ["dap", "fs", "lsp", "project", "run", "search", "state", "terminal"]
+full = ["dap", "fs", "lsp", "project", "run", "state", "terminal"]
 
 [lints]
 workspace = true
 
 [dependencies]
 anyhow = { version = "1", optional = true }
-globset = { version = "0.4.20", optional = true }
-ignore = { version = "0.4.33", optional = true }
-regex = { version = "1.13.1", optional = true }
 notify = { version = "8", optional = true }
 portable-pty = { version = "0.9", optional = true }
 serde = { version = "1", features = ["derive"] }
