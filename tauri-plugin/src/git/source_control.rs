@@ -2,7 +2,7 @@
 
 use substrate_git_app::WriteLock;
 use substrate_git_gitcli::GitCli;
-use substrate_platform::text_view::TextViews;
+use substrate_workspace_domain::TextViews;
 
 /// What Source Control's commands share: the adapter that runs `git`, and
 /// the lock that keeps two writes apart. Clones share both.

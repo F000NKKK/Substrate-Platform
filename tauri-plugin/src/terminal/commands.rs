@@ -4,20 +4,24 @@ use std::path::PathBuf;
 
 use substrate_host_contract::events;
 use substrate_message::Message;
-use substrate_platform::terminal::messages::{CANT_START, FAILED};
-use substrate_platform::terminal::{PtyOptions, PtySession, Shell, TerminalSize, detect_shells};
-use substrate_platform::workspace::Workspace;
+use substrate_terminal_app::{detect_shells, spawn_utf8};
+use substrate_terminal_domain::{SessionOptions, TerminalError, TerminalSize};
+use substrate_terminal_pty::{PortablePty, SystemShells};
+use substrate_workspace_app::Workspace;
 use tauri::{AppHandle, Emitter, Runtime, State};
 
 use super::exit::Exit;
-use super::failure::failed;
 use super::output::Output;
+use super::shell_entry::ShellEntry;
 use super::{SpawnRequest, Terminals};
 
 /// The shells installed here, for "New Terminal".
 #[tauri::command]
-pub(crate) fn terminal_shells() -> Vec<Shell> {
-    detect_shells()
+pub(crate) fn terminal_shells() -> Vec<ShellEntry> {
+    detect_shells(&SystemShells)
+        .into_iter()
+        .map(ShellEntry::from)
+        .collect()
 }
 
 #[tauri::command]
@@ -38,11 +42,12 @@ pub(crate) fn terminal_spawn<R: Runtime>(
     };
     let (out_app, out_id) = (app.clone(), spec.id.clone());
     let (exit_app, exit_id) = (app, spec.id.clone());
-    let session = PtySession::spawn_utf8(
-        PtyOptions {
+    let session = spawn_utf8(
+        &PortablePty,
+        SessionOptions {
             shell: spec.shell,
             cwd,
-            ..PtyOptions::default()
+            ..SessionOptions::default()
         },
         TerminalSize {
             cols: spec.cols,
@@ -69,8 +74,7 @@ pub(crate) fn terminal_spawn<R: Runtime>(
                 )
                 .ok();
         },
-    )
-    .map_err(|e| failed(CANT_START, e))?;
+    )?;
     terminals.sessions().insert(spec.id, session);
     Ok(())
 }
@@ -82,9 +86,9 @@ pub(crate) fn terminal_write(
     data: String,
 ) -> Result<(), Message> {
     match terminals.sessions().get_mut(&id) {
-        Some(session) => session
+        Some(session) => Ok(session
             .write(data.as_bytes())
-            .map_err(|e| failed(FAILED, e)),
+            .map_err(TerminalError::from)?),
         None => Ok(()),
     }
 }
@@ -97,9 +101,7 @@ pub(crate) fn terminal_resize(
     rows: u16,
 ) -> Result<(), Message> {
     match terminals.sessions().get(&id) {
-        Some(session) => session
-            .resize(TerminalSize { cols, rows })
-            .map_err(|e| failed(FAILED, e)),
+        Some(session) => Ok(session.resize(TerminalSize { cols, rows })?),
         None => Ok(()),
     }
 }

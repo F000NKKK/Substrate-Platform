@@ -5,7 +5,7 @@ use substrate_git_app::ports::{Branches, History};
 use substrate_git_domain::GitError;
 use substrate_git_domain::branches::{BranchCheckout, BranchSource, DeleteMode};
 use substrate_message::Message;
-use substrate_platform::workspace::Workspace;
+use substrate_workspace_app::Workspace;
 use tauri::State;
 
 use super::wire::branches::BranchDto;

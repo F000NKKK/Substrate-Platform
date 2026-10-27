@@ -9,7 +9,7 @@ use substrate_git_domain::commits::{CommitMode, CommitScope};
 use substrate_git_domain::stashes::StashMode;
 use substrate_git_domain::status::{ChangeKind, absolute};
 use substrate_git_gitcli::GitCli;
-use substrate_platform::text_view::TextViews;
+use substrate_workspace_domain::TextViews;
 
 fn git(dir: &Path, args: &[&str]) -> bool {
     Command::new("git")

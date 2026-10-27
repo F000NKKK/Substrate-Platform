@@ -7,7 +7,7 @@ use substrate_git_app::ports::{Diffs, History, WorkingTree};
 use substrate_git_domain::commits::{CommitMode, CommitScope};
 use substrate_git_domain::status::DiscardItem;
 use substrate_message::Message;
-use substrate_platform::workspace::Workspace;
+use substrate_workspace_app::Workspace;
 use tauri::State;
 
 use super::wire::commits::CommitResultDto;

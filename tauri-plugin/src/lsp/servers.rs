@@ -3,8 +3,9 @@
 use std::collections::HashMap;
 use std::sync::{Mutex, MutexGuard};
 
-use substrate_platform::lsp::{Client, LspError};
-use substrate_platform::sync::Locked;
+use substrate_lock::Locked;
+use substrate_lsp_app::Client;
+use substrate_lsp_domain::LspError;
 
 use super::server::Server;
 

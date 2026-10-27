@@ -13,3 +13,10 @@ repository = "https://github.com/F000NKKK/Substrate-Platform"
 workspace = true
 
 [dependencies]
+
+[dev-dependencies]
+criterion = { version = "0.8", default-features = false, features = ["cargo_bench_support"] }
+
+[[bench]]
+name = "stderr_levels"
+harness = false

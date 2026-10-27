@@ -5,10 +5,10 @@ use std::io::Cursor;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
+use substrate_lock::Locked;
 use substrate_run_domain::Task;
 
 use super::Script;
-use crate::lock::lock;
 use crate::ports::{ChildProcess, ExitReport, Launched, ProcessLauncher};
 
 /// Launches the scripted programs, remembering every task it was given;
@@ -28,7 +28,7 @@ impl FakeLauncher {
 
     /// The tasks it started, in order.
     pub(crate) fn launched(&self) -> Vec<Task> {
-        lock(&self.launched).clone()
+        self.launched.locked().clone()
     }
 }
 
@@ -38,7 +38,7 @@ impl ProcessLauncher for FakeLauncher {
             self.scripts.get(&task.program).cloned().ok_or_else(|| {
                 std::io::Error::new(std::io::ErrorKind::NotFound, "no such program")
             })?;
-        lock(&self.launched).push(task.clone());
+        self.launched.locked().push(task.clone());
         Ok(Launched {
             child: Box::new(FakeChild {
                 exit: script.exit,

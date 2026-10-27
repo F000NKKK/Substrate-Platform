@@ -6,8 +6,8 @@
 
 pub(crate) mod commands;
 mod exit;
-mod failure;
 mod output;
+mod shell_entry;
 mod spawn_request;
 mod terminals;
 

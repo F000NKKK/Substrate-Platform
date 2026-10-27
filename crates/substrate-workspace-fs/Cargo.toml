@@ -1,0 +1,28 @@
+[package]
+name = "substrate-workspace-fs"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "The workspace on the real file system: listing and changing folders and files, copying, reading text, watching folders for changes made outside the IDE."
+license = "AGPL-3.0-only"
+readme = "README.md"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]
+notify = "8"
+substrate-lock = { version = "0.1.0", path = "../substrate-lock" }
+substrate-message = { version = "0.1.0", path = "../substrate-message" }
+substrate-workspace-app = { version = "0.1.0", path = "../substrate-workspace-app" }
+substrate-workspace-domain = { version = "0.1.0", path = "../substrate-workspace-domain" }
+thiserror = "2"
+
+[dev-dependencies]
+criterion = { version = "0.8", default-features = false, features = ["cargo_bench_support"] }
+
+[[bench]]
+name = "directory_listing"
+harness = false

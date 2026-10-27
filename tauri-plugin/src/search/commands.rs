@@ -7,7 +7,6 @@ use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
 
 use substrate_message::Message;
-use substrate_platform::workspace::{NOTHING_OPEN, Workspace};
 use substrate_search_app::ports::FileWalker;
 use substrate_search_app::{
     DEFAULT_MAX_LINES, ReplaceRequest, Search, files_containing, find, replace,
@@ -16,6 +15,8 @@ use substrate_search_domain::SearchError;
 use substrate_search_domain::project::{Layout, OpenDocument, Scope};
 use substrate_search_domain::query::SearchQuery;
 use substrate_search_ignore::{DiskDocuments, IgnoreWalker};
+use substrate_workspace_app::Workspace;
+use substrate_workspace_domain::messages::NOTHING_OPEN;
 use tauri::State;
 use tauri::ipc::Channel;
 
@@ -109,13 +110,13 @@ pub(crate) async fn replace_in_files(
     request: ReplaceRequestDto,
 ) -> Result<ReplaceSummaryDto, Message> {
     check_root(&workspace, request.root.as_deref(), request.scope.into())?;
-    let roots = workspace.roots();
+    let boundary = workspace.boundary();
     let layout = layout.inner().clone();
     let files = documents.inner().clone();
     let request = ReplaceRequest::from(request);
     blocking(move || {
         let summary = replace(&request, &layout, (&IgnoreWalker, &files), &|path| {
-            roots.check(path).map_err(Message::from)
+            boundary.check(path).map_err(Message::from)
         })?;
         Ok::<_, SearchError>(ReplaceSummaryDto::from(summary))
     })

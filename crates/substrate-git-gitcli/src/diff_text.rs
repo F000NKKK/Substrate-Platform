@@ -5,7 +5,7 @@ use std::process::Stdio;
 
 use substrate_git_domain::diffs::{DiffSide, SideVersion};
 use substrate_git_domain::status::absolute;
-use substrate_platform::text_view::{TextView, TextViews};
+use substrate_workspace_domain::{TextView, TextViews};
 
 use crate::cli::git;
 
@@ -111,7 +111,7 @@ fn through_view(view: TextView, path: &str, bytes: &[u8]) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
-    use substrate_platform::text_view::TextView;
+    use substrate_workspace_domain::TextView;
 
     use super::*;
 

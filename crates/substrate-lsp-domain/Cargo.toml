@@ -1,0 +1,18 @@
+[package]
+name = "substrate-lsp-domain"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "The language server context's vocabulary: the languages a product knows and the server each is served by, what a server says unasked, file URIs, and why talking to a server fails."
+license = "AGPL-3.0-only"
+readme = "README.md"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]
+serde_json = "1"
+substrate-message = { version = "0.1.0", path = "../substrate-message" }
+thiserror = "2"

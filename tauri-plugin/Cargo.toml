@@ -11,31 +11,43 @@ repository = "https://github.com/F000NKKK/Substrate-Platform"
 # Tauri wants a plugin's links key: its permissions are found by it.
 links = "tauri-plugin-substrate"
 
-# Each command group is a feature of its name, turning on the core's module.
+# Each command group is a feature of its name, turning on its context's crates.
 [features]
-dap = ["substrate-platform/dap", "dep:serde_json", "dep:substrate-run-app"]
-fs = ["substrate-platform/fs"]
+dap = ["dep:serde_json", "dep:substrate-dap-app", "dep:substrate-dap-domain", "dep:substrate-run-app", "dep:substrate-run-process"]
+fs = []
 git = ["dep:substrate-git-app", "dep:substrate-git-domain", "dep:substrate-git-gitcli"]
-lsp = ["substrate-platform/lsp", "dep:serde_json", "dep:substrate-run-app"]
+lsp = ["dep:serde_json", "dep:substrate-lsp-app", "dep:substrate-lsp-domain", "dep:substrate-run-app", "dep:substrate-run-process"]
 search = ["dep:substrate-search-app", "dep:substrate-search-domain", "dep:substrate-search-ignore"]
 state = ["substrate-platform/state", "dep:serde_json"]
-terminal = ["substrate-platform/terminal"]
+terminal = ["dep:substrate-terminal-app", "dep:substrate-terminal-domain", "dep:substrate-terminal-pty"]
 
 [lints]
 workspace = true
 
 [dependencies]
+substrate-dap-app = { version = "0.1.0", path = "../crates/substrate-dap-app", optional = true }
+substrate-dap-domain = { version = "0.1.0", path = "../crates/substrate-dap-domain", optional = true }
 substrate-git-app = { version = "0.1.0", path = "../crates/substrate-git-app", optional = true }
 substrate-git-domain = { version = "0.1.0", path = "../crates/substrate-git-domain", optional = true }
 substrate-git-gitcli = { version = "0.1.0", path = "../crates/substrate-git-gitcli", optional = true }
+substrate-lsp-app = { version = "0.1.0", path = "../crates/substrate-lsp-app", optional = true }
+substrate-lsp-domain = { version = "0.1.0", path = "../crates/substrate-lsp-domain", optional = true }
 substrate-search-app = { version = "0.1.0", path = "../crates/substrate-search-app", optional = true }
 substrate-search-domain = { version = "0.1.0", path = "../crates/substrate-search-domain", optional = true }
 substrate-search-ignore = { version = "0.1.0", path = "../crates/substrate-search-ignore", optional = true }
+substrate-terminal-app = { version = "0.1.0", path = "../crates/substrate-terminal-app", optional = true }
+substrate-terminal-domain = { version = "0.1.0", path = "../crates/substrate-terminal-domain", optional = true }
+substrate-terminal-pty = { version = "0.1.0", path = "../crates/substrate-terminal-pty", optional = true }
 substrate-host-contract = { version = "0.1.0", path = "../crates/substrate-host-contract" }
+substrate-lock = { version = "0.1.0", path = "../crates/substrate-lock" }
 substrate-message = { version = "0.1.0", path = "../crates/substrate-message" }
 substrate-process = { version = "0.1.0", path = "../crates/substrate-process" }
 substrate-run-app = { version = "0.1.0", path = "../crates/substrate-run-app", optional = true }
-substrate-platform = { version = "0.4.0", path = ".." }
+substrate-run-process = { version = "0.1.0", path = "../crates/substrate-run-process", optional = true }
+substrate-workspace-app = { version = "0.1.0", path = "../crates/substrate-workspace-app" }
+substrate-workspace-domain = { version = "0.1.0", path = "../crates/substrate-workspace-domain" }
+substrate-workspace-fs = { version = "0.1.0", path = "../crates/substrate-workspace-fs" }
+substrate-platform = { version = "0.4.0", path = "..", optional = true }
 tauri = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", optional = true }

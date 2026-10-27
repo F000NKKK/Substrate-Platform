@@ -57,44 +57,20 @@ readme = "README.md"
 license = "AGPL-3.0-only"
 repository = "https://github.com/F000NKKK/Substrate-Platform"
 
-# Each module beyond the core is a feature of its name; a product turns on
-# what it uses.
+# Each module is a feature of its name; a product turns on what it uses.
 [features]
-# The debug adapters: `dap` starts them through the run crates and reads their
-# adapter list from TOML.
-dap = ["dep:serde_json", "dep:substrate-run-app", "dep:substrate-run-process", "dep:toml"]
-fs = ["dep:notify"]
-# The language servers: `lsp` starts them through the run crates and reads their
-# language list from TOML.
-lsp = ["dep:serde_json", "dep:substrate-run-app", "dep:substrate-run-process", "dep:toml"]
 project = []
 state = ["dep:serde_json"]
-terminal = ["dep:anyhow", "dep:portable-pty"]
-full = ["dap", "fs", "lsp", "project", "state", "terminal"]
+full = ["project", "state"]
 
 [lints]
 workspace = true
 
 [dependencies]
-anyhow = { version = "1", optional = true }
-notify = { version = "8", optional = true }
-portable-pty = { version = "0.9", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", optional = true }
 substrate-message = { version = "0.1.0", path = "crates/substrate-message" }
-substrate-process = { version = "0.1.0", path = "crates/substrate-process" }
-substrate-run-app = { version = "0.1.0", path = "crates/substrate-run-app", optional = true }
-substrate-run-process = { version = "0.1.0", path = "crates/substrate-run-process", optional = true }
 thiserror = "2"
-toml = { version = "1", optional = true }
 
 [dev-dependencies]
-criterion = { version = "0.8", default-features = false, features = ["cargo_bench_support"] }
-toml = "1"
-substrate-run-app = { version = "0.1.0", path = "crates/substrate-run-app" }
-substrate-run-domain = { version = "0.1.0", path = "crates/substrate-run-domain" }
-
-[[bench]]
-name = "core"
-harness = false
-required-features = ["fs", "terminal"]
+serde_json = "1"

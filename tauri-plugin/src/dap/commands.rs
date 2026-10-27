@@ -3,11 +3,14 @@
 use std::path::{Path, PathBuf};
 
 use serde_json::Value;
+use substrate_dap_app::Client;
+use substrate_dap_app::wire::EventDto;
+use substrate_dap_domain::{AdapterDefinition, AdapterId, Adapters, Command, DapError};
 use substrate_host_contract::events;
 use substrate_message::Message;
-use substrate_platform::dap::{AdapterDefinition, AdapterId, Adapters, Client, Command, DapError};
-use substrate_platform::workspace::Workspace;
 use substrate_run_app::LogSink;
+use substrate_run_process::SystemLauncher;
+use substrate_workspace_app::Workspace;
 use tauri::{AppHandle, Emitter, Runtime, State};
 
 use super::Sessions;
@@ -37,8 +40,9 @@ pub(crate) async fn dap_start<R: Runtime>(
     adapters: State<'_, Adapters>,
     sessions: State<'_, Sessions>,
     root: String,
-    adapter: AdapterId,
+    adapter: String,
 ) -> Result<Value, Message> {
+    let adapter = AdapterId::new(adapter);
     workspace.check(Path::new(&root))?;
     let key = (root.clone(), adapter.clone());
     if let Some(session) = sessions.running().get(&key)
@@ -47,7 +51,7 @@ pub(crate) async fn dap_start<R: Runtime>(
         return Ok(session.capabilities.clone());
     }
     let definition = adapters
-        .get(&adapter)
+        .find(&adapter)
         .map(|a| a.definition.clone())
         .ok_or_else(|| DapError::NoAdapter {
             adapter: adapter.clone(),
@@ -75,22 +79,28 @@ fn launch<R: Runtime>(
     log.on_push(move |line| {
         let event = OutputEvent {
             root: log_root.clone(),
-            adapter: log_adapter.clone(),
+            adapter: log_adapter.to_string(),
             line: line.text.clone(),
         };
         // The UI window is gone: nobody to tell.
         log_app.emit(events::DAP_OUTPUT, event).ok();
     });
     let (event_app, event_root, event_adapter) = (app.clone(), root.to_string(), adapter.clone());
-    let client = Client::start(&definition, &PathBuf::from(root), log, move |event| {
-        let event = DebugEvent {
-            root: event_root.clone(),
-            adapter: event_adapter.clone(),
-            event,
-        };
-        // The UI window is gone: nobody to tell.
-        event_app.emit(events::DAP_EVENT, event).ok();
-    })?;
+    let client = Client::start(
+        &SystemLauncher,
+        &definition,
+        &PathBuf::from(root),
+        log,
+        move |event| {
+            let event = DebugEvent {
+                root: event_root.clone(),
+                adapter: event_adapter.to_string(),
+                event: EventDto::from(event),
+            };
+            // The UI window is gone: nobody to tell.
+            event_app.emit(events::DAP_EVENT, event).ok();
+        },
+    )?;
     match client.initialize(adapter) {
         Ok(capabilities) => Ok(Session {
             client,
@@ -110,10 +120,11 @@ fn launch<R: Runtime>(
 pub(crate) async fn dap_request(
     sessions: State<'_, Sessions>,
     root: String,
-    adapter: AdapterId,
+    adapter: String,
     command: String,
     arguments: Value,
 ) -> Result<Value, Message> {
+    let adapter = AdapterId::new(adapter);
     let command = Command::from(command.as_str());
     let (client, arguments) = sessions.get(&root, &adapter, |session| {
         let arguments = match command {
@@ -130,9 +141,9 @@ pub(crate) async fn dap_request(
 pub(crate) async fn dap_stop(
     sessions: State<'_, Sessions>,
     root: String,
-    adapter: AdapterId,
+    adapter: String,
 ) -> Result<(), Message> {
-    let session = sessions.running().remove(&(root, adapter));
+    let session = sessions.running().remove(&(root, AdapterId::new(adapter)));
     if let Some(session) = session {
         blocking(move || {
             session.client.shutdown();

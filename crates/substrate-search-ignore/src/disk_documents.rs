@@ -2,9 +2,9 @@
 
 use std::path::Path;
 
-use substrate_platform::text_view::TextViews;
 use substrate_search_app::ports::{Decoding, DocumentSource};
 use substrate_search_domain::SearchError;
+use substrate_workspace_domain::TextViews;
 
 /// Files larger than this are assumed not to be source and skipped.
 const MAX_FILE_BYTES: u64 = 8 * 1024 * 1024;

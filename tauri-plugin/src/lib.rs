@@ -37,4 +37,4 @@ pub use options::Options;
 pub use state::StateOptions;
 /// The plugin's name: its commands are `plugin:substrate|<command>`.
 pub use substrate_host_contract::commands::SUBSTRATE_PLUGIN as NAME;
-pub use substrate_platform::workspace::Workspace;
+pub use substrate_workspace_app::Workspace;

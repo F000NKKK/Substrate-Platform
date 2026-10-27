@@ -3,7 +3,7 @@
 use std::path::{Path, PathBuf};
 
 use substrate_message::Message;
-use substrate_platform::workspace::Workspace;
+use substrate_workspace_app::Workspace;
 
 /// `root`, once it's known to be in the workspace.
 ///

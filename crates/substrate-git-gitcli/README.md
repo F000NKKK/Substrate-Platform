@@ -21,7 +21,7 @@ use std::path::Path;
 
 use substrate_git_app::ports::WorkingTree;
 use substrate_git_gitcli::GitCli;
-use substrate_platform::text_view::TextViews;
+use substrate_workspace_domain::TextViews;
 
 let git = GitCli::new(TextViews::default());
 // `None` when the folder isn't in a repository (or git isn't installed).
@@ -31,9 +31,10 @@ let _status = git.status(Path::new("."));
 ## Depends on / used by
 
 Depends on [`substrate-git-app`](../substrate-git-app/README.md),
-[`substrate-git-domain`](../substrate-git-domain/README.md) and
-[`substrate-platform`](../../README.md) (the clean-environment `process::command`
-and the text views). Used by [`tauri-plugin-substrate`](../../tauri-plugin/README.md).
+[`substrate-git-domain`](../substrate-git-domain/README.md),
+[`substrate-process`](../substrate-process/README.md) (the clean-environment
+`command`) and [`substrate-workspace-domain`](../substrate-workspace-domain/README.md)
+(the text views). Used by [`tauri-plugin-substrate`](../../tauri-plugin/README.md).
 
 ## License
 

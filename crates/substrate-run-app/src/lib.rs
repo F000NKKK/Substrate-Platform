@@ -6,7 +6,6 @@
 #![doc = include_str!("../README.md")]
 
 mod completion;
-mod lock;
 mod log_sink;
 pub mod ports;
 mod streaming;
