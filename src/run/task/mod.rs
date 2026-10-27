@@ -224,7 +224,7 @@ fn spawn_streaming(
 /// and holding the output pipes open. On Unix the child leads its own process
 /// group (see `spawn_streaming`), so the whole group is signalled at once; on
 /// Windows `taskkill /T` walks the process tree instead.
-fn kill_tree(child: &mut Child) {
+pub(crate) fn kill_tree(child: &mut Child) {
     #[cfg(unix)]
     {
         if let Ok(pgid) = libc::pid_t::try_from(child.id()) {
