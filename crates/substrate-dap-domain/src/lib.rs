@@ -8,6 +8,9 @@
 //! session that asked for a stack trace is the one that reads it.
 #![doc = include_str!("../README.md")]
 
+mod adapter;
+mod adapter_definition;
+mod adapter_id;
 mod adapters;
 mod dap_error;
 mod dap_error_message;
@@ -16,7 +19,10 @@ mod ids;
 pub mod messages;
 mod requests;
 
-pub use adapters::{Adapter, AdapterDefinition, AdapterId, Adapters};
+pub use adapter::Adapter;
+pub use adapter_definition::AdapterDefinition;
+pub use adapter_id::AdapterId;
+pub use adapters::Adapters;
 pub use dap_error::DapError;
 pub use events::{ChangeReason, Event, OutputCategory, StopReason};
 pub use ids::{FrameId, Seq, ThreadId, VariablesReference};

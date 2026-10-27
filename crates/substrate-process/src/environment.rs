@@ -57,7 +57,7 @@ mod tests {
     #[test]
     fn outside_an_appimage_nothing_changes() {
         if std::env::var_os("APPDIR").is_none() {
-            assert!(host_environment().is_empty());
+            assert_eq!(host_environment().len(), 0);
         }
     }
 }

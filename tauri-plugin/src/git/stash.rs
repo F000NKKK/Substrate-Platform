@@ -1,4 +1,8 @@
 //! Stashes and the global Git settings.
+#![expect(
+    clippy::unreachable,
+    reason = "the expansion of `#[tauri::command]` contains `unreachable!`"
+)]
 
 use substrate_git_app::ports::{Settings, Stashes};
 use substrate_git_app::stashing;

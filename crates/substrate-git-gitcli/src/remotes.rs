@@ -133,11 +133,7 @@ impl Remotes for GitCli {
             name.trim().to_string()
         };
         let dest = parent.join(&name);
-        if dest.exists()
-            && std::fs::read_dir(&dest)
-                .map(|mut d| d.next().is_some())
-                .unwrap_or(true)
-        {
+        if dest.exists() && std::fs::read_dir(&dest).map_or(true, |mut d| d.next().is_some()) {
             return Err(GitError::CloneTargetNotEmpty { path: dest });
         }
         let dest_text = dest.to_string_lossy().into_owned();

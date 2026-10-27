@@ -3,12 +3,11 @@
 members = ["tauri-plugin", "crates/*"]
 resolver = "3"
 
-# Craftbook's lint set (templates/workspace-lints.toml). Wave 0 of the
-# migration (craftbook adoption/substrate-platform.md §4) turns every `deny`
-# into `warn`, so the build stays green while the backlog is worked off;
-# wave 11 turns them back to `deny`. These six are `deny` already: the build
-# of a product depending on Substrate by path prints a crate's own warnings, so
-# they stay at zero.
+# Craftbook's lint set (templates/workspace-lints.toml), as `deny` (wave 11
+# of the migration, craftbook adoption/substrate-platform.md §4): clippy's
+# lints fail the build of the workspace. rustc's own lints stay `warn` (a
+# product building Substrate by path would otherwise break on a new
+# compiler's warnings), except these `deny`: they stay at zero.
 [workspace.lints.rust]
 missing_docs = "deny"
 missing_debug_implementations = "deny"
@@ -18,31 +17,31 @@ unused_qualifications = "deny"
 elided_lifetimes_in_paths = "deny"
 
 [workspace.lints.clippy]
-pedantic = { level = "warn", priority = -1 }
-too_many_lines = "warn"
-too_many_arguments = "warn"
-excessive_nesting = "warn"
-cognitive_complexity = "warn"
-fn_params_excessive_bools = "warn"
-struct_excessive_bools = "warn"
-module_name_repetitions = "warn"
-unwrap_used = "warn"
-panic = "warn"
-todo = "warn"
-unreachable = "warn"
-unimplemented = "warn"
-dbg_macro = "warn"
-print_stdout = "warn"
-print_stderr = "warn"
-allow_attributes = "warn"
-allow_attributes_without_reason = "warn"
-undocumented_unsafe_blocks = "warn"
-wildcard_imports = "warn"
-let_underscore_must_use = "warn"
-let_underscore_untyped = "warn"
-missing_errors_doc = "warn"
-missing_panics_doc = "warn"
+pedantic = { level = "deny", priority = -1 }
+too_many_lines = "deny"
+too_many_arguments = "deny"
+excessive_nesting = "deny"
+cognitive_complexity = "deny"
+fn_params_excessive_bools = "deny"
+struct_excessive_bools = "deny"
+module_name_repetitions = "deny"
+unwrap_used = "deny"
+panic = "deny"
+todo = "deny"
+unreachable = "deny"
+unimplemented = "deny"
+dbg_macro = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+allow_attributes = "deny"
+allow_attributes_without_reason = "deny"
+undocumented_unsafe_blocks = "deny"
+wildcard_imports = "deny"
+let_underscore_must_use = "deny"
+let_underscore_untyped = "deny"
+missing_errors_doc = "deny"
+missing_panics_doc = "deny"
 mod_module_files = "allow"
-self_named_module_files = "warn"
-large_types_passed_by_value = "warn"
-shadow_unrelated = "warn"
+self_named_module_files = "deny"
+large_types_passed_by_value = "deny"
+shadow_unrelated = "deny"

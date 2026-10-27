@@ -1,4 +1,8 @@
 //! Folders and files, as commands.
+#![expect(
+    clippy::needless_pass_by_value,
+    reason = "Tauri hands a command its arguments by value: `State` and deserialized parameters cannot be borrowed"
+)]
 
 use std::path::{Path, PathBuf};
 

@@ -221,7 +221,7 @@ Run `npm install` in `Substrate-Platform/ui` once so its own dependencies
 ```sh
 cargo build --workspace --all-features
 cargo test --workspace --all-features
-cargo clippy --workspace --all-targets --all-features
+cargo clippy --workspace --all-targets --all-features -- -D warnings
 ```
 
 The toolchain is pinned to Rust 1.99 in `rust-toolchain.toml`.

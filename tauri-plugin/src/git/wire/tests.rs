@@ -72,15 +72,15 @@ fn small_results_keep_their_names() {
         hash: "abc".into(),
         subject: "s".into(),
     };
-    let value = serde_json::to_value(CommitResultDto::from(made)).expect("serializes");
-    assert_eq!(value, json!({ "hash": "abc", "subject": "s" }));
+    let committed = serde_json::to_value(CommitResultDto::from(made)).expect("serializes");
+    assert_eq!(committed, json!({ "hash": "abc", "subject": "s" }));
     let texts = DiffTexts {
         left: Some("a".into()),
         ..DiffTexts::default()
     };
-    let value = serde_json::to_value(DiffTextsDto::from(texts)).expect("serializes");
+    let diffed = serde_json::to_value(DiffTextsDto::from(texts)).expect("serializes");
     assert_eq!(
-        value,
+        diffed,
         json!({ "left": "a", "right": null, "binary": false })
     );
 }

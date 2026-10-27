@@ -1,4 +1,12 @@
 //! Language servers, as commands.
+#![expect(
+    clippy::unreachable,
+    reason = "the expansion of `#[tauri::command]` contains `unreachable!`"
+)]
+#![expect(
+    clippy::needless_pass_by_value,
+    reason = "Tauri hands a command its arguments by value: `State` and deserialized parameters cannot be borrowed"
+)]
 
 use std::path::{Path, PathBuf};
 
@@ -171,6 +179,10 @@ pub(crate) fn lsp_did_open(
 
 /// The editor changed `path` to `text` at `version`.
 #[tauri::command]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "Tauri injects state as separate parameters; the UI sends the rest"
+)]
 pub(crate) fn lsp_did_change(
     servers: State<'_, Servers>,
     root: String,

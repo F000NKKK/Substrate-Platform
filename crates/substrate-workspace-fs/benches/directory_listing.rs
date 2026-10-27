@@ -1,4 +1,8 @@
 //! Directory levels listed for a file tree.
+#![expect(
+    clippy::unwrap_used,
+    reason = "a benchmark that cannot build or list its fixture has nothing to measure"
+)]
 
 use std::hint::black_box;
 
@@ -17,7 +21,7 @@ fn directory_listing(c: &mut Criterion) {
         }
     }
     c.bench_function("list/2000_entries", |b| {
-        b.iter(|| list(black_box(&dir)).unwrap().len())
+        b.iter(|| list(black_box(&dir)).unwrap().len());
     });
     std::fs::remove_dir_all(&dir).unwrap();
 }

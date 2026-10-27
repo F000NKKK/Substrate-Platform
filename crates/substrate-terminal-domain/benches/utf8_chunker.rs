@@ -19,7 +19,7 @@ fn pty_output(c: &mut Criterion) {
                 total += chunker.push(black_box(chunk)).len();
             }
             total + chunker.finish().len()
-        })
+        });
     });
     group.bench_function("keystroke_echo", |b| {
         b.iter(|| {
@@ -29,7 +29,7 @@ fn pty_output(c: &mut Criterion) {
                 total += chunker.push(black_box(chunk)).len();
             }
             total
-        })
+        });
     });
     group.finish();
 }

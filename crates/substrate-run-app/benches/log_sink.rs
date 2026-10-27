@@ -27,7 +27,7 @@ fn log_sink(c: &mut Criterion) {
                 sink.drain().len()
             },
             BatchSize::SmallInput,
-        )
+        );
     });
 }
 

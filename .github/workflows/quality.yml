@@ -1,8 +1,7 @@
 # Craftbook quality gates (craftbook rust/08-testing-and-quality.md §8.5),
 # adapted from craftbook templates/ci.yml for the migration in
-# craftbook adoption/substrate-platform.md. While the lint set is at `warn`
-# (until wave 11), clippy fails only on its correctness and suspicious groups;
-# wave 11 turns the lint set to `deny` and this job to `-D warnings`.
+# craftbook adoption/substrate-platform.md. The lint set stays at `warn` for
+# quick local builds; CI runs clippy with `-D warnings`, so any warning fails.
 name: quality
 
 on:
@@ -15,8 +14,7 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
-  # Broken doc links fail now; `-D warnings` (missing docs too) from wave 11.
-  RUSTDOCFLAGS: -D rustdoc::broken_intra_doc_links -D rustdoc::private_intra_doc_links
+  RUSTDOCFLAGS: -D warnings -D rustdoc::all
   # The Craftbook version this project follows; bumped by the project's own PR.
   CRAFTBOOK_REF: main
   # `tauri-plugin` links GTK and WebKitGTK on Linux.
@@ -41,7 +39,7 @@ jobs:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
       - run: cargo fmt --all --check
-      - run: cargo clippy --workspace --all-targets --all-features -- -D clippy::correctness -D clippy::suspicious
+      - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
       - run: python3 .craftbook/tools/craftcheck check . --baseline .craftcheck-baseline
       - run: python3 .craftbook/tools/craftcheck deps . --baseline .craftcheck-deps-baseline
 

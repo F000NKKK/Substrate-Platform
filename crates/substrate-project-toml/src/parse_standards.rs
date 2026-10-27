@@ -17,7 +17,7 @@ pub fn parse_standards(text: &str) -> Result<Vec<ProjectStandard>, ProjectError>
     Ok(file
         .standard
         .into_iter()
-        .map(|standard| standard.into_standard())
+        .map(super::standard_dto::StandardDto::into_standard)
         .collect())
 }
 

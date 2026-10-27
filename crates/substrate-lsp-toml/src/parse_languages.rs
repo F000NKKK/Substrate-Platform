@@ -64,7 +64,7 @@ mod tests {
 
     #[test]
     fn an_empty_list_is_no_languages() {
-        assert!(parse_languages("").unwrap().all().is_empty());
+        assert_eq!(parse_languages("").unwrap().all(), []);
     }
 
     #[test]

@@ -32,7 +32,7 @@ code, so we can agree on the approach first.
 
    ```bash
    cargo fmt --all --check
-   cargo clippy --workspace --all-targets --all-features
+   cargo clippy --workspace --all-targets --all-features -- -D warnings
    python3 <craftbook>/tools/craftcheck check . --baseline .craftcheck-baseline
    python3 <craftbook>/tools/craftcheck deps . --baseline .craftcheck-deps-baseline
    cargo test --workspace --all-features
@@ -46,14 +46,16 @@ code, so we can agree on the approach first.
    on Linux (`libgtk-3-dev libwebkit2gtk-4.1-dev libsoup-3.0-dev
    libayatana-appindicator3-dev librsvg2-dev`).
 
-   The lint set is at `warn` while the code is migrated to Craftbook
-   (`adoption/substrate-platform.md` there), except `missing_docs`, `unsafe_code`, `unused_qualifications`,
-   `missing_debug_implementations`, `unreachable_pub` and
-   `elided_lifetimes_in_paths`, which are `deny`: a product building Substrate
-   by path sees its warnings, so these stay at zero in every feature
-   combination. A change adds no new warning
-   and no new `craftcheck` finding, and regenerates the baselines when it
-   removes some (`--write-baseline`; they only shrink). Coverage only goes up.
+   Craftbook's clippy lint set is `deny` in the workspace and CI runs clippy
+   with `-D warnings`: a change adds no warning. Where a lint cannot be met,
+   `#[expect(lint, reason = "…")]` states why (never `#[allow]`). rustc's own
+   lints stay `warn`, except `missing_docs`, `unsafe_code`,
+   `unused_qualifications`, `missing_debug_implementations`,
+   `unreachable_pub` and `elided_lifetimes_in_paths`, which are `deny`: a
+   product building Substrate by path sees its warnings, so these stay at
+   zero in every feature combination. A change adds no new `craftcheck`
+   finding, and regenerates the baselines when it removes some
+   (`--write-baseline`; they only shrink). Coverage only goes up.
 4. Open a pull request that explains what changed and why.
 
 Substrate stays generic: no Yog-specific formats or logic, only infrastructure any IDE could use.

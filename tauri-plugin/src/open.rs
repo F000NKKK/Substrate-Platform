@@ -1,6 +1,10 @@
 //! Opening links and files in the user's default app — through Substrate's
 //! process helper, so what a packaged app starts gets the system's own
-//! environment (Tauri's opener passes an AppImage's on, and they fail).
+//! environment (Tauri's opener passes an `AppImage`'s on, and they fail).
+#![expect(
+    clippy::needless_pass_by_value,
+    reason = "Tauri hands a command its arguments by value: `State` and deserialized parameters cannot be borrowed"
+)]
 
 use std::path::Path;
 

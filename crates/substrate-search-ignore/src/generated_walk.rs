@@ -24,9 +24,7 @@ fn files_of(generated: &Generated, root: &Path) -> Vec<PathBuf> {
         return Vec::new();
     }
     let mut builder = ignore::WalkBuilder::new(&directory);
-    builder
-        .standard_filters(false)
-        .sort_by_file_name(|a, b| a.cmp(b));
+    builder.standard_filters(false).sort_by_file_name(Ord::cmp);
     builder
         .build()
         .filter_map(Result::ok)

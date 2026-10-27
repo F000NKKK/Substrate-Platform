@@ -1,4 +1,8 @@
 //! What talks to remotes or runs long — streamed to the UI.
+#![expect(
+    clippy::unreachable,
+    reason = "the expansion of `#[tauri::command]` contains `unreachable!`"
+)]
 
 use std::path::Path;
 
@@ -33,6 +37,10 @@ pub(crate) async fn git_remote<R: Runtime>(
 
 /// Merge into Current / Rebase onto, streamed.
 #[tauri::command]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "Tauri injects state as separate parameters; the UI sends the rest"
+)]
 pub(crate) async fn git_integrate<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
@@ -79,6 +87,10 @@ pub(crate) async fn git_operation<R: Runtime>(
 /// dialog, so it joins the workspace the way Open Folder's does. The new
 /// working tree's path, to open.
 #[tauri::command]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "Tauri injects state as separate parameters; the UI sends the rest"
+)]
 pub(crate) async fn git_clone<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,

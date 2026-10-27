@@ -2,6 +2,10 @@
 
 /// A local or remote-tracking branch with its tip.
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "remote, current and gone are independent facts git reports about a branch"
+)]
 pub struct Branch {
     /// `main`, `origin/main`.
     pub name: String,

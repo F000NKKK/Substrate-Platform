@@ -23,6 +23,7 @@ impl ProjectStandard {
     /// `detect_files` is among `files` — the folder's files, relative to it
     /// and `/`-separated, as deep as the product lists them. `None` if
     /// nothing matches.
+    #[must_use]
     pub fn detect(files: &[String], standards: &[ProjectStandard]) -> Option<String> {
         standards
             .iter()
@@ -72,12 +73,12 @@ mod tests {
     fn standard(id: &str, files: &[&str]) -> ProjectStandard {
         ProjectStandard {
             id: id.to_string(),
-            detect_files: files.iter().map(|f| f.to_string()).collect(),
+            detect_files: files.iter().map(ToString::to_string).collect(),
         }
     }
 
     fn files(names: &[&str]) -> Vec<String> {
-        names.iter().map(|n| n.to_string()).collect()
+        names.iter().map(ToString::to_string).collect()
     }
 
     #[test]

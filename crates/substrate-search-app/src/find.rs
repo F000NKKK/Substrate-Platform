@@ -81,14 +81,14 @@ fn search_file(
     };
     summary.files_searched += 1;
     let remaining = search.max_lines - summary.matching_lines;
-    let matches = matcher.find_all(
+    let found = matcher.find_all(
         text,
         remaining.saturating_mul(MATCHES_PER_LINE).max(MIN_MATCHES),
     );
-    if matches.is_empty() {
+    if found.is_empty() {
         return None;
     }
-    let mut hits = line_hits(text, &matches);
+    let mut hits = line_hits(text, &found);
     if hits.len() >= remaining {
         hits.truncate(remaining);
         summary.truncated = true;

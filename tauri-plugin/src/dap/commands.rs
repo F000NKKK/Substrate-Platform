@@ -1,4 +1,12 @@
 //! Debug adapters, as commands.
+#![expect(
+    clippy::unreachable,
+    reason = "the expansion of `#[tauri::command]` contains `unreachable!`"
+)]
+#![expect(
+    clippy::needless_pass_by_value,
+    reason = "Tauri hands a command its arguments by value: `State` and deserialized parameters cannot be borrowed"
+)]
 
 use std::path::{Path, PathBuf};
 

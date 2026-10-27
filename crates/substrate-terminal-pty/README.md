@@ -7,7 +7,7 @@ installed ones on the `PATH`, `default_shell` names the user's own.
 **Layer and context:** infra · terminal
 
 - For: the real implementations of `substrate-terminal-app`'s ports. The shell
-  starts with the system's own environment, not an AppImage's.
+  starts with the system's own environment, not an `AppImage`'s.
 - Not for: the session's use cases (`substrate-terminal-app`).
 
 ## Usage

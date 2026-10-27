@@ -19,10 +19,10 @@ fn generated_code_is_searched_only_when_asked() {
     std::fs::write(&generated, "pub const NEEDLE: &str = \"needle\";\n").unwrap();
     std::fs::write(dir.join(".build/Cargo.toml"), "needle\n").unwrap();
     let root = dir.to_string_lossy().into_owned();
-    let search = |generated: GeneratedCode| {
+    let search = |scope: GeneratedCode| {
         let mut files = Vec::new();
         let q = SearchQuery {
-            generated,
+            generated: scope,
             ..query("needle")
         };
         find(
@@ -188,7 +188,7 @@ fn a_documents_search_reads_only_the_buffers_its_mask_covers() {
     };
 
     find(&search, adapters_ref(), &|| true, &mut |f| {
-        files.push(f.relative_path)
+        files.push(f.relative_path);
     })
     .unwrap();
 

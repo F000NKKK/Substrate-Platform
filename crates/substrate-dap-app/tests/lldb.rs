@@ -1,4 +1,8 @@
 //! A real adapter.
+#![expect(
+    clippy::unwrap_used,
+    reason = "a scenario against a real adapter reads its answers by unwrapping: a failure is the test failing"
+)]
 
 use std::path::Path;
 use std::sync::mpsc;
@@ -69,6 +73,19 @@ fn locals_at_the_top(client: &Client, thread: ThreadId) -> Value {
     client.variables(locals).unwrap()
 }
 
+/// The stopped frame shows `answer` as 42.
+fn check_the_answer(client: &Client, thread: ThreadId) {
+    let variables = locals_at_the_top(client, thread);
+    assert!(
+        variables["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|v| v["name"] == "answer" && v["value"] == "42"),
+        "{variables}"
+    );
+}
+
 /// A real adapter end to end: `cargo test -p substrate-dap-app -- --ignored`
 /// with `lldb-dap` (LLVM's) and `rustc` installed. Without them it says so
 /// and passes.
@@ -116,15 +133,7 @@ fn lldb_dap_stops_at_a_breakpoint_and_shows_a_variable() {
     else {
         panic!("stopped without a thread: {stopped:?}");
     };
-    let variables = locals_at_the_top(&client, thread);
-    assert!(
-        variables["variables"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .any(|v| v["name"] == "answer" && v["value"] == "42"),
-        "{variables}"
-    );
+    check_the_answer(&client, thread);
     // The line has more than one location: clear the breakpoints to run to the end.
     client.set_breakpoints(&source, &[]).unwrap();
     client.resume(thread).unwrap();

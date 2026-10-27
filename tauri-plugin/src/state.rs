@@ -1,6 +1,10 @@
 //! What the IDE remembers: a project's state in the product's private folder
 //! of it ([`StateOptions::project_dir`]), the app's in its config folder.
 //! The UI owns the keys of both. Feature `state`.
+#![expect(
+    clippy::needless_pass_by_value,
+    reason = "Tauri hands a command its arguments by value: `State` and deserialized parameters cannot be borrowed"
+)]
 
 use std::path::{Path, PathBuf};
 

@@ -37,17 +37,17 @@ fn whole_word_checks_neighbours() {
         ..query("foo")
     };
     assert_eq!(found(&q, "foo foobar _foo foo_ (foo)").len(), 2);
-    let q = SearchQuery {
+    let doubled = SearchQuery {
         word: WordMatch::WholeWord,
         ..query("aa")
     };
-    assert_eq!(found(&q, "aaa aa"), ["aa"]);
+    assert_eq!(found(&doubled, "aaa aa"), ["aa"]);
     // Punctuation at the edge needs no word boundary.
-    let q = SearchQuery {
+    let arrow = SearchQuery {
         word: WordMatch::WholeWord,
         ..query("->")
     };
-    assert_eq!(found(&q, "a->b"), ["->"]);
+    assert_eq!(found(&arrow, "a->b"), ["->"]);
 }
 
 #[test]
@@ -60,17 +60,17 @@ fn regex_mode_and_errors() {
         found(&q, "fn main() {}\npub fn run()"),
         ["fn main", "fn run"]
     );
-    let q = SearchQuery {
+    let unclosed = SearchQuery {
         syntax: PatternSyntax::Regex,
         ..query("(")
     };
-    assert!(Matcher::new(&q).is_err());
+    assert!(Matcher::new(&unclosed).is_err());
     // Empty matches are skipped rather than looping forever.
-    let q = SearchQuery {
+    let starred = SearchQuery {
         syntax: PatternSyntax::Regex,
         ..query("x*")
     };
-    assert_eq!(found(&q, "ab x"), ["x"]);
+    assert_eq!(found(&starred, "ab x"), ["x"]);
 }
 
 #[test]
@@ -85,9 +85,9 @@ fn replace_literal_and_with_captures() {
         case: CaseSensitivity::Sensitive,
         ..query(r"(\w+)\.unwrap\(\)")
     };
-    let matcher = Matcher::new(&q).unwrap();
+    let captured = Matcher::new(&q).unwrap();
     assert_eq!(
-        matcher.replace_all("x.unwrap(); y.unwrap()", "$1?", ReplacementMode::Expand),
+        captured.replace_all("x.unwrap(); y.unwrap()", "$1?", ReplacementMode::Expand),
         ("x?; y?".to_string(), 2)
     );
 }

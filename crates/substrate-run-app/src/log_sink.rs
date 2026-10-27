@@ -85,17 +85,14 @@ impl LogSink {
             text: text.into(),
         };
         let mut state = self.state();
-        match state.on_push.clone() {
+        if let Some(callback) = state.on_push.clone() {
             // Call it with the lock released, in case the callback itself is
             // slow or re-enters this sink.
-            Some(callback) => {
-                drop(state);
-                callback(&line);
-            }
-            None => {
-                state.lines.push_back(line);
-                state.trim();
-            }
+            drop(state);
+            callback(&line);
+        } else {
+            state.lines.push_back(line);
+            state.trim();
         }
     }
 
@@ -128,6 +125,7 @@ impl LogSink {
 
     /// Remove and return every retained line pushed since the last drain —
     /// pair with a Tauri command that ships them to the frontend.
+    #[must_use]
     pub fn drain(&self) -> Vec<LogLine> {
         std::mem::take(&mut self.state().lines).into()
     }
@@ -175,7 +173,7 @@ mod tests {
             ["two", "three"]
         );
         assert_eq!(lines[1].level, Level::Error);
-        assert!(sink.lines().is_empty());
+        assert_eq!(sink.lines(), Vec::<LogLine>::new());
     }
 
     #[test]

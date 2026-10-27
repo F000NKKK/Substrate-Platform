@@ -55,7 +55,7 @@ steps = [{ workflow = "build" }, { run = "cargo", args = ["test"] }]
         assert!(ci.description.is_none());
         assert!(matches!(&ci.steps[0], Step::Compose { workflow } if workflow == "build"));
         assert!(
-            matches!(&ci.steps[1], Step::Run { args, cwd, env, .. } if args == &["test"] && cwd.is_none() && env.is_empty())
+            matches!(&ci.steps[1], Step::Run { args: a, cwd: c, env: e, .. } if a == &["test"] && c.is_none() && e.is_empty())
         );
     }
 

@@ -1,4 +1,8 @@
 //! Git Changes: the status, staging, committing and the diffs.
+#![expect(
+    clippy::unreachable,
+    reason = "the expansion of `#[tauri::command]` contains `unreachable!`"
+)]
 
 use std::path::Path;
 
@@ -77,6 +81,10 @@ pub(crate) async fn git_discard(
     clippy::too_many_arguments,
     reason = "Tauri injects state as separate parameters; the UI sends the rest"
 )]
+#[expect(
+    clippy::fn_params_excessive_bools,
+    reason = "`amend` and `stage_all` are the UI's two independent flags, named in the command's wire"
+)]
 pub(crate) async fn git_commit(
     workspace: State<'_, Workspace>,
     source: State<'_, SourceControl>,
@@ -86,12 +94,12 @@ pub(crate) async fn git_commit(
     stage_all: bool,
 ) -> Result<CommitResultDto, Message> {
     let root = checked(&workspace, &root)?;
-    let mode = if amend {
+    let how = if amend {
         CommitMode::Amend
     } else {
         CommitMode::New
     };
-    let scope = if stage_all {
+    let staging = if stage_all {
         CommitScope::All
     } else {
         CommitScope::Staged
@@ -103,7 +111,7 @@ pub(crate) async fn git_commit(
             &source.lock,
             &root,
             &message,
-            (mode, scope),
+            (how, staging),
         )?;
         Ok::<_, substrate_git_domain::GitError>(CommitResultDto::from(made))
     })

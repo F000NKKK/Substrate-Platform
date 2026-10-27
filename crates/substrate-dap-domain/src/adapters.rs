@@ -36,6 +36,8 @@ impl Adapters {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeMap;
+
     use super::*;
     use crate::AdapterDefinition;
 
@@ -46,7 +48,7 @@ mod tests {
             definition: AdapterDefinition {
                 command: id.into(),
                 args: Vec::new(),
-                env: Default::default(),
+                env: BTreeMap::default(),
                 launch_defaults: None,
             },
         }

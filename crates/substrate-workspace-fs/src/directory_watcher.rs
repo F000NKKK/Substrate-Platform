@@ -51,7 +51,7 @@ impl DirectoryWatcher {
         let (tx, rx) = mpsc::channel::<Vec<PathBuf>>();
         let watcher = notify::recommended_watcher(move |res: notify::Result<notify::Event>| {
             if let Ok(ev) = res
-                && changes_content(&ev.kind)
+                && changes_content(ev.kind)
             {
                 tx.send(ev.paths).ok();
             }
@@ -83,14 +83,14 @@ impl DirectoryWatcher {
     /// permission) is skipped.
     pub fn set(&self, folders: impl IntoIterator<Item = PathBuf>) {
         let wanted: HashSet<PathBuf> = folders.into_iter().collect();
-        let mut watcher = self.watcher.locked();
+        let mut backend = self.watcher.locked();
         let mut watched = self.watched.locked();
         for gone in watched.difference(&wanted) {
-            watcher.unwatch(gone).ok();
+            backend.unwatch(gone).ok();
         }
         watched.retain(|p| wanted.contains(p));
         for new in wanted {
-            if !watched.contains(&new) && watcher.watch(&new, RecursiveMode::NonRecursive).is_ok() {
+            if !watched.contains(&new) && backend.watch(&new, RecursiveMode::NonRecursive).is_ok() {
                 watched.insert(new);
             }
         }
@@ -106,7 +106,7 @@ impl DirectoryWatcher {
 }
 
 /// Opening or reading a file changes nothing; closing it after writing does.
-fn changes_content(kind: &EventKind) -> bool {
+fn changes_content(kind: EventKind) -> bool {
     match kind {
         EventKind::Access(AccessKind::Close(AccessMode::Write)) => true,
         EventKind::Access(_) => false,
@@ -172,7 +172,7 @@ mod tests {
 
         // Unwatched: no more batches for it.
         w.set([]);
-        assert!(w.watched().is_empty());
+        assert_eq!(w.watched(), Vec::<PathBuf>::new());
         batches.locked().clear();
         std::fs::write(&file, "three").unwrap();
         std::thread::sleep(Duration::from_millis(300));

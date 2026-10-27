@@ -6,7 +6,7 @@ use substrate_terminal_domain::SessionOptions;
 use crate::default_shell;
 
 /// The shell command for `options`, with the system's environment, not an
-/// AppImage's (see `substrate_process`).
+/// `AppImage`'s (see `substrate_process`).
 pub(crate) fn command(options: SessionOptions) -> CommandBuilder {
     let mut command = CommandBuilder::new(options.shell.unwrap_or_else(default_shell));
     for (key, value) in substrate_process::host_environment() {

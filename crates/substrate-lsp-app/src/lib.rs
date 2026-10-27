@@ -17,6 +17,7 @@ mod capabilities;
 mod client;
 mod connection;
 mod documents;
+mod envelope;
 mod handshake;
 mod shutdown;
 

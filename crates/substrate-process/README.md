@@ -5,7 +5,7 @@ and files with the user's default app.
 
 **Layer and context:** infra · process
 
-- For: `command` (a `Command` without the variables an AppImage's runtime
+- For: `command` (a `Command` without the variables an `AppImage`'s runtime
   set), `start`, `open_link`, `open_path`, `reveal`, and the messages of
   `ProcessError`.
 - Not for: streaming a program's output into a log; that is

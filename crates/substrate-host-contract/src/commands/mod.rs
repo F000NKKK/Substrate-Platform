@@ -42,7 +42,7 @@ mod tests {
     fn every_command_of_substrate_is_listed_once() {
         let all = names(SUBSTRATE);
         let mut unique = all.clone();
-        unique.sort();
+        unique.sort_unstable();
         unique.dedup();
         assert_eq!(all.len(), unique.len());
     }

@@ -1,5 +1,5 @@
 //! Projects and solutions, the way an IDE models them whatever builds them.
-//! The model holds what Visual Studio's `.sln`/`.slnx` and MSBuild's
+//! The model holds what Visual Studio's `.sln`/`.slnx` and `MSBuild`'s
 //! `.csproj` hold, as well as Cargo's or a product's own files:
 //! - [`Solution`]: solution folders, configurations and platforms, each
 //!   project's configuration per solution configuration, build dependencies;

@@ -1,6 +1,7 @@
 //! Every message template the core declares, for the generated copy.
 
 /// Every template Substrate declares, for the export.
+#[must_use]
 pub fn catalog() -> Vec<(&'static str, &'static str, &'static str)> {
     let groups: &[&[(&str, &str, &str)]] = &[
         #[cfg(feature = "dap")]
