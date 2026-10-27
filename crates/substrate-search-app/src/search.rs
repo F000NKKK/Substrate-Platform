@@ -7,7 +7,7 @@ use substrate_search_domain::query::SearchQuery;
 pub const DEFAULT_MAX_LINES: usize = 20_000;
 
 /// What one search covers.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Search<'a> {
     /// The project root — required for `Project` scope, used for relative paths otherwise.
     pub root: Option<&'a str>,

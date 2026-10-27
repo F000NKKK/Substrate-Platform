@@ -46,7 +46,7 @@ code, so we can agree on the approach first.
    libayatana-appindicator3-dev librsvg2-dev`).
 
    The lint set is at `warn` while the code is migrated to Craftbook
-   (`adoption/substrate-platform.md` there), except `missing_docs`,
+   (`adoption/substrate-platform.md` there), except `missing_docs`, `unsafe_code`, `unused_qualifications`,
    `missing_debug_implementations`, `unreachable_pub` and
    `elided_lifetimes_in_paths`, which are `deny`: a product building Substrate
    by path sees its warnings, so these stay at zero in every feature

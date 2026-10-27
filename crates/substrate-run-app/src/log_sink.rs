@@ -12,7 +12,6 @@
 //! grow memory for a buffer nobody drains.
 
 use std::collections::VecDeque;
-use std::fmt;
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use substrate_run_domain::{Level, LogLine};
@@ -21,21 +20,10 @@ use crate::lock::lock;
 
 type PushCallback = Arc<dyn Fn(&LogLine) + Send + Sync>;
 
-/// The lines kept and the callback hearing each push.
 struct LogSinkState {
     lines: VecDeque<LogLine>,
     max_lines: Option<usize>,
     on_push: Option<PushCallback>,
-}
-
-impl fmt::Debug for LogSinkState {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("LogSinkState")
-            .field("lines", &self.lines)
-            .field("max_lines", &self.max_lines)
-            .field("on_push", &self.on_push.is_some())
-            .finish()
-    }
 }
 
 impl Default for LogSinkState {
@@ -50,7 +38,7 @@ impl Default for LogSinkState {
 
 /// Cheaply-cloneable handle for pushing lines from anywhere (a background
 /// thread streaming a subprocess's stdout, a socket read loop, ...).
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Default)]
 pub struct LogSink(Arc<Mutex<LogSinkState>>);
 
 impl LogSink {
