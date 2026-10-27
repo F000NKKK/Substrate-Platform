@@ -5,14 +5,16 @@ members = ["tauri-plugin", "crates/*"]
 # Craftbook's lint set (templates/workspace-lints.toml). Wave 0 of the
 # migration (craftbook adoption/substrate-platform.md §4) turns every `deny`
 # into `warn`, so the build stays green while the backlog is worked off;
-# wave 11 turns them back to `deny`.
+# wave 11 turns them back to `deny`. These six are `deny` already: the build
+# of a product depending on Substrate by path prints a crate's own warnings, so
+# they stay at zero.
 [workspace.lints.rust]
-missing_docs = "warn"
-missing_debug_implementations = "warn"
-unsafe_code = "warn"
-unreachable_pub = "warn"
-unused_qualifications = "warn"
-elided_lifetimes_in_paths = "warn"
+missing_docs = "deny"
+missing_debug_implementations = "deny"
+unsafe_code = "deny"
+unreachable_pub = "deny"
+unused_qualifications = "deny"
+elided_lifetimes_in_paths = "deny"
 
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }

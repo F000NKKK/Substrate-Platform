@@ -5,7 +5,7 @@ use substrate_platform::dap::{Adapter, AdapterId};
 
 /// An adapter as the UI picks one by: its id and the languages it debugs.
 #[derive(Serialize)]
-pub struct AdapterEntry {
+pub(crate) struct AdapterEntry {
     /// Its id.
     id: AdapterId,
     /// The ids of the languages it debugs.

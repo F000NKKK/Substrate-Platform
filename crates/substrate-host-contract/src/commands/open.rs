@@ -2,6 +2,7 @@
 
 use super::{Domain, SUBSTRATE_PLUGIN};
 
+/// The commands that open links and files with the system.
 pub const DOMAIN: Domain = Domain {
     key: "open",
     plugin: SUBSTRATE_PLUGIN,

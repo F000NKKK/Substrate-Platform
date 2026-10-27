@@ -2,6 +2,7 @@
 
 use super::{Domain, SUBSTRATE_PLUGIN};
 
+/// The Source Control commands.
 pub const DOMAIN: Domain = Domain {
     key: "git",
     plugin: SUBSTRATE_PLUGIN,

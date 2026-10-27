@@ -3,6 +3,7 @@
 //! a product wires `on_output` to however it ships bytes to its own UI (e.g.
 //! a Tauri event to an xterm.js instance).
 
+use std::fmt;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -17,6 +18,12 @@ pub struct PtySession {
     master: Box<dyn MasterPty + Send>,
     writer: Box<dyn Write + Send>,
     child: Box<dyn portable_pty::Child + Send + Sync>,
+}
+
+impl fmt::Debug for PtySession {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("PtySession").finish_non_exhaustive()
+    }
 }
 
 impl PtySession {

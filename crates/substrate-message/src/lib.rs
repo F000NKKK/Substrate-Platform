@@ -19,14 +19,18 @@ pub const VERBATIM: &str = "{detail}";
 /// [`VERBATIM`]'s placeholder.
 const DETAIL: &str = "detail";
 
+/// A message for the user: a template and the values for its placeholders.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Message {
+    /// The English template, `{name}` marking each placeholder.
     pub text: &'static str,
+    /// What each placeholder becomes.
     #[serde(skip_serializing_if = "BTreeMap::is_empty")]
     pub args: BTreeMap<&'static str, String>,
 }
 
 impl Message {
+    /// A message with no placeholders filled yet.
     pub fn new(text: &'static str) -> Self {
         Self {
             text,
@@ -64,11 +68,16 @@ impl From<std::io::Error> for Message {
 }
 
 /// Declares a module's message templates: `messages! { group { NAME = "text", … } }`
-/// — a `pub const` each, and `ALL` (group, name, text) for the export.
+/// — a `pub const` each (documented with its own text, after any doc written
+/// above it), and `ALL` (group, name, text) for the export.
 #[macro_export]
 macro_rules! messages {
     ($group:ident { $( $(#[$doc:meta])* $name:ident = $text:expr ),* $(,)? }) => {
-        $( $(#[$doc])* pub const $name: &str = $text; )*
+        $(
+            $(#[$doc])*
+            #[doc = concat!("The template \"", $text, "\".")]
+            pub const $name: &str = $text;
+        )*
         /// Every template here, for the UI's generated copy.
         pub const ALL: &[(&str, &str, &str)] = &[ $( (stringify!($group), stringify!($name), $name) ),* ];
     };

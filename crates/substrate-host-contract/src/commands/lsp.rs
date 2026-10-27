@@ -2,6 +2,7 @@
 
 use super::{Domain, SUBSTRATE_PLUGIN};
 
+/// The language server commands.
 pub const DOMAIN: Domain = Domain {
     key: "lsp",
     plugin: SUBSTRATE_PLUGIN,

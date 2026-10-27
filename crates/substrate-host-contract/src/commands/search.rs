@@ -2,6 +2,7 @@
 
 use super::{Domain, SUBSTRATE_PLUGIN};
 
+/// The Find and Replace in Files commands.
 pub const DOMAIN: Domain = Domain {
     key: "search",
     plugin: SUBSTRATE_PLUGIN,

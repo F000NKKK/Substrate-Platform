@@ -2,6 +2,7 @@
 
 use super::{Domain, SUBSTRATE_PLUGIN};
 
+/// The terminal commands.
 pub const DOMAIN: Domain = Domain {
     key: "terminal",
     plugin: SUBSTRATE_PLUGIN,

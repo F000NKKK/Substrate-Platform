@@ -19,7 +19,7 @@ use crate::blocking;
 
 /// The product's languages.
 #[tauri::command]
-pub fn lsp_languages(languages: State<'_, Languages>) -> Vec<LanguageEntry> {
+pub(crate) fn lsp_languages(languages: State<'_, Languages>) -> Vec<LanguageEntry> {
     languages
         .all()
         .iter()
@@ -39,7 +39,7 @@ pub fn lsp_languages(languages: State<'_, Languages>) -> Vec<LanguageEntry> {
     clippy::too_many_arguments,
     reason = "Tauri command: the parameters are the UI's arguments and injected state"
 )]
-pub async fn lsp_start<R: Runtime>(
+pub(crate) async fn lsp_start<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
     languages: State<'_, Languages>,
@@ -116,7 +116,7 @@ fn launch<R: Runtime>(
 
 /// `method` with `params` to the server: its result.
 #[tauri::command]
-pub async fn lsp_request(
+pub(crate) async fn lsp_request(
     servers: State<'_, Servers>,
     root: String,
     language: String,
@@ -129,7 +129,7 @@ pub async fn lsp_request(
 
 /// `method` with `params` to the server, no answer expected.
 #[tauri::command]
-pub fn lsp_notify(
+pub(crate) fn lsp_notify(
     servers: State<'_, Servers>,
     root: String,
     language: String,
@@ -145,7 +145,7 @@ pub fn lsp_notify(
     clippy::too_many_arguments,
     reason = "Tauri command: the parameters are the UI's arguments and injected state"
 )]
-pub fn lsp_did_open(
+pub(crate) fn lsp_did_open(
     workspace: State<'_, Workspace>,
     servers: State<'_, Servers>,
     root: String,
@@ -163,7 +163,7 @@ pub fn lsp_did_open(
 
 /// The editor changed `path` to `text` at `version`.
 #[tauri::command]
-pub fn lsp_did_change(
+pub(crate) fn lsp_did_change(
     servers: State<'_, Servers>,
     root: String,
     language: String,
@@ -178,7 +178,7 @@ pub fn lsp_did_change(
 
 /// The editor saved `path`.
 #[tauri::command]
-pub fn lsp_did_save(
+pub(crate) fn lsp_did_save(
     servers: State<'_, Servers>,
     root: String,
     language: String,
@@ -191,7 +191,7 @@ pub fn lsp_did_save(
 
 /// The editor closed `path`.
 #[tauri::command]
-pub fn lsp_did_close(
+pub(crate) fn lsp_did_close(
     servers: State<'_, Servers>,
     root: String,
     language: String,
@@ -204,7 +204,7 @@ pub fn lsp_did_close(
 
 /// Stops `language`'s server for `root`, if it runs.
 #[tauri::command]
-pub async fn lsp_stop(
+pub(crate) async fn lsp_stop(
     servers: State<'_, Servers>,
     root: String,
     language: String,

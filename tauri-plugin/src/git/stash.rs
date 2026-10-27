@@ -13,7 +13,7 @@ use super::{SourceControl, checked};
 use crate::blocking;
 
 #[tauri::command]
-pub async fn git_stash_list(
+pub(crate) async fn git_stash_list(
     workspace: State<'_, Workspace>,
     source: State<'_, SourceControl>,
     root: String,
@@ -28,7 +28,7 @@ pub async fn git_stash_list(
 }
 
 #[tauri::command]
-pub async fn git_stash_push(
+pub(crate) async fn git_stash_push(
     workspace: State<'_, Workspace>,
     source: State<'_, SourceControl>,
     root: String,
@@ -42,7 +42,7 @@ pub async fn git_stash_push(
 }
 
 #[tauri::command]
-pub async fn git_stash_op(
+pub(crate) async fn git_stash_op(
     workspace: State<'_, Workspace>,
     source: State<'_, SourceControl>,
     root: String,
@@ -56,13 +56,15 @@ pub async fn git_stash_op(
 }
 
 #[tauri::command]
-pub async fn git_config_get(source: State<'_, SourceControl>) -> Result<GlobalConfigDto, Message> {
+pub(crate) async fn git_config_get(
+    source: State<'_, SourceControl>,
+) -> Result<GlobalConfigDto, Message> {
     let source = source.inner().clone();
     blocking(move || Ok::<_, Message>(GlobalConfigDto::from(source.adapter.get()))).await
 }
 
 #[tauri::command]
-pub async fn git_config_set(
+pub(crate) async fn git_config_set(
     source: State<'_, SourceControl>,
     key: String,
     value: String,

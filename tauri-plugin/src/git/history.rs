@@ -15,7 +15,7 @@ use super::{SourceControl, checked};
 use crate::blocking;
 
 #[tauri::command]
-pub async fn git_log(
+pub(crate) async fn git_log(
     workspace: State<'_, Workspace>,
     source: State<'_, SourceControl>,
     root: String,
@@ -33,7 +33,7 @@ pub async fn git_log(
 }
 
 #[tauri::command]
-pub async fn git_commit_files(
+pub(crate) async fn git_commit_files(
     workspace: State<'_, Workspace>,
     source: State<'_, SourceControl>,
     root: String,
@@ -49,7 +49,7 @@ pub async fn git_commit_files(
 }
 
 #[tauri::command]
-pub async fn git_branches(
+pub(crate) async fn git_branches(
     workspace: State<'_, Workspace>,
     source: State<'_, SourceControl>,
     root: String,
@@ -65,7 +65,7 @@ pub async fn git_branches(
 
 /// Checks out `name`; `remote` (the UI's flag) when it's a remote-tracking branch.
 #[tauri::command]
-pub async fn git_switch(
+pub(crate) async fn git_switch(
     workspace: State<'_, Workspace>,
     source: State<'_, SourceControl>,
     root: String,
@@ -88,7 +88,7 @@ pub async fn git_switch(
     clippy::too_many_arguments,
     reason = "Tauri injects state as separate parameters; the UI sends the rest"
 )]
-pub async fn git_branch_create(
+pub(crate) async fn git_branch_create(
     workspace: State<'_, Workspace>,
     source: State<'_, SourceControl>,
     root: String,
@@ -112,7 +112,7 @@ pub async fn git_branch_create(
 
 /// Deletes a local branch; `force` (the UI's flag) even when it isn't merged.
 #[tauri::command]
-pub async fn git_branch_delete(
+pub(crate) async fn git_branch_delete(
     workspace: State<'_, Workspace>,
     source: State<'_, SourceControl>,
     root: String,

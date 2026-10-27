@@ -5,7 +5,7 @@ use serde::Deserialize;
 /// What to start: the terminal's id, its size, the shell (none: the
 /// system's) and the folder (none: the open project's).
 #[derive(Deserialize)]
-pub struct SpawnRequest {
+pub(crate) struct SpawnRequest {
     /// The terminal's id.
     pub(super) id: String,
     /// Columns.

@@ -2,6 +2,7 @@
 
 use super::{Domain, SUBSTRATE_PLUGIN};
 
+/// The commands for what the IDE remembers.
 pub const DOMAIN: Domain = Domain {
     key: "state",
     plugin: SUBSTRATE_PLUGIN,
