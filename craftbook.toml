@@ -1,0 +1,11 @@
+# Layer and context map for craftcheck (craftbook rust/06-tooling.md §6.3).
+# Today's single-crate map, copied from craftbook adoption/substrate-platform;
+# the target map of that page replaces it with the crate split (wave 5).
+[[crate]]
+name = "substrate-platform"
+layer = "infra"      # really mixed: shared-kernel + domain + app + infra + interface (commands, events)
+context = "substrate"
+[[crate]]
+name = "tauri-plugin-substrate"
+layer = "interface"
+context = "substrate"

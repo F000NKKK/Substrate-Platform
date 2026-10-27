@@ -3,7 +3,7 @@
 //! Everything Substrate says to a user is one of these, so the UI shows it
 //! in the user's language by default (`errorText` / `t(text, args)`).
 //!
-//! The templates are declared once, in their module's [`messages!`] block;
+//! The templates are declared once, in their module's [`messages!`](crate::messages) block;
 //! the UI gets them generated (`substrate-messages` writes
 //! `ui/src/infra/host/host.generated.ts`), never retyped.
 

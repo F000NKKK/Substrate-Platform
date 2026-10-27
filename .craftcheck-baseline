@@ -1,0 +1,161 @@
+benches/core.rs	E403		1
+src/bin/substrate-messages.rs	S701		1
+src/commands/mod.rs	C103	const SUBSTRATE	1
+src/commands/mod.rs	C103	const SUBSTRATE_PLUGIN	1
+src/commands/mod.rs	C103	fn names	1
+src/commands/mod.rs	C103	fn typescript	1
+src/commands/mod.rs	C103	struct Domain	1
+src/commands/mod.rs	S701		1
+src/events.rs	S701		1
+src/fs/dir.rs	C108	DirEntryInfo	1
+src/fs/dir.rs	C108	EntryKind	1
+src/fs/dir.rs	N202	DirEntryInfo	1
+src/fs/watch.rs	C108	DirWatcher	1
+src/fs/watch.rs	E403		2
+src/git/branch.rs	C108	BranchInfo	1
+src/git/branch.rs	N202	BranchInfo	1
+src/git/config.rs	C108	GlobalConfig	1
+src/git/config.rs	E403		1
+src/git/diff.rs	A501	VIEW_SEQ	1
+src/git/diff.rs	C108	DiffSide	1
+src/git/diff.rs	C108	DiffTexts	1
+src/git/diff.rs	E403		1
+src/git/diff.rs	S701		1
+src/git/diff.rs	S702		1
+src/git/history.rs	C108	CommitInfo	1
+src/git/history.rs	N202	CommitInfo	1
+src/git/remote.rs	C108	BranchOp	1
+src/git/remote.rs	C108	RemoteOp	1
+src/git/run.rs	A501	WRITE_LOCK	1
+src/git/stash.rs	C108	StashInfo	1
+src/git/stash.rs	C108	StashMode	1
+src/git/stash.rs	C108	StashOp	1
+src/git/stash.rs	N202	StashInfo	1
+src/git/status.rs	C101		1
+src/git/status.rs	C108	ChangeKind	1
+src/git/status.rs	C108	CommitResult	1
+src/git/status.rs	C108	DiscardItem	1
+src/git/status.rs	C108	FileChange	1
+src/git/status.rs	C108	Operation	1
+src/git/status.rs	C108	RepoStatus	1
+src/lsp/client.rs	C101		1
+src/lsp/client.rs	C108	LspClient	1
+src/lsp/client.rs	C108	Notification	1
+src/lsp/client.rs	E403		6
+src/lsp/client.rs	S702		1
+src/lsp/languages.rs	C108	Language	1
+src/lsp/languages.rs	C108	ServerDef	1
+src/lsp/tests.rs	C101		1
+src/lsp/tests.rs	D301		1
+src/lsp/tests.rs	E403		2
+src/message.rs	S701		2
+src/process/mod.rs	C103	const APPIMAGE_VARS	1
+src/process/mod.rs	C103	fn command	1
+src/process/mod.rs	C103	fn host_env	1
+src/project/format.rs	C108	Formats	1
+src/project/format.rs	C108	ProjectFormat	1
+src/project/format.rs	C108	SolutionFormat	1
+src/project/model.rs	C108	Configuration	1
+src/project/model.rs	C108	ConfigurationMapping	1
+src/project/model.rs	C108	ConfiguredProperties	1
+src/project/model.rs	C108	Item	1
+src/project/model.rs	C108	Project	1
+src/project/model.rs	C108	ProjectEntry	1
+src/project/model.rs	C108	Reference	1
+src/project/model.rs	C108	Section	1
+src/project/model.rs	C108	Solution	1
+src/project/model.rs	C108	SolutionFolder	1
+src/project/standard.rs	C108	ProjectStandard	1
+src/run/log.rs	C108	Level	1
+src/run/log.rs	C108	LogLine	1
+src/run/log.rs	C108	LogSink	1
+src/run/task/mod.rs	C101		1
+src/run/task/mod.rs	C108	Completion	1
+src/run/task/mod.rs	C108	TaskExit	1
+src/run/task/mod.rs	C108	TaskHandle	1
+src/run/task/mod.rs	E403		3
+src/run/workflow.rs	C102		1
+src/run/workflow.rs	C108	WorkflowDef	1
+src/run/workflow.rs	C108	WorkflowFile	1
+src/run/workflow.rs	C108	WorkflowHandle	1
+src/run/workflow.rs	C108	WorkflowResult	1
+src/run/workflow.rs	C108	WorkflowStep	1
+src/run/workflow.rs	E404	parse	1
+src/search/files.rs	C108	ProjectEntry	1
+src/search/hits.rs	C108	LineHit	1
+src/search/mod.rs	C103		1
+src/search/mod.rs	C103	const ALWAYS_SKIPPED	1
+src/search/mod.rs	C103	const BINARY_SNIFF_BYTES	1
+src/search/mod.rs	C103	const DEFAULT_MAX_LINES	1
+src/search/mod.rs	C103	const MAX_FILE_BYTES	1
+src/search/mod.rs	C103	const MAX_LINE_CHARS	1
+src/search/mod.rs	C103	fn is_word_char	1
+src/search/mod.rs	C103	impl FileMask	1
+src/search/mod.rs	C103	impl Layout	1
+src/search/mod.rs	C103	impl Matcher	1
+src/search/mod.rs	C103	struct FileMask	1
+src/search/mod.rs	C103	struct Generated	1
+src/search/mod.rs	C103	struct Layout	1
+src/search/mod.rs	C103	struct Matcher	1
+src/search/mod.rs	C103	struct SearchQuery	1
+src/search/replace.rs	C108	ReplaceRequest	1
+src/search/replace.rs	C108	ReplaceSummary	1
+src/search/replace.rs	C108	ReplacedDocument	1
+src/search/replace.rs	C108	ReplacedFile	1
+src/search/run.rs	C108	FileResult	1
+src/search/run.rs	C108	FindSummary	1
+src/search/run.rs	C108	OpenDocument	1
+src/search/run.rs	C108	Plan	1
+src/search/run.rs	C108	Scope	1
+src/search/run.rs	C108	Search	1
+src/search/run.rs	C108	Source	1
+src/search/tests.rs	C101		1
+src/search/tests.rs	E403		3
+src/state/mod.rs	C103	const APP_STATE_FILE	1
+src/state/mod.rs	C103	const GITIGNORE	1
+src/state/mod.rs	C103	const IGNORE_EVERYTHING	1
+src/state/mod.rs	C103	const PARTIAL_EXTENSION	1
+src/state/mod.rs	C103	const WORKSPACE_FILE	1
+src/state/mod.rs	C103	fn failed	1
+src/state/mod.rs	C103	fn private_dir	1
+src/state/mod.rs	C103	fn read_json	1
+src/state/mod.rs	C103	fn write_json	1
+src/sync.rs	C108	Locked	1
+src/sync.rs	C108	ReadWrite	1
+src/terminal/chunker.rs	C108	Utf8Chunker	1
+src/terminal/session.rs	C108	PtyOptions	1
+src/terminal/session.rs	C108	PtySession	1
+src/terminal/session.rs	E404	resize	1
+src/terminal/session.rs	E404	spawn	1
+src/terminal/session.rs	E404	spawn_utf8	1
+src/terminal/session.rs	E404	spawn_with	1
+src/terminal/shell.rs	C108	ShellInfo	1
+src/terminal/shell.rs	N202	ShellInfo	1
+src/text_view.rs	A501	VIEWS	1
+src/workspace.rs	C108	Roots	1
+tauri-plugin/src/fs.rs	C108	Entry	1
+tauri-plugin/src/fs.rs	C108	Watcher	1
+tauri-plugin/src/fs.rs	E403		2
+tauri-plugin/src/git/mod.rs	C103	fn checked	1
+tauri-plugin/src/git/mod.rs	C103	fn output	1
+tauri-plugin/src/git/mod.rs	C103	type Res	1
+tauri-plugin/src/git/mod.rs	E403		1
+tauri-plugin/src/lib.rs	C103		1
+tauri-plugin/src/lib.rs	C103	fn blocking	1
+tauri-plugin/src/lib.rs	C103	fn init	1
+tauri-plugin/src/lib.rs	C103	fn init_with	1
+tauri-plugin/src/lib.rs	C103	struct Options	1
+tauri-plugin/src/lsp.rs	C101		1
+tauri-plugin/src/lsp.rs	C108	LanguageInfo	1
+tauri-plugin/src/lsp.rs	C108	Servers	1
+tauri-plugin/src/lsp.rs	E403		2
+tauri-plugin/src/lsp.rs	N202	LanguageInfo	1
+tauri-plugin/src/search	C109		1
+tauri-plugin/src/search/mod.rs	C108	FindBatch	1
+tauri-plugin/src/search/mod.rs	C108	FindRequest	1
+tauri-plugin/src/search/mod.rs	C108	Searches	1
+tauri-plugin/src/search/mod.rs	E403		2
+tauri-plugin/src/terminal	C109		1
+tauri-plugin/src/terminal/mod.rs	C108	Spawn	1
+tauri-plugin/src/terminal/mod.rs	C108	Terminals	1
+tauri-plugin/src/terminal/mod.rs	E403		3

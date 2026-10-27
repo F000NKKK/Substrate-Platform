@@ -26,8 +26,8 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: Operating system, Minecraft version and loader.
-      placeholder: Windows 11, Minecraft 1.21.1, Fabric
+      description: Operating system, and the product built on Substrate if any.
+      placeholder: Windows 11, Yog-IDLE 2.4.5
   - type: textarea
     id: logs
     attributes:

@@ -120,7 +120,7 @@ pub fn relative(root: &Path, path: &Path) -> String {
         .replace('\\', "/")
 }
 
-/// A file's text (through its [`TextView`], if its kind has one), or
+/// A file's text (through its [`TextView`](crate::text_view::TextView), if its kind has one), or
 /// `None` for one that's too large, binary, unreadable — or, when `strict`,
 /// not valid UTF-8 (a replace mustn't mangle it).
 pub fn read_text(path: &Path, strict: bool) -> Option<String> {

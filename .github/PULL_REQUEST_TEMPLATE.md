@@ -4,10 +4,10 @@
 
 ## How it was tested
 
-<!-- Tests added or run, and what you checked by hand (in game, in the IDE…). -->
+<!-- Tests added or run, and what you checked by hand (in the IDE…). -->
 
 ## Checklist
 
-- [ ] It builds and the tests pass
+- [ ] The gates in CONTRIBUTING.md pass (no new warnings or craftcheck findings)
 - [ ] Commit messages follow Conventional Commits
 - [ ] Documentation and translations are updated where needed
