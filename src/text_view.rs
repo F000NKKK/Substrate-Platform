@@ -20,12 +20,12 @@ pub struct TextView {
 static VIEWS: LazyLock<RwLock<HashMap<String, TextView>>> = LazyLock::new(Default::default);
 
 /// Files ending `.<ext>` are read and written through `view` from now on.
-pub fn register_text_view(ext: &str, view: TextView) {
+pub fn register(ext: &str, view: TextView) {
     VIEWS.write_locked().insert(ext.to_owned(), view);
 }
 
 /// The view registered for `path`'s extension, if one is.
-pub fn text_view(path: &Path) -> Option<TextView> {
+pub fn find(path: &Path) -> Option<TextView> {
     let ext = path.extension()?.to_str()?;
     VIEWS.read_locked().get(ext).copied()
 }

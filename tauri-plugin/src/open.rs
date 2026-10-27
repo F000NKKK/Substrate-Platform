@@ -16,14 +16,14 @@ pub fn open_url(url: String) -> Result<(), Message> {
 
 /// Opens a file or folder of the workspace.
 #[tauri::command]
-pub fn open_path(ws: State<'_, Workspace>, path: String) -> Result<(), Message> {
-    ws.check(Path::new(&path))?;
+pub fn open_path(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
+    workspace.check(Path::new(&path))?;
     process::open_path(Path::new(&path))
 }
 
 /// Shows a file or folder of the workspace in the file manager.
 #[tauri::command]
-pub fn reveal_path(ws: State<'_, Workspace>, path: String) -> Result<(), Message> {
-    ws.check(Path::new(&path))?;
+pub fn reveal_path(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
+    workspace.check(Path::new(&path))?;
     process::reveal(Path::new(&path))
 }

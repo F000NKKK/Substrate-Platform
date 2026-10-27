@@ -38,12 +38,13 @@ const SELECT_FLAG: &str = "/select,";
 /// Starts `program` and leaves it running — waited for on a thread of its
 /// own, so it doesn't stay a zombie. A macOS `.app` starts through the opener.
 pub fn start(program: &Path) -> Result<(), Message> {
-    let cmd = if cfg!(target_os = "macos") && program.extension().is_some_and(|x| x == APP_BUNDLE) {
-        opener(program.as_os_str())
-    } else {
-        command(program)
-    };
-    spawn(cmd)
+    let invocation =
+        if cfg!(target_os = "macos") && program.extension().is_some_and(|x| x == APP_BUNDLE) {
+            opener(program.as_os_str())
+        } else {
+            command(program)
+        };
+    spawn(invocation)
 }
 
 /// Opens `path` — a file or folder — in the user's default app.
@@ -59,18 +60,18 @@ pub fn reveal(path: &Path) -> Result<(), Message> {
 
 #[cfg(target_os = "macos")]
 fn revealer(path: &Path) -> Command {
-    let mut cmd = command(OPENER.0);
-    cmd.arg(REVEAL_FLAG).arg(path);
-    cmd
+    let mut invocation = command(OPENER.0);
+    invocation.arg(REVEAL_FLAG).arg(path);
+    invocation
 }
 
 #[cfg(windows)]
 fn revealer(path: &Path) -> Command {
     let mut select = OsString::from(SELECT_FLAG);
     select.push(path);
-    let mut cmd = command(FILE_MANAGER);
-    cmd.arg(select);
-    cmd
+    let mut invocation = command(FILE_MANAGER);
+    invocation.arg(select);
+    invocation
 }
 
 #[cfg(not(any(target_os = "macos", windows)))]
@@ -89,17 +90,17 @@ pub fn open_link(url: &str) -> Result<(), Message> {
 /// The opener, for `target`.
 fn opener(target: &OsStr) -> Command {
     let (program, args) = OPENER;
-    let mut cmd = command(program);
-    cmd.args(args).arg(target);
-    cmd
+    let mut invocation = command(program);
+    invocation.args(args).arg(target);
+    invocation
 }
 
-/// Starts `cmd` and waits for it on a thread of its own, so it doesn't
+/// Starts `invocation` and waits for it on a thread of its own, so it doesn't
 /// stay a zombie.
-fn spawn(mut cmd: Command) -> Result<(), Message> {
-    let mut child = cmd.spawn().map_err(|e| {
+fn spawn(mut invocation: Command) -> Result<(), Message> {
+    let mut child = invocation.spawn().map_err(|e| {
         Message::new(CANT_START)
-            .arg("program", cmd.get_program().to_string_lossy())
+            .arg("program", invocation.get_program().to_string_lossy())
             .arg("error", e)
     })?;
     std::thread::spawn(move || child.wait());

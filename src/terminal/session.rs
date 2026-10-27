@@ -93,22 +93,22 @@ impl PtySession {
             pixel_height: 0,
         })?;
 
-        let mut cmd = CommandBuilder::new(options.shell.unwrap_or_else(default_shell));
+        let mut command = CommandBuilder::new(options.shell.unwrap_or_else(default_shell));
         // The system's environment, not an AppImage's (see `process`).
-        for (key, value) in crate::process::host_env() {
+        for (key, value) in crate::process::host_environment() {
             match value {
-                Some(value) => cmd.env(key, value),
-                None => cmd.env_remove(key),
+                Some(value) => command.env(key, value),
+                None => command.env_remove(key),
             }
         }
-        cmd.args(&options.args);
+        command.args(&options.args);
         if let Some(cwd) = options.cwd {
-            cmd.cwd(cwd);
+            command.cwd(cwd);
         }
         for (key, value) in &options.env {
-            cmd.env(key, value);
+            command.env(key, value);
         }
-        let child = pair.slave.spawn_command(cmd)?;
+        let child = pair.slave.spawn_command(command)?;
         // The slave end is only needed to spawn the child; drop our copy so
         // the master gets EOF when the child exits instead of hanging open.
         drop(pair.slave);

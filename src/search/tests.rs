@@ -14,8 +14,9 @@ fn query(pattern: &str) -> SearchQuery {
 }
 
 fn found<'a>(q: &SearchQuery, text: &'a str) -> Vec<&'a str> {
-    let m = Matcher::new(q).unwrap();
-    m.find_all(text, usize::MAX)
+    let matcher = Matcher::new(q).unwrap();
+    matcher
+        .find_all(text, usize::MAX)
         .into_iter()
         .map(|(s, e)| &text[s..e])
         .collect()
@@ -76,9 +77,9 @@ fn regex_mode_and_errors() {
 
 #[test]
 fn replace_literal_and_with_captures() {
-    let m = Matcher::new(&query("$a")).unwrap();
+    let matcher = Matcher::new(&query("$a")).unwrap();
     assert_eq!(
-        m.replace_all("$a + $A", "$1", true),
+        matcher.replace_all("$a + $A", "$1", ReplacementMode::Literal),
         ("$1 + $1".to_string(), 2)
     );
     let q = SearchQuery {
@@ -86,9 +87,9 @@ fn replace_literal_and_with_captures() {
         match_case: true,
         ..query(r"(\w+)\.unwrap\(\)")
     };
-    let m = Matcher::new(&q).unwrap();
+    let matcher = Matcher::new(&q).unwrap();
     assert_eq!(
-        m.replace_all("x.unwrap(); y.unwrap()", "$1?", false),
+        matcher.replace_all("x.unwrap(); y.unwrap()", "$1?", ReplacementMode::Expand),
         ("x?; y?".to_string(), 2)
     );
 }
@@ -96,8 +97,8 @@ fn replace_literal_and_with_captures() {
 #[test]
 fn hits_group_by_line_with_utf16_columns() {
     let text = "fn a() {}\n    let é = foo + foo;\r\nfoo";
-    let m = Matcher::new(&query("foo")).unwrap();
-    let hits = line_hits(text, &m.find_all(text, usize::MAX));
+    let matcher = Matcher::new(&query("foo")).unwrap();
+    let hits = line_hits(text, &matcher.find_all(text, usize::MAX));
     assert_eq!(hits.len(), 2);
     assert_eq!(hits[0].line, 2);
     assert_eq!(hits[0].column, 13);
@@ -112,8 +113,8 @@ fn hits_group_by_line_with_utf16_columns() {
 #[test]
 fn long_lines_are_windowed() {
     let text = format!("{}needle{}", "x".repeat(2000), "y".repeat(2000));
-    let m = Matcher::new(&query("needle")).unwrap();
-    let hits = line_hits(&text, &m.find_all(&text, usize::MAX));
+    let matcher = Matcher::new(&query("needle")).unwrap();
+    let hits = line_hits(&text, &matcher.find_all(&text, usize::MAX));
     let hit = &hits[0];
     assert!(hit.text.chars().count() <= MAX_LINE_CHARS + 2);
     let (s, e) = hit.ranges[0];
@@ -145,9 +146,9 @@ fn file_mask_globs() {
 /// generated code under it.
 fn layout() -> Layout {
     Layout {
-        skip_dirs: vec![".build".to_string()],
+        skipped_directories: vec![".build".to_string()],
         generated: vec![Generated {
-            dir: PathBuf::from(".build/generated"),
+            directory: PathBuf::from(".build/generated"),
             extension: "rs".to_string(),
         }],
     }
@@ -187,7 +188,7 @@ fn generated_code_is_searched_only_when_asked() {
             include_generated,
             ..query("needle")
         };
-        run_search(
+        find(
             &Search {
                 root: Some(&root),
                 scope: Scope::Project,
@@ -197,7 +198,7 @@ fn generated_code_is_searched_only_when_asked() {
                 layout: &layout(),
             },
             &|| true,
-            &mut |f| files.push(f.rel_path),
+            &mut |f| files.push(f.relative_path),
         )
         .unwrap();
         files
@@ -253,7 +254,7 @@ fn project_search_skips_ignored_build_and_binary_files() {
     let dir = temp_project("walk");
     let root = dir.to_string_lossy().into_owned();
     let mut files = Vec::new();
-    let summary = run_search(
+    let summary = find(
         &Search {
             root: Some(&root),
             scope: Scope::Project,
@@ -263,7 +264,7 @@ fn project_search_skips_ignored_build_and_binary_files() {
             layout: &layout(),
         },
         &|| true,
-        &mut |f| files.push(f.rel_path),
+        &mut |f| files.push(f.relative_path),
     )
     .unwrap();
     assert_eq!(files, ["notes.md", "src/lib.rs"]);
@@ -281,7 +282,7 @@ fn project_search_skips_ignored_build_and_binary_files() {
         ..query("needle")
     };
     let mut files = Vec::new();
-    let summary = run_search(
+    let summary = find(
         &Search {
             root: Some(&root),
             scope: Scope::Project,
@@ -291,7 +292,7 @@ fn project_search_skips_ignored_build_and_binary_files() {
             layout: &layout(),
         },
         &|| true,
-        &mut |f| files.push((f.rel_path, f.hits.len())),
+        &mut |f| files.push((f.relative_path, f.hits.len())),
     )
     .unwrap();
     assert_eq!(
@@ -304,7 +305,7 @@ fn project_search_skips_ignored_build_and_binary_files() {
     assert_eq!(summary.matching_lines, 3);
 
     // The cap stops the search.
-    let summary = run_search(
+    let summary = find(
         &Search {
             root: Some(&root),
             scope: Scope::Project,
@@ -319,7 +320,7 @@ fn project_search_skips_ignored_build_and_binary_files() {
     .unwrap();
     assert!(summary.truncated);
     assert_eq!(summary.matching_lines, 2);
-    let summary = run_search(
+    let summary = find(
         &Search {
             root: Some(&root),
             scope: Scope::Project,
@@ -353,7 +354,7 @@ fn replace_writes_files_and_returns_buffers() {
             text: "needle, needles".to_string(),
         }],
     };
-    let summary = run_replace(&request, &layout(), &|_| Ok(())).unwrap();
+    let summary = replace(&request, &layout(), &|_| Ok(())).unwrap();
     assert_eq!(summary.total, 2);
     assert_eq!(summary.documents.len(), 1);
     assert_eq!(summary.documents[0].text, "pin, needles");
@@ -382,14 +383,14 @@ fn a_registered_view_is_what_search_reads() {
     fn write(p: &Path, text: &str) -> Result<(), String> {
         std::fs::write(p, text.chars().rev().collect::<String>()).map_err(|e| e.to_string())
     }
-    use crate::text_view::{TextView, register_text_view, text_view};
-    register_text_view("reversed", TextView { read, write });
+    use crate::text_view::{TextView, find, register};
+    register("reversed", TextView { read, write });
     let dir = std::env::temp_dir().join(format!("substrate-views-{}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();
     let file = dir.join("a.reversed");
     std::fs::write(&file, "olleh").unwrap();
-    assert_eq!(read_text(&file, true).as_deref(), Some("hello"));
-    (text_view(&file).unwrap().write)(&file, "bye").unwrap();
+    assert_eq!(read_text(&file, Decoding::Strict).as_deref(), Some("hello"));
+    (find(&file).unwrap().write)(&file, "bye").unwrap();
     assert_eq!(std::fs::read_to_string(&file).unwrap(), "eyb");
     std::fs::remove_dir_all(&dir).unwrap();
 }

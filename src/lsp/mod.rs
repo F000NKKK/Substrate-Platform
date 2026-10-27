@@ -1,6 +1,6 @@
 //! Language servers: the languages a product knows and the server each is
 //! served by ([`Languages`], from a TOML list), a running server spoken to
-//! over the Language Server Protocol ([`LspClient`]) and the `file://` URIs
+//! over the Language Server Protocol ([`Client`]) and the `file://` URIs
 //! it names documents by ([`uri`]). Feature `lsp`.
 //!
 //! The client is protocol plumbing only: JSON-RPC framing, requests matched
@@ -15,8 +15,8 @@ mod languages;
 pub mod messages;
 pub mod uri;
 
-pub use client::{LspClient, Notification, REQUEST_TIMEOUT};
-pub use languages::{Language, Languages, ServerDef};
+pub use client::{Client, Notification, REQUEST_TIMEOUT};
+pub use languages::{Language, Languages, ServerDefinition};
 
 #[cfg(test)]
 mod tests;

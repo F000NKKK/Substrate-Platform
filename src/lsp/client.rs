@@ -14,13 +14,13 @@ use std::time::Duration;
 
 use serde_json::{Value, json};
 
-use super::languages::ServerDef;
+use super::languages::ServerDefinition;
 use super::{framing, messages, uri};
 use crate::message::Message;
 use crate::run::LogSink;
 use crate::sync::Locked;
 
-/// How long [`LspClient::request`] waits for an answer.
+/// How long [`Client::request`] waits for an answer.
 pub const REQUEST_TIMEOUT: Duration = Duration::from_secs(30);
 /// How long `shutdown` gives the server to answer before it is killed.
 const SHUTDOWN_TIMEOUT: Duration = Duration::from_secs(2);
@@ -81,17 +81,17 @@ impl Shared {
 /// to the same server. Requests block their caller (a backend command's
 /// thread), never the reader.
 #[derive(Clone)]
-pub struct LspClient {
+pub struct Client {
     shared: Arc<Shared>,
 }
 
-impl LspClient {
+impl Client {
     /// Starts `server` in `cwd` (usually the workspace root): its stdin and
     /// stdout carry the protocol, its stderr goes to `log`, and
     /// `on_notification` hears what it says unasked — on the reader's
     /// thread, so it should hand off rather than block.
     pub fn start(
-        server: &ServerDef,
+        server: &ServerDefinition,
         cwd: &Path,
         log: LogSink,
         on_notification: impl Fn(Notification) + Send + Sync + 'static,
@@ -101,8 +101,9 @@ impl LspClient {
                 .arg("server", server.name())
                 .arg("error", error.to_string())
         };
-        let mut cmd = crate::process::command(&server.command);
-        cmd.args(&server.args)
+        let mut command = crate::process::command(&server.command);
+        command
+            .args(&server.args)
             .envs(&server.env)
             .current_dir(cwd)
             .stdin(Stdio::piped())
@@ -111,8 +112,8 @@ impl LspClient {
         // Its own process group, so stopping it takes down what it started
         // (`cargo check` under rust-analyzer) — see `run::task::kill_tree`.
         #[cfg(unix)]
-        std::os::unix::process::CommandExt::process_group(&mut cmd, 0);
-        let mut child = cmd.spawn().map_err(|e| cant_start(&e))?;
+        std::os::unix::process::CommandExt::process_group(&mut command, 0);
+        let mut child = command.spawn().map_err(|e| cant_start(&e))?;
         let (Some(stdin), Some(stdout), Some(stderr)) =
             (child.stdin.take(), child.stdout.take(), child.stderr.take())
         else {

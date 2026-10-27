@@ -10,7 +10,7 @@ use substrate_platform::events;
 use substrate_platform::message::Message;
 use substrate_platform::sync::Locked;
 use substrate_platform::terminal::messages::{CANT_START, FAILED};
-use substrate_platform::terminal::{PtyOptions, PtySession, ShellInfo, detect_shells};
+use substrate_platform::terminal::{PtyOptions, PtySession, Shell, detect_shells};
 use substrate_platform::workspace::Workspace;
 use tauri::{AppHandle, Emitter, Runtime, State};
 
@@ -27,7 +27,7 @@ impl Terminals {
 /// What to start: the terminal's id, its size, the shell (none: the
 /// system's) and the folder (none: the open project's).
 #[derive(Deserialize)]
-pub struct Spawn {
+pub struct SpawnRequest {
     id: String,
     cols: u16,
     rows: u16,
@@ -52,7 +52,7 @@ fn failed(template: &'static str, error: impl ToString) -> Message {
 
 /// The shells installed here, for "New Terminal".
 #[tauri::command]
-pub fn terminal_shells() -> Vec<ShellInfo> {
+pub fn terminal_shells() -> Vec<Shell> {
     detect_shells()
 }
 
@@ -60,17 +60,17 @@ pub fn terminal_shells() -> Vec<ShellInfo> {
 pub fn terminal_spawn<R: Runtime>(
     app: AppHandle<R>,
     terminals: State<'_, Terminals>,
-    ws: State<'_, Workspace>,
-    spec: Spawn,
+    workspace: State<'_, Workspace>,
+    spec: SpawnRequest,
 ) -> Result<(), Message> {
     // "Open in Terminal" on a folder of the workspace; otherwise the open project.
     let cwd = match spec.cwd {
         Some(dir) => {
             let dir = PathBuf::from(dir);
-            ws.check(&dir)?;
+            workspace.check(&dir)?;
             Some(dir)
         }
-        None => ws.current(),
+        None => workspace.current(),
     };
     let (out_app, out_id) = (app.clone(), spec.id.clone());
     let (exit_app, exit_id) = (app, spec.id.clone());

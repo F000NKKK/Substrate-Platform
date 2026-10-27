@@ -11,8 +11,6 @@ use substrate_platform::state::{
 use substrate_platform::workspace::Workspace;
 use tauri::{AppHandle, Manager, Runtime, State};
 
-type Res<T> = Result<T, Message>;
-
 /// Where a product keeps its own data in a project.
 #[derive(Clone, Debug)]
 pub struct StateOptions {
@@ -21,13 +19,17 @@ pub struct StateOptions {
 }
 
 /// The product's private folder of `project_root`, once that's in the workspace.
-fn project_dir(ws: &Workspace, options: &StateOptions, project_root: &str) -> Res<PathBuf> {
+fn project_dir(
+    workspace: &Workspace,
+    options: &StateOptions,
+    project_root: &str,
+) -> Result<PathBuf, Message> {
     let root = Path::new(project_root);
-    ws.check(root)?;
+    workspace.check(root)?;
     Ok(root.join(&options.project_dir))
 }
 
-fn app_state_file<R: Runtime>(app: &AppHandle<R>) -> Res<PathBuf> {
+fn app_state_file<R: Runtime>(app: &AppHandle<R>) -> Result<PathBuf, Message> {
     app.path()
         .app_config_dir()
         .map(|dir| dir.join(APP_STATE_FILE))
@@ -37,23 +39,23 @@ fn app_state_file<R: Runtime>(app: &AppHandle<R>) -> Res<PathBuf> {
 /// The project's remembered state (open files, layout, expanded folders…).
 #[tauri::command]
 pub fn workspace_load(
-    ws: State<'_, Workspace>,
+    workspace: State<'_, Workspace>,
     options: State<'_, StateOptions>,
     project_root: String,
-) -> Res<Value> {
+) -> Result<Value, Message> {
     Ok(read_json(
-        &project_dir(&ws, &options, &project_root)?.join(WORKSPACE_FILE),
+        &project_dir(&workspace, &options, &project_root)?.join(WORKSPACE_FILE),
     ))
 }
 
 #[tauri::command]
 pub fn workspace_save(
-    ws: State<'_, Workspace>,
+    workspace: State<'_, Workspace>,
     options: State<'_, StateOptions>,
     project_root: String,
     value: Value,
-) -> Res<()> {
-    let dir = project_dir(&ws, &options, &project_root)?;
+) -> Result<(), Message> {
+    let dir = project_dir(&workspace, &options, &project_root)?;
     private_dir(&dir)?;
     write_json(&dir.join(WORKSPACE_FILE), &value)
 }
@@ -61,11 +63,11 @@ pub fn workspace_save(
 /// What isn't tied to a project (recent projects, the last one opened, the
 /// layout with none open).
 #[tauri::command]
-pub fn app_state_load<R: Runtime>(app: AppHandle<R>) -> Res<Value> {
+pub fn app_state_load<R: Runtime>(app: AppHandle<R>) -> Result<Value, Message> {
     Ok(read_json(&app_state_file(&app)?))
 }
 
 #[tauri::command]
-pub fn app_state_save<R: Runtime>(app: AppHandle<R>, value: Value) -> Res<()> {
+pub fn app_state_save<R: Runtime>(app: AppHandle<R>, value: Value) -> Result<(), Message> {
     write_json(&app_state_file(&app)?, &value)
 }

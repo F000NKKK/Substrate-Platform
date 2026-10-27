@@ -7,13 +7,13 @@ use std::path::Path;
 
 #[derive(Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct StashInfo {
+pub struct StashEntry {
     pub index: u32,
     pub message: String,
     pub date: i64,
 }
 
-fn parse_stashes(raw: &str) -> Vec<StashInfo> {
+fn parse_stashes(raw: &str) -> Vec<StashEntry> {
     raw.lines()
         .filter_map(|line| {
             let (selector, rest) = line.split_once('\x1f')?;
@@ -23,7 +23,7 @@ fn parse_stashes(raw: &str) -> Vec<StashInfo> {
                 .strip_suffix('}')?
                 .parse()
                 .ok()?;
-            Some(StashInfo {
+            Some(StashEntry {
                 index,
                 message: message.to_string(),
                 date: date.parse().unwrap_or(0),
@@ -32,7 +32,7 @@ fn parse_stashes(raw: &str) -> Vec<StashInfo> {
         .collect()
 }
 
-pub fn list(root: &Path) -> Result<Vec<StashInfo>, Message> {
+pub fn list(root: &Path) -> Result<Vec<StashEntry>, Message> {
     let top = require_repo(root)?;
     Ok(parse_stashes(&run(git(&top).args([
         "stash",
@@ -55,34 +55,35 @@ pub enum StashMode {
 pub fn push(root: &Path, message: &str, mode: StashMode) -> Result<(), Message> {
     let top = require_repo(root)?;
     let _lock = write_lock();
-    let mut cmd = git(&top);
-    cmd.args(["stash", "push", "--quiet"]);
+    let mut command = git(&top);
+    command.args(["stash", "push", "--quiet"]);
     match mode {
-        StashMode::All => cmd.arg("--include-untracked"),
-        StashMode::KeepIndex => cmd.args(["--include-untracked", "--keep-index"]),
-        StashMode::Staged => cmd.arg("--staged"),
+        StashMode::All => command.arg("--include-untracked"),
+        StashMode::KeepIndex => command.args(["--include-untracked", "--keep-index"]),
+        StashMode::Staged => command.arg("--staged"),
     };
     if !message.trim().is_empty() {
-        cmd.args(["--message", message.trim()]);
+        command.args(["--message", message.trim()]);
     }
-    run(&mut cmd).map(drop)
+    run(&mut command).map(drop)
 }
 
 #[derive(Deserialize, Clone, Copy)]
 #[serde(rename_all = "camelCase")]
-pub enum StashOp {
+pub enum StashOperation {
     Apply,
     Pop,
     Drop,
 }
 
-pub fn op(root: &Path, index: u32, op: StashOp) -> Result<(), Message> {
+/// Applies, pops or drops stash `index`.
+pub fn perform(root: &Path, index: u32, operation: StashOperation) -> Result<(), Message> {
     let top = require_repo(root)?;
     let _lock = write_lock();
-    let verb = match op {
-        StashOp::Apply => "apply",
-        StashOp::Pop => "pop",
-        StashOp::Drop => "drop",
+    let verb = match operation {
+        StashOperation::Apply => "apply",
+        StashOperation::Pop => "pop",
+        StashOperation::Drop => "drop",
     };
     run(git(&top).args(["stash", verb, "--quiet", &format!("stash@{{{index}}}")])).map(drop)
 }

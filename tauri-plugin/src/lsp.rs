@@ -12,18 +12,16 @@ use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard};
 use substrate_platform::events;
 use substrate_platform::lsp::messages::{NO_SERVER, STOPPED};
-use substrate_platform::lsp::{Languages, LspClient};
+use substrate_platform::lsp::{Client, Languages};
 use substrate_platform::message::Message;
 use substrate_platform::run::LogSink;
 use substrate_platform::sync::Locked;
 use substrate_platform::workspace::Workspace;
 use tauri::{AppHandle, Emitter, Runtime, State};
 
-type Res<T> = Result<T, Message>;
-
 /// A running server and what it said it can do.
 struct Server {
-    client: LspClient,
+    client: Client,
     capabilities: Value,
 }
 
@@ -36,7 +34,7 @@ impl Servers {
         self.0.locked()
     }
 
-    fn client(&self, root: &str, language: &str) -> Res<LspClient> {
+    fn client(&self, root: &str, language: &str) -> Result<Client, Message> {
         self.running()
             .get(&(root.to_string(), language.to_string()))
             .map(|s| s.client.clone())
@@ -56,7 +54,7 @@ impl Servers {
 /// server serves it.
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct LanguageInfo {
+pub struct LanguageEntry {
     id: String,
     extensions: Vec<String>,
     file_names: Vec<String>,
@@ -80,11 +78,11 @@ struct OutputEvent {
 
 /// The product's languages.
 #[tauri::command]
-pub fn lsp_languages(languages: State<'_, Languages>) -> Vec<LanguageInfo> {
+pub fn lsp_languages(languages: State<'_, Languages>) -> Vec<LanguageEntry> {
     languages
         .all()
         .iter()
-        .map(|l| LanguageInfo {
+        .map(|l| LanguageEntry {
             id: l.id.clone(),
             extensions: l.extensions.clone(),
             file_names: l.file_names.clone(),
@@ -98,13 +96,13 @@ pub fn lsp_languages(languages: State<'_, Languages>) -> Vec<LanguageInfo> {
 #[tauri::command]
 pub async fn lsp_start<R: Runtime>(
     app: AppHandle<R>,
-    ws: State<'_, Workspace>,
+    workspace: State<'_, Workspace>,
     languages: State<'_, Languages>,
     servers: State<'_, Servers>,
     root: String,
     language: String,
-) -> Res<Value> {
-    ws.check(Path::new(&root))?;
+) -> Result<Value, Message> {
+    workspace.check(Path::new(&root))?;
     let key = (root.clone(), language.clone());
     if let Some(server) = servers.running().get(&key)
         && !server.client.is_stopped()
@@ -130,7 +128,7 @@ pub async fn lsp_start<R: Runtime>(
             );
         });
         let dir = PathBuf::from(&note_root);
-        let client = LspClient::start(&def, &dir, log, move |n| {
+        let client = Client::start(&def, &dir, log, move |n| {
             let _ = app.emit(
                 events::LSP_NOTIFICATION,
                 NotificationEvent {
@@ -170,7 +168,7 @@ pub async fn lsp_request(
     language: String,
     method: String,
     params: Value,
-) -> Res<Value> {
+) -> Result<Value, Message> {
     let client = servers.client(&root, &language)?;
     blocking(move || client.request(&method, params)).await
 }
@@ -182,23 +180,23 @@ pub fn lsp_notify(
     language: String,
     method: String,
     params: Value,
-) -> Res<()> {
+) -> Result<(), Message> {
     servers.client(&root, &language)?.notify(&method, params)
 }
 
 /// The editor opened `path` (in the workspace) with `text` at `version`.
 #[tauri::command]
 pub fn lsp_did_open(
-    ws: State<'_, Workspace>,
+    workspace: State<'_, Workspace>,
     servers: State<'_, Servers>,
     root: String,
     language: String,
     path: String,
     version: i64,
     text: String,
-) -> Res<()> {
+) -> Result<(), Message> {
     let path = PathBuf::from(path);
-    ws.check(&path)?;
+    workspace.check(&path)?;
     servers
         .client(&root, &language)?
         .did_open(&path, &language, version, &text)
@@ -212,7 +210,7 @@ pub fn lsp_did_change(
     path: String,
     version: i64,
     text: String,
-) -> Res<()> {
+) -> Result<(), Message> {
     servers
         .client(&root, &language)?
         .did_change(Path::new(&path), version, &text)
@@ -224,7 +222,7 @@ pub fn lsp_did_save(
     root: String,
     language: String,
     path: String,
-) -> Res<()> {
+) -> Result<(), Message> {
     servers.client(&root, &language)?.did_save(Path::new(&path))
 }
 
@@ -234,7 +232,7 @@ pub fn lsp_did_close(
     root: String,
     language: String,
     path: String,
-) -> Res<()> {
+) -> Result<(), Message> {
     servers
         .client(&root, &language)?
         .did_close(Path::new(&path))
@@ -242,7 +240,11 @@ pub fn lsp_did_close(
 
 /// Stops `language`'s server for `root`, if it runs.
 #[tauri::command]
-pub async fn lsp_stop(servers: State<'_, Servers>, root: String, language: String) -> Res<()> {
+pub async fn lsp_stop(
+    servers: State<'_, Servers>,
+    root: String,
+    language: String,
+) -> Result<(), Message> {
     let server = servers.running().remove(&(root, language));
     if let Some(server) = server {
         blocking(move || {

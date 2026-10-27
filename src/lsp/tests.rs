@@ -25,11 +25,11 @@ impl FakeServer {
     }
 }
 
-fn connected() -> (LspClient, FakeServer, mpsc::Receiver<Notification>) {
+fn connected() -> (Client, FakeServer, mpsc::Receiver<Notification>) {
     let (client_in, server_out) = std::io::pipe().unwrap();
     let (server_in, client_out) = std::io::pipe().unwrap();
     let (tx, rx) = mpsc::channel();
-    let client = LspClient::connect("fake-ls", client_in, client_out, move |n| {
+    let client = Client::connect("fake-ls", client_in, client_out, move |n| {
         let _ = tx.send(n);
     });
     let server = FakeServer {
@@ -287,13 +287,13 @@ fn rust_analyzer_answers_a_hover() {
     let text = "/// The answer.\nfn answer() -> u32 { 42 }\nfn main() { answer(); }\n";
     std::fs::write(&main, text).unwrap();
 
-    let server = ServerDef {
+    let server = ServerDefinition {
         command: "rust-analyzer".into(),
         args: Vec::new(),
         env: Default::default(),
         initialization_options: None,
     };
-    let client = LspClient::start(&server, &dir, crate::run::LogSink::new(), |_| {}).unwrap();
+    let client = Client::start(&server, &dir, crate::run::LogSink::new(), |_| {}).unwrap();
     let capabilities = client.initialize(&dir, None).unwrap();
     assert!(capabilities.get("hoverProvider").is_some());
     client.did_open(&main, "rust", 1, text).unwrap();

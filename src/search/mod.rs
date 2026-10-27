@@ -20,23 +20,25 @@ mod files;
 pub use files::*;
 mod hits;
 pub use hits::*;
-mod run;
-pub use run::*;
+mod find;
+pub use find::*;
 pub mod messages;
 mod replace;
 pub use replace::*;
+mod replacement_mode;
+pub use replacement_mode::ReplacementMode;
 #[cfg(test)]
 mod tests;
 
 /// Directories never searched, ignored or not: VCS metadata, dependencies,
-/// common build output. A product adds its own ([`Layout::skip_dirs`]).
+/// common build output. A product adds its own ([`Layout::skipped_directories`]).
 const ALWAYS_SKIPPED: &[&str] = &[".git", ".hg", ".svn", "target", "node_modules"];
 
 /// A product's project layout, as a search sees it.
 #[derive(Clone, Debug, Default)]
 pub struct Layout {
     /// More folder names never searched (the product's build output, its own data).
-    pub skip_dirs: Vec<String>,
+    pub skipped_directories: Vec<String>,
     /// Generated code, relative to a project root — searched only when a
     /// query asks (`include_generated`), never replaced in.
     pub generated: Vec<Generated>,
@@ -45,13 +47,13 @@ pub struct Layout {
 /// A folder of generated code and the extension of its files.
 #[derive(Clone, Debug)]
 pub struct Generated {
-    pub dir: PathBuf,
+    pub directory: PathBuf,
     pub extension: String,
 }
 
 impl Layout {
     fn skips(&self, name: &str) -> bool {
-        ALWAYS_SKIPPED.contains(&name) || self.skip_dirs.iter().any(|d| d == name)
+        ALWAYS_SKIPPED.contains(&name) || self.skipped_directories.iter().any(|d| d == name)
     }
 }
 
@@ -152,10 +154,14 @@ impl Matcher {
         out
     }
 
-    /// `text` with every match replaced — `$1`/`${name}` expand in regex
-    /// mode, `replacement` is taken literally otherwise. Returns the new text
-    /// and the number of replacements.
-    pub fn replace_all(&self, text: &str, replacement: &str, literal: bool) -> (String, usize) {
+    /// `text` with every match replaced by `replacement`, read as `mode` says.
+    /// Returns the new text and the number of replacements.
+    pub fn replace_all(
+        &self,
+        text: &str,
+        replacement: &str,
+        mode: ReplacementMode,
+    ) -> (String, usize) {
         let matches = self.find_all(text, usize::MAX);
         if matches.is_empty() {
             return (text.to_string(), 0);
@@ -164,7 +170,7 @@ impl Matcher {
         let mut last = 0;
         for &(start, end) in &matches {
             out.push_str(&text[last..start]);
-            if literal {
+            if mode == ReplacementMode::Literal {
                 out.push_str(replacement);
             } else if let Some(caps) = self.re.captures_at(text, start) {
                 caps.expand(replacement, &mut out);
@@ -240,9 +246,12 @@ impl FileMask {
         })
     }
 
-    pub fn matches(&self, rel_path: &str) -> bool {
-        let name = rel_path.rsplit(['/', '\\']).next().unwrap_or(rel_path);
-        let rel = rel_path.replace('\\', "/");
+    pub fn matches(&self, relative_path: &str) -> bool {
+        let name = relative_path
+            .rsplit(['/', '\\'])
+            .next()
+            .unwrap_or(relative_path);
+        let rel = relative_path.replace('\\', "/");
         let hit = |set: &GlobSet| set.is_match(name) || set.is_match(&rel);
         self.include.as_ref().is_none_or(hit) && !self.exclude.as_ref().is_some_and(hit)
     }

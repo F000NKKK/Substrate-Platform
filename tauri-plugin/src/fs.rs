@@ -9,16 +9,14 @@ use std::sync::OnceLock;
 use substrate_platform::events;
 use substrate_platform::fs::messages::{ALREADY_EXISTS, FAILED, INTO_ITSELF, NOT_A_FILE};
 use substrate_platform::fs::watch::DEFAULT_QUIET;
-use substrate_platform::fs::{DirEntryInfo, DirWatcher, EntryKind, dir};
+use substrate_platform::fs::{DirectoryEntry, DirectoryWatcher, EntryKind, dir};
 use substrate_platform::message::Message;
 use substrate_platform::workspace::Workspace;
 use tauri::{AppHandle, Emitter, Runtime, State};
 
-type Res<T> = Result<T, Message>;
-
 /// The watcher behind `fs_watch`, made on first use.
 #[derive(Default)]
-pub struct Watcher(OnceLock<DirWatcher>);
+pub struct Watcher(OnceLock<DirectoryWatcher>);
 
 /// A folder's entry, as the UI's file tree takes it.
 #[derive(Serialize)]
@@ -28,8 +26,8 @@ pub struct Entry {
     kind: EntryKind,
 }
 
-impl From<DirEntryInfo> for Entry {
-    fn from(e: DirEntryInfo) -> Self {
+impl From<DirectoryEntry> for Entry {
+    fn from(e: DirectoryEntry) -> Self {
         Entry {
             name: e.name,
             path: e.path.to_string_lossy().into_owned(),
@@ -45,50 +43,54 @@ fn failed(path: &Path, error: impl ToString) -> Message {
 }
 
 /// `path`, once it's known to be in the workspace.
-fn inside(ws: &Workspace, path: &str) -> Res<PathBuf> {
+fn inside(workspace: &Workspace, path: &str) -> Result<PathBuf, Message> {
     let path = PathBuf::from(path);
-    ws.check(&path)?;
+    workspace.check(&path)?;
     Ok(path)
 }
 
 #[tauri::command]
-pub fn dir_list(ws: State<'_, Workspace>, path: String) -> Res<Vec<Entry>> {
-    let path = inside(&ws, &path)?;
-    dir::list_dir(&path)
+pub fn dir_list(workspace: State<'_, Workspace>, path: String) -> Result<Vec<Entry>, Message> {
+    let path = inside(&workspace, &path)?;
+    dir::list(&path)
         .map(|all| all.into_iter().map(Entry::from).collect())
         .map_err(|e| failed(&path, e))
 }
 
 #[tauri::command]
-pub fn dir_create_file(ws: State<'_, Workspace>, path: String) -> Res<()> {
-    let path = inside(&ws, &path)?;
+pub fn dir_create_file(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
+    let path = inside(&workspace, &path)?;
     dir::create_file(&path).map_err(|e| failed(&path, e))
 }
 
 #[tauri::command]
-pub fn dir_create_dir(ws: State<'_, Workspace>, path: String) -> Res<()> {
-    let path = inside(&ws, &path)?;
-    dir::create_dir(&path).map_err(|e| failed(&path, e))
+pub fn dir_create_dir(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
+    let path = inside(&workspace, &path)?;
+    dir::create(&path).map_err(|e| failed(&path, e))
 }
 
 #[tauri::command]
-pub fn dir_rename(ws: State<'_, Workspace>, from: String, to: String) -> Res<()> {
-    let (from, to) = (inside(&ws, &from)?, inside(&ws, &to)?);
+pub fn dir_rename(
+    workspace: State<'_, Workspace>,
+    from: String,
+    to: String,
+) -> Result<(), Message> {
+    let (from, to) = (inside(&workspace, &from)?, inside(&workspace, &to)?);
     dir::rename(&from, &to).map_err(|e| failed(&from, e))
 }
 
 #[tauri::command]
-pub fn dir_remove(ws: State<'_, Workspace>, path: String) -> Res<()> {
-    let path = inside(&ws, &path)?;
+pub fn dir_remove(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
+    let path = inside(&workspace, &path)?;
     dir::remove(&path).map_err(|e| failed(&path, e))
 }
 
 /// Copies a file or a folder to `to`, which mustn't exist: the source may be
 /// anywhere, the destination must be in the workspace.
 #[tauri::command]
-pub fn dir_copy(ws: State<'_, Workspace>, from: String, to: String) -> Res<()> {
+pub fn dir_copy(workspace: State<'_, Workspace>, from: String, to: String) -> Result<(), Message> {
     let from = PathBuf::from(from);
-    let to = inside(&ws, &to)?;
+    let to = inside(&workspace, &to)?;
     if to.exists() {
         return Err(Message::new(ALREADY_EXISTS).arg("path", to.display()));
     }
@@ -99,7 +101,7 @@ pub fn dir_copy(ws: State<'_, Workspace>, from: String, to: String) -> Res<()> {
 }
 
 #[tauri::command]
-pub fn file_read(path: String) -> Res<String> {
+pub fn file_read(path: String) -> Result<String, Message> {
     let path = PathBuf::from(path);
     if !path.is_file() {
         return Err(Message::new(NOT_A_FILE).arg("path", path.display()));
@@ -108,15 +110,19 @@ pub fn file_read(path: String) -> Res<String> {
 }
 
 #[tauri::command]
-pub fn file_write(ws: State<'_, Workspace>, path: String, contents: String) -> Res<()> {
-    let path = inside(&ws, &path)?;
+pub fn file_write(
+    workspace: State<'_, Workspace>,
+    path: String,
+    contents: String,
+) -> Result<(), Message> {
+    let path = inside(&workspace, &path)?;
     dir::write_file(&path, &contents).map_err(|e| failed(&path, e))
 }
 
 /// A folder or file the user picked (a native dialog) joins the workspace.
 #[tauri::command]
-pub fn allow_path(ws: State<'_, Workspace>, path: String) -> Res<()> {
-    ws.allow(Path::new(&path)).map(|_| ())
+pub fn allow_path(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
+    workspace.allow(Path::new(&path)).map(|_| ())
 }
 
 /// Watches exactly `folders` for changes made outside the IDE; each burst
@@ -126,9 +132,9 @@ pub fn fs_watch<R: Runtime>(
     app: AppHandle<R>,
     watcher: State<'_, Watcher>,
     folders: Vec<String>,
-) -> Res<()> {
+) -> Result<(), Message> {
     if watcher.0.get().is_none() {
-        let made = DirWatcher::new(DEFAULT_QUIET, move |paths| {
+        let made = DirectoryWatcher::new(DEFAULT_QUIET, move |paths| {
             let paths: Vec<String> = paths
                 .iter()
                 .map(|p| p.to_string_lossy().into_owned())

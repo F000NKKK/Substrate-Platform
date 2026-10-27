@@ -9,7 +9,7 @@ use serde::Serialize;
 /// camelCase field names (`clearCommand`), ready to hand to a JS frontend.
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ShellInfo {
+pub struct Shell {
     pub id: String,
     pub label: String,
     pub command: String,
@@ -68,8 +68,8 @@ fn clear_command_for(program: &str) -> &'static str {
         .map_or(CLEAR, |(_, command)| command)
 }
 
-fn shell(program: &str, label: &str) -> ShellInfo {
-    ShellInfo {
+fn shell(program: &str, label: &str) -> Shell {
+    Shell {
         id: program.to_string(),
         label: label.to_string(),
         command: program.to_string(),
@@ -80,8 +80,8 @@ fn shell(program: &str, label: &str) -> ShellInfo {
 /// Every shell worth offering that `PATH` resolves on this machine — never
 /// assumes zsh/fish/pwsh are there because they're common. Never empty:
 /// with none of them, the system's default shell ([`super::default_shell`]).
-pub fn detect_shells() -> Vec<ShellInfo> {
-    let found: Vec<ShellInfo> = CANDIDATES
+pub fn detect_shells() -> Vec<Shell> {
+    let found: Vec<Shell> = CANDIDATES
         .iter()
         .filter(|(program, _)| exists_in_path(program))
         .map(|(program, label)| shell(program, label))
@@ -94,7 +94,7 @@ pub fn detect_shells() -> Vec<ShellInfo> {
         .file_stem()
         .map(|s| s.to_string_lossy().to_lowercase())
         .unwrap_or_default();
-    vec![ShellInfo {
+    vec![Shell {
         command: default,
         ..shell(&program, DEFAULT_LABEL)
     }]

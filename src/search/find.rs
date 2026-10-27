@@ -13,7 +13,8 @@ pub struct OpenDocument {
 #[serde(rename_all = "camelCase")]
 pub struct FileResult {
     pub path: String,
-    pub rel_path: String,
+    #[serde(rename = "relPath")]
+    pub relative_path: String,
     pub hits: Vec<LineHit>,
 }
 
@@ -120,7 +121,7 @@ pub struct Search<'a> {
 
 /// Runs a search, handing each matching file to `emit` as it's found;
 /// `keep_going` is polled between files.
-pub fn run_search(
+pub fn find(
     search: &Search,
     keep_going: &dyn Fn() -> bool,
     emit: &mut dyn FnMut(FileResult),
@@ -152,7 +153,7 @@ pub fn run_search(
         let owned;
         let text = match source {
             Source::Buffer(text) => *text,
-            Source::Disk => match read_text(path, false) {
+            Source::Disk => match read_text(path, Decoding::Lossy) {
                 Some(text) => {
                     owned = text;
                     &owned
@@ -175,7 +176,7 @@ pub fn run_search(
         summary.matching_files += 1;
         emit(FileResult {
             path: path.to_string_lossy().into_owned(),
-            rel_path: plan.root.as_deref().map_or_else(
+            relative_path: plan.root.as_deref().map_or_else(
                 || path.to_string_lossy().into_owned(),
                 |r| relative(r, path),
             ),

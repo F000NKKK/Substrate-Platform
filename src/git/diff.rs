@@ -41,7 +41,7 @@ fn side_text(top: &Path, side: &DiffSide) -> Result<Option<String>, ()> {
         "" => return Ok(None),
         WORKTREE => {
             let file = absolute(top, &side.path);
-            if let Some(view) = crate::text_view::text_view(Path::new(&file)) {
+            if let Some(view) = crate::text_view::find(Path::new(&file)) {
                 return Ok((view.read)(Path::new(&file)));
             }
             match std::fs::read(&file) {
@@ -57,7 +57,7 @@ fn side_text(top: &Path, side: &DiffSide) -> Result<Option<String>, ()> {
             };
             // A file the product reads as text: through the same view as on
             // disk, so both sides of its diff are the same text of it.
-            if let Some(view) = crate::text_view::text_view(Path::new(&side.path)) {
+            if let Some(view) = crate::text_view::find(Path::new(&side.path)) {
                 return Ok(
                     blob(top, &spec).and_then(|bytes| through_view(view, &side.path, &bytes))
                 );
@@ -153,7 +153,7 @@ pub fn head_text(root: &Path, path: &Path) -> Result<Option<String>, Message> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::text_view::{TextView, register_text_view};
+    use crate::text_view::{TextView, register};
 
     fn upper(path: &Path) -> Option<String> {
         std::fs::read_to_string(path).ok().map(|s| s.to_uppercase())
@@ -169,7 +169,7 @@ mod tests {
             read: upper,
             write: no_write,
         };
-        register_text_view("difftest", view);
+        register("difftest", view);
         let text = through_view(view, "dir/a.difftest", b"binary-ish");
         assert_eq!(text.as_deref(), Some("BINARY-ISH"));
     }

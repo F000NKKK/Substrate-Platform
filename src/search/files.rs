@@ -38,16 +38,16 @@ pub fn project_files(root: &Path, mask: &FileMask, layout: &Layout) -> Vec<PathB
         .collect()
 }
 
-/// A file or folder of the project, as a folder listing gives one.
+/// A file or folder of the project, as the project walk gives one.
 #[derive(Clone, Serialize, Debug, PartialEq)]
-pub struct ProjectEntry {
+pub struct WalkEntry {
     pub name: String,
     pub path: String,
     pub kind: &'static str,
 }
 
 /// Every file and folder under `root` (not `root` itself) that `project_walk` keeps.
-pub fn project_entries(root: &Path, layout: &Layout) -> Vec<ProjectEntry> {
+pub fn project_entries(root: &Path, layout: &Layout) -> Vec<WalkEntry> {
     project_walk(root, layout)
         .filter_map(Result::ok)
         .filter(|entry| entry.depth() > 0)
@@ -57,7 +57,7 @@ pub fn project_entries(root: &Path, layout: &Layout) -> Vec<ProjectEntry> {
                 Some(t) if t.is_file() => "file",
                 _ => return None,
             };
-            Some(ProjectEntry {
+            Some(WalkEntry {
                 name: entry.file_name().to_string_lossy().into_owned(),
                 path: entry.path().to_string_lossy().into_owned(),
                 kind,
@@ -78,7 +78,8 @@ pub fn files_containing(
     Ok(project_files(root, &mask, layout)
         .into_iter()
         .filter(|path| {
-            read_text(path, false).is_some_and(|text| !matcher.find_all(&text, 1).is_empty())
+            read_text(path, Decoding::Lossy)
+                .is_some_and(|text| !matcher.find_all(&text, 1).is_empty())
         })
         .take(limit)
         .map(|path| path.to_string_lossy().into_owned())
@@ -91,7 +92,7 @@ pub fn files_containing(
 pub fn generated_files(root: &Path, mask: &FileMask, layout: &Layout) -> Vec<PathBuf> {
     let mut out = Vec::new();
     for generated in &layout.generated {
-        let dir = root.join(&generated.dir);
+        let dir = root.join(&generated.directory);
         if !dir.is_dir() {
             continue;
         }
@@ -120,11 +121,20 @@ pub fn relative(root: &Path, path: &Path) -> String {
         .replace('\\', "/")
 }
 
+/// How a file's bytes become text.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Decoding {
+    /// Invalid UTF-8 becomes U+FFFD (a search only reads it).
+    Lossy,
+    /// Invalid UTF-8 is no text at all (a replace mustn't mangle it).
+    Strict,
+}
+
 /// A file's text (through its [`TextView`](crate::text_view::TextView), if its kind has one), or
-/// `None` for one that's too large, binary, unreadable — or, when `strict`,
-/// not valid UTF-8 (a replace mustn't mangle it).
-pub fn read_text(path: &Path, strict: bool) -> Option<String> {
-    if let Some(view) = crate::text_view::text_view(path) {
+/// `None` for one that's too large, binary, unreadable — or not valid UTF-8,
+/// when `decoding` is strict.
+pub fn read_text(path: &Path, decoding: Decoding) -> Option<String> {
+    if let Some(view) = crate::text_view::find(path) {
         return (view.read)(path);
     }
     let meta = std::fs::metadata(path).ok()?;
@@ -137,7 +147,9 @@ pub fn read_text(path: &Path, strict: bool) -> Option<String> {
     }
     match String::from_utf8(bytes) {
         Ok(text) => Some(text),
-        Err(err) if !strict => Some(String::from_utf8_lossy(err.as_bytes()).into_owned()),
+        Err(err) if decoding == Decoding::Lossy => {
+            Some(String::from_utf8_lossy(err.as_bytes()).into_owned())
+        }
         Err(_) => None,
     }
 }

@@ -8,7 +8,7 @@ use std::path::Path;
 
 #[derive(Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct CommitInfo {
+pub struct Commit {
     pub hash: String,
     pub short_hash: String,
     pub parents: Vec<String>,
@@ -23,14 +23,14 @@ pub struct CommitInfo {
 
 const LOG_FORMAT: &str = "--format=%H%x1f%h%x1f%P%x1f%an%x1f%ae%x1f%at%x1f%D%x1f%s%x1e";
 
-fn parse_log(raw: &str) -> Vec<CommitInfo> {
+fn parse_log(raw: &str) -> Vec<Commit> {
     raw.split('\x1e')
         .filter_map(|record| {
             let fields: Vec<&str> = record.trim_start_matches('\n').split('\x1f').collect();
             let [hash, short, parents, author, email, date, refs, subject] = fields[..] else {
                 return None;
             };
-            Some(CommitInfo {
+            Some(Commit {
                 hash: hash.to_string(),
                 short_hash: short.to_string(),
                 parents: parents.split_whitespace().map(str::to_string).collect(),
@@ -49,7 +49,7 @@ fn parse_log(raw: &str) -> Vec<CommitInfo> {
 }
 
 /// A page of `rev`'s history (HEAD when empty), newest first.
-pub fn log(root: &Path, rev: &str, skip: u32, max: u32) -> Result<Vec<CommitInfo>, Message> {
+pub fn log(root: &Path, rev: &str, skip: u32, max: u32) -> Result<Vec<Commit>, Message> {
     let top = require_repo(root)?;
     if rev.is_empty() && !has_head(&top) {
         return Ok(Vec::new());
@@ -104,7 +104,7 @@ pub fn commit_files(root: &Path, hash: &str) -> Result<Vec<FileChange>, Message>
     };
     let mut files = parse_name_status(&raw);
     for file in &mut files {
-        file.abs_path = absolute(&top, &file.path);
+        file.absolute_path = absolute(&top, &file.path);
     }
     Ok(files)
 }

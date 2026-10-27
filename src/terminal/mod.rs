@@ -9,4 +9,4 @@ mod shell;
 
 pub use chunker::Utf8Chunker;
 pub use session::{PtyOptions, PtySession, default_shell};
-pub use shell::{ShellInfo, detect_shells};
+pub use shell::{Shell, detect_shells};

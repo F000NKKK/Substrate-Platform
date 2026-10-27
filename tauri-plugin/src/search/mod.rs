@@ -10,15 +10,13 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant};
 use substrate_platform::message::Message;
 use substrate_platform::search::{
-    DEFAULT_MAX_LINES, FileResult, FindSummary, Layout, OpenDocument, ProjectEntry, ReplaceRequest,
-    ReplaceSummary, Scope, Search, SearchQuery, files_containing, project_entries, run_replace,
-    run_search,
+    DEFAULT_MAX_LINES, FileResult, FindSummary, Layout, OpenDocument, ReplaceRequest,
+    ReplaceSummary, Scope, Search, SearchQuery, WalkEntry, files_containing, find, project_entries,
+    replace,
 };
 use substrate_platform::workspace::{NOTHING_OPEN, Workspace};
 use tauri::State;
 use tauri::ipc::Channel;
-
-type Res<T> = Result<T, Message>;
 
 /// How often a running search sends what it found.
 const BATCH_EVERY: Duration = Duration::from_millis(100);
@@ -53,9 +51,9 @@ pub struct FindBatch {
 }
 
 /// `root` checked against the workspace — required for a project search.
-fn check_root(ws: &Workspace, root: Option<&str>, scope: Scope) -> Res<()> {
+fn check_root(workspace: &Workspace, root: Option<&str>, scope: Scope) -> Result<(), Message> {
     match root {
-        Some(root) => ws.check(Path::new(root)),
+        Some(root) => workspace.check(Path::new(root)),
         None if scope == Scope::Project => Err(Message::new(NOTHING_OPEN)),
         None => Ok(()),
     }
@@ -65,13 +63,13 @@ fn check_root(ws: &Workspace, root: Option<&str>, scope: Scope) -> Res<()> {
 /// totals once done or cancelled.
 #[tauri::command]
 pub async fn find_in_files(
-    ws: State<'_, Workspace>,
+    workspace: State<'_, Workspace>,
     searches: State<'_, Searches>,
     layout: State<'_, Layout>,
     request: FindRequest,
     on_batch: Channel<FindBatch>,
-) -> Res<FindSummary> {
-    check_root(&ws, request.root.as_deref(), request.scope)?;
+) -> Result<FindSummary, Message> {
+    check_root(&workspace, request.root.as_deref(), request.scope)?;
     let current = Arc::clone(&searches.current);
     current.store(request.search_id, Ordering::SeqCst);
     let layout = layout.inner().clone();
@@ -88,7 +86,7 @@ pub async fn find_in_files(
             max_lines: request.max_lines.unwrap_or(DEFAULT_MAX_LINES),
             layout: &layout,
         };
-        let summary = run_search(&search, &keep_going, &mut |file| {
+        let summary = find(&search, &keep_going, &mut |file| {
             pending.push(file);
             if last_flush.elapsed() > BATCH_EVERY {
                 let _ = on_batch.send(FindBatch {
@@ -115,25 +113,25 @@ pub fn find_cancel(searches: State<'_, Searches>) {
 /// comes back for the UI to put in their buffers, other files are rewritten.
 #[tauri::command]
 pub async fn replace_in_files(
-    ws: State<'_, Workspace>,
+    workspace: State<'_, Workspace>,
     layout: State<'_, Layout>,
     request: ReplaceRequest,
-) -> Res<ReplaceSummary> {
-    check_root(&ws, request.root.as_deref(), request.scope)?;
-    let roots = ws.roots();
+) -> Result<ReplaceSummary, Message> {
+    check_root(&workspace, request.root.as_deref(), request.scope)?;
+    let roots = workspace.roots();
     let layout = layout.inner().clone();
-    blocking(move || run_replace(&request, &layout, &|path| roots.check(path))).await
+    blocking(move || replace(&request, &layout, &|path| roots.check(path))).await
 }
 
 /// A file explorer's search and filters: the project's files and folders,
 /// the ones a lazily listed tree hasn't opened too.
 #[tauri::command]
 pub async fn project_items(
-    ws: State<'_, Workspace>,
+    workspace: State<'_, Workspace>,
     layout: State<'_, Layout>,
     root: String,
-) -> Res<Vec<ProjectEntry>> {
-    ws.check(Path::new(&root))?;
+) -> Result<Vec<WalkEntry>, Message> {
+    workspace.check(Path::new(&root))?;
     let layout = layout.inner().clone();
     blocking(move || Ok(project_entries(Path::new(&root), &layout))).await
 }
@@ -143,12 +141,12 @@ pub async fn project_items(
 /// Find in Files still running.
 #[tauri::command]
 pub async fn project_files_containing(
-    ws: State<'_, Workspace>,
+    workspace: State<'_, Workspace>,
     layout: State<'_, Layout>,
     root: String,
     query: SearchQuery,
-) -> Res<Vec<String>> {
-    ws.check(Path::new(&root))?;
+) -> Result<Vec<String>, Message> {
+    workspace.check(Path::new(&root))?;
     let layout = layout.inner().clone();
     blocking(move || files_containing(Path::new(&root), &query, MAX_CONTAINING_FILES, &layout))
         .await

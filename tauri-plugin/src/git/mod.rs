@@ -13,11 +13,9 @@ use substrate_platform::message::Message;
 use substrate_platform::workspace::Workspace;
 use tauri::{AppHandle, Emitter, Runtime};
 
-type Res<T> = Result<T, Message>;
-
 /// `root`, once it's known to be in the workspace.
-fn checked(ws: &Workspace, root: &str) -> Res<PathBuf> {
-    ws.check(Path::new(root))?;
+fn checked(workspace: &Workspace, root: &str) -> Result<PathBuf, Message> {
+    workspace.check(Path::new(root))?;
     Ok(PathBuf::from(root))
 }
 

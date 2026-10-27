@@ -29,7 +29,7 @@ use crate::message::Message;
 
 /// How a language server is started.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
-pub struct ServerDef {
+pub struct ServerDefinition {
     pub command: String,
     #[serde(default)]
     pub args: Vec<String>,
@@ -40,7 +40,7 @@ pub struct ServerDef {
     pub initialization_options: Option<toml::Table>,
 }
 
-impl ServerDef {
+impl ServerDefinition {
     /// The server's name for the user: its program.
     pub fn name(&self) -> &str {
         Path::new(&self.command)
@@ -49,7 +49,7 @@ impl ServerDef {
             .unwrap_or(&self.command)
     }
 
-    /// The options as JSON, for [`super::LspClient::initialize`].
+    /// The options as JSON, for [`super::Client::initialize`].
     pub fn initialization_options(&self) -> Option<Value> {
         self.initialization_options
             .as_ref()
@@ -65,7 +65,7 @@ pub struct Language {
     pub extensions: Vec<String>,
     /// Whole file names (`Dockerfile`, `Cargo.lock`), compared exactly.
     pub file_names: Vec<String>,
-    pub server: Option<ServerDef>,
+    pub server: Option<ServerDefinition>,
 }
 
 impl Language {
@@ -93,7 +93,7 @@ struct LanguageEntry {
     extensions: Vec<String>,
     #[serde(default)]
     file_names: Vec<String>,
-    server: Option<ServerDef>,
+    server: Option<ServerDefinition>,
 }
 
 /// A product's languages, in its list's order of ids.

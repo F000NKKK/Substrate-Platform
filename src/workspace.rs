@@ -102,13 +102,13 @@ mod tests {
 
     #[test]
     fn only_what_was_opened() {
-        let ws = Workspace::default();
+        let workspace = Workspace::default();
         let here = std::env::temp_dir();
-        assert_eq!(ws.check(&here), Err(Message::new(NOTHING_OPEN)));
-        ws.open(&here).unwrap();
-        assert!(ws.check(&here.join("not-yet-created.txt")).is_ok());
-        assert_eq!(ws.current(), here.canonicalize().ok());
-        ws.close();
-        assert!(ws.current().is_none() && ws.check(&here).is_ok());
+        assert_eq!(workspace.check(&here), Err(Message::new(NOTHING_OPEN)));
+        workspace.open(&here).unwrap();
+        assert!(workspace.check(&here.join("not-yet-created.txt")).is_ok());
+        assert_eq!(workspace.current(), here.canonicalize().ok());
+        workspace.close();
+        assert!(workspace.current().is_none() && workspace.check(&here).is_ok());
     }
 }

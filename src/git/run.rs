@@ -1,7 +1,7 @@
 //! Running `git`: set up for a GUI host, its failures made actionable, its
 //! long runs streamed; and finding the repository a folder is in.
 
-use super::messages as m;
+use super::messages;
 use crate::message::Message;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::path::{Path, PathBuf};
@@ -41,8 +41,9 @@ pub(crate) fn write_lock() -> std::sync::MutexGuard<'static, ()> {
 /// English (`LC_MESSAGES=C`, the rest of the locale kept) — what failed is
 /// recognized by them.
 pub(crate) fn git(dir: &Path) -> Command {
-    let mut cmd = crate::process::command("git");
-    cmd.current_dir(dir)
+    let mut command = crate::process::command("git");
+    command
+        .current_dir(dir)
         .args(["-c", "core.quotepath=false", "-c", "color.ui=false"])
         .env_remove("LC_ALL")
         .env("LC_MESSAGES", "C")
@@ -55,16 +56,16 @@ pub(crate) fn git(dir: &Path) -> Command {
     {
         use std::os::windows::process::CommandExt;
         const CREATE_NO_WINDOW: u32 = 0x0800_0000;
-        cmd.creation_flags(CREATE_NO_WINDOW);
+        command.creation_flags(CREATE_NO_WINDOW);
     }
-    cmd
+    command
 }
 
 fn spawn_error(err: std::io::Error) -> Message {
     if err.kind() == std::io::ErrorKind::NotFound {
-        Message::new(m::MISSING)
+        Message::new(messages::MISSING)
     } else {
-        Message::new(m::CANT_START).arg("error", err)
+        Message::new(messages::CANT_START).arg("error", err)
     }
 }
 
@@ -82,17 +83,17 @@ fn failure(stderr: &str, stdout: &str) -> Message {
 pub(crate) fn friendly(text: &str) -> Message {
     let lower = text.to_lowercase();
     if AUTH_SIGNS.iter().any(|sign| lower.contains(sign)) {
-        Message::new(m::AUTH_FAILED)
+        Message::new(messages::AUTH_FAILED)
     } else if IDENTITY_SIGNS.iter().any(|sign| lower.contains(sign)) {
-        Message::new(m::NO_IDENTITY)
+        Message::new(messages::NO_IDENTITY)
     } else {
         Message::verbatim(text)
     }
 }
 
-/// Runs `cmd` to completion — its stdout when it succeeded, else what it said went wrong.
-pub(crate) fn run(cmd: &mut Command) -> Result<String, Message> {
-    let out = cmd
+/// Runs `command` to completion — its stdout when it succeeded, else what it said went wrong.
+pub(crate) fn run(command: &mut Command) -> Result<String, Message> {
+    let out = command
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .output()
@@ -106,8 +107,8 @@ pub(crate) fn run(cmd: &mut Command) -> Result<String, Message> {
 }
 
 /// Like [`run`], feeding `input` to the command's stdin.
-pub(crate) fn run_with_input(cmd: &mut Command, input: &str) -> Result<String, Message> {
-    let mut child = cmd
+pub(crate) fn run_with_input(command: &mut Command, input: &str) -> Result<String, Message> {
+    let mut child = command
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -125,11 +126,11 @@ pub(crate) fn run_with_input(cmd: &mut Command, input: &str) -> Result<String, M
     }
 }
 
-/// Runs `cmd` with its output streamed line by line to `out`, headed by the
+/// Runs `command` with its output streamed line by line to `out`, headed by the
 /// command line itself. Progress meters (`\r` rewrites) only show their final state.
-pub(crate) fn stream(out: Output, cmd: &mut Command, shown: &str) -> Result<(), Message> {
-    out(Message::new(m::RUNNING).arg("command", shown));
-    let mut child = cmd
+pub(crate) fn stream(out: Output, command: &mut Command, shown: &str) -> Result<(), Message> {
+    out(Message::new(messages::RUNNING).arg("command", shown));
+    let mut child = command
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
@@ -139,7 +140,7 @@ pub(crate) fn stream(out: Output, cmd: &mut Command, shown: &str) -> Result<(), 
             err
         })?;
     let (Some(stdout), Some(stderr)) = (child.stdout.take(), child.stderr.take()) else {
-        return Err(Message::new(m::CANT_START).arg("error", "no output"));
+        return Err(Message::new(messages::CANT_START).arg("error", "no output"));
     };
     let (stdout, stderr, status) = std::thread::scope(|scope| {
         let forward = |reader: Box<dyn Read + Send>| {
@@ -175,10 +176,10 @@ pub(crate) fn stream(out: Output, cmd: &mut Command, shown: &str) -> Result<(), 
         return Ok(());
     }
     out(match status.code() {
-        Some(code) => Message::new(m::FAILED)
+        Some(code) => Message::new(messages::FAILED)
             .arg("command", shown)
             .arg("code", code),
-        None => Message::new(m::KILLED).arg("command", shown),
+        None => Message::new(messages::KILLED).arg("command", shown),
     });
     Err(failure(&stderr, &stdout))
 }
@@ -223,7 +224,7 @@ pub(crate) fn repo_of(root: &Path) -> Result<Option<(PathBuf, PathBuf)>, Message
 pub(crate) fn require_repo(root: &Path) -> Result<PathBuf, Message> {
     repo_of(root)?
         .map(|(top, _)| top)
-        .ok_or_else(|| Message::new(m::NOT_A_REPOSITORY))
+        .ok_or_else(|| Message::new(messages::NOT_A_REPOSITORY))
 }
 
 /// The working tree's top folder of the repository `root` is in, if it's in one.
@@ -253,11 +254,11 @@ mod tests {
             friendly(
                 "fatal: could not read Username for 'https://github.com': terminal prompts disabled"
             ),
-            Message::new(m::AUTH_FAILED)
+            Message::new(messages::AUTH_FAILED)
         );
         assert_eq!(
             friendly("Author identity unknown\n\n*** Please tell me who you are."),
-            Message::new(m::NO_IDENTITY)
+            Message::new(messages::NO_IDENTITY)
         );
         assert_eq!(
             friendly("error: pathspec 'x' did not match"),

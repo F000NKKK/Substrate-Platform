@@ -144,8 +144,8 @@ mod tests {
 
     #[test]
     fn fills_placeholders_for_display() {
-        let m = Message::new("{path} already exists").arg("path", "/a");
-        assert_eq!(m.to_string(), "/a already exists");
+        let message = Message::new("{path} already exists").arg("path", "/a");
+        assert_eq!(message.to_string(), "/a already exists");
         assert_eq!(Message::verbatim("raw").to_string(), "raw");
     }
 

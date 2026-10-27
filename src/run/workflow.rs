@@ -18,21 +18,21 @@ use super::task::{Completion, Task, run_streamed};
 
 /// One `workflow.toml`'s worth of named flows.
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct WorkflowFile {
-    pub workflow: HashMap<String, WorkflowDef>,
+pub struct File {
+    pub workflow: HashMap<String, Definition>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct WorkflowDef {
+pub struct Definition {
     pub description: Option<String>,
-    pub steps: Vec<WorkflowStep>,
+    pub steps: Vec<Step>,
 }
 
 /// A step either runs one external command, or composes another named
 /// workflow (its steps are inlined in place, recursively).
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
-pub enum WorkflowStep {
+pub enum Step {
     Run {
         run: String,
         #[serde(default)]
@@ -46,7 +46,7 @@ pub enum WorkflowStep {
     },
 }
 
-impl WorkflowFile {
+impl File {
     pub fn parse(toml_str: &str) -> anyhow::Result<Self> {
         Ok(toml::from_str(toml_str)?)
     }
@@ -65,46 +65,46 @@ fn substitute(input: &str, vars: &HashMap<String, String>) -> String {
 
 /// How a whole workflow run ended.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum WorkflowResult {
+pub enum Outcome {
     /// Every step succeeded.
     Succeeded,
     /// A step failed (or the workflow couldn't run at all) — see the log.
     Failed,
-    /// [`WorkflowHandle::cancel`] stopped it.
+    /// [`Handle::cancel`] stopped it.
     Cancelled,
 }
 
-impl WorkflowResult {
+impl Outcome {
     pub fn is_success(self) -> bool {
-        self == WorkflowResult::Succeeded
+        self == Outcome::Succeeded
     }
 }
 
-struct WorkflowShared {
+struct Shared {
     cancel: AtomicBool,
-    result: Completion<WorkflowResult>,
+    result: Completion<Outcome>,
 }
 
 /// Mirrors [`super::task::TaskHandle`]'s shape — poll [`Self::is_running`]
 /// (or [`Self::result`]) from the UI thread, or block on [`Self::wait`];
 /// output arrives in the [`LogSink`] passed to [`run`].
 #[derive(Clone)]
-pub struct WorkflowHandle {
-    shared: Arc<WorkflowShared>,
+pub struct Handle {
+    shared: Arc<Shared>,
 }
 
-impl WorkflowHandle {
+impl Handle {
     pub fn is_running(&self) -> bool {
         self.shared.result.get().is_none()
     }
 
     /// `None` while still running.
-    pub fn result(&self) -> Option<WorkflowResult> {
+    pub fn result(&self) -> Option<Outcome> {
         self.shared.result.get()
     }
 
     /// Blocks until every step has finished (or the run stopped early).
-    pub fn wait(&self) -> WorkflowResult {
+    pub fn wait(&self) -> Outcome {
         self.shared.result.wait()
     }
 
@@ -118,7 +118,7 @@ impl WorkflowHandle {
 /// What every step of one run shares: the workflows, `${VAR}` values, the
 /// base folder, where output goes, and the cancel flag.
 struct Runner<'a> {
-    file: &'a WorkflowFile,
+    file: &'a File,
     vars: &'a HashMap<String, String>,
     cwd: &'a Path,
     sink: &'a LogSink,
@@ -153,10 +153,10 @@ impl Runner<'_> {
         ok
     }
 
-    fn run_step(&self, step: &WorkflowStep, chain: &mut Vec<String>) -> bool {
+    fn run_step(&self, step: &Step, chain: &mut Vec<String>) -> bool {
         let vars = self.vars;
         match step {
-            WorkflowStep::Run {
+            Step::Run {
                 run,
                 args,
                 cwd: step_cwd,
@@ -185,7 +185,7 @@ impl Runner<'_> {
                     }
                 }
             }
-            WorkflowStep::Compose { workflow } => self.run_named(workflow, chain),
+            Step::Compose { workflow } => self.run_named(workflow, chain),
         }
     }
 }
@@ -195,15 +195,15 @@ impl Runner<'_> {
 /// failure. `${VAR}` in any step's `run`/`args`/`cwd`/`env` is substituted
 /// from `vars` before that step runs.
 pub fn run(
-    file: WorkflowFile,
+    file: File,
     name: impl Into<String>,
     vars: HashMap<String, String>,
     cwd: impl Into<PathBuf>,
     sink: LogSink,
-) -> WorkflowHandle {
+) -> Handle {
     let name = name.into();
     let cwd = cwd.into();
-    let shared = Arc::new(WorkflowShared {
+    let shared = Arc::new(Shared {
         cancel: AtomicBool::new(false),
         result: Completion::new(),
     });
@@ -220,16 +220,16 @@ pub fn run(
         let ok = runner.run_named(&name, &mut Vec::new());
         let result = if thread_shared.cancel.load(Ordering::Acquire) {
             sink.warn(format!("workflow '{name}' cancelled"));
-            WorkflowResult::Cancelled
+            Outcome::Cancelled
         } else if ok {
-            WorkflowResult::Succeeded
+            Outcome::Succeeded
         } else {
-            WorkflowResult::Failed
+            Outcome::Failed
         };
         thread_shared.result.set(result);
     });
 
-    WorkflowHandle { shared }
+    Handle { shared }
 }
 
 #[cfg(test)]
@@ -256,11 +256,11 @@ steps = [{ workflow = "build" }, { run = "cargo", args = ["test"] }]
 
     #[test]
     fn parse_reads_run_and_compose_steps() {
-        let file = WorkflowFile::parse(SAMPLE).unwrap();
+        let file = File::parse(SAMPLE).unwrap();
         let build = &file.workflow["build"];
         assert_eq!(build.description.as_deref(), Some("Compile"));
         match &build.steps[0] {
-            WorkflowStep::Run {
+            Step::Run {
                 run,
                 args,
                 cwd,
@@ -276,9 +276,9 @@ steps = [{ workflow = "build" }, { run = "cargo", args = ["test"] }]
 
         let ci = &file.workflow["ci"];
         assert!(ci.description.is_none());
-        assert!(matches!(&ci.steps[0], WorkflowStep::Compose { workflow } if workflow == "build"));
+        assert!(matches!(&ci.steps[0], Step::Compose { workflow } if workflow == "build"));
         match &ci.steps[1] {
-            WorkflowStep::Run { args, cwd, env, .. } => {
+            Step::Run { args, cwd, env, .. } => {
                 assert_eq!(args, &["test"]);
                 assert!(cwd.is_none() && env.is_empty());
             }
@@ -288,7 +288,7 @@ steps = [{ workflow = "build" }, { run = "cargo", args = ["test"] }]
 
     #[test]
     fn parse_rejects_invalid_toml() {
-        assert!(WorkflowFile::parse("[workflow.x]\nsteps = 3").is_err());
+        assert!(File::parse("[workflow.x]\nsteps = 3").is_err());
     }
 
     #[test]
@@ -303,7 +303,7 @@ steps = [{ workflow = "build" }, { run = "cargo", args = ["test"] }]
 
     #[test]
     fn compose_cycles_are_detected_instead_of_recursing() {
-        let file = WorkflowFile::parse(
+        let file = File::parse(
             r#"
 [workflow.a]
 steps = [{ workflow = "b" }]
@@ -331,26 +331,26 @@ steps = [{ workflow = "a" }]
 
     #[test]
     fn missing_workflow_fails() {
-        let file = WorkflowFile::parse(SAMPLE).unwrap();
+        let file = File::parse(SAMPLE).unwrap();
         let handle = run(file, "nope", HashMap::new(), ".", LogSink::new());
-        assert_eq!(handle.wait(), WorkflowResult::Failed);
+        assert_eq!(handle.wait(), Outcome::Failed);
     }
 
     #[cfg(unix)]
-    fn sh_workflow(scripts: &[&str]) -> WorkflowFile {
+    fn sh_workflow(scripts: &[&str]) -> File {
         let steps = scripts
             .iter()
-            .map(|s| WorkflowStep::Run {
+            .map(|s| Step::Run {
                 run: "sh".to_string(),
                 args: vec!["-c".to_string(), s.to_string()],
                 cwd: None,
                 env: HashMap::new(),
             })
             .collect();
-        WorkflowFile {
+        File {
             workflow: HashMap::from([(
                 "main".to_string(),
-                WorkflowDef {
+                Definition {
                     description: None,
                     steps,
                 },
@@ -369,7 +369,7 @@ steps = [{ workflow = "a" }]
             ".",
             sink.clone(),
         );
-        assert_eq!(handle.wait(), WorkflowResult::Succeeded);
+        assert_eq!(handle.wait(), Outcome::Succeeded);
         assert!(!handle.is_running());
         assert!(sink.lines().iter().any(|l| l.text == "hi"));
     }
@@ -385,7 +385,7 @@ steps = [{ workflow = "a" }]
             ".",
             sink.clone(),
         );
-        assert_eq!(handle.wait(), WorkflowResult::Failed);
+        assert_eq!(handle.wait(), Outcome::Failed);
         assert!(!sink.lines().iter().any(|l| l.text == "unreachable"));
     }
 
@@ -402,7 +402,7 @@ steps = [{ workflow = "a" }]
         );
         std::thread::sleep(std::time::Duration::from_millis(100));
         handle.cancel();
-        assert_eq!(handle.wait(), WorkflowResult::Cancelled);
+        assert_eq!(handle.wait(), Outcome::Cancelled);
         assert!(!sink.lines().iter().any(|l| l.text == "unreachable"));
     }
 }

@@ -42,7 +42,7 @@ pub struct ReplaceSummary {
 /// Replace All over the same set of files a search would cover: open
 /// documents' new text comes back for the frontend to apply to their
 /// buffers, every other file is rewritten on disk (non-UTF-8 files are left alone).
-pub fn run_replace(
+pub fn replace(
     request: &ReplaceRequest,
     layout: &Layout,
     may_write: &dyn Fn(&Path) -> Result<(), Message>,
@@ -58,12 +58,16 @@ pub fn run_replace(
         false,
         layout,
     );
-    let literal = !request.query.regex;
+    let mode = if request.query.regex {
+        ReplacementMode::Expand
+    } else {
+        ReplacementMode::Literal
+    };
     let mut summary = ReplaceSummary::default();
     for (path, source) in &plan.items {
         match source {
             Source::Buffer(text) => {
-                let (new_text, count) = matcher.replace_all(text, &request.replacement, literal);
+                let (new_text, count) = matcher.replace_all(text, &request.replacement, mode);
                 if count > 0 {
                     summary.total += count;
                     summary.documents.push(ReplacedDocument {
@@ -74,15 +78,15 @@ pub fn run_replace(
                 }
             }
             Source::Disk => {
-                let Some(text) = read_text(path, true) else {
+                let Some(text) = read_text(path, Decoding::Strict) else {
                     continue;
                 };
-                let (new_text, count) = matcher.replace_all(&text, &request.replacement, literal);
+                let (new_text, count) = matcher.replace_all(&text, &request.replacement, mode);
                 if count == 0 {
                     continue;
                 }
                 let written = may_write(path).and_then(|()| {
-                    match crate::text_view::text_view(path) {
+                    match crate::text_view::find(path) {
                         Some(view) => (view.write)(path, &new_text),
                         None => std::fs::write(path, &new_text).map_err(|e| e.to_string()),
                     }

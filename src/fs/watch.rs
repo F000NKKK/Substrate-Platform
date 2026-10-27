@@ -20,15 +20,15 @@ pub const DEFAULT_QUIET: Duration = Duration::from_millis(150);
 
 /// Watches a set of folders; changed paths (files or folders directly in a
 /// watched folder, or the folder itself) go to the callback in batches.
-pub struct DirWatcher {
+pub struct DirectoryWatcher {
     watcher: Mutex<RecommendedWatcher>,
     watched: Mutex<HashSet<PathBuf>>,
 }
 
-impl DirWatcher {
+impl DirectoryWatcher {
     /// A watcher calling `on_change` (from its own thread) with each
     /// batch, sorted and without duplicates, once `quiet` passes without
-    /// another change. Watches nothing until [`DirWatcher::set`].
+    /// another change. Watches nothing until [`DirectoryWatcher::set`].
     pub fn new(
         quiet: Duration,
         on_change: impl Fn(Vec<PathBuf>) + Send + 'static,
@@ -133,7 +133,8 @@ mod tests {
         std::fs::create_dir(&other).unwrap();
         let batches = Arc::new(Mutex::new(Vec::new()));
         let sink = batches.clone();
-        let w = DirWatcher::new(Duration::from_millis(50), move |b| sink.locked().push(b)).unwrap();
+        let w = DirectoryWatcher::new(Duration::from_millis(50), move |b| sink.locked().push(b))
+            .unwrap();
         w.set([dir.clone()]);
         assert_eq!(w.watched(), std::slice::from_ref(&dir));
 
@@ -168,8 +169,8 @@ mod tests {
         let dir = temp_dir("burst");
         let batches = Arc::new(Mutex::new(Vec::new()));
         let sink = batches.clone();
-        let w =
-            DirWatcher::new(Duration::from_millis(200), move |b| sink.locked().push(b)).unwrap();
+        let w = DirectoryWatcher::new(Duration::from_millis(200), move |b| sink.locked().push(b))
+            .unwrap();
         w.set([dir.clone()]);
         for i in 0..20 {
             std::fs::write(dir.join(format!("f{i}.txt")), "x").unwrap();

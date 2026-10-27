@@ -7,7 +7,7 @@ use std::path::Path;
 
 #[derive(Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct BranchInfo {
+pub struct Branch {
     /// `main`, `origin/main`.
     pub name: String,
     pub remote: bool,
@@ -39,7 +39,7 @@ fn parse_track(track: &str) -> (u32, u32, bool) {
     result
 }
 
-fn parse_branches(raw: &str) -> Vec<BranchInfo> {
+fn parse_branches(raw: &str) -> Vec<Branch> {
     raw.lines()
         .filter_map(|line| {
             let fields: Vec<&str> = line.split('\x1f').collect();
@@ -51,7 +51,7 @@ fn parse_branches(raw: &str) -> Vec<BranchInfo> {
                 return None;
             }
             let (ahead, behind, gone) = parse_track(track);
-            Some(BranchInfo {
+            Some(Branch {
                 name: name.to_string(),
                 remote: refname.starts_with(REMOTES_PREFIX),
                 current: head == "*",
@@ -67,8 +67,35 @@ fn parse_branches(raw: &str) -> Vec<BranchInfo> {
         .collect()
 }
 
+/// Where the branch to switch to is.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BranchSource {
+    /// A local branch, checked out as it is.
+    Local,
+    /// A remote-tracking branch (`origin/feature`): a local branch tracking it is made.
+    Remote,
+}
+
+/// Whether a new branch is checked out.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BranchCheckout {
+    /// The current branch stays checked out.
+    Stay,
+    /// The new branch is checked out.
+    Switch,
+}
+
+/// How a branch is deleted.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DeleteMode {
+    /// Only when it's merged (`git branch -d`).
+    Merged,
+    /// Even when it isn't merged anywhere (`git branch -D`).
+    Force,
+}
+
 /// Every local and remote-tracking branch.
-pub fn list(root: &Path) -> Result<Vec<BranchInfo>, Message> {
+pub fn list(root: &Path) -> Result<Vec<Branch>, Message> {
     let top = require_repo(root)?;
     Ok(parse_branches(&run(git(&top).args([
         "for-each-ref",
@@ -80,38 +107,46 @@ pub fn list(root: &Path) -> Result<Vec<BranchInfo>, Message> {
 
 /// Checks out a branch. A remote one (`origin/feature`) gets a local branch
 /// tracking it, as Visual Studio does.
-pub fn switch(root: &Path, name: &str, remote: bool) -> Result<(), Message> {
+pub fn switch(root: &Path, name: &str, source: BranchSource) -> Result<(), Message> {
     let top = require_repo(root)?;
     let _lock = write_lock();
-    let mut cmd = git(&top);
-    cmd.arg("switch");
-    if remote {
-        cmd.arg("--track");
+    let mut command = git(&top);
+    command.arg("switch");
+    if source == BranchSource::Remote {
+        command.arg("--track");
     }
-    run(cmd.arg(name)).map(drop)
+    run(command.arg(name)).map(drop)
 }
 
 /// New Branch: from `start` (the current commit when empty), checked out or not.
-pub fn create(root: &Path, name: &str, start: &str, checkout: bool) -> Result<(), Message> {
+pub fn create(
+    root: &Path,
+    name: &str,
+    start: &str,
+    checkout: BranchCheckout,
+) -> Result<(), Message> {
     let top = require_repo(root)?;
     let _lock = write_lock();
-    let mut cmd = git(&top);
-    if checkout {
-        cmd.args(["switch", "-c", name]);
-    } else {
-        cmd.args(["branch", name]);
-    }
+    let mut command = git(&top);
+    match checkout {
+        BranchCheckout::Switch => command.args(["switch", "-c", name]),
+        BranchCheckout::Stay => command.args(["branch", name]),
+    };
     if !start.is_empty() {
-        cmd.arg(start);
+        command.arg(start);
     }
-    run(&mut cmd).map(drop)
+    run(&mut command).map(drop)
 }
 
-/// Deletes a local branch — `force` even when it isn't merged anywhere.
-pub fn delete(root: &Path, name: &str, force: bool) -> Result<(), Message> {
+/// Deletes a local branch, merged or (`DeleteMode::Force`) not.
+pub fn delete(root: &Path, name: &str, mode: DeleteMode) -> Result<(), Message> {
     let top = require_repo(root)?;
     let _lock = write_lock();
-    run(git(&top).args(["branch", if force { "-D" } else { "-d" }, name])).map(drop)
+    let flag = match mode {
+        DeleteMode::Merged => "-d",
+        DeleteMode::Force => "-D",
+    };
+    run(git(&top).args(["branch", flag, name])).map(drop)
 }
 
 /// The branch checked out — `None` on a detached HEAD.

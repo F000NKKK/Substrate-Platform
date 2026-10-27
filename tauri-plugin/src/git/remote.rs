@@ -1,9 +1,10 @@
 //! What talks to remotes or runs long — streamed to the UI.
 
-use super::{Res, checked, output};
+use super::{checked, output};
 use crate::blocking;
 use std::path::Path;
-use substrate_platform::git::remote::{self, BranchOp, RemoteOp};
+use substrate_platform::git::remote::{self, Integration, RemoteOperation, Resolution};
+use substrate_platform::message::Message;
 use substrate_platform::workspace::Workspace;
 use tauri::{AppHandle, Runtime, State};
 
@@ -11,37 +12,43 @@ use tauri::{AppHandle, Runtime, State};
 #[tauri::command]
 pub async fn git_remote<R: Runtime>(
     app: AppHandle<R>,
-    ws: State<'_, Workspace>,
+    workspace: State<'_, Workspace>,
     root: String,
-    op: RemoteOp,
-) -> Res<()> {
-    let root = checked(&ws, &root)?;
-    blocking(move || remote::remote(&root, op, &output(&app))).await
+    op: RemoteOperation,
+) -> Result<(), Message> {
+    let root = checked(&workspace, &root)?;
+    blocking(move || remote::synchronize(&root, op, &output(&app))).await
 }
 
 /// Merge into Current / Rebase onto, streamed.
 #[tauri::command]
 pub async fn git_integrate<R: Runtime>(
     app: AppHandle<R>,
-    ws: State<'_, Workspace>,
+    workspace: State<'_, Workspace>,
     root: String,
-    op: BranchOp,
+    op: Integration,
     branch: String,
-) -> Res<()> {
-    let root = checked(&ws, &root)?;
+) -> Result<(), Message> {
+    let root = checked(&workspace, &root)?;
     blocking(move || remote::integrate(&root, op, &branch, &output(&app))).await
 }
 
-/// Continues (`go_on`) or aborts the merge/rebase/cherry-pick/revert in progress, streamed.
+/// Continues (`go_on`, the UI's flag) or aborts the
+/// merge/rebase/cherry-pick/revert in progress, streamed.
 #[tauri::command]
 pub async fn git_operation<R: Runtime>(
     app: AppHandle<R>,
-    ws: State<'_, Workspace>,
+    workspace: State<'_, Workspace>,
     root: String,
     go_on: bool,
-) -> Res<()> {
-    let root = checked(&ws, &root)?;
-    blocking(move || remote::operation(&root, go_on, &output(&app))).await
+) -> Result<(), Message> {
+    let root = checked(&workspace, &root)?;
+    let resolution = if go_on {
+        Resolution::Continue
+    } else {
+        Resolution::Abort
+    };
+    blocking(move || remote::resolve(&root, resolution, &output(&app))).await
 }
 
 /// Clone a Repository into `parent` — a folder the user picked in the native
@@ -50,12 +57,12 @@ pub async fn git_operation<R: Runtime>(
 #[tauri::command]
 pub async fn git_clone<R: Runtime>(
     app: AppHandle<R>,
-    ws: State<'_, Workspace>,
+    workspace: State<'_, Workspace>,
     url: String,
     parent: String,
     name: String,
-) -> Res<String> {
-    let parent = ws.allow(Path::new(&parent))?;
+) -> Result<String, Message> {
+    let parent = workspace.allow(Path::new(&parent))?;
     blocking(move || remote::clone(&url, &parent, &name, &output(&app))).await
 }
 
@@ -63,10 +70,10 @@ pub async fn git_clone<R: Runtime>(
 #[tauri::command]
 pub async fn git_init<R: Runtime>(
     app: AppHandle<R>,
-    ws: State<'_, Workspace>,
+    workspace: State<'_, Workspace>,
     root: String,
     branch: String,
-) -> Res<()> {
-    let root = checked(&ws, &root)?;
+) -> Result<(), Message> {
+    let root = checked(&workspace, &root)?;
     blocking(move || remote::init(&root, &branch, &output(&app))).await
 }

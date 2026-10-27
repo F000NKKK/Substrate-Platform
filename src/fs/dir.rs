@@ -14,12 +14,15 @@ use serde::Serialize;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum EntryKind {
+    /// A file, or anything that isn't a directory.
     File,
-    Dir,
+    /// A directory.
+    #[serde(rename = "dir")]
+    Directory,
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct DirEntryInfo {
+pub struct DirectoryEntry {
     pub name: String,
     pub path: PathBuf,
     pub kind: EntryKind,
@@ -28,24 +31,24 @@ pub struct DirEntryInfo {
 /// One directory level, not recursive — a file tree widget calls this again
 /// for a folder node the moment it's expanded, rather than loading an entire
 /// subtree up front.
-pub fn list_dir(path: &Path) -> io::Result<Vec<DirEntryInfo>> {
+pub fn list(path: &Path) -> io::Result<Vec<DirectoryEntry>> {
     let mut entries = Vec::new();
     for entry in std::fs::read_dir(path)? {
         let entry = entry?;
         let file_type = entry.file_type()?;
         let kind = if file_type.is_dir() {
-            EntryKind::Dir
+            EntryKind::Directory
         } else {
             EntryKind::File
         };
-        entries.push(DirEntryInfo {
+        entries.push(DirectoryEntry {
             name: entry.file_name().to_string_lossy().into_owned(),
             path: entry.path(),
             kind,
         });
     }
     // Folders first, then case-insensitive by name.
-    entries.sort_by_cached_key(|e| (e.kind != EntryKind::Dir, e.name.to_lowercase()));
+    entries.sort_by_cached_key(|e| (e.kind != EntryKind::Directory, e.name.to_lowercase()));
     Ok(entries)
 }
 
@@ -53,7 +56,7 @@ pub fn create_file(path: &Path) -> io::Result<()> {
     std::fs::File::create(path).map(|_| ())
 }
 
-pub fn create_dir(path: &Path) -> io::Result<()> {
+pub fn create(path: &Path) -> io::Result<()> {
     std::fs::create_dir(path)
 }
 
@@ -128,10 +131,10 @@ mod tests {
             create_file(&dir.join(file)).unwrap();
         }
         for sub in ["zeta", "Alpha"] {
-            create_dir(&dir.join(sub)).unwrap();
+            create(&dir.join(sub)).unwrap();
         }
 
-        let names: Vec<_> = list_dir(&dir)
+        let names: Vec<_> = list(&dir)
             .unwrap()
             .into_iter()
             .map(|e| (e.name, e.kind))
@@ -139,8 +142,8 @@ mod tests {
         assert_eq!(
             names,
             vec![
-                ("Alpha".to_string(), EntryKind::Dir),
-                ("zeta".to_string(), EntryKind::Dir),
+                ("Alpha".to_string(), EntryKind::Directory),
+                ("zeta".to_string(), EntryKind::Directory),
                 ("A.txt".to_string(), EntryKind::File),
                 ("b.txt".to_string(), EntryKind::File),
                 ("c.txt".to_string(), EntryKind::File),

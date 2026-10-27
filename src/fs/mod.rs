@@ -5,5 +5,5 @@ pub mod dir;
 pub mod messages;
 pub mod watch;
 
-pub use dir::{DirEntryInfo, EntryKind};
-pub use watch::DirWatcher;
+pub use dir::{DirectoryEntry, EntryKind};
+pub use watch::DirectoryWatcher;

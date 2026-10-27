@@ -31,7 +31,7 @@ crate::messages! {
 /// entries into the AppImage — the runtime put them in front of the
 /// system's own, which a GTK program can't start without. Empty outside an
 /// AppImage.
-pub fn host_env() -> Vec<(OsString, Option<OsString>)> {
+pub fn host_environment() -> Vec<(OsString, Option<OsString>)> {
     let Some(appdir) = std::env::var_os("APPDIR").filter(|d| !d.is_empty()) else {
         return Vec::new();
     };
@@ -56,14 +56,14 @@ pub fn host_env() -> Vec<(OsString, Option<OsString>)> {
 
 /// A command for `program` with the system's own environment.
 pub fn command(program: impl AsRef<OsStr>) -> Command {
-    let mut cmd = Command::new(program);
-    for (key, value) in host_env() {
+    let mut invocation = Command::new(program);
+    for (key, value) in host_environment() {
         match value {
-            Some(value) => cmd.env(key, value),
-            None => cmd.env_remove(key),
+            Some(value) => invocation.env(key, value),
+            None => invocation.env_remove(key),
         };
     }
-    cmd
+    invocation
 }
 
 #[cfg(test)]
@@ -73,7 +73,7 @@ mod tests {
     #[test]
     fn outside_an_appimage_nothing_changes() {
         if std::env::var_os("APPDIR").is_none() {
-            assert!(host_env().is_empty());
+            assert!(host_environment().is_empty());
         }
     }
 }

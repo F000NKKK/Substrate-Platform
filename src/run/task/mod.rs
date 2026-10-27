@@ -174,21 +174,24 @@ fn spawn_streaming(
     envs: &[(String, String)],
     sink: &LogSink,
 ) -> std::io::Result<StreamingChild> {
-    let mut cmd = crate::process::command(program);
-    cmd.args(args).stdout(Stdio::piped()).stderr(Stdio::piped());
+    let mut command = crate::process::command(program);
+    command
+        .args(args)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
     // Its own process group (pgid = its pid), so cancelling can take down
     // everything it spawned too — see `kill_tree`.
     #[cfg(unix)]
-    std::os::unix::process::CommandExt::process_group(&mut cmd, 0);
+    std::os::unix::process::CommandExt::process_group(&mut command, 0);
     if let Some(cwd) = cwd {
-        cmd.current_dir(cwd);
+        command.current_dir(cwd);
     }
     for (k, v) in envs {
-        cmd.env(k, v);
+        command.env(k, v);
     }
 
     sink.info(format!("$ {} {}", program, args.join(" ")));
-    let mut child = cmd.spawn()?;
+    let mut child = command.spawn()?;
 
     let (done_tx, readers_done) = mpsc::channel();
     if let Some(stdout) = child.stdout.take() {
