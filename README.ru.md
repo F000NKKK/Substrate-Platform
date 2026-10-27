@@ -72,7 +72,7 @@ flowchart LR
 | `dap` | Адаптеры отладки по Debug Adapter Protocol — отладочный двойник `lsp`. `Adapters`: TOML-список продукта — `[adapter.<id>]` с `languages`, `command`, `args`, `env` и `launch_defaults` (с чего начинается каждый `launch`). `dap::Client` запускает адаптер (stderr в `LogSink`) или подключается к любому потоку: запросы с номерами `Seq` и таймаутом (ждать могут несколько сразу: многие адаптеры отвечают на `launch` только после `configurationDone`), типизированные запросы (`initialize`, `launch`, `attach`, `set_breakpoints`, `configuration_done`, `stack_trace`, `scopes`, `variables`, `resume`, `step_over`/`step_in`/`step_out`, `pause`, `evaluate`, `disconnect`…), результаты — JSON адаптера. То, что адаптер сообщает сам, — типизированное `Event` (`Stopped`, `Output`, `Terminated`…; неизвестное хранится как `Other { name, body }`); его собственные запросы (`runInTerminal`, `startDebugging`) получают ответ-ошибку. Кадрирование — то же, что у `lsp`. |
 | `search` | Поиск и замена в файлах: обход проекта с учётом `.gitignore` (или только несохранённых буферов открытых документов), результаты по файлам; что обход пропускает, задаёт `Layout` продукта. |
 | `state` | Что IDE помнит между запусками: JSON-состояние проекта и приложения; чтение никогда не падает, запись атомарна. |
-| `git` | Система управления версиями через CLI `git`: состояние, индексирование, фиксации, сравнения, история, ветви, удалённые репозитории, спрятанные изменения, параметры. |
+| `git` (feature плагина; в этом крейте модуля нет) | Система управления версиями через CLI `git` тремя крейтами: [`substrate-git-domain`](crates/substrate-git-domain) (состояние, изменения, ветви, фиксации, спрятанные изменения, сравнения, `GitError`), [`substrate-git-app`](crates/substrate-git-app) (порты и `WriteLock`, который берут операции записи) и [`substrate-git-gitcli`](crates/substrate-git-gitcli) (`GitCli`: запускает `git` и разбирает его porcelain). |
 
 У Tauri-плагина `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) те же features для его команд (`dap`, `fs`, `git`, `lsp`, `search`, `state`, `terminal`); список языков `lsp` и адаптеров `dap` передаёт продукт в `Options::languages` и `Options::adapters`.
 
@@ -156,7 +156,7 @@ import { PlatformShell, ThemeProvider, StatusBar } from "substrate-platform-ui";
   `.properties` и просмотр изображений
 - `DiffEditor` для сравнения двух версий
 - Окна системы управления версиями (`GitHost`) и поиска с заменой в файлах
-  (`FindHost`, `FindInFilesWindow`, `FindResultsPanel`) поверх `git` и `search` крейта
+  (`FindHost`, `FindInFilesWindow`, `FindResultsPanel`) поверх `git` и `search` плагина
 - `WorkspaceProvider`: открытые папки и то, что происходит при закрытии окна
 
 ### 🧩 Виджеты

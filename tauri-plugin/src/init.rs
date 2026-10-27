@@ -38,9 +38,9 @@ pub fn init_with<R: Runtime>(options: Options) -> TauriPlugin<R> {
 /// Puts the state each feature's commands share under the app's management.
 fn manage<R: Runtime>(app: &AppHandle<R>, options: Options) {
     app.manage(Workspace::default());
-    app.manage(options.text_views);
     #[cfg(feature = "git")]
-    app.manage(substrate_platform::git::WriteLock::new());
+    app.manage(crate::git::SourceControl::new(options.text_views.clone()));
+    app.manage(options.text_views);
     #[cfg(feature = "terminal")]
     app.manage(terminal::Terminals::default());
     #[cfg(feature = "fs")]

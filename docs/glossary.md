@@ -13,7 +13,7 @@ renames the other in the same change. Contexts are listed in
 | Message | Text for the user: an English template with `{name}` placeholders, and their values. The template is the key the UI's translation catalogs use. | `message::Message` |
 | Template | One message's English text, declared once in its module's `messages!` block. | `messages!`, `*::messages::*` |
 | Verbatim | Text that is not ours to translate: a tool's own output. | `Message::verbatim` |
-| Error | Why an operation failed, as a typed enum per family; the interface turns it into a `Message` once, on the way out. | `git::GitError`, `search::SearchError`, `lsp::LspError`, `dap::DapError`, `fs::FsError`, `state::StateError`, `process::ProcessError`, `project::ProjectError`, `workspace::WorkspaceError`, `terminal::PtyError`, `run::workflow::FileError` |
+| Error | Why an operation failed, as a typed enum per family; the interface turns it into a `Message` once, on the way out. | `substrate_git_domain::GitError`, `search::SearchError`, `lsp::LspError`, `dap::DapError`, `fs::FsError`, `state::StateError`, `process::ProcessError`, `project::ProjectError`, `workspace::WorkspaceError`, `terminal::PtyError`, `run::workflow::FileError` |
 
 ## Workspace
 
@@ -33,23 +33,23 @@ renames the other in the same change. Contexts are listed in
 
 | Term | Meaning | In code |
 |---|---|---|
-| Repository status | A repository's state for Git Changes: branch, head, upstream, changes, operation. | `git::status::RepoStatus`, `git::status::read` |
-| File change | One changed file: path, original path, kind. | `git::status::FileChange` |
-| Change kind | Modified, added, deleted, renamed, copied, type changed, untracked, conflicted. | `git::status::ChangeKind` |
-| Operation | A merge, rebase, cherry-pick or revert waiting to be finished or aborted. | `git::status::Operation` |
-| Discard | Undo Changes: back to what is staged, or to the last commit. | `git::status::discard` |
-| Commit mode, scope | A new commit or an amend; what is staged or every change. | `git::status::CommitMode`, `git::status::CommitScope` |
-| Resolution | Continue or abort the operation in progress. | `git::remote::Resolution`, `git::remote::resolve` |
-| Remote operation | Fetch, pull, push, sync. | `git::remote::RemoteOperation`, `git::remote::synchronize` |
-| Integration | Merge a branch into the current one, or rebase onto it. | `git::remote::Integration` |
-| Branch | A local or remote-tracking branch and its tracking state. | `git::branch::Branch` |
-| Branch source, checkout, delete mode | Switch to a local or remote branch; check a new one out or not; delete only merged or force. | `git::branch::{BranchSource, BranchCheckout, DeleteMode}` |
-| Commit | One commit of a history page. | `git::history::Commit` |
-| Stash entry | One stash of the stash list. | `git::stash::StashEntry` |
-| Diff side | One side of a file's diff: a revision, the index or the working tree. | `git::diff::DiffSide` |
-| Diff texts | Both sides of a file's diff, as text. | `git::diff::DiffTexts` |
-| Output | Where a long run's lines go (the host's Output window). | `git::Output` |
-| Write lock | Held by every write to a repository, so two never race for `index.lock`; one per host, passed to each write. | `git::WriteLock` |
+| Repository status | A repository's state for Git Changes: branch, head, upstream, changes, operation. | `substrate_git_domain::status::RepoStatus`, `WorkingTree::status` |
+| File change | One changed file: path, original path, kind. | `substrate_git_domain::status::FileChange` |
+| Change kind | Modified, added, deleted, renamed, copied, type changed, untracked, conflicted. | `substrate_git_domain::status::ChangeKind` |
+| Operation | A merge, rebase, cherry-pick or revert waiting to be finished or aborted. | `substrate_git_domain::status::Operation` |
+| Discard | Undo Changes: back to what is staged, or to the last commit. | `substrate_git_app::changes::discard` |
+| Commit mode, scope | A new commit or an amend; what is staged or every change. | `substrate_git_domain::commits::{CommitMode, CommitScope}` |
+| Resolution | Continue or abort the operation in progress. | `substrate_git_domain::remotes::Resolution`, `substrate_git_app::syncing::resolve` |
+| Remote operation | Fetch, pull, push, sync. | `substrate_git_domain::remotes::RemoteOperation`, `substrate_git_app::syncing::synchronize` |
+| Integration | Merge a branch into the current one, or rebase onto it. | `substrate_git_domain::remotes::Integration` |
+| Branch | A local or remote-tracking branch and its tracking state. | `substrate_git_domain::branches::Branch` |
+| Branch source, checkout, delete mode | Switch to a local or remote branch; check a new one out or not; delete only merged or force. | `substrate_git_domain::branches::{BranchSource, BranchCheckout, DeleteMode}` |
+| Commit | One commit of a history page. | `substrate_git_domain::commits::Commit` |
+| Stash entry | One stash of the stash list. | `substrate_git_domain::stashes::StashEntry` |
+| Diff side | One side of a file's diff: a revision, the index or the working tree. | `substrate_git_domain::diffs::DiffSide` |
+| Diff texts | Both sides of a file's diff, as text. | `substrate_git_domain::diffs::DiffTexts` |
+| Output | Where a long run's lines go (the host's Output window). | `substrate_git_app::Output` |
+| Write lock | Held by every write to a repository, so two never race for `index.lock`; one per host, passed to each write. | `substrate_git_app::WriteLock` |
 
 ## Search
 
@@ -142,3 +142,6 @@ renames the other in the same change. Contexts are listed in
 | Host environment | How a started program's environment differs from this process's (an AppImage's variables removed). | `process::host_environment` |
 | Command domain | A group of host commands under a plugin. | `commands::Domain` |
 | Event | A message the host sends its UI, by name. | `events` |
+| Port | A trait a context's app crate declares and an adapter crate implements. | `substrate_git_app::ports::{WorkingTree, History, Diffs, Branches, Stashes, Remotes, Settings}` |
+| Adapter | An infrastructure crate that implements ports with an outside tool. | `substrate_git_gitcli::GitCli` |
+| DTO | A `serde` struct at the interface that mirrors a domain type for the wire; the name ends in `Dto`. | `RepoStatusDto`, `DiscardItemDto` |

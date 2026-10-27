@@ -13,7 +13,7 @@ repository = "https://github.com/F000NKKK/Substrate-Platform"
 [features]
 dap = ["substrate-platform/dap"]
 fs = ["substrate-platform/fs"]
-git = ["substrate-platform/git"]
+git = ["dep:substrate-git-domain"]
 lsp = ["substrate-platform/lsp"]
 project = ["substrate-platform/project"]
 search = ["substrate-platform/search"]
@@ -25,6 +25,7 @@ full = ["dap", "fs", "git", "lsp", "project", "search", "state", "terminal"]
 workspace = true
 
 [dependencies]
+substrate-git-domain = { version = "0.1.0", path = "../substrate-git-domain", optional = true }
 substrate-message = { version = "0.1.0", path = "../substrate-message" }
 substrate-platform = { version = "0.4.0", path = "../.." }
 

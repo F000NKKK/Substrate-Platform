@@ -8,7 +8,7 @@ pub fn catalog() -> Vec<(&'static str, &'static str, &'static str)> {
         #[cfg(feature = "fs")]
         substrate_platform::fs::messages::ALL,
         #[cfg(feature = "git")]
-        substrate_platform::git::messages::ALL,
+        substrate_git_domain::messages::ALL,
         #[cfg(feature = "lsp")]
         substrate_platform::lsp::messages::ALL,
         #[cfg(feature = "project")]

@@ -15,7 +15,7 @@ links = "tauri-plugin-substrate"
 [features]
 dap = ["substrate-platform/dap", "dep:serde_json"]
 fs = ["substrate-platform/fs"]
-git = ["substrate-platform/git"]
+git = ["dep:substrate-git-app", "dep:substrate-git-domain", "dep:substrate-git-gitcli"]
 lsp = ["substrate-platform/lsp", "dep:serde_json"]
 search = ["substrate-platform/search"]
 state = ["substrate-platform/state", "dep:serde_json"]
@@ -25,6 +25,9 @@ terminal = ["substrate-platform/terminal"]
 workspace = true
 
 [dependencies]
+substrate-git-app = { version = "0.1.0", path = "../crates/substrate-git-app", optional = true }
+substrate-git-domain = { version = "0.1.0", path = "../crates/substrate-git-domain", optional = true }
+substrate-git-gitcli = { version = "0.1.0", path = "../crates/substrate-git-gitcli", optional = true }
 substrate-host-contract = { version = "0.1.0", path = "../crates/substrate-host-contract" }
 substrate-message = { version = "0.1.0", path = "../crates/substrate-message" }
 substrate-platform = { version = "0.4.0", path = ".." }
@@ -35,3 +38,6 @@ serde_json = { version = "1", optional = true }
 [build-dependencies]
 substrate-host-contract = { version = "0.1.0", path = "../crates/substrate-host-contract" }
 tauri-plugin = { version = "2", features = ["build"] }
+
+[dev-dependencies]
+serde_json = "1"

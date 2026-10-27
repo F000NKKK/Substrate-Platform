@@ -6,6 +6,18 @@ name = "substrate-platform"
 layer = "infra"      # really mixed: shared-kernel + domain + app + infra + interface (commands, events)
 context = "substrate"
 [[crate]]
+name = "substrate-git-domain"
+layer = "domain"
+context = "source-control"
+[[crate]]
+name = "substrate-git-app"
+layer = "app"
+context = "source-control"
+[[crate]]
+name = "substrate-git-gitcli"
+layer = "infra"
+context = "source-control"
+[[crate]]
 name = "tauri-plugin-substrate"
 layer = "interface"
 context = "host-ui-contract"
@@ -31,3 +43,15 @@ relation = "published-language"
 from = "substrate"
 to = "message"
 relation = "shared-kernel"
+[[context_edge]]
+from = "source-control"
+to = "substrate"
+relation = "customer-supplier"
+[[context_edge]]
+from = "source-control"
+to = "message"
+relation = "shared-kernel"
+[[context_edge]]
+from = "host-ui-contract"
+to = "source-control"
+relation = "customer-supplier"

@@ -6,7 +6,7 @@
 //! module behind a feature of its name: `run` (processes streamed into a
 //! log, multi-step workflows), `terminal` (pty sessions, shells), `fs`
 //! (folders and files, watching them), `project` (projects and solutions),
-//! `git` (Source Control), `lsp` (language servers), `dap` (debug
+//! `lsp` (language servers), `dap` (debug
 //! adapters), `search` (Find and
 //! Replace in Files), `state` (what the IDE remembers). Nothing
 //! here knows about any specific product (no product or domain concepts, no
@@ -26,8 +26,6 @@ mod framing;
 pub mod dap;
 #[cfg(feature = "fs")]
 pub mod fs;
-#[cfg(feature = "git")]
-pub mod git;
 #[cfg(feature = "lsp")]
 pub mod lsp;
 #[cfg(feature = "project")]

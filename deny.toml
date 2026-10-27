@@ -45,6 +45,18 @@ crate = "substrate-message"
 allow = ["AGPL-3.0-only"]
 crate = "substrate-host-contract"
 
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-git-domain"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-git-app"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-git-gitcli"
+
 [bans]
 multiple-versions = "warn"
 wildcards = "deny"
