@@ -73,7 +73,7 @@ Always there: `message` (user-facing text as templates the UI translates), `even
 | `search` | Find and Replace in Files: a `.gitignore`-aware walk of the project (or only the open documents' unsaved buffers), results file by file; what the walk leaves out is the product's `Layout`. |
 | `state` | What an IDE remembers between runs: a project's and the app's JSON state; reading never fails, writing is atomic. |
 
-The Tauri plugin `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) has the same features for its commands (`fs`, `git`, `search`, `state`, `terminal`).
+The Tauri plugin `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) has the same features for its commands (`fs`, `git`, `lsp`, `search`, `state`, `terminal`); `lsp`'s languages are the product's, passed in `Options::languages`.
 
 Which paths a host may touch is deliberately left to the host, one layer up.
 

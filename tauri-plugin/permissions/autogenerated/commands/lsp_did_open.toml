@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-lsp-did-open"
+description = "Enables the lsp_did_open command without any pre-configured scope."
+commands.allow = ["lsp_did_open"]
+
+[[permission]]
+identifier = "deny-lsp-did-open"
+description = "Denies the lsp_did_open command without any pre-configured scope."
+commands.deny = ["lsp_did_open"]

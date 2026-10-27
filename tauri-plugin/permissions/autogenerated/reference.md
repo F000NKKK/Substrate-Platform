@@ -55,6 +55,15 @@ Every command Substrate's UI calls.
 - `allow-terminal-write`
 - `allow-terminal-resize`
 - `allow-terminal-kill`
+- `allow-lsp-languages`
+- `allow-lsp-start`
+- `allow-lsp-request`
+- `allow-lsp-notify`
+- `allow-lsp-did-open`
+- `allow-lsp-did-change`
+- `allow-lsp-did-save`
+- `allow-lsp-did-close`
+- `allow-lsp-stop`
 
 ## Permission Table
 
@@ -1049,6 +1058,240 @@ Enables the git_unstage command without any pre-configured scope.
 <td>
 
 Denies the git_unstage command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-lsp-did-change`
+
+</td>
+<td>
+
+Enables the lsp_did_change command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-lsp-did-change`
+
+</td>
+<td>
+
+Denies the lsp_did_change command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-lsp-did-close`
+
+</td>
+<td>
+
+Enables the lsp_did_close command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-lsp-did-close`
+
+</td>
+<td>
+
+Denies the lsp_did_close command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-lsp-did-open`
+
+</td>
+<td>
+
+Enables the lsp_did_open command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-lsp-did-open`
+
+</td>
+<td>
+
+Denies the lsp_did_open command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-lsp-did-save`
+
+</td>
+<td>
+
+Enables the lsp_did_save command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-lsp-did-save`
+
+</td>
+<td>
+
+Denies the lsp_did_save command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-lsp-languages`
+
+</td>
+<td>
+
+Enables the lsp_languages command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-lsp-languages`
+
+</td>
+<td>
+
+Denies the lsp_languages command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-lsp-notify`
+
+</td>
+<td>
+
+Enables the lsp_notify command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-lsp-notify`
+
+</td>
+<td>
+
+Denies the lsp_notify command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-lsp-request`
+
+</td>
+<td>
+
+Enables the lsp_request command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-lsp-request`
+
+</td>
+<td>
+
+Denies the lsp_request command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-lsp-start`
+
+</td>
+<td>
+
+Enables the lsp_start command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-lsp-start`
+
+</td>
+<td>
+
+Denies the lsp_start command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-lsp-stop`
+
+</td>
+<td>
+
+Enables the lsp_stop command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-lsp-stop`
+
+</td>
+<td>
+
+Denies the lsp_stop command without any pre-configured scope.
 
 </td>
 </tr>

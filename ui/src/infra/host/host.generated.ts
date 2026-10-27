@@ -27,6 +27,7 @@ export const messages = {
   },
   lsp: {
     invalidList: "The list of languages is invalid: {error}",
+    noServer: "There's no language server for {language}.",
     cantStart: "Couldn't start the language server {server}: {error}",
     failed: "The language server {server} failed: {error}",
     stopped: "The language server {server} has stopped.",
@@ -127,6 +128,17 @@ export const substrate = {
     terminalResize: { plugin: "substrate", command: "terminal_resize" },
     terminalKill: { plugin: "substrate", command: "terminal_kill" },
   },
+  lsp: {
+    lspLanguages: { plugin: "substrate", command: "lsp_languages" },
+    lspStart: { plugin: "substrate", command: "lsp_start" },
+    lspRequest: { plugin: "substrate", command: "lsp_request" },
+    lspNotify: { plugin: "substrate", command: "lsp_notify" },
+    lspDidOpen: { plugin: "substrate", command: "lsp_did_open" },
+    lspDidChange: { plugin: "substrate", command: "lsp_did_change" },
+    lspDidSave: { plugin: "substrate", command: "lsp_did_save" },
+    lspDidClose: { plugin: "substrate", command: "lsp_did_close" },
+    lspStop: { plugin: "substrate", command: "lsp_stop" },
+  },
 } as const;
 
 /** The events Substrate's host sends its UI. */
@@ -136,4 +148,6 @@ export const events = {
   filesChanged: "substrate://files-changed",
   terminalOutput: "substrate://terminal-output",
   terminalExit: "substrate://terminal-exit",
+  lspNotification: "substrate://lsp-notification",
+  lspOutput: "substrate://lsp-output",
 } as const;

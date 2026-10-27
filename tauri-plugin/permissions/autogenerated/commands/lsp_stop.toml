@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-lsp-stop"
+description = "Enables the lsp_stop command without any pre-configured scope."
+commands.allow = ["lsp_stop"]
+
+[[permission]]
+identifier = "deny-lsp-stop"
+description = "Denies the lsp_stop command without any pre-configured scope."
+commands.deny = ["lsp_stop"]

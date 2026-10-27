@@ -16,6 +16,12 @@ pub const TERMINAL_OUTPUT: &str = "substrate://terminal-output";
 /// A terminal's shell exited: `{ id }`.
 pub const TERMINAL_EXIT: &str = "substrate://terminal-exit";
 
+/// What a language server said unasked: `{ root, language, method, params }`.
+pub const LSP_NOTIFICATION: &str = "substrate://lsp-notification";
+
+/// A language server's own log (its stderr), a line: `{ root, language, line }`.
+pub const LSP_OUTPUT: &str = "substrate://lsp-output";
+
 /// Every event, for the UI's generated copy: (name in code, event).
 pub const ALL: &[(&str, &str)] = &[
     ("ideOutput", IDE_OUTPUT),
@@ -23,6 +29,8 @@ pub const ALL: &[(&str, &str)] = &[
     ("filesChanged", FILES_CHANGED),
     ("terminalOutput", TERMINAL_OUTPUT),
     ("terminalExit", TERMINAL_EXIT),
+    ("lspNotification", LSP_NOTIFICATION),
+    ("lspOutput", LSP_OUTPUT),
 ];
 
 /// `events` — (name in code, event) — as a TypeScript constant `name`; `doc`

@@ -11,6 +11,8 @@
 mod fs;
 #[cfg(feature = "git")]
 mod git;
+#[cfg(feature = "lsp")]
+mod lsp;
 mod open;
 #[cfg(feature = "search")]
 mod search;
@@ -19,7 +21,7 @@ mod state;
 #[cfg(feature = "terminal")]
 mod terminal;
 
-#[cfg(any(feature = "git", feature = "search"))]
+#[cfg(any(feature = "git", feature = "lsp", feature = "search"))]
 use substrate_platform::message::Message;
 pub use substrate_platform::workspace::Workspace;
 use tauri::Manager;
@@ -29,7 +31,7 @@ use tauri::plugin::{Builder, TauriPlugin};
 pub use substrate_platform::commands::SUBSTRATE_PLUGIN as NAME;
 
 /// Runs `work` off the UI thread.
-#[cfg(any(feature = "git", feature = "search"))]
+#[cfg(any(feature = "git", feature = "lsp", feature = "search"))]
 pub(crate) async fn blocking<T: Send + 'static>(
     work: impl FnOnce() -> Result<T, Message> + Send + 'static,
 ) -> Result<T, Message> {
@@ -44,6 +46,9 @@ pub struct Options {
     /// What a search keeps out of the walk, and where generated code lives.
     #[cfg(feature = "search")]
     pub search: substrate_platform::search::Layout,
+    /// The languages the product knows, and their servers.
+    #[cfg(feature = "lsp")]
+    pub languages: substrate_platform::lsp::Languages,
     /// Where the product keeps its own data in a project.
     #[cfg(feature = "state")]
     pub state: Option<state::StateOptions>,
@@ -76,7 +81,12 @@ pub fn init_with<R: tauri::Runtime>(options: Options) -> TauriPlugin<R> {
             if let Some(state) = options.state {
                 app.manage(state);
             }
-            #[cfg(not(any(feature = "search", feature = "state")))]
+            #[cfg(feature = "lsp")]
+            {
+                app.manage(lsp::Servers::default());
+                app.manage(options.languages);
+            }
+            #[cfg(not(any(feature = "lsp", feature = "search", feature = "state")))]
             let _ = options;
             Ok(())
         })
@@ -132,6 +142,24 @@ pub fn init_with<R: tauri::Runtime>(options: Options) -> TauriPlugin<R> {
             terminal::terminal_resize,
             #[cfg(feature = "terminal")]
             terminal::terminal_kill,
+            #[cfg(feature = "lsp")]
+            lsp::lsp_languages,
+            #[cfg(feature = "lsp")]
+            lsp::lsp_start,
+            #[cfg(feature = "lsp")]
+            lsp::lsp_request,
+            #[cfg(feature = "lsp")]
+            lsp::lsp_notify,
+            #[cfg(feature = "lsp")]
+            lsp::lsp_did_open,
+            #[cfg(feature = "lsp")]
+            lsp::lsp_did_change,
+            #[cfg(feature = "lsp")]
+            lsp::lsp_did_save,
+            #[cfg(feature = "lsp")]
+            lsp::lsp_did_close,
+            #[cfg(feature = "lsp")]
+            lsp::lsp_stop,
             #[cfg(feature = "git")]
             git::changes::git_status,
             #[cfg(feature = "git")]
@@ -181,5 +209,12 @@ pub fn init_with<R: tauri::Runtime>(options: Options) -> TauriPlugin<R> {
             #[cfg(feature = "git")]
             git::stash::git_config_set,
         ])
+        .on_drop(|_app| {
+            // Language servers don't outlive the app.
+            #[cfg(feature = "lsp")]
+            if let Some(servers) = _app.try_state::<lsp::Servers>() {
+                servers.stop_all();
+            }
+        })
         .build()
 }

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-lsp-notify"
+description = "Enables the lsp_notify command without any pre-configured scope."
+commands.allow = ["lsp_notify"]
+
+[[permission]]
+identifier = "deny-lsp-notify"
+description = "Denies the lsp_notify command without any pre-configured scope."
+commands.deny = ["lsp_notify"]

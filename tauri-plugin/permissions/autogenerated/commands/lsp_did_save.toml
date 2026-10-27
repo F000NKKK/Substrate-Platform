@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-lsp-did-save"
+description = "Enables the lsp_did_save command without any pre-configured scope."
+commands.allow = ["lsp_did_save"]
+
+[[permission]]
+identifier = "deny-lsp-did-save"
+description = "Denies the lsp_did_save command without any pre-configured scope."
+commands.deny = ["lsp_did_save"]

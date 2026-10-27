@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-lsp-languages"
+description = "Enables the lsp_languages command without any pre-configured scope."
+commands.allow = ["lsp_languages"]
+
+[[permission]]
+identifier = "deny-lsp-languages"
+description = "Denies the lsp_languages command without any pre-configured scope."
+commands.deny = ["lsp_languages"]
