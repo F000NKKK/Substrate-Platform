@@ -62,4 +62,8 @@ permissions = [
   "allow-lsp-did-save",
   "allow-lsp-did-close",
   "allow-lsp-stop",
+  "allow-dap-adapters",
+  "allow-dap-start",
+  "allow-dap-request",
+  "allow-dap-stop",
 ]

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-dap-stop"
+description = "Enables the dap_stop command without any pre-configured scope."
+commands.allow = ["dap_stop"]
+
+[[permission]]
+identifier = "deny-dap-stop"
+description = "Denies the dap_stop command without any pre-configured scope."
+commands.deny = ["dap_stop"]

@@ -7,7 +7,8 @@
 //! module behind a feature of its name: `run` (processes streamed into a
 //! log, multi-step workflows), `terminal` (pty sessions, shells), `fs`
 //! (folders and files, watching them), `project` (projects and solutions),
-//! `git` (Source Control), `lsp` (language servers), `search` (Find and
+//! `git` (Source Control), `lsp` (language servers), `dap` (debug
+//! adapters), `search` (Find and
 //! Replace in Files), `state` (what the IDE remembers). Nothing
 //! here knows about any specific product (no product or domain concepts, no
 //! UI framework, and no concrete project standards) — that's the whole point: every IDE product
@@ -22,6 +23,11 @@ pub mod sync;
 pub mod text_view;
 pub mod workspace;
 
+#[cfg(any(feature = "dap", feature = "lsp"))]
+mod framing;
+
+#[cfg(feature = "dap")]
+pub mod dap;
 #[cfg(feature = "fs")]
 pub mod fs;
 #[cfg(feature = "git")]

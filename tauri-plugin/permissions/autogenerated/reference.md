@@ -64,6 +64,10 @@ Every command Substrate's UI calls.
 - `allow-lsp-did-save`
 - `allow-lsp-did-close`
 - `allow-lsp-stop`
+- `allow-dap-adapters`
+- `allow-dap-start`
+- `allow-dap-request`
+- `allow-dap-stop`
 
 ## Permission Table
 
@@ -148,6 +152,110 @@ Enables the app_state_save command without any pre-configured scope.
 <td>
 
 Denies the app_state_save command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dap-adapters`
+
+</td>
+<td>
+
+Enables the dap_adapters command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dap-adapters`
+
+</td>
+<td>
+
+Denies the dap_adapters command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dap-request`
+
+</td>
+<td>
+
+Enables the dap_request command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dap-request`
+
+</td>
+<td>
+
+Denies the dap_request command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dap-start`
+
+</td>
+<td>
+
+Enables the dap_start command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dap-start`
+
+</td>
+<td>
+
+Denies the dap_start command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dap-stop`
+
+</td>
+<td>
+
+Enables the dap_stop command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dap-stop`
+
+</td>
+<td>
+
+Denies the dap_stop command without any pre-configured scope.
 
 </td>
 </tr>

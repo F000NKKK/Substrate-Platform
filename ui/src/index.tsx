@@ -20,6 +20,7 @@ export * from "./documents";
 export * from "./git";
 export * from "./search";
 export * from "./terminal";
+export * from "./dap";
 export * from "./lsp";
 export * from "./workspace";
 export * from "./windows";

@@ -8,6 +8,8 @@
 //! check their paths against the same one ([`Workspace::check`]).
 
 mod blocking;
+#[cfg(feature = "dap")]
+mod dap;
 #[cfg(feature = "fs")]
 mod fs;
 #[cfg(feature = "git")]
@@ -25,7 +27,7 @@ mod state;
 #[cfg(feature = "terminal")]
 mod terminal;
 
-#[cfg(any(feature = "git", feature = "lsp", feature = "search"))]
+#[cfg(any(feature = "dap", feature = "git", feature = "lsp", feature = "search"))]
 pub(crate) use blocking::blocking;
 pub use init::{init, init_with};
 pub use options::Options;

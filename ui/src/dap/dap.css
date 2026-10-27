@@ -1,0 +1,59 @@
+/* The debug panels: call stack and variables as dense lists. */
+.sp-debug-empty {
+  padding: var(--sp-space-sm);
+  color: var(--sp-text-muted);
+  font-size: var(--sp-font-size-sm);
+}
+
+.sp-debug-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--sp-font-size-sm);
+}
+
+.sp-debug-nested {
+  padding-left: var(--sp-space-md);
+}
+
+.sp-debug-row {
+  display: flex;
+  gap: var(--sp-space-sm);
+  align-items: baseline;
+  padding: 1px var(--sp-space-sm);
+  cursor: default;
+}
+
+.sp-debug-row:hover {
+  background: var(--sp-hover);
+}
+
+.sp-debug-row--selected {
+  background: var(--sp-surface-3);
+}
+
+.sp-debug-twisty {
+  width: 1ch;
+  color: var(--sp-text-muted);
+}
+
+.sp-debug-name {
+  font-family: var(--sp-font-mono);
+}
+
+.sp-debug-where,
+.sp-debug-value {
+  color: var(--sp-text-muted);
+  font-family: var(--sp-font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sp-debug-scope {
+  margin: 0;
+  padding: 2px var(--sp-space-sm);
+  background: var(--sp-surface-2);
+  font-size: var(--sp-font-size-sm);
+  font-weight: 600;
+}

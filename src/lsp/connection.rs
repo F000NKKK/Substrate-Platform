@@ -10,7 +10,8 @@ use std::sync::{Mutex, mpsc};
 use serde_json::{Value, json};
 
 use super::answer::answer;
-use super::{LspError, Notification, framing};
+use super::{LspError, Notification};
+use crate::framing;
 use crate::sync::Locked;
 
 /// What a request gets back.

@@ -15,7 +15,6 @@ mod client;
 mod connection;
 mod error;
 mod error_message;
-mod framing;
 mod languages;
 pub mod messages;
 mod notification;

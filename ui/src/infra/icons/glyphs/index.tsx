@@ -20,6 +20,7 @@ export { IconPlus } from "./IconPlus";
 export { IconTrash } from "./IconTrash";
 export { IconMore } from "./IconMore";
 export { IconSplit } from "./IconSplit";
+export { IconPause } from "./IconPause";
 export { IconPlay } from "./IconPlay";
 export { IconSave } from "./IconSave";
 export { IconUndo } from "./IconUndo";

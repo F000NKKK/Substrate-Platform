@@ -1,6 +1,6 @@
 //! Running blocking work off the UI thread.
 
-#[cfg(any(feature = "git", feature = "lsp", feature = "search"))]
+#[cfg(any(feature = "dap", feature = "git", feature = "lsp", feature = "search"))]
 use substrate_platform::message::Message;
 
 /// Runs `work` off the UI thread.
@@ -8,7 +8,7 @@ use substrate_platform::message::Message;
 /// # Errors
 ///
 /// What `work` returns, or the failure of its thread.
-#[cfg(any(feature = "git", feature = "lsp", feature = "search"))]
+#[cfg(any(feature = "dap", feature = "git", feature = "lsp", feature = "search"))]
 pub(crate) async fn blocking<T: Send + 'static, E: Into<Message> + Send + 'static>(
     work: impl FnOnce() -> Result<T, E> + Send + 'static,
 ) -> Result<T, Message> {

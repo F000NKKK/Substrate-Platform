@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-dap-start"
+description = "Enables the dap_start command without any pre-configured scope."
+commands.allow = ["dap_start"]
+
+[[permission]]
+identifier = "deny-dap-start"
+description = "Denies the dap_start command without any pre-configured scope."
+commands.deny = ["dap_start"]

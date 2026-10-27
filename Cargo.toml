@@ -57,6 +57,9 @@ repository = "https://github.com/F000NKKK/Substrate-Platform"
 # Each module beyond the core is a feature of its name; a product turns on
 # what it uses.
 [features]
+# The debug adapters: `dap` starts them through `run` and reads their
+# adapter list from TOML.
+dap = ["run", "dep:serde_json"]
 fs = ["dep:notify"]
 git = []
 # The language servers: `lsp` starts them through `run` and reads their
@@ -67,7 +70,7 @@ run = ["dep:toml", "dep:libc"]
 search = ["dep:globset", "dep:ignore", "dep:regex"]
 state = ["dep:serde_json"]
 terminal = ["dep:anyhow", "dep:portable-pty"]
-full = ["fs", "git", "lsp", "project", "run", "search", "state", "terminal"]
+full = ["dap", "fs", "git", "lsp", "project", "run", "search", "state", "terminal"]
 
 [lints]
 workspace = true

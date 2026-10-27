@@ -7,6 +7,7 @@ export { RU } from "./locales/ru";
 
 // The platform's own translations, by area, registered on import.
 import "./locales/ru";
+import "./locales/ru.dap";
 import "./locales/ru.editor";
 import "./locales/ru.errorList";
 import "./locales/ru.files";
