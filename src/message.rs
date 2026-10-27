@@ -78,6 +78,8 @@ pub fn catalog() -> Vec<(&'static str, &'static str, &'static str)> {
         crate::fs::messages::ALL,
         #[cfg(feature = "git")]
         crate::git::messages::ALL,
+        #[cfg(feature = "lsp")]
+        crate::lsp::messages::ALL,
         #[cfg(feature = "project")]
         crate::project::messages::ALL,
         crate::process::ALL,

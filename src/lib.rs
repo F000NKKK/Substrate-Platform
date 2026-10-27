@@ -7,8 +7,8 @@
 //! module behind a feature of its name: `run` (processes streamed into a
 //! log, multi-step workflows), `terminal` (pty sessions, shells), `fs`
 //! (folders and files, watching them), `project` (projects and solutions),
-//! `git` (Source Control), `search` (Find and Replace in Files), `state`
-//! (what the IDE remembers). Nothing
+//! `git` (Source Control), `lsp` (language servers), `search` (Find and
+//! Replace in Files), `state` (what the IDE remembers). Nothing
 //! here knows about any specific product (no product or domain concepts, no
 //! UI framework, and no concrete project standards) — that's the whole point: every IDE product
 //! depends on this crate the same way, and brings its own UI (e.g. a Tauri +
@@ -26,6 +26,8 @@ pub mod workspace;
 pub mod fs;
 #[cfg(feature = "git")]
 pub mod git;
+#[cfg(feature = "lsp")]
+pub mod lsp;
 #[cfg(feature = "project")]
 pub mod project;
 #[cfg(feature = "run")]

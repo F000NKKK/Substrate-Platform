@@ -25,6 +25,14 @@ export const messages = {
     failed: "[error] git {command} failed (exit code {code})",
     killed: "[error] git {command} was stopped by a signal",
   },
+  lsp: {
+    invalidList: "The list of languages is invalid: {error}",
+    cantStart: "Couldn't start the language server {server}: {error}",
+    failed: "The language server {server} failed: {error}",
+    stopped: "The language server {server} has stopped.",
+    timedOut: "{server} didn't answer {method} in time.",
+    error: "{server} couldn't do {method}: {error}",
+  },
   project: {
     noFormat: "No format this app knows reads {path}.",
     dependencyCycle: "{project} depends on itself through its build dependencies.",
