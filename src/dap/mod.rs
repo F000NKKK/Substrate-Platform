@@ -10,46 +10,19 @@
 //! stack trace is the one that reads it — so a new debugger is a section in
 //! the product's list, never code here.
 
-mod adapter;
-mod adapter_definition;
-mod adapter_entry;
-mod adapter_id;
 mod adapters;
-mod change_reason;
 mod client;
-mod command;
-mod connection;
-mod debuggee;
 mod error;
 mod error_message;
-mod evaluate_context;
 mod event;
-mod frame_id;
+mod ids;
 pub mod messages;
-mod output_category;
-mod requests;
-mod seq;
-mod stop_reason;
-mod thread_id;
-mod variables_reference;
 
-pub use adapter::Adapter;
-pub use adapter_definition::AdapterDefinition;
-pub use adapter_id::AdapterId;
-pub use adapters::Adapters;
-pub use change_reason::ChangeReason;
-pub use client::{Client, REQUEST_TIMEOUT};
-pub use command::Command;
-pub use debuggee::Debuggee;
+pub use adapters::{Adapter, AdapterDefinition, AdapterId, Adapters};
+pub use client::{Client, Command, Debuggee, EvaluateContext, REQUEST_TIMEOUT};
 pub use error::DapError;
-pub use evaluate_context::EvaluateContext;
-pub use event::Event;
-pub use frame_id::FrameId;
-pub use output_category::OutputCategory;
-pub use seq::Seq;
-pub use stop_reason::StopReason;
-pub use thread_id::ThreadId;
-pub use variables_reference::VariablesReference;
+pub use event::{ChangeReason, Event, OutputCategory, StopReason};
+pub use ids::{FrameId, Seq, ThreadId, VariablesReference};
 
 #[cfg(test)]
 mod tests;

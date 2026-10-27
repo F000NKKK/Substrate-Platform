@@ -9,7 +9,7 @@ use std::sync::{Mutex, mpsc};
 
 use serde_json::{Value, json};
 
-use super::{Command, DapError, Event, Seq};
+use crate::dap::{Command, DapError, Event, Seq};
 use crate::framing;
 use crate::sync::Locked;
 

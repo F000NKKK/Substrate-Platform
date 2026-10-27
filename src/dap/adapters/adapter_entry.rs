@@ -6,13 +6,6 @@ use serde::Deserialize;
 
 use super::AdapterDefinition;
 
-/// The list's file: `[adapter.<id>]` sections.
-#[derive(Deserialize)]
-pub(super) struct AdapterFile {
-    #[serde(default)]
-    pub(super) adapter: BTreeMap<String, AdapterEntry>,
-}
-
 /// One `[adapter.<id>]` section: the languages and the definition's keys.
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

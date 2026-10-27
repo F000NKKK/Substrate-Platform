@@ -1,6 +1,6 @@
 //! One adapter of the product's list.
 
-use super::{AdapterDefinition, AdapterId};
+use crate::dap::{AdapterDefinition, AdapterId};
 
 /// One adapter: the languages it debugs and how it is started.
 #[derive(Debug, Clone, PartialEq)]

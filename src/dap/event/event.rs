@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
-use super::{ChangeReason, OutputCategory, StopReason, ThreadId, VariablesReference};
+use crate::dap::{ChangeReason, OutputCategory, StopReason, ThreadId, VariablesReference};
 
 /// What the adapter said without being asked. On the wire to the UI it is
 /// `{ "event": "stopped", "body": { … } }`, the body's keys camelCase as

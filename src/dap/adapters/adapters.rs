@@ -14,8 +14,8 @@
 //!
 //! The key is the adapter's id; `languages` are the ids `lsp` knows them by.
 
-use super::adapter_entry::AdapterFile;
-use super::{Adapter, AdapterId, DapError};
+use super::adapter_file::AdapterFile;
+use crate::dap::{Adapter, AdapterId, DapError};
 
 /// A product's debug adapters, in the order of their ids.
 #[derive(Debug, Clone, Default, PartialEq)]

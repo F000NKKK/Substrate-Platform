@@ -6,7 +6,7 @@ use std::path::Path;
 
 use serde_json::{Value, json};
 
-use super::{
+use crate::dap::{
     AdapterId, Client, Command, DapError, Debuggee, EvaluateContext, FrameId, ThreadId,
     VariablesReference,
 };
@@ -38,7 +38,7 @@ impl Client {
     }
 
     /// `launch` with `arguments` (the adapter's own, see
-    /// [`super::AdapterDefinition::launch_arguments`]). Many adapters answer
+    /// [`crate::dap::AdapterDefinition::launch_arguments`]). Many adapters answer
     /// only after `configurationDone`: call it from a thread of its own.
     ///
     /// # Errors

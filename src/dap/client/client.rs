@@ -12,7 +12,7 @@ use std::time::Duration;
 use serde_json::{Value, json};
 
 use super::connection::Connection;
-use super::{AdapterDefinition, Command, DapError, Event};
+use crate::dap::{AdapterDefinition, Command, DapError, Event};
 use crate::run::LogSink;
 use crate::sync::Locked;
 
