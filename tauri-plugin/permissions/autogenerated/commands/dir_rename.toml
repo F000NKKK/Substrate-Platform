@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-dir-rename"
+description = "Enables the dir_rename command without any pre-configured scope."
+commands.allow = ["dir_rename"]
+
+[[permission]]
+identifier = "deny-dir-rename"
+description = "Denies the dir_rename command without any pre-configured scope."
+commands.deny = ["dir_rename"]

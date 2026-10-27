@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { contextKey, formatShortcut, pt, registerTranslations, resolvedLocale, setLocale, t, tn, withShortcut } from "./i18n";
 import "./locales/ru";
+import "./locales/ru.editor";
 import "./locales/ru.shell";
 
 registerTranslations({ id: "xx", name: "Test" }, {

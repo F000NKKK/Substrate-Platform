@@ -7,6 +7,16 @@ Every command Substrate's UI calls.
 - `allow-open-url`
 - `allow-open-path`
 - `allow-reveal-path`
+- `allow-dir-list`
+- `allow-dir-create-file`
+- `allow-dir-create-dir`
+- `allow-dir-rename`
+- `allow-dir-remove`
+- `allow-dir-copy`
+- `allow-file-read`
+- `allow-file-write`
+- `allow-allow-path`
+- `allow-fs-watch`
 - `allow-git-status`
 - `allow-git-stage`
 - `allow-git-unstage`
@@ -31,6 +41,15 @@ Every command Substrate's UI calls.
 - `allow-git-stash-op`
 - `allow-git-config-get`
 - `allow-git-config-set`
+- `allow-find-in-files`
+- `allow-find-cancel`
+- `allow-replace-in-files`
+- `allow-project-items`
+- `allow-project-files-containing`
+- `allow-workspace-load`
+- `allow-workspace-save`
+- `allow-app-state-load`
+- `allow-app-state-save`
 - `allow-terminal-shells`
 - `allow-terminal-spawn`
 - `allow-terminal-write`
@@ -45,6 +64,370 @@ Every command Substrate's UI calls.
 <th>Description</th>
 </tr>
 
+
+<tr>
+<td>
+
+`substrate:allow-allow-path`
+
+</td>
+<td>
+
+Enables the allow_path command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-allow-path`
+
+</td>
+<td>
+
+Denies the allow_path command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-app-state-load`
+
+</td>
+<td>
+
+Enables the app_state_load command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-app-state-load`
+
+</td>
+<td>
+
+Denies the app_state_load command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-app-state-save`
+
+</td>
+<td>
+
+Enables the app_state_save command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-app-state-save`
+
+</td>
+<td>
+
+Denies the app_state_save command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dir-copy`
+
+</td>
+<td>
+
+Enables the dir_copy command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dir-copy`
+
+</td>
+<td>
+
+Denies the dir_copy command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dir-create-dir`
+
+</td>
+<td>
+
+Enables the dir_create_dir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dir-create-dir`
+
+</td>
+<td>
+
+Denies the dir_create_dir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dir-create-file`
+
+</td>
+<td>
+
+Enables the dir_create_file command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dir-create-file`
+
+</td>
+<td>
+
+Denies the dir_create_file command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dir-list`
+
+</td>
+<td>
+
+Enables the dir_list command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dir-list`
+
+</td>
+<td>
+
+Denies the dir_list command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dir-remove`
+
+</td>
+<td>
+
+Enables the dir_remove command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dir-remove`
+
+</td>
+<td>
+
+Denies the dir_remove command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-dir-rename`
+
+</td>
+<td>
+
+Enables the dir_rename command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-dir-rename`
+
+</td>
+<td>
+
+Denies the dir_rename command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-file-read`
+
+</td>
+<td>
+
+Enables the file_read command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-file-read`
+
+</td>
+<td>
+
+Denies the file_read command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-file-write`
+
+</td>
+<td>
+
+Enables the file_write command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-file-write`
+
+</td>
+<td>
+
+Denies the file_write command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-find-cancel`
+
+</td>
+<td>
+
+Enables the find_cancel command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-find-cancel`
+
+</td>
+<td>
+
+Denies the find_cancel command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-find-in-files`
+
+</td>
+<td>
+
+Enables the find_in_files command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-find-in-files`
+
+</td>
+<td>
+
+Denies the find_in_files command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-fs-watch`
+
+</td>
+<td>
+
+Enables the fs_watch command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-fs-watch`
+
+</td>
+<td>
+
+Denies the fs_watch command without any pre-configured scope.
+
+</td>
+</tr>
 
 <tr>
 <td>
@@ -725,6 +1108,84 @@ Denies the open_url command without any pre-configured scope.
 <tr>
 <td>
 
+`substrate:allow-project-files-containing`
+
+</td>
+<td>
+
+Enables the project_files_containing command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-project-files-containing`
+
+</td>
+<td>
+
+Denies the project_files_containing command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-project-items`
+
+</td>
+<td>
+
+Enables the project_items command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-project-items`
+
+</td>
+<td>
+
+Denies the project_items command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-replace-in-files`
+
+</td>
+<td>
+
+Enables the replace_in_files command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-replace-in-files`
+
+</td>
+<td>
+
+Denies the replace_in_files command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
 `substrate:allow-reveal-path`
 
 </td>
@@ -874,6 +1335,58 @@ Enables the terminal_write command without any pre-configured scope.
 <td>
 
 Denies the terminal_write command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-workspace-load`
+
+</td>
+<td>
+
+Enables the workspace_load command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-workspace-load`
+
+</td>
+<td>
+
+Denies the workspace_load command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:allow-workspace-save`
+
+</td>
+<td>
+
+Enables the workspace_save command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`substrate:deny-workspace-save`
+
+</td>
+<td>
+
+Denies the workspace_save command without any pre-configured scope.
 
 </td>
 </tr>

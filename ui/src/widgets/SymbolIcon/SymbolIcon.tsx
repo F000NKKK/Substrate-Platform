@@ -51,7 +51,10 @@ const FAMILY: Record<SymbolKind, Family> = {
 };
 
 // 16×16 outlines, stroked in the kind's family color.
-const GLYPHS: Record<SymbolKind, ReactNode> = {
+/** Kinds drawn as another kind (only their family's color tells them apart). */
+const SAME_GLYPH = { class: "struct", interface: "trait", method: "function" } as const;
+
+const GLYPHS: Record<Exclude<SymbolKind, keyof typeof SAME_GLYPH>, ReactNode> = {
   file: (
     <>
       <path d="M4 1.5h5l3 3v10H4z" />
@@ -65,12 +68,6 @@ const GLYPHS: Record<SymbolKind, ReactNode> = {
   ),
   module: <path d="M6 2.5c-2 0-2 1-2 2.5s-1 2.5-2 3c1 .5 2 1.5 2 3s0 2.5 2 2.5M10 2.5c2 0 2 1 2 2.5s1 2.5 2 3c-1 .5-2 1.5-2 3s0 2.5-2 2.5" />,
   struct: (
-    <>
-      <rect x="2" y="2.5" width="12" height="11" rx="1.5" />
-      <path d="M5 6h6M5 10h6" />
-    </>
-  ),
-  class: (
     <>
       <rect x="2" y="2.5" width="12" height="11" rx="1.5" />
       <path d="M5 6h6M5 10h6" />
@@ -106,19 +103,7 @@ const GLYPHS: Record<SymbolKind, ReactNode> = {
       <path d="M1.5 8h5" />
     </>
   ),
-  interface: (
-    <>
-      <circle cx="10" cy="8" r="3.5" />
-      <path d="M1.5 8h5" />
-    </>
-  ),
   function: (
-    <>
-      <path d="M8 1.5l5.5 3v7L8 14.5l-5.5-3v-7z" />
-      <path d="M2.5 4.5L8 7.5l5.5-3M8 7.5v7" />
-    </>
-  ),
-  method: (
     <>
       <path d="M8 1.5l5.5 3v7L8 14.5l-5.5-3v-7z" />
       <path d="M2.5 4.5L8 7.5l5.5-3M8 7.5v7" />
@@ -163,7 +148,8 @@ export interface SymbolIconProps {
 
 /** A symbol kind's icon, colored by its family (types orange, interfaces and fields blue, functions purple — Visual Studio's scheme). Unknown kinds show as a plain text glyph. */
 export function SymbolIcon({ kind, size = 16, className }: SymbolIconProps) {
-  const known = (kind in GLYPHS ? kind : "text") as SymbolKind;
+  const known = (kind in FAMILY ? kind : "text") as SymbolKind;
+  const glyph = known in SAME_GLYPH ? SAME_GLYPH[known as keyof typeof SAME_GLYPH] : (known as keyof typeof GLYPHS);
   return (
     <svg
       className={["sp-symbol-icon", className].filter(Boolean).join(" ")}
@@ -178,7 +164,7 @@ export function SymbolIcon({ kind, size = 16, className }: SymbolIconProps) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      {GLYPHS[known]}
+      {GLYPHS[glyph]}
     </svg>
   );
 }

@@ -5,6 +5,7 @@
 //! nobody looks at costs nothing. Events are coalesced: a burst (a
 //! checkout, a build writing many files) arrives as one batch of paths.
 
+use crate::sync::Locked;
 use std::collections::{BTreeSet, HashSet};
 use std::path::PathBuf;
 use std::sync::Mutex;
@@ -67,8 +68,8 @@ impl DirWatcher {
     /// permission) is skipped.
     pub fn set(&self, folders: impl IntoIterator<Item = PathBuf>) {
         let wanted: HashSet<PathBuf> = folders.into_iter().collect();
-        let mut watcher = self.watcher.lock().unwrap_or_else(|e| e.into_inner());
-        let mut watched = self.watched.lock().unwrap_or_else(|e| e.into_inner());
+        let mut watcher = self.watcher.locked();
+        let mut watched = self.watched.locked();
         for gone in watched.difference(&wanted) {
             let _ = watcher.unwatch(gone);
         }
@@ -82,7 +83,7 @@ impl DirWatcher {
 
     /// The folders being watched now.
     pub fn watched(&self) -> Vec<PathBuf> {
-        let watched = self.watched.lock().unwrap_or_else(|e| e.into_inner());
+        let watched = self.watched.locked();
         let mut out: Vec<PathBuf> = watched.iter().cloned().collect();
         out.sort();
         out
@@ -117,7 +118,7 @@ mod tests {
     ) -> bool {
         let until = Instant::now() + Duration::from_secs(5);
         while Instant::now() < until {
-            if what(&batches.lock().unwrap()) {
+            if what(&batches.locked()) {
                 return true;
             }
             std::thread::sleep(Duration::from_millis(20));
@@ -132,10 +133,7 @@ mod tests {
         std::fs::create_dir(&other).unwrap();
         let batches = Arc::new(Mutex::new(Vec::new()));
         let sink = batches.clone();
-        let w = DirWatcher::new(Duration::from_millis(50), move |b| {
-            sink.lock().unwrap().push(b)
-        })
-        .unwrap();
+        let w = DirWatcher::new(Duration::from_millis(50), move |b| sink.locked().push(b)).unwrap();
         w.set([dir.clone()]);
         assert_eq!(w.watched(), std::slice::from_ref(&dir));
 
@@ -149,8 +147,7 @@ mod tests {
             .any(|p| p == &file)));
         assert!(
             batches
-                .lock()
-                .unwrap()
+                .locked()
                 .iter()
                 .flatten()
                 .all(|p| !p.starts_with(&other) || p == &other)
@@ -159,10 +156,10 @@ mod tests {
         // Unwatched: no more batches for it.
         w.set([]);
         assert!(w.watched().is_empty());
-        batches.lock().unwrap().clear();
+        batches.locked().clear();
         std::fs::write(&file, "three").unwrap();
         std::thread::sleep(Duration::from_millis(300));
-        assert!(batches.lock().unwrap().is_empty());
+        assert!(batches.locked().is_empty());
         let _ = std::fs::remove_dir_all(&dir);
     }
 
@@ -171,10 +168,8 @@ mod tests {
         let dir = temp_dir("burst");
         let batches = Arc::new(Mutex::new(Vec::new()));
         let sink = batches.clone();
-        let w = DirWatcher::new(Duration::from_millis(200), move |b| {
-            sink.lock().unwrap().push(b)
-        })
-        .unwrap();
+        let w =
+            DirWatcher::new(Duration::from_millis(200), move |b| sink.locked().push(b)).unwrap();
         w.set([dir.clone()]);
         for i in 0..20 {
             std::fs::write(dir.join(format!("f{i}.txt")), "x").unwrap();
@@ -185,7 +180,7 @@ mod tests {
             .filter(|p| p.extension().is_some())
             .count()
             >= 20));
-        assert_eq!(batches.lock().unwrap().len(), 1);
+        assert_eq!(batches.locked().len(), 1);
         let _ = std::fs::remove_dir_all(&dir);
     }
 }

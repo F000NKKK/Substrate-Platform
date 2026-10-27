@@ -1,9 +1,9 @@
 //! Starting programs and opening links and files with the user's default
 //! app, each with the system's own environment ([`super::command`]).
 
+use std::ffi::OsStr;
 #[cfg(windows)]
 use std::ffi::OsString;
-use std::ffi::OsStr;
 use std::path::Path;
 use std::process::Command;
 
@@ -97,9 +97,11 @@ fn opener(target: &OsStr) -> Command {
 /// Starts `cmd` and waits for it on a thread of its own, so it doesn't
 /// stay a zombie.
 fn spawn(mut cmd: Command) -> Result<(), Message> {
-    let mut child = cmd
-        .spawn()
-        .map_err(|e| Message::new(CANT_START).arg("program", cmd.get_program().to_string_lossy()).arg("error", e))?;
+    let mut child = cmd.spawn().map_err(|e| {
+        Message::new(CANT_START)
+            .arg("program", cmd.get_program().to_string_lossy())
+            .arg("error", e)
+    })?;
     std::thread::spawn(move || child.wait());
     Ok(())
 }
@@ -110,7 +112,10 @@ mod tests {
 
     #[test]
     fn only_links_open() {
-        assert_eq!(open_link("file:///etc/passwd").unwrap_err().text, NOT_A_LINK);
+        assert_eq!(
+            open_link("file:///etc/passwd").unwrap_err().text,
+            NOT_A_LINK
+        );
         assert_eq!(open_link("/bin/sh").unwrap_err().text, NOT_A_LINK);
     }
 }

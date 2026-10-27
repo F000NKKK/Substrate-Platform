@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-find-cancel"
+description = "Enables the find_cancel command without any pre-configured scope."
+commands.allow = ["find_cancel"]
+
+[[permission]]
+identifier = "deny-find-cancel"
+description = "Denies the find_cancel command without any pre-configured scope."
+commands.deny = ["find_cancel"]

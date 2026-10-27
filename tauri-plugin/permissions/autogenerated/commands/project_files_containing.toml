@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-project-files-containing"
+description = "Enables the project_files_containing command without any pre-configured scope."
+commands.allow = ["project_files_containing"]
+
+[[permission]]
+identifier = "deny-project-files-containing"
+description = "Denies the project_files_containing command without any pre-configured scope."
+commands.deny = ["project_files_containing"]

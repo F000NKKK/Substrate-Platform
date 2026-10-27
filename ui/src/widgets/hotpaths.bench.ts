@@ -1,11 +1,11 @@
 // Per-keystroke / per-event hot paths of the generic widgets, on inputs the
 // size an IDE actually produces (a big project tree, a 20k-row grid, a long
 // build log). `npm run bench`.
-import { bench, describe } from "vitest";
+import { test } from "vitest";
 import { flattenVisible } from "./Tree/useTree";
 import type { TreeNode } from "./Tree";
 import { nestFiles, type FileTreeNode } from "./FileTree";
-import { buildDisplayItems, filterRows, sortRows } from "./DataGrid/useDataGrid";
+import { buildDisplayItems, filterRows, sortRows } from "./DataGrid/state/useDataGrid";
 import type { DataGridColumn } from "./DataGrid";
 import { appendOutputLine, clearOutputBuffer } from "./OutputPanel/outputBuffer";
 
@@ -22,13 +22,15 @@ const allExpanded = new Set<string>();
 })(bigTree);
 const deepTree = tree(400, 1); // a 400-deep chain
 
-describe("tree", () => {
-  bench("flattenVisible 37k expanded", () => {
-    flattenVisible(bigTree, allExpanded, 0, null);
-  });
-  bench("flattenVisible 400 deep", () => {
-    flattenVisible(deepTree, new Set(Array.from({ length: 400 }, (_, i) => "n" + "/0".repeat(i + 1))), 0, null);
-  });
+test("tree", async ({ bench }) => {
+  await bench.compare(
+    bench("flattenVisible 37k expanded", () => {
+      flattenVisible(bigTree, allExpanded, 0, null);
+    }),
+    bench("flattenVisible 400 deep", () => {
+      flattenVisible(deepTree, new Set(Array.from({ length: 400 }, (_, i) => "n" + "/0".repeat(i + 1))), 0, null);
+    }),
+  );
 });
 
 // A flat folder of generated/nested files: Foo.yui + Foo.g.rs + Foo.ru.yres ...
@@ -43,13 +45,15 @@ const parentOf = (name: string, siblings: Set<string>) => {
   return siblings.has(base.toLowerCase()) ? base : null;
 };
 
-describe("file tree", () => {
-  bench("nestFiles 3000 files, 1000 parents", () => {
-    nestFiles(folder, parentOf);
-  });
-  bench("nestFiles 3000 files under one parent", () => {
-    nestFiles(crowded, parentOf);
-  });
+test("file tree", async ({ bench }) => {
+  await bench.compare(
+    bench("nestFiles 3000 files, 1000 parents", () => {
+      nestFiles(folder, parentOf);
+    }),
+    bench("nestFiles 3000 files under one parent", () => {
+      nestFiles(crowded, parentOf);
+    }),
+  );
 });
 
 interface Row {
@@ -71,28 +75,28 @@ const columns: DataGridColumn<Row>[] = [
 ];
 const byKey = new Map(columns.map((c) => [c.key, c]));
 
-describe("data grid 20k rows", () => {
-  bench("sort by name (text)", () => {
-    sortRows(rows, [{ key: "name", direction: "asc" }], byKey);
-  });
-  bench("sort by kind, then size", () => {
-    sortRows(rows, [{ key: "kind", direction: "asc" }, { key: "size", direction: "desc" }], byKey);
-  });
-  bench("filter name contains", () => {
-    filterRows(rows, { name: "File_1" }, byKey);
-  });
-  bench("group by kind with sums", () => {
-    buildDisplayItems(rows, ["kind"], byKey, new Set(), 0, "");
-  });
+test("data grid 20k rows", async ({ bench }) => {
+  await bench.compare(
+    bench("sort by name (text)", () => {
+      sortRows(rows, [{ key: "name", direction: "asc" }], byKey);
+    }),
+    bench("sort by kind, then size", () => {
+      sortRows(rows, [{ key: "kind", direction: "asc" }, { key: "size", direction: "desc" }], byKey);
+    }),
+    bench("filter name contains", () => {
+      filterRows(rows, { name: "File_1" }, byKey);
+    }),
+    bench("group by kind with sums", () => {
+      buildDisplayItems(rows, ["kind"], byKey, new Set());
+    }),
+  );
 });
 
 const logLine = "   Compiling app-core v0.40.0 (/home/user/Projects/app/crates/app-core)";
-describe("output buffer", () => {
-  bench(
-    "append 20k lines at the 10k cap",
-    () => {
+test("output buffer", async ({ bench }) => {
+  await bench.compare(
+    bench("append 20k lines at the 10k cap", { beforeEach: () => clearOutputBuffer("bench") }, () => {
       for (let i = 0; i < 20_000; i++) appendOutputLine("bench", logLine, 10_000);
-    },
-    { setup: () => clearOutputBuffer("bench") }
+    }),
   );
 });

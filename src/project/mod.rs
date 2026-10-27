@@ -24,7 +24,7 @@ mod standard;
 
 pub use format::{Formats, ProjectFormat, SolutionFormat};
 pub use model::{
-    Configuration, ConfigurationMapping, ConfiguredProperties, Item, Project, ProjectEntry, Reference, Section,
-    Solution, SolutionFolder,
+    Configuration, ConfigurationMapping, ConfiguredProperties, Item, Project, ProjectEntry,
+    Reference, Section, Solution, SolutionFolder,
 };
 pub use standard::ProjectStandard;

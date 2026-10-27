@@ -7,24 +7,34 @@
 //! module behind a feature of its name: `run` (processes streamed into a
 //! log, multi-step workflows), `terminal` (pty sessions, shells), `fs`
 //! (folders and files, watching them), `project` (projects and solutions),
-//! `git` (Source Control). Nothing here knows about any
-//! specific product (no product or domain concepts, no UI framework, and no
-//! concrete project standards) — that's the whole point: every IDE product
+//! `git` (Source Control), `lsp` (language servers), `search` (Find and
+//! Replace in Files), `state` (what the IDE remembers). Nothing
+//! here knows about any specific product (no product or domain concepts, no
+//! UI framework, and no concrete project standards) — that's the whole point: every IDE product
 //! depends on this crate the same way, and brings its own UI (e.g. a Tauri +
 //! React frontend) and its own project standards/workflow templates.
 
+pub mod commands;
 pub mod events;
 pub mod message;
 pub mod process;
+pub mod sync;
+pub mod text_view;
 pub mod workspace;
 
 #[cfg(feature = "fs")]
 pub mod fs;
 #[cfg(feature = "git")]
 pub mod git;
+#[cfg(feature = "lsp")]
+pub mod lsp;
 #[cfg(feature = "project")]
 pub mod project;
 #[cfg(feature = "run")]
 pub mod run;
+#[cfg(feature = "search")]
+pub mod search;
+#[cfg(feature = "state")]
+pub mod state;
 #[cfg(feature = "terminal")]
 pub mod terminal;

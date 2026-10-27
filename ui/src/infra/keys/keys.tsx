@@ -156,8 +156,12 @@ function inNativeKeys(e: KeyboardEvent): boolean {
   return e.target instanceof Element && !!e.target.closest("[data-sp-native-keys]");
 }
 
+/** An open modal (a dialog, a modal floating window): the IDE behind it takes no keys. */
+const MODAL_OPEN = '[aria-modal="true"]';
+
 function onKeyDown(e: KeyboardEvent) {
   if (e.defaultPrevented || e.isComposing || isModifierOnly(e)) return;
+  if (document.querySelector(MODAL_OPEN)) return;
   const step = eventShortcut(e);
   const prefix = pending && Date.now() - pendingAt < CHORD_TIMEOUT_MS ? pending : null;
   pending = null;

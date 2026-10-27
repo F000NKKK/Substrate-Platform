@@ -6,6 +6,7 @@ export const TOOL_WINDOW_ANCHORS: readonly ToolWindowAnchor[] = ["left", "right"
 
 /** Every place a panel can be docked — the three tool-window edges, or the tabbed center document zone. */
 export type DockAnchor = ToolWindowAnchor | "center";
+export const DOCK_ANCHORS: readonly DockAnchor[] = [...TOOL_WINDOW_ANCHORS, "center"];
 
 export interface PanelDef {
   id: string;
@@ -49,6 +50,7 @@ export interface TabMenuContext {
 
 /** `closed` — a tool window that isn't on screen anywhere, not even as a strip tab (closed with its × — View brings it back). */
 export type DockMode = "hidden" | "flyout" | "pinned" | "closed";
+export const DOCK_MODES: readonly DockMode[] = ["hidden", "flyout", "pinned", "closed"];
 
 export interface FloatRect {
   x: number;

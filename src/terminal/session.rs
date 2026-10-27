@@ -3,6 +3,7 @@
 //! a product wires `on_output` to however it ships bytes to its own UI (e.g.
 //! a Tauri event to an xterm.js instance).
 
+use crate::sync::Locked;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -155,7 +156,7 @@ impl PtySession {
             cols,
             rows,
             move |bytes| {
-                let mut guard = state.lock().unwrap_or_else(|e| e.into_inner());
+                let mut guard = state.locked();
                 let (chunker, on_output) = &mut *guard;
                 let text = chunker.push(&bytes);
                 if !text.is_empty() {
@@ -164,7 +165,7 @@ impl PtySession {
             },
             move || {
                 {
-                    let mut guard = exit_state.lock().unwrap_or_else(|e| e.into_inner());
+                    let mut guard = exit_state.locked();
                     let (chunker, on_output) = &mut *guard;
                     let text = chunker.finish();
                     if !text.is_empty() {

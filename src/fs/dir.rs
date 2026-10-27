@@ -90,6 +90,21 @@ pub fn write_file(path: &Path, contents: &str) -> io::Result<()> {
     std::fs::write(path, contents)
 }
 
+/// Copies a file or a whole folder to `to` (which mustn't exist): Copy and
+/// Paste, Add Existing Item.
+pub fn copy(from: &Path, to: &Path) -> io::Result<()> {
+    if from.is_dir() {
+        std::fs::create_dir(to)?;
+        for entry in std::fs::read_dir(from)? {
+            let entry = entry?;
+            copy(&entry.path(), &to.join(entry.file_name()))?;
+        }
+        Ok(())
+    } else {
+        std::fs::copy(from, to).map(|_| ())
+    }
+}
+
 /// Binary counterpart to [`write_file`].
 pub fn write_file_bytes(path: &Path, contents: &[u8]) -> io::Result<()> {
     std::fs::write(path, contents)

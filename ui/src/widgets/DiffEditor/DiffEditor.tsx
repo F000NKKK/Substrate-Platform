@@ -4,10 +4,10 @@ import { MergeView, unifiedMergeView } from "@codemirror/merge";
 import { basicSetup, EditorView } from "codemirror";
 import { useTheme } from "../../infra/theme";
 import { useLocale } from "../../infra/i18n";
-import { resolveEditorTheme } from "../Editor/editorThemes";
-import { languageForPath } from "../Editor/languageEditors";
-import { editorPhrases } from "../Editor/editorPhrases";
-import "../Editor/TextEditor.css";
+import { resolveEditorTheme } from "../Editor/code/editorThemes";
+import { languageForPath } from "../Editor/code/languageEditors";
+import { editorPhrases } from "../Editor/registry/editorPhrases";
+import "../Editor/code/TextEditor.css";
 import "./DiffEditor.css";
 
 export type DiffLayout = "sideBySide" | "inline";

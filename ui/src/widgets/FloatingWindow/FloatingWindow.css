@@ -62,3 +62,15 @@
   min-height: 0;
   overflow: auto;
 }
+
+/* A modal one: the rest of the IDE dimmed and out of reach, as under a dialog. */
+.sp-floating-window-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgb(0 0 0 / 0.35);
+}
+
+.sp-floating-window-backdrop > .sp-floating-window {
+  z-index: 1001;
+}

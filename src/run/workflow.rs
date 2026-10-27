@@ -14,7 +14,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use serde::{Deserialize, Serialize};
 
 use super::log::LogSink;
-use super::task::{Completion, run_streamed};
+use super::task::{Completion, Task, run_streamed};
 
 /// One `workflow.toml`'s worth of named flows.
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -115,37 +115,46 @@ impl WorkflowHandle {
     }
 }
 
-/// Runs `name`'s steps in order, returning `false` (and logging why) at the
-/// first failure — a missing workflow, a step that fails to spawn, a
-/// non-zero exit, or a `Compose` cycle. `chain` tracks the in-progress
-/// composition path so `a` composing `b` composing `a` is caught instead of
-/// recursing forever.
-fn run_named(
-    file: &WorkflowFile,
-    name: &str,
-    vars: &HashMap<String, String>,
-    cwd: &Path,
-    sink: &LogSink,
-    cancel: &AtomicBool,
-    chain: &mut Vec<String>,
-) -> bool {
-    if chain.iter().any(|n| n == name) {
-        sink.error(format!(
-            "workflow '{name}' composes itself (chain: {} -> {name})",
-            chain.join(" -> ")
-        ));
-        return false;
-    }
-    let Some(def) = file.workflow.get(name) else {
-        sink.error(format!("workflow '{name}' not found"));
-        return false;
-    };
+/// What every step of one run shares: the workflows, `${VAR}` values, the
+/// base folder, where output goes, and the cancel flag.
+struct Runner<'a> {
+    file: &'a WorkflowFile,
+    vars: &'a HashMap<String, String>,
+    cwd: &'a Path,
+    sink: &'a LogSink,
+    cancel: &'a AtomicBool,
+}
 
-    chain.push(name.to_string());
-    let ok = def.steps.iter().all(|step| {
-        if cancel.load(Ordering::Acquire) {
+impl Runner<'_> {
+    /// Runs `name`'s steps in order, returning `false` (and logging why) at
+    /// the first failure — a missing workflow, a step that fails to spawn, a
+    /// non-zero exit, or a `Compose` cycle. `chain` tracks the in-progress
+    /// composition path so `a` composing `b` composing `a` is caught instead
+    /// of recursing forever.
+    fn run_named(&self, name: &str, chain: &mut Vec<String>) -> bool {
+        if chain.iter().any(|n| n == name) {
+            self.sink.error(format!(
+                "workflow '{name}' composes itself (chain: {} -> {name})",
+                chain.join(" -> ")
+            ));
             return false;
         }
+        let Some(def) = self.file.workflow.get(name) else {
+            self.sink.error(format!("workflow '{name}' not found"));
+            return false;
+        };
+
+        chain.push(name.to_string());
+        let ok = def
+            .steps
+            .iter()
+            .all(|step| !self.cancel.load(Ordering::Acquire) && self.run_step(step, chain));
+        chain.pop();
+        ok
+    }
+
+    fn run_step(&self, step: &WorkflowStep, chain: &mut Vec<String>) -> bool {
+        let vars = self.vars;
         match step {
             WorkflowStep::Run {
                 run,
@@ -154,31 +163,31 @@ fn run_named(
                 env,
             } => {
                 let program = substitute(run, vars);
-                let args: Vec<String> = args.iter().map(|a| substitute(a, vars)).collect();
-                let resolved_cwd = step_cwd
-                    .as_ref()
-                    .map(|c| cwd.join(substitute(c, vars)))
-                    .unwrap_or_else(|| cwd.to_path_buf());
-                let envs: Vec<(String, String)> = env
-                    .iter()
-                    .map(|(k, v)| (k.clone(), substitute(v, vars)))
-                    .collect();
-
-                match run_streamed(&program, &args, Some(&resolved_cwd), &envs, sink, cancel) {
+                let task = Task {
+                    program: program.clone(),
+                    args: args.iter().map(|a| substitute(a, vars)).collect(),
+                    cwd: Some(
+                        step_cwd
+                            .as_ref()
+                            .map(|c| self.cwd.join(substitute(c, vars)))
+                            .unwrap_or_else(|| self.cwd.to_path_buf()),
+                    ),
+                    envs: env
+                        .iter()
+                        .map(|(k, v)| (k.clone(), substitute(v, vars)))
+                        .collect(),
+                };
+                match run_streamed(&task, self.sink, self.cancel) {
                     Ok(exit) => exit.success,
                     Err(err) => {
-                        sink.error(format!("failed to run '{program}': {err}"));
+                        self.sink.error(format!("failed to run '{program}': {err}"));
                         false
                     }
                 }
             }
-            WorkflowStep::Compose { workflow } => {
-                run_named(file, workflow, vars, cwd, sink, cancel, chain)
-            }
+            WorkflowStep::Compose { workflow } => self.run_named(workflow, chain),
         }
-    });
-    chain.pop();
-    ok
+    }
 }
 
 /// Run the named workflow in the background (non-blocking): spawns one
@@ -201,15 +210,14 @@ pub fn run(
     let thread_shared = shared.clone();
 
     std::thread::spawn(move || {
-        let ok = run_named(
-            &file,
-            &name,
-            &vars,
-            &cwd,
-            &sink,
-            &thread_shared.cancel,
-            &mut Vec::new(),
-        );
+        let runner = Runner {
+            file: &file,
+            vars: &vars,
+            cwd: &cwd,
+            sink: &sink,
+            cancel: &thread_shared.cancel,
+        };
+        let ok = runner.run_named(&name, &mut Vec::new());
         let result = if thread_shared.cancel.load(Ordering::Acquire) {
             sink.warn(format!("workflow '{name}' cancelled"));
             WorkflowResult::Cancelled
@@ -305,15 +313,14 @@ steps = [{ workflow = "a" }]
         )
         .unwrap();
         let sink = LogSink::new();
-        let ok = run_named(
-            &file,
-            "a",
-            &HashMap::new(),
-            Path::new("."),
-            &sink,
-            &AtomicBool::new(false),
-            &mut Vec::new(),
-        );
+        let runner = Runner {
+            file: &file,
+            vars: &HashMap::new(),
+            cwd: Path::new("."),
+            sink: &sink,
+            cancel: &AtomicBool::new(false),
+        };
+        let ok = runner.run_named("a", &mut Vec::new());
         assert!(!ok);
         let errors: Vec<_> = sink.lines().into_iter().map(|l| l.text).collect();
         assert_eq!(

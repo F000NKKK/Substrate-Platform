@@ -295,6 +295,174 @@
       "type": "string",
       "oneOf": [
         {
+          "description": "Enables the allow_path command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-allow-path",
+          "markdownDescription": "Enables the allow_path command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the allow_path command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-allow-path",
+          "markdownDescription": "Denies the allow_path command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the app_state_load command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-app-state-load",
+          "markdownDescription": "Enables the app_state_load command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the app_state_load command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-app-state-load",
+          "markdownDescription": "Denies the app_state_load command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the app_state_save command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-app-state-save",
+          "markdownDescription": "Enables the app_state_save command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the app_state_save command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-app-state-save",
+          "markdownDescription": "Denies the app_state_save command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the dir_copy command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dir-copy",
+          "markdownDescription": "Enables the dir_copy command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dir_copy command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dir-copy",
+          "markdownDescription": "Denies the dir_copy command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the dir_create_dir command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dir-create-dir",
+          "markdownDescription": "Enables the dir_create_dir command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dir_create_dir command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dir-create-dir",
+          "markdownDescription": "Denies the dir_create_dir command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the dir_create_file command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dir-create-file",
+          "markdownDescription": "Enables the dir_create_file command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dir_create_file command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dir-create-file",
+          "markdownDescription": "Denies the dir_create_file command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the dir_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dir-list",
+          "markdownDescription": "Enables the dir_list command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dir_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dir-list",
+          "markdownDescription": "Denies the dir_list command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the dir_remove command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dir-remove",
+          "markdownDescription": "Enables the dir_remove command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dir_remove command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dir-remove",
+          "markdownDescription": "Denies the dir_remove command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the dir_rename command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-dir-rename",
+          "markdownDescription": "Enables the dir_rename command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the dir_rename command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-dir-rename",
+          "markdownDescription": "Denies the dir_rename command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the file_read command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-file-read",
+          "markdownDescription": "Enables the file_read command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the file_read command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-file-read",
+          "markdownDescription": "Denies the file_read command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the file_write command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-file-write",
+          "markdownDescription": "Enables the file_write command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the file_write command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-file-write",
+          "markdownDescription": "Denies the file_write command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the find_cancel command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-find-cancel",
+          "markdownDescription": "Enables the find_cancel command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the find_cancel command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-find-cancel",
+          "markdownDescription": "Denies the find_cancel command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the find_in_files command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-find-in-files",
+          "markdownDescription": "Enables the find_in_files command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the find_in_files command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-find-in-files",
+          "markdownDescription": "Denies the find_in_files command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the fs_watch command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-fs-watch",
+          "markdownDescription": "Enables the fs_watch command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the fs_watch command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-fs-watch",
+          "markdownDescription": "Denies the fs_watch command without any pre-configured scope."
+        },
+        {
           "description": "Enables the git_branch_create command without any pre-configured scope.",
           "type": "string",
           "const": "allow-git-branch-create",
@@ -607,6 +775,42 @@
           "markdownDescription": "Denies the open_url command without any pre-configured scope."
         },
         {
+          "description": "Enables the project_files_containing command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-project-files-containing",
+          "markdownDescription": "Enables the project_files_containing command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the project_files_containing command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-project-files-containing",
+          "markdownDescription": "Denies the project_files_containing command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the project_items command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-project-items",
+          "markdownDescription": "Enables the project_items command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the project_items command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-project-items",
+          "markdownDescription": "Denies the project_items command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the replace_in_files command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-replace-in-files",
+          "markdownDescription": "Enables the replace_in_files command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the replace_in_files command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-replace-in-files",
+          "markdownDescription": "Denies the replace_in_files command without any pre-configured scope."
+        },
+        {
           "description": "Enables the reveal_path command without any pre-configured scope.",
           "type": "string",
           "const": "allow-reveal-path",
@@ -679,10 +883,34 @@
           "markdownDescription": "Denies the terminal_write command without any pre-configured scope."
         },
         {
-          "description": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-open-url`\n- `allow-open-path`\n- `allow-reveal-path`\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`\n- `allow-terminal-shells`\n- `allow-terminal-spawn`\n- `allow-terminal-write`\n- `allow-terminal-resize`\n- `allow-terminal-kill`",
+          "description": "Enables the workspace_load command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-workspace-load",
+          "markdownDescription": "Enables the workspace_load command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the workspace_load command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-workspace-load",
+          "markdownDescription": "Denies the workspace_load command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the workspace_save command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-workspace-save",
+          "markdownDescription": "Enables the workspace_save command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the workspace_save command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-workspace-save",
+          "markdownDescription": "Denies the workspace_save command without any pre-configured scope."
+        },
+        {
+          "description": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-open-url`\n- `allow-open-path`\n- `allow-reveal-path`\n- `allow-dir-list`\n- `allow-dir-create-file`\n- `allow-dir-create-dir`\n- `allow-dir-rename`\n- `allow-dir-remove`\n- `allow-dir-copy`\n- `allow-file-read`\n- `allow-file-write`\n- `allow-allow-path`\n- `allow-fs-watch`\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`\n- `allow-find-in-files`\n- `allow-find-cancel`\n- `allow-replace-in-files`\n- `allow-project-items`\n- `allow-project-files-containing`\n- `allow-workspace-load`\n- `allow-workspace-save`\n- `allow-app-state-load`\n- `allow-app-state-save`\n- `allow-terminal-shells`\n- `allow-terminal-spawn`\n- `allow-terminal-write`\n- `allow-terminal-resize`\n- `allow-terminal-kill`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-open-url`\n- `allow-open-path`\n- `allow-reveal-path`\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`\n- `allow-terminal-shells`\n- `allow-terminal-spawn`\n- `allow-terminal-write`\n- `allow-terminal-resize`\n- `allow-terminal-kill`"
+          "markdownDescription": "Every command Substrate's UI calls.\n#### This default permission set includes:\n\n- `allow-open-url`\n- `allow-open-path`\n- `allow-reveal-path`\n- `allow-dir-list`\n- `allow-dir-create-file`\n- `allow-dir-create-dir`\n- `allow-dir-rename`\n- `allow-dir-remove`\n- `allow-dir-copy`\n- `allow-file-read`\n- `allow-file-write`\n- `allow-allow-path`\n- `allow-fs-watch`\n- `allow-git-status`\n- `allow-git-stage`\n- `allow-git-unstage`\n- `allow-git-discard`\n- `allow-git-commit`\n- `allow-git-last-message`\n- `allow-git-diff-texts`\n- `allow-git-head-text`\n- `allow-git-log`\n- `allow-git-commit-files`\n- `allow-git-branches`\n- `allow-git-switch`\n- `allow-git-branch-create`\n- `allow-git-branch-delete`\n- `allow-git-remote`\n- `allow-git-integrate`\n- `allow-git-operation`\n- `allow-git-clone`\n- `allow-git-init`\n- `allow-git-stash-list`\n- `allow-git-stash-push`\n- `allow-git-stash-op`\n- `allow-git-config-get`\n- `allow-git-config-set`\n- `allow-find-in-files`\n- `allow-find-cancel`\n- `allow-replace-in-files`\n- `allow-project-items`\n- `allow-project-files-containing`\n- `allow-workspace-load`\n- `allow-workspace-save`\n- `allow-app-state-load`\n- `allow-app-state-save`\n- `allow-terminal-shells`\n- `allow-terminal-spawn`\n- `allow-terminal-write`\n- `allow-terminal-resize`\n- `allow-terminal-kill`"
         }
       ]
     }

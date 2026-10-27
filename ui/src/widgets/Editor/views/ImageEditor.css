@@ -1,0 +1,14 @@
+.sp-image-editor {
+  height: 100%;
+}
+
+/* A checkerboard behind, so transparency shows. */
+.sp-image-editor .sp-zoom-view-port {
+  background: repeating-conic-gradient(var(--sp-surface-1) 0% 25%, var(--sp-surface-0) 0% 50%) 50% / 16px 16px;
+}
+
+.sp-image-editor-error {
+  padding: var(--sp-space-md);
+  color: var(--sp-text-faint);
+  font-family: var(--sp-font-ui);
+}

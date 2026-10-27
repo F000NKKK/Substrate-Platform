@@ -50,6 +50,18 @@ const label = (t: RunTarget) => t.displayName ?? t.description ?? t.name;
 const groupOf = (t: RunTarget) => t.group ?? t.name;
 
 /**
+ * One target per group, the groups that have `current`'s variant: a group
+ * without it (a loader that doesn't exist for that game version) isn't
+ * offered — another variant is picked first. Every group without a current one.
+ */
+export function offeredGroups(targets: RunTarget[], current: RunTarget | undefined): RunTarget[] {
+  const all = [...new Map(targets.map((t) => [groupOf(t), t])).values()];
+  if (!current?.variant) return all;
+  return all.filter((g) => targets.some((t) => groupOf(t) === groupOf(g) && t.variant === current.variant));
+}
+
+
+/**
  * A Visual Studio-style run-target picker: choose a target from a dropdown
  * (or a group and its variant, see `RunTarget.group`), then hit the solid
  * green Start arrow to launch it — purely presentational, the product
@@ -75,8 +87,11 @@ export function RunBar({ targets, running, onRun, emptyLabel, modes, selectedMod
 
   const current = targets.find((t) => t.name === selected);
   const grouped = targets.some((t) => t.group);
-  const groups = [...new Map(targets.map((t) => [groupOf(t), t])).values()];
+
   const variants = current ? targets.filter((t) => groupOf(t) === groupOf(current) && t.variant) : [];
+
+  /** The groups offered: those with the current variant (no loader that doesn't exist for that game version). */
+  const groups = offeredGroups(targets, current);
 
   /** Switching group keeps the variant when the new group has it, else takes its last (newest). */
   function pickGroup(group: string) {
@@ -103,7 +118,11 @@ export function RunBar({ targets, running, onRun, emptyLabel, modes, selectedMod
           <Picker
             text={current ? (current.groupLabel ?? groupOf(current)) : nothing}
             disabled={targets.length === 0}
-            items={groups.map((g) => ({ label: g.groupLabel ?? groupOf(g), checked: current !== undefined && groupOf(g) === groupOf(current), onSelect: () => pickGroup(groupOf(g)) }))}
+            items={groups.map((g) => ({
+              label: g.groupLabel ?? groupOf(g),
+              checked: current !== undefined && groupOf(g) === groupOf(current),
+              onSelect: () => pickGroup(groupOf(g)),
+            }))}
           />
           {variants.length > 0 && (
             <Picker
@@ -132,6 +151,7 @@ export function RunBar({ targets, running, onRun, emptyLabel, modes, selectedMod
 interface PickerItem {
   label: string;
   checked: boolean;
+  disabled?: boolean;
   onSelect: () => void;
 }
 

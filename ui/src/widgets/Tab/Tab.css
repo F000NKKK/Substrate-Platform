@@ -53,9 +53,28 @@
 /* horizontal — the CenterDock's document tabs */
 
 .sp-tab--horizontal {
+  position: relative;
   height: var(--sp-control-height);
   padding: 0 var(--sp-space-md);
-  border-radius: var(--sp-control-radius) var(--sp-control-radius) 0 0;
+  border-radius: 0;
+}
+
+/* A short divider after each tab, hidden beside the active and the hovered one. */
+.sp-tab--horizontal::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 25%;
+  bottom: 25%;
+  width: 1px;
+  background: var(--sp-border);
+}
+
+.sp-tab--horizontal:hover::after,
+.sp-tab--horizontal[data-active="true"]::after,
+.sp-tab--horizontal:has(+ .sp-tab--horizontal[data-active="true"])::after,
+.sp-tab--horizontal:has(+ .sp-tab--horizontal:hover)::after {
+  display: none;
 }
 
 .sp-tab--horizontal:hover {
