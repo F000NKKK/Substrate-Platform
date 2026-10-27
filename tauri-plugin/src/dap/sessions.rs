@@ -3,8 +3,8 @@
 use std::collections::HashMap;
 use std::sync::{Mutex, MutexGuard};
 
-use substrate_platform::dap::{AdapterId, DapError};
-use substrate_platform::sync::Locked;
+use substrate_dap_domain::{AdapterId, DapError};
+use substrate_lock::Locked;
 
 use super::session::Session;
 

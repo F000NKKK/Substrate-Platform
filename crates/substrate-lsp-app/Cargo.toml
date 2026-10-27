@@ -1,0 +1,25 @@
+[package]
+name = "substrate-lsp-app"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "A running language server spoken to over the Language Server Protocol: requests matched to responses, notifications, the document lifecycle and the initialize-to-exit handshake."
+license = "AGPL-3.0-only"
+readme = "README.md"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]
+serde_json = "1"
+substrate-framing = { version = "0.1.0", path = "../substrate-framing" }
+substrate-lock = { version = "0.1.0", path = "../substrate-lock" }
+substrate-lsp-domain = { version = "0.1.0", path = "../substrate-lsp-domain" }
+substrate-run-app = { version = "0.1.0", path = "../substrate-run-app" }
+substrate-run-domain = { version = "0.1.0", path = "../substrate-run-domain" }
+
+[dev-dependencies]
+substrate-message = { version = "0.1.0", path = "../substrate-message" }
+substrate-run-process = { version = "0.1.0", path = "../substrate-run-process" }

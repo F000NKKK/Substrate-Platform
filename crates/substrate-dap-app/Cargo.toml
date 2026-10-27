@@ -1,0 +1,27 @@
+[package]
+name = "substrate-dap-app"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "A running debug adapter spoken to over the Debug Adapter Protocol: requests matched to responses, events decoded and passed on, the adapter's own requests answered, and the wire shape of events."
+license = "AGPL-3.0-only"
+readme = "README.md"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+substrate-dap-domain = { version = "0.1.0", path = "../substrate-dap-domain" }
+substrate-framing = { version = "0.1.0", path = "../substrate-framing" }
+substrate-lock = { version = "0.1.0", path = "../substrate-lock" }
+substrate-run-app = { version = "0.1.0", path = "../substrate-run-app" }
+substrate-run-domain = { version = "0.1.0", path = "../substrate-run-domain" }
+
+[dev-dependencies]
+substrate-message = { version = "0.1.0", path = "../substrate-message" }
+substrate-process = { version = "0.1.0", path = "../substrate-process" }
+substrate-run-process = { version = "0.1.0", path = "../substrate-run-process" }

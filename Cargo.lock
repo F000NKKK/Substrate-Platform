@@ -3272,6 +3272,49 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
 
 [[package]]
+name = "substrate-dap-app"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "substrate-dap-domain",
+ "substrate-framing",
+ "substrate-lock",
+ "substrate-message",
+ "substrate-process",
+ "substrate-run-app",
+ "substrate-run-domain",
+ "substrate-run-process",
+]
+
+[[package]]
+name = "substrate-dap-domain"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "substrate-message",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "substrate-dap-toml"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "substrate-dap-domain",
+ "substrate-message",
+ "toml 1.1.3+spec-1.1.0",
+]
+
+[[package]]
+name = "substrate-framing"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+]
+
+[[package]]
 name = "substrate-git-app"
 version = "0.1.0"
 dependencies = [
@@ -3294,19 +3337,62 @@ dependencies = [
  "substrate-git-app",
  "substrate-git-domain",
  "substrate-message",
- "substrate-platform",
  "substrate-process",
+ "substrate-workspace-domain",
 ]
 
 [[package]]
 name = "substrate-host-contract"
 version = "0.1.0"
 dependencies = [
+ "substrate-dap-domain",
  "substrate-git-domain",
+ "substrate-lsp-domain",
  "substrate-message",
  "substrate-platform",
  "substrate-process",
  "substrate-search-domain",
+ "substrate-terminal-domain",
+ "substrate-workspace-domain",
+ "substrate-workspace-fs",
+]
+
+[[package]]
+name = "substrate-lock"
+version = "0.1.0"
+
+[[package]]
+name = "substrate-lsp-app"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "substrate-framing",
+ "substrate-lock",
+ "substrate-lsp-domain",
+ "substrate-message",
+ "substrate-run-app",
+ "substrate-run-domain",
+ "substrate-run-process",
+]
+
+[[package]]
+name = "substrate-lsp-domain"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "substrate-message",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "substrate-lsp-toml"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "substrate-lsp-domain",
+ "substrate-message",
+ "toml 1.1.3+spec-1.1.0",
 ]
 
 [[package]]
@@ -3320,19 +3406,10 @@ dependencies = [
 name = "substrate-platform"
 version = "0.4.0"
 dependencies = [
- "anyhow",
- "criterion",
- "notify",
- "portable-pty",
  "serde",
  "serde_json",
  "substrate-message",
- "substrate-process",
- "substrate-run-app",
- "substrate-run-domain",
- "substrate-run-process",
  "thiserror 2.0.21",
- "toml 1.1.3+spec-1.1.0",
 ]
 
 [[package]]
@@ -3347,12 +3424,17 @@ dependencies = [
 name = "substrate-run-app"
 version = "0.1.0"
 dependencies = [
+ "criterion",
+ "substrate-lock",
  "substrate-run-domain",
 ]
 
 [[package]]
 name = "substrate-run-domain"
 version = "0.1.0"
+dependencies = [
+ "criterion",
+]
 
 [[package]]
 name = "substrate-run-process"
@@ -3398,9 +3480,65 @@ version = "0.1.0"
 dependencies = [
  "ignore",
  "substrate-message",
- "substrate-platform",
  "substrate-search-app",
  "substrate-search-domain",
+ "substrate-workspace-domain",
+]
+
+[[package]]
+name = "substrate-terminal-app"
+version = "0.1.0"
+dependencies = [
+ "substrate-lock",
+ "substrate-terminal-domain",
+]
+
+[[package]]
+name = "substrate-terminal-domain"
+version = "0.1.0"
+dependencies = [
+ "criterion",
+ "substrate-message",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "substrate-terminal-pty"
+version = "0.1.0"
+dependencies = [
+ "portable-pty",
+ "substrate-process",
+ "substrate-terminal-app",
+ "substrate-terminal-domain",
+]
+
+[[package]]
+name = "substrate-workspace-app"
+version = "0.1.0"
+dependencies = [
+ "substrate-lock",
+ "substrate-workspace-domain",
+]
+
+[[package]]
+name = "substrate-workspace-domain"
+version = "0.1.0"
+dependencies = [
+ "substrate-message",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "substrate-workspace-fs"
+version = "0.1.0"
+dependencies = [
+ "criterion",
+ "notify",
+ "substrate-lock",
+ "substrate-message",
+ "substrate-workspace-app",
+ "substrate-workspace-domain",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -3673,17 +3811,29 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
+ "substrate-dap-app",
+ "substrate-dap-domain",
  "substrate-git-app",
  "substrate-git-domain",
  "substrate-git-gitcli",
  "substrate-host-contract",
+ "substrate-lock",
+ "substrate-lsp-app",
+ "substrate-lsp-domain",
  "substrate-message",
  "substrate-platform",
  "substrate-process",
  "substrate-run-app",
+ "substrate-run-process",
  "substrate-search-app",
  "substrate-search-domain",
  "substrate-search-ignore",
+ "substrate-terminal-app",
+ "substrate-terminal-domain",
+ "substrate-terminal-pty",
+ "substrate-workspace-app",
+ "substrate-workspace-domain",
+ "substrate-workspace-fs",
  "tauri",
  "tauri-plugin",
 ]

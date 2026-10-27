@@ -14,9 +14,8 @@
 use std::collections::VecDeque;
 use std::sync::{Arc, Mutex, MutexGuard};
 
+use substrate_lock::Locked;
 use substrate_run_domain::{Level, LogLine};
-
-use crate::lock::lock;
 
 type PushCallback = Arc<dyn Fn(&LogLine) + Send + Sync>;
 
@@ -55,7 +54,7 @@ impl LogSink {
     /// consistent (every mutation is a single push/clear), so keep going
     /// rather than cascading the panic into every later push.
     fn state(&self) -> MutexGuard<'_, LogSinkState> {
-        lock(&self.0)
+        self.0.locked()
     }
 
     /// Registers a callback fired synchronously every time a line is pushed
@@ -185,10 +184,10 @@ mod tests {
         sink.info("before");
         let seen = Arc::new(Mutex::new(Vec::new()));
         let seen_cb = seen.clone();
-        sink.on_push(move |line| lock(&seen_cb).push(line.text.clone()));
+        sink.on_push(move |line| seen_cb.locked().push(line.text.clone()));
         sink.info("after");
 
-        assert_eq!(*lock(&seen), ["after"]);
+        assert_eq!(*seen.locked(), ["after"]);
         assert_eq!(
             sink.lines()
                 .iter()

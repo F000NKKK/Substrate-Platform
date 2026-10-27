@@ -1,0 +1,22 @@
+[package]
+name = "substrate-lsp-toml"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "Reads a product's list of languages and their language servers from TOML into the language server context's vocabulary."
+license = "AGPL-3.0-only"
+readme = "README.md"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+substrate-lsp-domain = { version = "0.1.0", path = "../substrate-lsp-domain" }
+toml = "1"
+
+[dev-dependencies]
+substrate-message = { version = "0.1.0", path = "../substrate-message" }

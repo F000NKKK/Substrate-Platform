@@ -1,6 +1,6 @@
 //! The adapter.
 
-use substrate_platform::text_view::TextViews;
+use substrate_workspace_domain::TextViews;
 
 /// Source control through the `git` executable. Clones share the text views.
 #[derive(Clone, Debug, Default)]

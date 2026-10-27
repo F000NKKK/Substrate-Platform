@@ -2,7 +2,7 @@
 
 use std::sync::{Condvar, Mutex, PoisonError};
 
-use crate::lock::lock;
+use substrate_lock::Locked;
 
 /// A value set once from a background thread and waited on from any other.
 #[derive(Debug)]
@@ -21,12 +21,12 @@ impl<T: Clone> Completion<T> {
 
     /// The value, once it's set.
     pub(crate) fn get(&self) -> Option<T> {
-        lock(&self.value).clone()
+        self.value.locked().clone()
     }
 
     /// Blocks until the value is set.
     pub(crate) fn wait(&self) -> T {
-        let mut guard = lock(&self.value);
+        let mut guard = self.value.locked();
         loop {
             if let Some(value) = guard.as_ref() {
                 return value.clone();
@@ -40,7 +40,7 @@ impl<T: Clone> Completion<T> {
 
     /// Sets the value and wakes every waiter.
     pub(crate) fn set(&self, value: T) {
-        *lock(&self.value) = Some(value);
+        *self.value.locked() = Some(value);
         self.ready.notify_all();
     }
 }

@@ -1,5 +1,5 @@
 //! Source Control's commands: each checks its folder against the
-//! [`Workspace`](substrate_platform::workspace::Workspace) and runs the
+//! [`Workspace`](substrate_workspace_app::Workspace) and runs the
 //! `substrate-git-*` crates off the UI thread; long runs stream to the UI as
 //! [`events::GIT_OUTPUT`](substrate_host_contract::events::GIT_OUTPUT).
 //! Feature `git`.

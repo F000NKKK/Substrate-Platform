@@ -8,12 +8,12 @@ pub struct Options {
     pub search: substrate_search_domain::project::Layout,
     /// The languages the product knows, and their servers.
     #[cfg(feature = "lsp")]
-    pub languages: substrate_platform::lsp::Languages,
+    pub languages: substrate_lsp_domain::Languages,
     /// The debug adapters the product knows.
     #[cfg(feature = "dap")]
-    pub adapters: substrate_platform::dap::Adapters,
+    pub adapters: substrate_dap_domain::Adapters,
     /// How the product's own file kinds are read and written as text.
-    pub text_views: substrate_platform::text_view::TextViews,
+    pub text_views: substrate_workspace_domain::TextViews,
     /// Where the product keeps its own data in a project.
     #[cfg(feature = "state")]
     pub state: Option<crate::state::StateOptions>,

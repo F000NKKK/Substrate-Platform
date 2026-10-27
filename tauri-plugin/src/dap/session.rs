@@ -1,7 +1,8 @@
 //! A running debug session.
 
 use serde_json::Value;
-use substrate_platform::dap::{AdapterDefinition, Client};
+use substrate_dap_app::Client;
+use substrate_dap_domain::AdapterDefinition;
 
 /// A started adapter and what it said it can do.
 pub(super) struct Session {

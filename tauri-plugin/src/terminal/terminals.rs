@@ -3,15 +3,15 @@
 use std::collections::HashMap;
 use std::sync::{Mutex, MutexGuard};
 
-use substrate_platform::sync::Locked;
-use substrate_platform::terminal::PtySession;
+use substrate_lock::Locked;
+use substrate_terminal_app::ports::Session;
 
 /// The open terminals, by id.
 #[derive(Default)]
-pub(crate) struct Terminals(Mutex<HashMap<String, PtySession>>);
+pub(crate) struct Terminals(Mutex<HashMap<String, Box<dyn Session>>>);
 
 impl Terminals {
-    pub(super) fn sessions(&self) -> MutexGuard<'_, HashMap<String, PtySession>> {
+    pub(super) fn sessions(&self) -> MutexGuard<'_, HashMap<String, Box<dyn Session>>> {
         self.0.locked()
     }
 }

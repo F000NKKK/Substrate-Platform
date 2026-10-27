@@ -9,7 +9,7 @@ use substrate_message::Message;
 use substrate_platform::state::{
     APP_STATE_FILE, WORKSPACE_FILE, private_dir, read_json, write_json,
 };
-use substrate_platform::workspace::Workspace;
+use substrate_workspace_app::Workspace;
 use tauri::{AppHandle, Manager, Runtime, State};
 
 /// Where a product keeps its own data in a project.

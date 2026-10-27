@@ -1,6 +1,6 @@
 //! Language servers: one per workspace root and language, started on the
 //! UI's first `lsp_start` and spoken to through the
-//! [`Languages`](substrate_platform::lsp::Languages) the product gives the
+//! [`Languages`](substrate_lsp_domain::Languages) the product gives the
 //! plugin. What a server says unasked goes to the UI as
 //! [`events::LSP_NOTIFICATION`](substrate_host_contract::events::LSP_NOTIFICATION),
 //! its own log as

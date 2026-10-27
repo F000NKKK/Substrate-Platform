@@ -6,7 +6,7 @@ use substrate_git_app::ports::Remotes;
 use substrate_git_app::syncing;
 use substrate_git_domain::remotes::Resolution;
 use substrate_message::Message;
-use substrate_platform::workspace::Workspace;
+use substrate_workspace_app::Workspace;
 use tauri::{AppHandle, Runtime, State};
 
 use super::wire::remotes::{IntegrationDto, RemoteOperationDto};

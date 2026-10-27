@@ -4,7 +4,7 @@ use substrate_git_app::ports::{Settings, Stashes};
 use substrate_git_app::stashing;
 use substrate_git_domain::GitError;
 use substrate_message::Message;
-use substrate_platform::workspace::Workspace;
+use substrate_workspace_app::Workspace;
 use tauri::State;
 
 use super::wire::settings::GlobalConfigDto;

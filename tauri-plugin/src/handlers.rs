@@ -47,25 +47,25 @@ pub(crate) fn commands<R: tauri::Runtime>()
         #[cfg(feature = "search")]
         search::commands::project_files_containing,
         #[cfg(feature = "fs")]
-        fs::dir_list,
+        fs::commands::dir_list,
         #[cfg(feature = "fs")]
-        fs::dir_create_file,
+        fs::commands::dir_create_file,
         #[cfg(feature = "fs")]
-        fs::dir_create_dir,
+        fs::commands::dir_create_dir,
         #[cfg(feature = "fs")]
-        fs::dir_rename,
+        fs::commands::dir_rename,
         #[cfg(feature = "fs")]
-        fs::dir_remove,
+        fs::commands::dir_remove,
         #[cfg(feature = "fs")]
-        fs::dir_copy,
+        fs::commands::dir_copy,
         #[cfg(feature = "fs")]
-        fs::file_read,
+        fs::commands::file_read,
         #[cfg(feature = "fs")]
-        fs::file_write,
+        fs::commands::file_write,
         #[cfg(feature = "fs")]
-        fs::allow_path,
+        fs::commands::allow_path,
         #[cfg(feature = "fs")]
-        fs::fs_watch,
+        fs::commands::fs_watch,
         #[cfg(feature = "terminal")]
         terminal::commands::terminal_shells,
         #[cfg(feature = "terminal")]

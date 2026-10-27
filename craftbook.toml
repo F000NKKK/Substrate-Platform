@@ -62,6 +62,63 @@ name = "substrate-host-contract"
 layer = "interface"
 context = "host-ui-contract"
 
+[[crate]]
+name = "substrate-lock"
+layer = "shared-kernel"
+context = "lock"
+[[crate]]
+name = "substrate-framing"
+layer = "shared-kernel"
+context = "framing"
+[[crate]]
+name = "substrate-workspace-domain"
+layer = "domain"
+context = "workspace"
+[[crate]]
+name = "substrate-workspace-app"
+layer = "app"
+context = "workspace"
+[[crate]]
+name = "substrate-workspace-fs"
+layer = "infra"
+context = "workspace"
+[[crate]]
+name = "substrate-terminal-domain"
+layer = "domain"
+context = "terminal"
+[[crate]]
+name = "substrate-terminal-app"
+layer = "app"
+context = "terminal"
+[[crate]]
+name = "substrate-terminal-pty"
+layer = "infra"
+context = "terminal"
+[[crate]]
+name = "substrate-lsp-domain"
+layer = "domain"
+context = "language-server"
+[[crate]]
+name = "substrate-lsp-app"
+layer = "app"
+context = "language-server"
+[[crate]]
+name = "substrate-lsp-toml"
+layer = "infra"
+context = "language-server"
+[[crate]]
+name = "substrate-dap-domain"
+layer = "domain"
+context = "debug-adapter"
+[[crate]]
+name = "substrate-dap-app"
+layer = "app"
+context = "debug-adapter"
+[[crate]]
+name = "substrate-dap-toml"
+layer = "infra"
+context = "debug-adapter"
+
 # The core is one context until the split reaches it (waves 6-10).
 [[context_edge]]
 from = "host-ui-contract"
@@ -130,4 +187,65 @@ relation = "customer-supplier"
 [[context_edge]]
 from = "source-control"
 to = "process"
+relation = "customer-supplier"
+
+[[context_edge]]
+from = "debug-adapter"
+to = "run"
+relation = "customer-supplier"
+[[context_edge]]
+from = "debug-adapter"
+to = "process"
+relation = "customer-supplier"
+[[context_edge]]
+from = "debug-adapter"
+to = "message"
+relation = "shared-kernel"
+[[context_edge]]
+from = "language-server"
+to = "run"
+relation = "customer-supplier"
+[[context_edge]]
+from = "language-server"
+to = "process"
+relation = "customer-supplier"
+[[context_edge]]
+from = "language-server"
+to = "message"
+relation = "shared-kernel"
+[[context_edge]]
+from = "terminal"
+to = "process"
+relation = "customer-supplier"
+[[context_edge]]
+from = "terminal"
+to = "message"
+relation = "shared-kernel"
+[[context_edge]]
+from = "workspace"
+to = "message"
+relation = "shared-kernel"
+[[context_edge]]
+from = "source-control"
+to = "workspace"
+relation = "customer-supplier"
+[[context_edge]]
+from = "search"
+to = "workspace"
+relation = "customer-supplier"
+[[context_edge]]
+from = "host-ui-contract"
+to = "debug-adapter"
+relation = "customer-supplier"
+[[context_edge]]
+from = "host-ui-contract"
+to = "language-server"
+relation = "customer-supplier"
+[[context_edge]]
+from = "host-ui-contract"
+to = "terminal"
+relation = "customer-supplier"
+[[context_edge]]
+from = "host-ui-contract"
+to = "workspace"
 relation = "customer-supplier"

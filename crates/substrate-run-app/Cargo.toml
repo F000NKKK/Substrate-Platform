@@ -14,3 +14,11 @@ workspace = true
 
 [dependencies]
 substrate-run-domain = { version = "0.1.0", path = "../substrate-run-domain" }
+substrate-lock = { version = "0.1.0", path = "../substrate-lock" }
+
+[dev-dependencies]
+criterion = { version = "0.8", default-features = false, features = ["cargo_bench_support"] }
+
+[[bench]]
+name = "log_sink"
+harness = false

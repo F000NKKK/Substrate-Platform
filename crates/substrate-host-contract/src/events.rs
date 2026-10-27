@@ -22,7 +22,7 @@ pub const LSP_NOTIFICATION: &str = "substrate://lsp-notification";
 /// A language server's own log (its stderr), a line: `{ root, language, line }`.
 pub const LSP_OUTPUT: &str = "substrate://lsp-output";
 
-/// What a debug adapter said unasked, a `substrate_platform::dap::Event`:
+/// What a debug adapter said unasked, a `substrate_dap_app::wire::EventDto`:
 /// `{ root, adapter, event: { event, body } }`.
 pub const DAP_EVENT: &str = "substrate://dap-event";
 

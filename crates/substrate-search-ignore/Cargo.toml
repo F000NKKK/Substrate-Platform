@@ -14,7 +14,7 @@ workspace = true
 
 [dependencies]
 ignore = "0.4.33"
-substrate-platform = { version = "0.4.0", path = "../.." }
+substrate-workspace-domain = { version = "0.1.0", path = "../substrate-workspace-domain" }
 substrate-search-app = { version = "0.1.0", path = "../substrate-search-app" }
 substrate-search-domain = { version = "0.1.0", path = "../substrate-search-domain" }
 

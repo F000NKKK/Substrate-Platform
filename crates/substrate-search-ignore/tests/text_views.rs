@@ -2,9 +2,9 @@
 
 use std::path::Path;
 
-use substrate_platform::text_view::{TextView, TextViews};
 use substrate_search_app::ports::{Decoding, DocumentSource};
 use substrate_search_ignore::DiskDocuments;
+use substrate_workspace_domain::{TextView, TextViews};
 
 /// A kind of file kept reversed on disk, read and written through its view.
 #[test]

@@ -1,0 +1,17 @@
+[package]
+name = "substrate-workspace-app"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "The workspace's use cases: which folders are open, the project shown now, and checking that a path is inside them, through the port that resolves paths."
+license = "AGPL-3.0-only"
+readme = "README.md"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]
+substrate-lock = { version = "0.1.0", path = "../substrate-lock" }
+substrate-workspace-domain = { version = "0.1.0", path = "../substrate-workspace-domain" }

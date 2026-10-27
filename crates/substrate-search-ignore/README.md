@@ -14,7 +14,7 @@ project, and text read and written through the product's text views.
 ## Usage
 
 ```rust
-use substrate_platform::text_view::TextViews;
+use substrate_workspace_domain::TextViews;
 use substrate_search_ignore::{DiskDocuments, IgnoreWalker};
 
 let (_walker, _documents) = (IgnoreWalker, DiskDocuments::new(TextViews::default()));
@@ -24,7 +24,8 @@ let (_walker, _documents) = (IgnoreWalker, DiskDocuments::new(TextViews::default
 
 Depends on [`substrate-search-app`](../substrate-search-app/README.md),
 [`substrate-search-domain`](../substrate-search-domain/README.md) and
-[`substrate-platform`](../../README.md) (the text views). Used by
+[`substrate-workspace-domain`](../substrate-workspace-domain/README.md) (the text
+views). Used by
 [`tauri-plugin-substrate`](../../tauri-plugin/README.md).
 
 ## License

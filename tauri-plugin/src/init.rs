@@ -1,5 +1,8 @@
 //! The plugin itself.
 
+use std::sync::Arc;
+
+use substrate_workspace_fs::DiskPaths;
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{AppHandle, Manager, Runtime};
 
@@ -37,7 +40,7 @@ pub fn init_with<R: Runtime>(options: Options) -> TauriPlugin<R> {
 
 /// Puts the state each feature's commands share under the app's management.
 fn manage<R: Runtime>(app: &AppHandle<R>, options: Options) {
-    app.manage(Workspace::default());
+    app.manage(Workspace::new(Arc::new(DiskPaths)));
     #[cfg(feature = "git")]
     app.manage(crate::git::SourceControl::new(options.text_views.clone()));
     #[cfg(feature = "terminal")]

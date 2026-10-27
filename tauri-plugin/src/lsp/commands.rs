@@ -4,10 +4,12 @@ use std::path::{Path, PathBuf};
 
 use serde_json::Value;
 use substrate_host_contract::events;
+use substrate_lsp_app::Client;
+use substrate_lsp_domain::{Languages, LspError, ServerDefinition};
 use substrate_message::Message;
-use substrate_platform::lsp::{Client, Languages, LspError, ServerDefinition};
-use substrate_platform::workspace::Workspace;
 use substrate_run_app::LogSink;
+use substrate_run_process::SystemLauncher;
+use substrate_workspace_app::Workspace;
 use tauri::{AppHandle, Emitter, Runtime, State};
 
 use super::Servers;
@@ -55,7 +57,7 @@ pub(crate) async fn lsp_start<R: Runtime>(
         return Ok(server.capabilities.clone());
     }
     let definition = languages
-        .get(&language)
+        .find(&language)
         .and_then(|l| l.server.clone())
         .ok_or_else(|| LspError::NoServer {
             language: language.clone(),
@@ -92,17 +94,23 @@ fn launch<R: Runtime>(
     let dir = PathBuf::from(root);
     let (note_app, note_root, note_language) =
         (app.clone(), root.to_string(), language.to_string());
-    let client = Client::start(definition, &dir, log, move |notification| {
-        let event = NotificationEvent {
-            root: note_root.clone(),
-            language: note_language.clone(),
-            method: notification.method,
-            params: notification.params,
-        };
-        // The UI window is gone: nobody to tell.
-        note_app.emit(events::LSP_NOTIFICATION, event).ok();
-    })?;
-    match client.initialize(&dir, definition.initialization_options()) {
+    let client = Client::start(
+        &SystemLauncher,
+        definition,
+        &dir,
+        log,
+        move |notification| {
+            let event = NotificationEvent {
+                root: note_root.clone(),
+                language: note_language.clone(),
+                method: notification.method,
+                params: notification.params,
+            };
+            // The UI window is gone: nobody to tell.
+            note_app.emit(events::LSP_NOTIFICATION, event).ok();
+        },
+    )?;
+    match client.initialize(&dir, definition.initialization_options.clone()) {
         Ok(capabilities) => Ok(Server {
             client,
             capabilities,

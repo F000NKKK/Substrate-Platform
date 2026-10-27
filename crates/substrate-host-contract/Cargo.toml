@@ -9,27 +9,32 @@ readme = "README.md"
 license = "AGPL-3.0-only"
 repository = "https://github.com/F000NKKK/Substrate-Platform"
 
-# Each feature of the core adds its messages to the catalog.
+# Each feature of a context adds its messages to the catalog.
 [features]
-dap = ["substrate-platform/dap"]
-fs = ["substrate-platform/fs"]
+dap = ["dep:substrate-dap-domain"]
+fs = ["dep:substrate-workspace-fs"]
 git = ["dep:substrate-git-domain"]
-lsp = ["substrate-platform/lsp"]
+lsp = ["dep:substrate-lsp-domain"]
 project = ["substrate-platform/project"]
 search = ["dep:substrate-search-domain"]
 state = ["substrate-platform/state"]
-terminal = ["substrate-platform/terminal"]
+terminal = ["dep:substrate-terminal-domain"]
 full = ["dap", "fs", "git", "lsp", "project", "search", "state", "terminal"]
 
 [lints]
 workspace = true
 
 [dependencies]
+substrate-dap-domain = { version = "0.1.0", path = "../substrate-dap-domain", optional = true }
 substrate-git-domain = { version = "0.1.0", path = "../substrate-git-domain", optional = true }
+substrate-lsp-domain = { version = "0.1.0", path = "../substrate-lsp-domain", optional = true }
 substrate-search-domain = { version = "0.1.0", path = "../substrate-search-domain", optional = true }
+substrate-terminal-domain = { version = "0.1.0", path = "../substrate-terminal-domain", optional = true }
+substrate-workspace-fs = { version = "0.1.0", path = "../substrate-workspace-fs", optional = true }
 substrate-message = { version = "0.1.0", path = "../substrate-message" }
 substrate-process = { version = "0.1.0", path = "../substrate-process" }
-substrate-platform = { version = "0.4.0", path = "../.." }
+substrate-workspace-domain = { version = "0.1.0", path = "../substrate-workspace-domain" }
+substrate-platform = { version = "0.4.0", path = "../..", optional = true }
 
 # The UI's generated copy covers every module's messages.
 [[bin]]
