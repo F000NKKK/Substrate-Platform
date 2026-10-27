@@ -1,10 +1,11 @@
 //! Branches: listing, switching, creating, deleting.
 
-use super::GitError;
-use super::WriteLock;
-use super::run::{git, require_repo, run};
-use serde::Serialize;
 use std::path::Path;
+
+use serde::Serialize;
+
+use super::run::{git, require_repo, run};
+use super::{GitError, WriteLock};
 
 #[derive(Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]

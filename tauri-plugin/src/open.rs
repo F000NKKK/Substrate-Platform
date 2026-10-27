@@ -3,6 +3,7 @@
 //! environment (Tauri's opener passes an AppImage's on, and they fail).
 
 use std::path::Path;
+
 use substrate_platform::message::Message;
 use substrate_platform::process;
 use substrate_platform::workspace::Workspace;

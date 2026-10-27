@@ -1,11 +1,13 @@
 //! The two sides of a file's diff, and what a file holds in the last commit.
 
+use std::path::{Path, PathBuf};
+use std::process::Stdio;
+
+use serde::{Deserialize, Serialize};
+
 use super::GitError;
 use super::run::{absolute, git, repo_of, require_repo};
 use crate::text_view::{TextView, TextViews};
-use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
-use std::process::Stdio;
 
 /// Files larger than this aren't shown in a diff.
 const MAX_DIFF_BYTES: usize = 8 * 1024 * 1024;

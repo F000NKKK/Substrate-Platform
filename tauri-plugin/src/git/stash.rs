@@ -1,13 +1,14 @@
 //! Stashes and the global Git settings.
 
-use super::checked;
-use crate::blocking;
 use substrate_platform::git::WriteLock;
 use substrate_platform::git::config::{self, GlobalConfig};
 use substrate_platform::git::stash::{self, StashEntry, StashMode, StashOperation};
 use substrate_platform::message::Message;
 use substrate_platform::workspace::Workspace;
 use tauri::State;
+
+use super::checked;
+use crate::blocking;
 
 #[tauri::command]
 pub async fn git_stash_list(

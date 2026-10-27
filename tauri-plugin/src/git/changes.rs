@@ -1,8 +1,7 @@
 //! Git Changes: the status, staging, committing and the diffs.
 
-use super::checked;
-use crate::blocking;
 use std::path::Path;
+
 use substrate_platform::git::WriteLock;
 use substrate_platform::git::diff::{self, DiffSide, DiffTexts};
 use substrate_platform::git::status::{
@@ -12,6 +11,9 @@ use substrate_platform::message::Message;
 use substrate_platform::text_view::TextViews;
 use substrate_platform::workspace::Workspace;
 use tauri::State;
+
+use super::checked;
+use crate::blocking;
 
 /// The repository's state for Git Changes and the status bar — `None` when
 /// `root` isn't in a repository.

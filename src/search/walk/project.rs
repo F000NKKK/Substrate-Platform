@@ -3,8 +3,7 @@
 use std::path::{Path, PathBuf};
 
 use super::{Decoding, Layout, read_text};
-use crate::search::SearchError;
-use crate::search::{FileMask, Matcher, SearchQuery};
+use crate::search::{FileMask, Matcher, SearchError, SearchQuery};
 use crate::text_view::TextViews;
 
 /// The walk over a project's own files: .gitignore'd entries (whether or

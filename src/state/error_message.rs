@@ -17,8 +17,9 @@ impl From<StateError> for Message {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::path::Path;
+
+    use super::*;
 
     #[test]
     fn a_failure_names_its_path_and_reason() {

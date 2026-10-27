@@ -23,8 +23,9 @@ impl From<FsError> for Message {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::path::Path;
+
+    use super::*;
 
     #[test]
     fn io_failures_name_their_path() {
