@@ -40,7 +40,7 @@ export interface PanelSurfaceProps {
 export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onFloat, style, outline = true, outlineRevision, onHeaderPointerDown, children }: PanelSurfaceProps) {
   const t = useT();
   return (
-    <div className="sp-panel-surface" style={style}>
+    <div className="sp-panel-surface" style={style} tabIndex={-1}>
       <div
         className="sp-panel-surface-header"
         draggable={!onHeaderPointerDown}
@@ -66,7 +66,7 @@ export function PanelSurface({ panelId, title, pinned, onTogglePin, onClose, onF
       <div className="sp-panel-surface-body">
         <ErrorBoundary what={title}>{children}</ErrorBoundary>
       </div>
-      {outline && <Outline revision={outlineRevision} />}
+      {outline && <Outline revision={outlineRevision} color="var(--sp-panel-outline)" />}
     </div>
   );
 }

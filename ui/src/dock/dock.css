@@ -199,8 +199,14 @@
   flex: 1;
 }
 
+/* The panel's own outline (PanelSurface) is quiet until focus is inside it — one accent outline on screen, not one per pinned panel. */
+.sp-panel-surface {
+  --sp-panel-outline: var(--sp-border-strong);
+  outline: none;
+}
+
 .sp-panel-surface:focus-within {
-  box-shadow: 0 0 0 1px var(--sp-accent);
+  --sp-panel-outline: var(--sp-accent);
 }
 
 /*
