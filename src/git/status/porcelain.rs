@@ -1,9 +1,9 @@
 //! Reading `git status`: running it, and parsing its porcelain v2.
 
-use crate::git::GitError;
 use std::path::Path;
 
 use super::{ChangeKind, FileChange, Operation, RepoStatus};
+use crate::git::GitError;
 use crate::git::run::{git, repo_of, run};
 
 /// Parses `git status --porcelain=v2 --branch --show-stash -z`.

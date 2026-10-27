@@ -1,11 +1,10 @@
 //! Undo Changes.
 
-use crate::git::GitError;
-use crate::git::WriteLock;
 use std::path::Path;
 
 use super::{ChangeKind, DiscardItem};
 use crate::git::run::{git, has_head, require_repo, run};
+use crate::git::{GitError, WriteLock};
 
 /// Undo Changes: an unstaged change goes back to what's staged (an untracked
 /// file is deleted), a staged one back to the last commit — index and disk

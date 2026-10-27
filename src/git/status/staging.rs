@@ -1,10 +1,9 @@
 //! Staging and unstaging changes.
 
-use crate::git::GitError;
-use crate::git::WriteLock;
 use std::path::Path;
 
 use crate::git::run::{git, has_head, require_repo, run};
+use crate::git::{GitError, WriteLock};
 
 /// Stages `paths` (repo-relative) — every change when empty. Deletions too.
 ///

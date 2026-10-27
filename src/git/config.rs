@@ -1,10 +1,12 @@
 //! Git's own global settings that the Source Control options page edits.
 
-use super::GitError;
-use super::run::{git, run};
-use serde::Serialize;
 use std::collections::HashMap;
 use std::path::PathBuf;
+
+use serde::Serialize;
+
+use super::GitError;
+use super::run::{git, run};
 
 /// The global keys that may be read and written here — nothing else.
 pub const GLOBAL_KEYS: &[&str] = &[

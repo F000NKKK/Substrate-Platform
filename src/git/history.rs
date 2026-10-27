@@ -1,10 +1,12 @@
 //! History: a branch's commits, and the files a commit changed.
 
+use std::path::Path;
+
+use serde::Serialize;
+
 use super::GitError;
 use super::run::{absolute, git, has_head, require_repo, run};
 use super::status::{ChangeKind, FileChange};
-use serde::Serialize;
-use std::path::Path;
 
 #[derive(Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]

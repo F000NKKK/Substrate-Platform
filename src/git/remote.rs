@@ -1,13 +1,14 @@
 //! Long runs, streamed to an [`Output`]: fetch, pull, push, sync; merge and
 //! rebase; finishing or aborting what's in progress; clone and init.
 
-use super::GitError;
-use super::WriteLock;
+use std::path::Path;
+
+use serde::Deserialize;
+
 use super::branch::{current, has_upstream};
 use super::run::{Output, git, repo_of, require_repo, run, stream, stream_git};
 use super::status::Operation;
-use serde::Deserialize;
-use std::path::Path;
+use super::{GitError, WriteLock};
 
 /// The remote a branch pushes to when nothing else says: git's convention.
 const ORIGIN: &str = "origin";

@@ -3,8 +3,7 @@
 use regex::{Regex, RegexBuilder};
 
 use super::ReplacementMode;
-use crate::search::SearchError;
-use crate::search::SearchQuery;
+use crate::search::{SearchError, SearchQuery};
 
 /// The compiled pattern, with VS's "Match whole word" applied as a check on
 /// each match's neighbours (the regex engine has no lookaround) rather than

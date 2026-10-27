@@ -1,11 +1,10 @@
 //! Committing, and the message Amend starts from.
 
-use crate::git::GitError;
-use crate::git::WriteLock;
 use std::path::Path;
 
 use super::{CommitMode, CommitResult, CommitScope};
 use crate::git::run::{git, require_repo, run, run_with_input};
+use crate::git::{GitError, WriteLock};
 
 /// Commits what `scope` takes in, as a new commit or amending the last (`mode`).
 ///

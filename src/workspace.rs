@@ -3,10 +3,11 @@
 //! a process in must resolve under one of them — an IDE never reaches
 //! outside what the user opened.
 
-use crate::message::Message;
-use crate::sync::Locked;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
+
+use crate::message::Message;
+use crate::sync::Locked;
 
 crate::messages! {
     workspace {

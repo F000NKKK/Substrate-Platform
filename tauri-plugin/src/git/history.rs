@@ -1,7 +1,5 @@
 //! The history and the branches.
 
-use super::checked;
-use crate::blocking;
 use substrate_platform::git::WriteLock;
 use substrate_platform::git::branch::{self, Branch, BranchCheckout, BranchSource, DeleteMode};
 use substrate_platform::git::history::{self, Commit};
@@ -9,6 +7,9 @@ use substrate_platform::git::status::FileChange;
 use substrate_platform::message::Message;
 use substrate_platform::workspace::Workspace;
 use tauri::State;
+
+use super::checked;
+use crate::blocking;
 
 #[tauri::command]
 pub async fn git_log(

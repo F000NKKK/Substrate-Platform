@@ -1,11 +1,12 @@
 //! Running `git`: set up for a GUI host, its failures made actionable, its
 //! long runs streamed; and finding the repository a folder is in.
 
-use super::{GitError, messages};
-use crate::message::Message;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+
+use super::{GitError, messages};
+use crate::message::Message;
 
 /// Where a long run's lines go (the host's Output window): git's own as
 /// they are ([`Message::verbatim`]), ours to translate.

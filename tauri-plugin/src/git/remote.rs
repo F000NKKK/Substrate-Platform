@@ -1,13 +1,15 @@
 //! What talks to remotes or runs long — streamed to the UI.
 
-use super::{checked, output};
-use crate::blocking;
 use std::path::Path;
+
 use substrate_platform::git::WriteLock;
 use substrate_platform::git::remote::{self, Integration, RemoteOperation, Resolution};
 use substrate_platform::message::Message;
 use substrate_platform::workspace::Workspace;
 use tauri::{AppHandle, Runtime, State};
+
+use super::{checked, output};
+use crate::blocking;
 
 /// Fetch / Pull / Push / Sync, streamed.
 #[tauri::command]
