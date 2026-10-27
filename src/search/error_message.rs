@@ -1,7 +1,7 @@
 //! A [`SearchError`] as the user sees it.
 
 use super::{SearchError, messages};
-use crate::message::Message;
+use substrate_message::Message;
 
 impl From<SearchError> for Message {
     fn from(error: SearchError) -> Self {

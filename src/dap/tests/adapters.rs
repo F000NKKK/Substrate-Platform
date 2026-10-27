@@ -5,7 +5,7 @@ use std::path::Path;
 use serde_json::{Value, json};
 
 use crate::dap::*;
-use crate::message::Message;
+use substrate_message::Message;
 
 const LIST: &str = r#"
     [adapter.lldb]

@@ -1,0 +1,34 @@
+[package]
+name = "substrate-host-contract"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "The contract between Substrate's host and its UI: command and event names, message catalog and the TypeScript copy generated from them."
+readme = "README.md"
+license = "AGPL-3.0-only"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+# Each feature of the core adds its messages to the catalog.
+[features]
+dap = ["substrate-platform/dap"]
+fs = ["substrate-platform/fs"]
+git = ["substrate-platform/git"]
+lsp = ["substrate-platform/lsp"]
+project = ["substrate-platform/project"]
+search = ["substrate-platform/search"]
+state = ["substrate-platform/state"]
+terminal = ["substrate-platform/terminal"]
+full = ["dap", "fs", "git", "lsp", "project", "search", "state", "terminal"]
+
+[lints]
+workspace = true
+
+[dependencies]
+substrate-message = { version = "0.1.0", path = "../substrate-message" }
+substrate-platform = { version = "0.4.0", path = "../.." }
+
+# The UI's generated copy covers every module's messages.
+[[bin]]
+name = "substrate-messages"
+required-features = ["full"]

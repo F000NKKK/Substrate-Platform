@@ -1,7 +1,7 @@
 //! Why talking to a language server failed.
 
 /// Why talking to a language server failed — what the UI says is
-/// [`crate::message::Message::from`].
+/// [`substrate_message::Message::from`].
 #[derive(Debug, thiserror::Error)]
 pub enum LspError {
     /// The product's list of languages is not valid TOML of the shape.

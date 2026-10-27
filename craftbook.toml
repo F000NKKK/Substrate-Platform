@@ -8,4 +8,26 @@ context = "substrate"
 [[crate]]
 name = "tauri-plugin-substrate"
 layer = "interface"
-context = "substrate"
+context = "host-ui-contract"
+[[crate]]
+name = "substrate-message"
+layer = "shared-kernel"
+context = "message"
+[[crate]]
+name = "substrate-host-contract"
+layer = "interface"
+context = "host-ui-contract"
+
+# The core is one context until the split reaches it (waves 6-10).
+[[context_edge]]
+from = "host-ui-contract"
+to = "substrate"
+relation = "customer-supplier"
+[[context_edge]]
+from = "host-ui-contract"
+to = "message"
+relation = "published-language"
+[[context_edge]]
+from = "substrate"
+to = "message"
+relation = "shared-kernel"

@@ -1,6 +1,6 @@
-//! What Git says to the user (see [`crate::message`]).
+//! What Git says to the user (see [`substrate_message`]).
 
-crate::messages! {
+substrate_message::messages! {
     git {
         MISSING = "Git isn't installed, or isn't on PATH.",
         CANT_START = "Couldn't start git: {error}",

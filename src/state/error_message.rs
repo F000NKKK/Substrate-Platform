@@ -1,7 +1,7 @@
 //! A [`StateError`] as the user sees it.
 
 use super::{StateError, messages};
-use crate::message::Message;
+use substrate_message::Message;
 
 impl From<StateError> for Message {
     fn from(error: StateError) -> Self {

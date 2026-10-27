@@ -6,7 +6,7 @@ use std::sync::Arc;
 use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
 
-use substrate_platform::message::Message;
+use substrate_message::Message;
 use substrate_platform::search::{
     DEFAULT_MAX_LINES, FindSummary, Layout, ReplaceRequest, ReplaceSummary, Scope, Search,
     SearchQuery, WalkEntry, files_containing, find, project_entries, replace,

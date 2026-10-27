@@ -60,7 +60,7 @@ flowchart LR
 
 ## 🦀 Rust Crate
 
-Always there: `message` (user-facing text as templates the UI translates), `events`, `process` (what a started program's environment should be) `workspace` (the folders the user opened; paths outside them are refused), `sync` (locks that outlive a panic), `text_view` (a product's binary formats read and written as text, so search, replace and diffs see what the editor shows; the product builds a `TextViews` value and hands it to the plugin's `Options`) and `commands` (the host commands by domain: the one list permissions, handlers and the UI's copy come from). Every other module is a Cargo feature of its name, so a product builds only what it uses (`full` turns on all):
+Always there: `process` (what a started program's environment should be) `workspace` (the folders the user opened; paths outside them are refused), `sync` (locks that outlive a panic), `text_view` (a product's binary formats read and written as text, so search, replace and diffs see what the editor shows; the product builds a `TextViews` value and hands it to the plugin's `Options`). Beside it, [`crates/substrate-message`](crates/substrate-message) is the shared kernel (`Message`: user-facing text as templates the UI translates, and the `messages!` macro) and [`crates/substrate-host-contract`](crates/substrate-host-contract) is the contract with the UI (`commands`: the host commands by domain, the one list permissions, handlers and the UI's copy come from; `events`; the generator `cargo run -p substrate-host-contract --all-features --bin substrate-messages`). Every other module is a Cargo feature of its name, so a product builds only what it uses (`full` turns on all):
 
 | Feature / module | What it does |
 |---|---|

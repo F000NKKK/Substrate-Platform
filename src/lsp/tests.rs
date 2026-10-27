@@ -9,7 +9,7 @@ use serde_json::{Value, json};
 
 use super::*;
 use crate::framing;
-use crate::message::Message;
+use substrate_message::Message;
 
 /// A client wired to a fake server on this thread's other end: what the
 /// client wrote is read from `from_client`, what the server says goes into

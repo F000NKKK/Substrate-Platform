@@ -6,12 +6,12 @@
 use serde::Serialize;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
-use substrate_platform::events;
+use substrate_host_contract::events;
+use substrate_message::Message;
 use substrate_platform::fs::watch::DEFAULT_QUIET;
 use substrate_platform::fs::{
     DirectoryEntry, DirectoryWatcher, EntryKind, FsError, copy_new, dir, read_text,
 };
-use substrate_platform::message::Message;
 use substrate_platform::workspace::Workspace;
 use tauri::{AppHandle, Emitter, Runtime, State};
 

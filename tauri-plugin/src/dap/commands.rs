@@ -3,9 +3,9 @@
 use std::path::{Path, PathBuf};
 
 use serde_json::Value;
+use substrate_host_contract::events;
+use substrate_message::Message;
 use substrate_platform::dap::{AdapterDefinition, AdapterId, Adapters, Client, Command, DapError};
-use substrate_platform::events;
-use substrate_platform::message::Message;
 use substrate_platform::run::LogSink;
 use substrate_platform::workspace::Workspace;
 use tauri::{AppHandle, Emitter, Runtime, State};

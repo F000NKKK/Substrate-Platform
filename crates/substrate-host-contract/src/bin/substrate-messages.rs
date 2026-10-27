@@ -9,9 +9,9 @@ fn main() -> Result<(), String> {
     let path = std::env::args()
         .nth(1)
         .unwrap_or_else(|| DEFAULT_OUT.to_string());
-    let text = substrate_platform::message::typescript();
+    let text = substrate_host_contract::typescript();
     if std::fs::read_to_string(&path).ok().as_deref() == Some(text.as_str()) {
         return Ok(());
     }
-    std::fs::write(&path, text).map_err(|e| format!("{path}: {e}"))
+    std::fs::write(&path, text).map_err(|e| [path.as_str(), ": ", &e.to_string()].concat())
 }

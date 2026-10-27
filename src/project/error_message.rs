@@ -1,7 +1,7 @@
 //! A [`ProjectError`] as the user sees it.
 
 use super::{ProjectError, messages};
-use crate::message::Message;
+use substrate_message::Message;
 
 impl From<ProjectError> for Message {
     fn from(error: ProjectError) -> Self {

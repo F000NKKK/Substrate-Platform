@@ -135,7 +135,7 @@ mod tests {
         for not_a_link in ["file:///etc/passwd", "/bin/sh"] {
             let error = open_link(not_a_link).unwrap_err();
             assert!(matches!(error, ProcessError::NotALink { .. }));
-            assert_eq!(crate::message::Message::from(error).text, NOT_A_LINK);
+            assert_eq!(substrate_message::Message::from(error).text, NOT_A_LINK);
         }
     }
 }

@@ -110,7 +110,7 @@ fn file_mask_globs() {
 #[test]
 fn an_invalid_mask_glob_is_refused() {
     let error = FileMask::parse("*.rs; src/[").unwrap_err();
-    let message = crate::message::Message::from(error);
+    let message = substrate_message::Message::from(error);
     assert_eq!(message.text, crate::search::messages::BAD_MASK);
     assert_eq!(message.args["mask"], "src/[");
     assert!(FileMask::parse("!src/[").is_err());
@@ -129,7 +129,7 @@ fn an_empty_pattern_is_refused() {
     let error = Matcher::new(&query("")).unwrap_err();
     assert!(matches!(error, SearchError::EmptyPattern));
     assert_eq!(
-        crate::message::Message::from(error).text,
+        substrate_message::Message::from(error).text,
         crate::search::messages::EMPTY
     );
 }

@@ -3,7 +3,7 @@
 use serde::Serialize;
 
 use super::{ReplacedDocument, ReplacedFile};
-use crate::message::Message;
+use substrate_message::Message;
 
 /// What Replace All changed, and what it couldn't.
 #[derive(Clone, Default, Serialize, Debug)]

@@ -1,7 +1,7 @@
 //! A [`DapError`] as the user sees it.
 
 use super::{DapError, messages};
-use crate::message::Message;
+use substrate_message::Message;
 
 impl From<DapError> for Message {
     fn from(error: DapError) -> Self {

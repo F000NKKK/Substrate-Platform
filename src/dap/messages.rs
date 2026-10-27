@@ -1,6 +1,6 @@
-//! What a debug adapter says to the user (see [`crate::message`]).
+//! What a debug adapter says to the user (see [`substrate_message`]).
 
-crate::messages! {
+substrate_message::messages! {
     dap {
         INVALID_LIST = "The list of debug adapters is invalid: {error}",
         NO_ADAPTER = "There's no debug adapter {adapter}.",

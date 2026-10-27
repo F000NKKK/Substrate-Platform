@@ -3,12 +3,12 @@
 //! a process in must resolve under one of them — an IDE never reaches
 //! outside what the user opened.
 
-use crate::message::Message;
 use crate::sync::Locked;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
+use substrate_message::Message;
 
-crate::messages! {
+substrate_message::messages! {
     workspace {
         NOTHING_OPEN = "No project is open.",
         NOT_ON_DISK = "{path} doesn't resolve to anything on disk.",

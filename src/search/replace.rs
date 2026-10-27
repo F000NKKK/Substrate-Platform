@@ -9,8 +9,8 @@ use super::{
     Decoding, FileMask, Layout, Matcher, ReplaceRequest, ReplaceSummary, ReplacedDocument,
     ReplacedFile, ReplacementMode, SearchError, read_text,
 };
-use crate::message::Message;
 use crate::text_view::TextViews;
+use substrate_message::Message;
 
 /// Replace All over the same set of files a search would cover: open
 /// documents' new text comes back for the frontend to apply to their

@@ -3,7 +3,7 @@
 use std::path::PathBuf;
 
 /// Why a search or a replace failed — what the UI says is
-/// [`crate::message::Message::from`].
+/// [`substrate_message::Message::from`].
 #[derive(Debug, thiserror::Error)]
 pub enum SearchError {
     /// The text to look for is empty.

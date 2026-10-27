@@ -3,7 +3,7 @@
 use std::path::{Path, PathBuf};
 
 /// Why a file operation failed — what the UI says is
-/// [`crate::message::Message::from`].
+/// [`substrate_message::Message::from`].
 #[derive(Debug, thiserror::Error)]
 pub enum FsError {
     /// The path is not a file.

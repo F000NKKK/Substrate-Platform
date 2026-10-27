@@ -1,6 +1,6 @@
-//! What a language server says to the user (see [`crate::message`]).
+//! What a language server says to the user (see [`substrate_message`]).
 
-crate::messages! {
+substrate_message::messages! {
     lsp {
         INVALID_LIST = "The list of languages is invalid: {error}",
         NO_SERVER = "There's no language server for {language}.",

@@ -17,7 +17,7 @@ use super::state;
 use super::terminal;
 
 /// Every command of the features turned on (Substrate's domains,
-/// `substrate_platform::commands`, list the same ones).
+/// `substrate_host_contract::commands`, list the same ones).
 #[expect(
     clippy::too_many_lines,
     reason = "one command list: tauri's `generate_handler!` can't be split or composed"

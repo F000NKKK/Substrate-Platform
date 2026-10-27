@@ -1,7 +1,7 @@
 //! Why opening a link, a file or a program failed.
 
 /// Why opening a link, a file or a program failed — what the UI says is
-/// [`crate::message::Message::from`].
+/// [`substrate_message::Message::from`].
 #[derive(Debug, thiserror::Error)]
 pub enum ProcessError {
     /// Only web and mail links are opened.

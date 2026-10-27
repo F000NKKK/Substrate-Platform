@@ -4,7 +4,7 @@
 /// The General output: what the IDE itself reports (errors, notices).
 pub const IDE_OUTPUT: &str = "substrate://ide-output";
 
-/// A Source Control run's lines, as [`crate::message::Message`]s.
+/// A Source Control run's lines, as [`substrate_message::Message`]s.
 pub const GIT_OUTPUT: &str = "substrate://git-output";
 
 /// Paths changed outside the IDE, in the watched folders: a list of paths.
@@ -22,7 +22,7 @@ pub const LSP_NOTIFICATION: &str = "substrate://lsp-notification";
 /// A language server's own log (its stderr), a line: `{ root, language, line }`.
 pub const LSP_OUTPUT: &str = "substrate://lsp-output";
 
-/// What a debug adapter said unasked, an [`crate::dap::Event`]:
+/// What a debug adapter said unasked, a `substrate_platform::dap::Event`:
 /// `{ root, adapter, event: { event, body } }`.
 pub const DAP_EVENT: &str = "substrate://dap-event";
 
@@ -45,9 +45,9 @@ pub const ALL: &[(&str, &str)] = &[
 /// `events` — (name in code, event) — as a TypeScript constant `name`; `doc`
 /// is its comment. A product's own events go to its UI the same way.
 pub fn typescript(name: &str, doc: &str, events: &[(&str, &str)]) -> String {
-    let mut out = format!("/** {doc} */\nexport const {name} = {{\n");
+    let mut out = ["/** ", doc, " */\nexport const ", name, " = {\n"].concat();
     for (key, event) in events {
-        out.push_str(&format!("  {key}: {event:?},\n"));
+        out.push_str(&["  ", key, ": ", &format!("{event:?}"), ",\n"].concat());
     }
     out.push_str("} as const;\n");
     out

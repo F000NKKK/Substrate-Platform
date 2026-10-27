@@ -1,6 +1,6 @@
 # The core and its Tauri plugin (`tauri-plugin/`): one target dir.
 [workspace]
-members = ["tauri-plugin"]
+members = ["tauri-plugin", "crates/*"]
 
 # Craftbook's lint set (templates/workspace-lints.toml). Wave 0 of the
 # migration (craftbook adoption/substrate-platform.md §4) turns every `deny`
@@ -51,6 +51,7 @@ edition = "2024"
 rust-version = "1.99"
 authors = ["F000NK"]
 description = "Brand-neutral IDE platform core (task/workflow runner, log sink, PTY sessions, directory + project/solution engines) — the shared backend foundation for future IDE-style tools."
+readme = "README.md"
 license = "AGPL-3.0-only"
 repository = "https://github.com/F000NKKK/Substrate-Platform"
 
@@ -84,6 +85,7 @@ notify = { version = "8", optional = true }
 portable-pty = { version = "0.9", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", optional = true }
+substrate-message = { version = "0.1.0", path = "crates/substrate-message" }
 thiserror = "2"
 toml = { version = "1", optional = true }
 
@@ -95,11 +97,6 @@ libc = { version = "0.2", optional = true }
 [dev-dependencies]
 criterion = { version = "0.8", default-features = false, features = ["cargo_bench_support"] }
 toml = "1"
-
-# The UI's generated copy covers every module's messages.
-[[bin]]
-name = "substrate-messages"
-required-features = ["full"]
 
 [[bench]]
 name = "core"

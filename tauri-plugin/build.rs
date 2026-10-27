@@ -1,8 +1,8 @@
 //! The plugin's permissions: Tauri's own per command, and the default set
-//! (every command) — from Substrate's domains (`substrate_platform::commands`),
+//! (every command) — from Substrate's domains (`substrate_host_contract::commands`),
 //! the one list of its commands, whatever features a build turns on.
 
-use substrate_platform::commands::{SUBSTRATE, names};
+use substrate_host_contract::commands::{SUBSTRATE, names};
 
 /// The default permission set: what a product grants by `substrate:default`.
 const DEFAULT_PERMISSIONS: &str = "permissions/default.toml";

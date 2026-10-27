@@ -6,6 +6,7 @@ rust-version = "1.99"
 authors = ["F000NK"]
 license = "AGPL-3.0-only"
 description = "Substrate Platform's host commands for a Tauri app: the workspace boundary, opening links, Source Control, terminals — what Substrate's UI calls, the same in every product."
+readme = "README.md"
 repository = "https://github.com/F000NKKK/Substrate-Platform"
 # Tauri wants a plugin's links key: its permissions are found by it.
 links = "tauri-plugin-substrate"
@@ -24,11 +25,13 @@ terminal = ["substrate-platform/terminal"]
 workspace = true
 
 [dependencies]
-substrate-platform = { path = ".." }
+substrate-host-contract = { version = "0.1.0", path = "../crates/substrate-host-contract" }
+substrate-message = { version = "0.1.0", path = "../crates/substrate-message" }
+substrate-platform = { version = "0.4.0", path = ".." }
 tauri = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", optional = true }
 
 [build-dependencies]
-substrate-platform = { path = ".." }
+substrate-host-contract = { version = "0.1.0", path = "../crates/substrate-host-contract" }
 tauri-plugin = { version = "2", features = ["build"] }

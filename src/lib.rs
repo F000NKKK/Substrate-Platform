@@ -1,8 +1,7 @@
 //! Substrate Platform — a brand-neutral IDE backend core.
 //!
 //! Provides the backend pieces every IDE-style desktop tool needs
-//! regardless of what it's actually editing. Always there: user-facing
-//! [`message`]s, the [`events`] the UI hears, started programs' environment
+//! regardless of what it's actually editing. Always there: started programs' environment
 //! ([`process`]) and the folders the user opened ([`workspace`]). Each
 //! module behind a feature of its name: `run` (processes streamed into a
 //! log, multi-step workflows), `terminal` (pty sessions, shells), `fs`
@@ -15,9 +14,6 @@
 //! depends on this crate the same way, and brings its own UI (e.g. a Tauri +
 //! React frontend) and its own project standards/workflow templates.
 
-pub mod commands;
-pub mod events;
-pub mod message;
 pub mod process;
 pub mod sync;
 pub mod text_view;

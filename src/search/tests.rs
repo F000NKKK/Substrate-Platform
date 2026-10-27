@@ -286,7 +286,7 @@ fn a_file_replace_may_not_write_is_reported() {
     };
 
     let summary = replace(&request, &layout(), &TextViews::default(), &|path| {
-        Err(crate::message::Message::verbatim(path.display()))
+        Err(substrate_message::Message::verbatim(path.display()))
     })
     .unwrap();
 

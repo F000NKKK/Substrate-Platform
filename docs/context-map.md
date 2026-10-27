@@ -7,16 +7,17 @@ The measured gap and the migration plan are in Craftbook's
 
 ## Today
 
-One crate, `substrate-platform`, holds every context, each behind a Cargo
-feature of its name; `tauri-plugin-substrate` is the interface layer (Tauri
-commands, the composition root). `craftbook.toml` maps both as one context
-until the split (wave 5 onwards).
+`substrate-message` (shared kernel) and `substrate-host-contract` (the
+command and event catalog, the generator of the UI's copy) are split out
+(wave 5). `substrate-platform` still holds every other context, each behind a
+Cargo feature of its name; `tauri-plugin-substrate` is the interface layer
+(Tauri commands, the composition root). The split goes on context by context.
 
 ## Contexts
 
 | Context | Today (module, feature) | What it owns | Target crates (layer) |
 |---|---|---|---|
-| message (shared kernel) | `message`, every `*/messages.rs` | user-facing text as templates the UI translates | `substrate-message` (shared kernel) |
+| message (shared kernel) | `substrate-message`, every `*/messages.rs` | user-facing text as templates the UI translates | `substrate-message` (shared kernel) |
 | workspace | `workspace`, `fs`, `text_view` | the folders the user opened; listing, changing and watching them; product formats read as text | `substrate-workspace-domain`, `substrate-workspace-fs` (infra) |
 | source-control | `git` | status, staging, commits, branches, remotes, stashes, diffs, through the `git` executable | `substrate-git-domain`, `substrate-git-app`, `substrate-git-gitcli` (infra; the anticorruption layer for git's porcelain) |
 | search | `search` | Find and Replace in Files, the project walk | `substrate-search-domain`, `substrate-search-app`, `substrate-search-ignore` (infra) |
@@ -27,7 +28,7 @@ until the split (wave 5 onwards).
 | project-model | `project` | solutions and projects as an IDE models them | `substrate-project-domain`, `substrate-project-app` |
 | ide-state | `state` | what the IDE remembers between runs | `substrate-state-app`, `substrate-state-json` (infra) |
 | host | `process` | starting programs with the system's own environment, opening links and files | `substrate-host-app`, `substrate-host-os` (infra) |
-| host-ui-contract | `commands`, `events`, `bin/substrate-messages` | the command and event catalog the UI is generated from | `substrate-host-contract` (interface), `tauri-plugin-substrate` (interface) |
+| host-ui-contract | `substrate-host-contract`: `commands`, `events`, `bin/substrate-messages` | the command and event catalog the UI is generated from | `substrate-host-contract` (interface), `tauri-plugin-substrate` (interface) |
 
 `sync` (`Locked`, `ReadWrite`) belongs to no context; it dissolves into the
 call sites when the crates split.

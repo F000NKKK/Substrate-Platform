@@ -1,7 +1,7 @@
-//! What projects and solutions say to the user (see [`crate::message`]).
+//! What projects and solutions say to the user (see [`substrate_message`]).
 //! A format's own failures are the product's to word.
 
-crate::messages! {
+substrate_message::messages! {
     project {
         NO_FORMAT = "No format this app knows reads {path}.",
         DEPENDENCY_CYCLE = "{project} depends on itself through its build dependencies.",

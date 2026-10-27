@@ -22,7 +22,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
 }
 
 /// The plugin, with the commands of each feature turned on (Substrate's
-/// domains, `substrate_platform::commands`, list the same ones).
+/// domains, `substrate_host_contract::commands`, list the same ones).
 #[must_use]
 pub fn init_with<R: Runtime>(options: Options) -> TauriPlugin<R> {
     Builder::new(NAME)

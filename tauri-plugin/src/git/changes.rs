@@ -3,12 +3,12 @@
 use super::checked;
 use crate::blocking;
 use std::path::Path;
+use substrate_message::Message;
 use substrate_platform::git::WriteLock;
 use substrate_platform::git::diff::{self, DiffSide, DiffTexts};
 use substrate_platform::git::status::{
     self, CommitMode, CommitResult, CommitScope, DiscardItem, RepoStatus,
 };
-use substrate_platform::message::Message;
 use substrate_platform::text_view::TextViews;
 use substrate_platform::workspace::Workspace;
 use tauri::State;

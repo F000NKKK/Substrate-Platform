@@ -2,7 +2,7 @@
 
 use std::path::PathBuf;
 
-/// Why a git operation failed — what the UI says is [`crate::message::Message::from`].
+/// Why a git operation failed — what the UI says is [`substrate_message::Message::from`].
 #[derive(Debug, thiserror::Error)]
 pub enum GitError {
     /// The `git` executable isn't there.

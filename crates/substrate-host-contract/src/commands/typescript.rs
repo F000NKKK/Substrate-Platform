@@ -15,19 +15,29 @@ pub fn names(domains: &[&Domain]) -> Vec<&'static str> {
 /// `{ plugin, command }` (what the UI's `invokeCommand` takes); `doc` is its comment.
 #[must_use]
 pub fn typescript(name: &str, doc: &str, domains: &[&Domain]) -> String {
-    let mut out = format!("/** {doc} */\nexport const {name} = {{\n");
+    let mut out = ["/** ", doc, " */\nexport const ", name, " = {\n"].concat();
     for domain in domains {
-        out.push_str(&format!("  {}: {{\n", domain.key));
+        out.push_str(&["  ", domain.key, ": {\n"].concat());
         for command in domain.commands {
-            out.push_str(&format!(
-                "    {}: {{ plugin: {:?}, command: {:?} }},\n",
-                crate::message::camel(command),
-                domain.plugin,
-                command
-            ));
+            out.push_str(&entry(domain.plugin, command));
         }
         out.push_str("  },\n");
     }
     out.push_str("} as const;\n");
     out
+}
+
+/// One command: `camelName: { plugin, command },`.
+fn entry(plugin: &str, command: &str) -> String {
+    let (plugin, command_name) = (format!("{plugin:?}"), format!("{command:?}"));
+    [
+        "    ",
+        &substrate_message::camel(command),
+        ": { plugin: ",
+        &plugin,
+        ", command: ",
+        &command_name,
+        " },\n",
+    ]
+    .concat()
 }

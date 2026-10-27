@@ -1,6 +1,6 @@
-//! What a search says to the user (see [`crate::message`]).
+//! What a search says to the user (see [`substrate_message`]).
 
-crate::messages! {
+substrate_message::messages! {
     search {
         EMPTY = "The search text is empty.",
         BAD_PATTERN = "Invalid regular expression: {error}",
