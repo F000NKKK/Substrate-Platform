@@ -1,145 +1,54 @@
-//! Find and Replace in Files' tests.
+//! Find and Replace in Files' tests, over scratch projects.
+
+use std::path::{Path, PathBuf};
 
 use super::*;
 
 fn query(pattern: &str) -> SearchQuery {
     SearchQuery {
         pattern: pattern.to_string(),
-        match_case: false,
-        whole_word: false,
-        regex: false,
-        file_mask: String::new(),
-        include_generated: false,
+        ..SearchQuery::default()
     }
 }
 
-fn found<'a>(q: &SearchQuery, text: &'a str) -> Vec<&'a str> {
-    let matcher = Matcher::new(q).unwrap();
-    matcher
-        .find_all(text, usize::MAX)
-        .into_iter()
-        .map(|(s, e)| &text[s..e])
-        .collect()
+/// Finds `query` in the project at `root` (with `documents` open): the
+/// matching files' relative paths and hit counts, and the totals.
+fn find_in(
+    root: &str,
+    query: &SearchQuery,
+    documents: &[OpenDocument],
+    max_lines: usize,
+    keep_going: &dyn Fn() -> bool,
+) -> (Vec<(String, usize)>, FindSummary) {
+    let mut files = Vec::new();
+    let search = Search {
+        root: Some(root),
+        scope: Scope::Project,
+        query,
+        documents,
+        max_lines,
+        layout: &layout(),
+    };
+    let summary = find(&search, keep_going, &mut |f| {
+        files.push((f.relative_path, f.hits.len()));
+    })
+    .unwrap();
+    (files, summary)
 }
 
-#[test]
-fn literal_mode_escapes_and_ignores_case() {
-    assert_eq!(found(&query("a.b"), "a.b axb A.B"), ["a.b", "A.B"]);
-    let q = SearchQuery {
-        match_case: true,
-        ..query("a.b")
-    };
-    assert_eq!(found(&q, "a.b A.B"), ["a.b"]);
+/// `src/other.rs` open with three needles on two lines.
+fn open_other(dir: &Path) -> [OpenDocument; 1] {
+    [OpenDocument {
+        path: dir.join("src/other.rs").to_string_lossy().into_owned(),
+        text: "needle needle\nneedle".to_string(),
+    }]
 }
 
-#[test]
-fn whole_word_checks_neighbours() {
-    let q = SearchQuery {
-        whole_word: true,
-        ..query("foo")
-    };
-    assert_eq!(found(&q, "foo foobar _foo foo_ (foo)").len(), 2);
-    let q = SearchQuery {
-        whole_word: true,
-        ..query("aa")
-    };
-    assert_eq!(found(&q, "aaa aa"), ["aa"]);
-    // Punctuation at the edge needs no word boundary.
-    let q = SearchQuery {
-        whole_word: true,
-        ..query("->")
-    };
-    assert_eq!(found(&q, "a->b"), ["->"]);
-}
-
-#[test]
-fn regex_mode_and_errors() {
-    let q = SearchQuery {
-        regex: true,
-        ..query(r"fn\s+(\w+)")
-    };
-    assert_eq!(
-        found(&q, "fn main() {}\npub fn run()"),
-        ["fn main", "fn run"]
-    );
-    let q = SearchQuery {
-        regex: true,
-        ..query("(")
-    };
-    assert!(Matcher::new(&q).is_err());
-    // Empty matches are skipped rather than looping forever.
-    let q = SearchQuery {
-        regex: true,
-        ..query("x*")
-    };
-    assert_eq!(found(&q, "ab x"), ["x"]);
-}
-
-#[test]
-fn replace_literal_and_with_captures() {
-    let matcher = Matcher::new(&query("$a")).unwrap();
-    assert_eq!(
-        matcher.replace_all("$a + $A", "$1", ReplacementMode::Literal),
-        ("$1 + $1".to_string(), 2)
-    );
-    let q = SearchQuery {
-        regex: true,
-        match_case: true,
-        ..query(r"(\w+)\.unwrap\(\)")
-    };
-    let matcher = Matcher::new(&q).unwrap();
-    assert_eq!(
-        matcher.replace_all("x.unwrap(); y.unwrap()", "$1?", ReplacementMode::Expand),
-        ("x?; y?".to_string(), 2)
-    );
-}
-
-#[test]
-fn hits_group_by_line_with_utf16_columns() {
-    let text = "fn a() {}\n    let é = foo + foo;\r\nfoo";
-    let matcher = Matcher::new(&query("foo")).unwrap();
-    let hits = line_hits(text, &matcher.find_all(text, usize::MAX));
-    assert_eq!(hits.len(), 2);
-    assert_eq!(hits[0].line, 2);
-    assert_eq!(hits[0].column, 13);
-    assert_eq!(hits[0].text, "let é = foo + foo;");
-    assert_eq!(hits[0].ranges, vec![(8, 11), (14, 17)]);
-    assert_eq!(
-        (hits[1].line, hits[1].column, hits[1].text.as_str()),
-        (3, 1, "foo")
-    );
-}
-
-#[test]
-fn long_lines_are_windowed() {
-    let text = format!("{}needle{}", "x".repeat(2000), "y".repeat(2000));
-    let matcher = Matcher::new(&query("needle")).unwrap();
-    let hits = line_hits(&text, &matcher.find_all(&text, usize::MAX));
-    let hit = &hits[0];
-    assert!(hit.text.chars().count() <= MAX_LINE_CHARS + 2);
-    let (s, e) = hit.ranges[0];
-    let shown: Vec<u16> = hit.text.encode_utf16().collect();
-    assert_eq!(
-        String::from_utf16(&shown[s as usize..e as usize]).unwrap(),
-        "needle"
-    );
-    assert_eq!(hit.column, 2001);
-}
-
-#[test]
-fn file_mask_globs() {
-    let mask = FileMask::parse("*.rs; *.toml; !Cargo.toml").unwrap();
-    assert!(mask.matches("src/lib.rs"));
-    assert!(mask.matches("yog.toml"));
-    assert!(!mask.matches("Cargo.toml"));
-    assert!(!mask.matches("README.md"));
-    assert!(FileMask::parse("").unwrap().matches("anything"));
-    assert!(FileMask::parse("*.*").unwrap().matches("Makefile"));
-    assert!(
-        FileMask::parse("src/**/*.rs")
-            .unwrap()
-            .matches("src/a/b.rs")
-    );
+fn rust_files(pattern: &str) -> SearchQuery {
+    SearchQuery {
+        file_mask: "*.rs".to_string(),
+        ..query(pattern)
+    }
 }
 
 /// A product's layout, as the tests use one: its build folder skipped, its
@@ -156,7 +65,9 @@ fn layout() -> Layout {
 
 fn temp_project(name: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!("substrate-search-{name}-{}", std::process::id()));
-    let _ = std::fs::remove_dir_all(&dir);
+    if dir.exists() {
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
     for (path, contents) in [
         ("src/lib.rs", "pub fn needle() {}\n"),
         ("src/other.rs", "// no match\n"),
@@ -212,7 +123,7 @@ fn generated_code_is_searched_only_when_asked() {
             ".build/generated/screens/menu.g.rs"
         ]
     );
-    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::remove_dir_all(&dir).unwrap();
 }
 
 #[test]
@@ -226,12 +137,12 @@ fn project_entries_and_content_matches_skip_what_search_skips() {
     assert_eq!(
         entries,
         [
-            (".gitignore".to_string(), "file"),
-            ("blob.bin".to_string(), "file"),
-            ("notes.md".to_string(), "file"),
-            ("src".to_string(), "dir"),
-            ("src/lib.rs".to_string(), "file"),
-            ("src/other.rs".to_string(), "file"),
+            (".gitignore".to_string(), WalkEntryKind::File),
+            ("blob.bin".to_string(), WalkEntryKind::File),
+            ("notes.md".to_string(), WalkEntryKind::File),
+            ("src".to_string(), WalkEntryKind::Directory),
+            ("src/lib.rs".to_string(), WalkEntryKind::File),
+            ("src/other.rs".to_string(), WalkEntryKind::File),
         ]
     );
     let containing: Vec<_> = files_containing(&dir, &query("needle"), 10, &layout())
@@ -246,55 +157,36 @@ fn project_entries_and_content_matches_skip_what_search_skips() {
             .len(),
         1
     );
-    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::remove_dir_all(&dir).unwrap();
 }
 
 #[test]
 fn project_search_skips_ignored_build_and_binary_files() {
     let dir = temp_project("walk");
-    let root = dir.to_string_lossy().into_owned();
-    let mut files = Vec::new();
-    let summary = find(
-        &Search {
-            root: Some(&root),
-            scope: Scope::Project,
-            query: &query("needle"),
-            documents: &[],
-            max_lines: 100,
-            layout: &layout(),
-        },
-        &|| true,
-        &mut |f| files.push(f.relative_path),
-    )
-    .unwrap();
-    assert_eq!(files, ["notes.md", "src/lib.rs"]);
-    assert_eq!(summary.matching_files, 2);
-    assert_eq!(summary.matching_lines, 2);
-    assert_eq!(summary.files_searched, 4); // .gitignore, notes.md, lib.rs, other.rs
 
-    // An open buffer stands in for its file.
-    let docs = [OpenDocument {
-        path: dir.join("src/other.rs").to_string_lossy().into_owned(),
-        text: "needle needle\nneedle".to_string(),
-    }];
-    let q = SearchQuery {
-        file_mask: "*.rs".to_string(),
-        ..query("needle")
-    };
-    let mut files = Vec::new();
-    let summary = find(
-        &Search {
-            root: Some(&root),
-            scope: Scope::Project,
-            query: &q,
-            documents: &docs,
-            max_lines: 100,
-            layout: &layout(),
-        },
+    let (files, summary) = find_in(&dir.to_string_lossy(), &query("needle"), &[], 100, &|| true);
+
+    assert_eq!(
+        files,
+        [("notes.md".to_string(), 1), ("src/lib.rs".to_string(), 1)]
+    );
+    assert_eq!((summary.matching_files, summary.matching_lines), (2, 2));
+    assert_eq!(summary.files_searched, 4); // .gitignore, notes.md, lib.rs, other.rs
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+fn an_open_buffer_stands_in_for_its_file() {
+    let dir = temp_project("buffer");
+
+    let (files, summary) = find_in(
+        &dir.to_string_lossy(),
+        &rust_files("needle"),
+        &open_other(&dir),
+        100,
         &|| true,
-        &mut |f| files.push((f.relative_path, f.hits.len())),
-    )
-    .unwrap();
+    );
+
     assert_eq!(
         files,
         [
@@ -303,37 +195,100 @@ fn project_search_skips_ignored_build_and_binary_files() {
         ]
     );
     assert_eq!(summary.matching_lines, 3);
+    std::fs::remove_dir_all(dir).unwrap();
+}
 
-    // The cap stops the search.
-    let summary = find(
-        &Search {
-            root: Some(&root),
-            scope: Scope::Project,
-            query: &q,
-            documents: &docs,
-            max_lines: 2,
-            layout: &layout(),
-        },
+#[test]
+fn the_cap_stops_the_search() {
+    let dir = temp_project("cap");
+
+    let (_, summary) = find_in(
+        &dir.to_string_lossy(),
+        &rust_files("needle"),
+        &open_other(&dir),
+        2,
         &|| true,
-        &mut |_| {},
-    )
-    .unwrap();
+    );
+
     assert!(summary.truncated);
     assert_eq!(summary.matching_lines, 2);
-    let summary = find(
-        &Search {
-            root: Some(&root),
-            scope: Scope::Project,
-            query: &q,
-            documents: &docs,
-            max_lines: 2,
-            layout: &layout(),
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+fn a_replaced_search_stops_as_cancelled() {
+    let dir = temp_project("cancel");
+
+    let (files, summary) = find_in(&dir.to_string_lossy(), &query("needle"), &[], 2, &|| false);
+
+    assert!(files.is_empty() && summary.cancelled);
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+fn a_documents_search_reads_only_the_buffers_its_mask_covers() {
+    let documents = [
+        OpenDocument {
+            path: "/p/src/a.rs".to_string(),
+            text: "needle".to_string(),
         },
-        &|| false,
-        &mut |_| {},
-    )
+        OpenDocument {
+            path: "/p/notes.md".to_string(),
+            text: "needle".to_string(),
+        },
+    ];
+    let mut files = Vec::new();
+    let search = Search {
+        root: Some("/p"),
+        scope: Scope::Documents,
+        query: &rust_files("needle"),
+        documents: &documents,
+        max_lines: 10,
+        layout: &Layout::default(),
+    };
+
+    find(&search, &|| true, &mut |f| files.push(f.relative_path)).unwrap();
+
+    assert_eq!(files, ["src/a.rs"]);
+}
+
+#[test]
+fn a_project_search_without_a_root_finds_nothing() {
+    let search = Search {
+        root: None,
+        scope: Scope::Project,
+        query: &query("needle"),
+        documents: &[],
+        max_lines: 10,
+        layout: &Layout::default(),
+    };
+
+    let summary = find(&search, &|| true, &mut |_| {}).unwrap();
+
+    assert_eq!(summary, FindSummary::default());
+}
+
+#[test]
+fn a_file_replace_may_not_write_is_reported() {
+    let dir = temp_project("refused");
+    let request = ReplaceRequest {
+        root: Some(dir.to_string_lossy().into_owned()),
+        scope: Scope::Project,
+        query: rust_files("needle"),
+        replacement: "pin".to_string(),
+        documents: Vec::new(),
+    };
+
+    let summary = replace(&request, &layout(), &|path| {
+        Err(crate::message::Message::verbatim(path.display()))
+    })
     .unwrap();
-    assert!(summary.cancelled);
+
+    assert_eq!((summary.total, summary.errors.len()), (0, 1));
+    assert_eq!(
+        std::fs::read_to_string(dir.join("src/lib.rs")).unwrap(),
+        "pub fn needle() {}\n"
+    );
     std::fs::remove_dir_all(dir).unwrap();
 }
 

@@ -143,31 +143,12 @@ pub(crate) fn stream(out: Output, command: &mut Command, shown: &str) -> Result<
         return Err(Message::new(messages::CANT_START).arg("error", "no output"));
     };
     let (stdout, stderr, status) = std::thread::scope(|scope| {
-        let forward = |reader: Box<dyn Read + Send>| {
-            scope.spawn(move || {
-                let mut lines = Vec::new();
-                for line in BufReader::new(reader).split(b'\n').map_while(Result::ok) {
-                    let line = String::from_utf8_lossy(&line);
-                    let line = line
-                        .trim_end_matches('\r')
-                        .rsplit('\r')
-                        .next()
-                        .unwrap_or("")
-                        .to_string();
-                    if line.is_empty() {
-                        continue;
-                    }
-                    out(Message::verbatim(&line));
-                    lines.push(line);
-                }
-                lines.join("\n")
-            })
-        };
-        let (o, e) = (forward(Box::new(stdout)), forward(Box::new(stderr)));
+        let stdout = scope.spawn(move || forward_lines(stdout, out));
+        let stderr = scope.spawn(move || forward_lines(stderr, out));
         let status = child.wait();
         (
-            o.join().unwrap_or_default(),
-            e.join().unwrap_or_default(),
+            stdout.join().unwrap_or_default(),
+            stderr.join().unwrap_or_default(),
             status,
         )
     });
@@ -182,6 +163,27 @@ pub(crate) fn stream(out: Output, command: &mut Command, shown: &str) -> Result<
         None => Message::new(messages::KILLED).arg("command", shown),
     });
     Err(failure(&stderr, &stdout))
+}
+
+/// Forwards `reader`'s lines to `out` as they come — a progress meter's
+/// `\r` rewrites by their final state, empty lines dropped — and returns
+/// them, for the failure message.
+fn forward_lines(reader: impl Read, out: Output) -> String {
+    let mut lines = Vec::new();
+    for line in BufReader::new(reader).split(b'\n').map_while(Result::ok) {
+        let line = String::from_utf8_lossy(&line);
+        let line = line
+            .trim_end_matches('\r')
+            .rsplit('\r')
+            .next()
+            .unwrap_or("");
+        if line.is_empty() {
+            continue;
+        }
+        out(Message::verbatim(line));
+        lines.push(line.to_string());
+    }
+    lines.join("\n")
 }
 
 /// Streams a `git args` run in `top` to `out` (see [`stream`]).

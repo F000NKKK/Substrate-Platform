@@ -1,18 +1,47 @@
-//! What an IDE asks of a [`Solution`]: its projects and folders by id, the
+//! A solution, and what an IDE asks of it: its projects and folders by id, the
 //! tree they make, which configuration of a project a solution
 //! configuration builds, and the order to build them in.
 
 use std::collections::BTreeSet;
 
-use super::messages;
-use super::model::{Configuration, ConfigurationMapping, ProjectEntry, Solution, SolutionFolder};
+use serde::{Deserialize, Serialize};
+
+use super::{Configuration, ConfigurationMapping, ProjectEntry, Section, SolutionFolder, messages};
 use crate::message::Message;
 
+/// A solution: its projects and how they're built together.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct Solution {
+    /// Its name.
+    pub name: String,
+    /// Its configurations.
+    #[serde(default)]
+    pub configurations: Vec<Configuration>,
+    /// Its solution folders.
+    #[serde(default)]
+    pub folders: Vec<SolutionFolder>,
+    /// Its projects, as it lists them.
+    #[serde(default)]
+    pub projects: Vec<ProjectEntry>,
+    /// The format's header settings, in order (a `.sln`'s format and
+    /// Visual Studio versions).
+    #[serde(default)]
+    pub properties: Vec<(String, String)>,
+    /// What else the format keeps, in order — the model's own parts
+    /// (configurations, nesting) stand where the file had them.
+    #[serde(default)]
+    pub sections: Vec<Section>,
+}
+
 impl Solution {
+    /// The project of `id`.
+    #[must_use]
     pub fn project(&self, id: &str) -> Option<&ProjectEntry> {
         self.projects.iter().find(|p| p.id == id)
     }
 
+    /// The solution folder of `id`.
+    #[must_use]
     pub fn folder(&self, id: &str) -> Option<&SolutionFolder> {
         self.folders.iter().find(|f| f.id == id)
     }
@@ -39,6 +68,7 @@ impl Solution {
 
     /// What `configuration` does with `project`: its own mapping, else the
     /// project's configuration of the same name, built.
+    #[must_use]
     pub fn mapping(
         &self,
         project: &ProjectEntry,
@@ -58,6 +88,10 @@ impl Solution {
     }
 
     /// The projects `configuration` builds, each after its dependencies.
+    ///
+    /// # Errors
+    ///
+    /// A dependency cycle, or a dependency on a project the solution lacks.
     pub fn build_order(
         &self,
         configuration: &Configuration,

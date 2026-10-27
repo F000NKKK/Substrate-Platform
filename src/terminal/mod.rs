@@ -2,11 +2,17 @@
 //! has ([`detect_shells`]) and their output decoded as it streams
 //! ([`Utf8Chunker`]). Feature `terminal`.
 
-mod chunker;
+mod default_shell;
 pub mod messages;
-mod session;
+mod pty_options;
+mod pty_session;
 mod shell;
+mod size;
+mod utf8_chunker;
 
-pub use chunker::Utf8Chunker;
-pub use session::{PtyOptions, PtySession, default_shell};
+pub use default_shell::default_shell;
+pub use pty_options::PtyOptions;
+pub use pty_session::PtySession;
 pub use shell::{Shell, detect_shells};
+pub use size::TerminalSize;
+pub use utf8_chunker::Utf8Chunker;

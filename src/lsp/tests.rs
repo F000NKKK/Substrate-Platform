@@ -1,3 +1,5 @@
+//! Language-server tests: framing, the client, languages and URIs.
+
 use std::io::{BufReader, Cursor, PipeReader, PipeWriter};
 use std::path::Path;
 use std::sync::mpsc;

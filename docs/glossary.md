@@ -84,6 +84,7 @@ renames the other in the same change. Contexts are listed in
 | Term | Meaning | In code |
 |---|---|---|
 | Pty session | A shell running on a real OS pseudo-terminal. | `terminal::PtySession` |
+| Terminal size | A terminal's columns and rows. | `terminal::TerminalSize` |
 | Shell | One installed shell a terminal can start. | `terminal::Shell` |
 | UTF-8 chunker | Turns arbitrarily split bytes into whole characters. | `terminal::Utf8Chunker` |
 

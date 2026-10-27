@@ -9,14 +9,19 @@
 //! asked for a completion is the one that reads it — so a new language is a
 //! line in the product's list, never code here.
 
+mod answer;
+mod capabilities;
 mod client;
+mod connection;
 mod framing;
 mod languages;
 pub mod messages;
+mod notification;
 pub mod uri;
 
-pub use client::{Client, Notification, REQUEST_TIMEOUT};
+pub use client::{Client, REQUEST_TIMEOUT};
 pub use languages::{Language, Languages, ServerDefinition};
+pub use notification::Notification;
 
 #[cfg(test)]
 mod tests;

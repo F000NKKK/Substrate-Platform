@@ -35,8 +35,6 @@ jobs:
           repository: F000NKKK/craftbook
           ref: ${{ env.CRAFTBOOK_REF }}
           path: .craftbook
-          # Needed while Craftbook is private: a fine-grained token that can read it.
-          token: ${{ secrets.CRAFTBOOK_TOKEN }}
       - run: sudo apt-get update && sudo apt-get install -y $TAURI_SYSTEM_LIBS
       - uses: dtolnay/rust-toolchain@1.99
         with:

@@ -1,7 +1,7 @@
 //! History: a branch's commits, and the files a commit changed.
 
 use super::run::{absolute, git, has_head, require_repo, run};
-use super::status::{ChangeKind, FileChange, change};
+use super::status::{ChangeKind, FileChange};
 use crate::message::Message;
 use serde::Serialize;
 use std::path::Path;
@@ -75,9 +75,9 @@ fn parse_name_status(raw: &str) -> Vec<FileChange> {
         let Some(first) = fields.next() else { break };
         if matches!(kind, ChangeKind::Renamed | ChangeKind::Copied) {
             let Some(second) = fields.next() else { break };
-            files.push(change(second, Some(first), kind));
+            files.push(FileChange::new(second, Some(first), kind));
         } else {
-            files.push(change(first, None, kind));
+            files.push(FileChange::new(first, None, kind));
         }
     }
     files
@@ -119,10 +119,10 @@ mod tests {
         assert_eq!(
             parse_name_status(raw),
             [
-                change("src/a.rs", None, ChangeKind::Modified),
-                change("new.rs", Some("old.rs"), ChangeKind::Renamed),
-                change("added file.txt", None, ChangeKind::Added),
-                change("gone.rs", None, ChangeKind::Deleted),
+                FileChange::new("src/a.rs", None, ChangeKind::Modified),
+                FileChange::new("new.rs", Some("old.rs"), ChangeKind::Renamed),
+                FileChange::new("added file.txt", None, ChangeKind::Added),
+                FileChange::new("gone.rs", None, ChangeKind::Deleted),
             ]
         );
     }
