@@ -16,12 +16,12 @@ use super::{SpawnRequest, Terminals};
 
 /// The shells installed here, for "New Terminal".
 #[tauri::command]
-pub fn terminal_shells() -> Vec<Shell> {
+pub(crate) fn terminal_shells() -> Vec<Shell> {
     detect_shells()
 }
 
 #[tauri::command]
-pub fn terminal_spawn<R: Runtime>(
+pub(crate) fn terminal_spawn<R: Runtime>(
     app: AppHandle<R>,
     terminals: State<'_, Terminals>,
     workspace: State<'_, Workspace>,
@@ -76,7 +76,7 @@ pub fn terminal_spawn<R: Runtime>(
 }
 
 #[tauri::command]
-pub fn terminal_write(
+pub(crate) fn terminal_write(
     terminals: State<'_, Terminals>,
     id: String,
     data: String,
@@ -90,7 +90,7 @@ pub fn terminal_write(
 }
 
 #[tauri::command]
-pub fn terminal_resize(
+pub(crate) fn terminal_resize(
     terminals: State<'_, Terminals>,
     id: String,
     cols: u16,
@@ -105,7 +105,7 @@ pub fn terminal_resize(
 }
 
 #[tauri::command]
-pub fn terminal_kill(terminals: State<'_, Terminals>, id: String) {
+pub(crate) fn terminal_kill(terminals: State<'_, Terminals>, id: String) {
     if let Some(mut session) = terminals.sessions().remove(&id) {
         session.kill().ok();
     }

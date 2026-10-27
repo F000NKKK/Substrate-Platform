@@ -13,7 +13,7 @@ use crate::blocking;
 
 /// Fetch / Pull / Push / Sync, streamed.
 #[tauri::command]
-pub async fn git_remote<R: Runtime>(
+pub(crate) async fn git_remote<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
     lock: State<'_, WriteLock>,
@@ -31,7 +31,7 @@ pub async fn git_remote<R: Runtime>(
     clippy::too_many_arguments,
     reason = "Tauri injects state as separate parameters; the UI sends the rest"
 )]
-pub async fn git_integrate<R: Runtime>(
+pub(crate) async fn git_integrate<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
     lock: State<'_, WriteLock>,
@@ -47,7 +47,7 @@ pub async fn git_integrate<R: Runtime>(
 /// Continues (`go_on`, the UI's flag) or aborts the
 /// merge/rebase/cherry-pick/revert in progress, streamed.
 #[tauri::command]
-pub async fn git_operation<R: Runtime>(
+pub(crate) async fn git_operation<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
     lock: State<'_, WriteLock>,
@@ -68,7 +68,7 @@ pub async fn git_operation<R: Runtime>(
 /// dialog, so it joins the workspace the way Open Folder's does. The new
 /// working tree's path, to open.
 #[tauri::command]
-pub async fn git_clone<R: Runtime>(
+pub(crate) async fn git_clone<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
     url: String,
@@ -81,7 +81,7 @@ pub async fn git_clone<R: Runtime>(
 
 /// Create Git Repository in the project folder.
 #[tauri::command]
-pub async fn git_init<R: Runtime>(
+pub(crate) async fn git_init<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
     root: String,

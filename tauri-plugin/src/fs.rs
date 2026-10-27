@@ -18,11 +18,11 @@ use tauri::{AppHandle, Emitter, Runtime, State};
 
 /// The watcher behind `fs_watch`, made on first use.
 #[derive(Default)]
-pub struct Watcher(OnceLock<DirectoryWatcher>);
+pub(crate) struct Watcher(OnceLock<DirectoryWatcher>);
 
 /// A folder's entry, as the UI's file tree takes it.
 #[derive(Serialize)]
-pub struct Entry {
+pub(crate) struct Entry {
     name: String,
     path: String,
     kind: EntryKind,
@@ -46,26 +46,32 @@ fn inside(workspace: &Workspace, path: &str) -> Result<PathBuf, Message> {
 }
 
 #[tauri::command]
-pub fn dir_list(workspace: State<'_, Workspace>, path: String) -> Result<Vec<Entry>, Message> {
+pub(crate) fn dir_list(
+    workspace: State<'_, Workspace>,
+    path: String,
+) -> Result<Vec<Entry>, Message> {
     let path = inside(&workspace, &path)?;
     let all = dir::list(&path).map_err(|e| FsError::io(&path, e))?;
     Ok(all.into_iter().map(Entry::from).collect())
 }
 
 #[tauri::command]
-pub fn dir_create_file(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
+pub(crate) fn dir_create_file(
+    workspace: State<'_, Workspace>,
+    path: String,
+) -> Result<(), Message> {
     let path = inside(&workspace, &path)?;
     Ok(dir::create_file(&path).map_err(|e| FsError::io(&path, e))?)
 }
 
 #[tauri::command]
-pub fn dir_create_dir(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
+pub(crate) fn dir_create_dir(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
     let path = inside(&workspace, &path)?;
     Ok(dir::create(&path).map_err(|e| FsError::io(&path, e))?)
 }
 
 #[tauri::command]
-pub fn dir_rename(
+pub(crate) fn dir_rename(
     workspace: State<'_, Workspace>,
     from: String,
     to: String,
@@ -75,7 +81,7 @@ pub fn dir_rename(
 }
 
 #[tauri::command]
-pub fn dir_remove(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
+pub(crate) fn dir_remove(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
     let path = inside(&workspace, &path)?;
     Ok(dir::remove(&path).map_err(|e| FsError::io(&path, e))?)
 }
@@ -83,18 +89,22 @@ pub fn dir_remove(workspace: State<'_, Workspace>, path: String) -> Result<(), M
 /// Copies a file or a folder to `to`, which mustn't exist: the source may be
 /// anywhere, the destination must be in the workspace.
 #[tauri::command]
-pub fn dir_copy(workspace: State<'_, Workspace>, from: String, to: String) -> Result<(), Message> {
+pub(crate) fn dir_copy(
+    workspace: State<'_, Workspace>,
+    from: String,
+    to: String,
+) -> Result<(), Message> {
     let to = inside(&workspace, &to)?;
     Ok(copy_new(Path::new(&from), &to)?)
 }
 
 #[tauri::command]
-pub fn file_read(path: String) -> Result<String, Message> {
+pub(crate) fn file_read(path: String) -> Result<String, Message> {
     Ok(read_text(Path::new(&path))?)
 }
 
 #[tauri::command]
-pub fn file_write(
+pub(crate) fn file_write(
     workspace: State<'_, Workspace>,
     path: String,
     contents: String,
@@ -105,7 +115,7 @@ pub fn file_write(
 
 /// A folder or file the user picked (a native dialog) joins the workspace.
 #[tauri::command]
-pub fn allow_path(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
+pub(crate) fn allow_path(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
     workspace.allow(Path::new(&path))?;
     Ok(())
 }
@@ -113,7 +123,7 @@ pub fn allow_path(workspace: State<'_, Workspace>, path: String) -> Result<(), M
 /// Watches exactly `folders` for changes made outside the IDE; each burst
 /// comes back as one [`events::FILES_CHANGED`], spelled like `folders`.
 #[tauri::command]
-pub fn fs_watch<R: Runtime>(
+pub(crate) fn fs_watch<R: Runtime>(
     app: AppHandle<R>,
     watcher: State<'_, Watcher>,
     folders: Vec<String>,

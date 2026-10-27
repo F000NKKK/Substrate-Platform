@@ -19,7 +19,7 @@ use crate::blocking;
 
 /// The product's adapters.
 #[tauri::command]
-pub fn dap_adapters(adapters: State<'_, Adapters>) -> Vec<AdapterEntry> {
+pub(crate) fn dap_adapters(adapters: State<'_, Adapters>) -> Vec<AdapterEntry> {
     adapters.all().iter().map(AdapterEntry::from).collect()
 }
 
@@ -31,7 +31,7 @@ pub fn dap_adapters(adapters: State<'_, Adapters>) -> Vec<AdapterEntry> {
     clippy::too_many_arguments,
     reason = "Tauri command: the parameters are the UI's arguments and injected state"
 )]
-pub async fn dap_start<R: Runtime>(
+pub(crate) async fn dap_start<R: Runtime>(
     app: AppHandle<R>,
     workspace: State<'_, Workspace>,
     adapters: State<'_, Adapters>,
@@ -107,7 +107,7 @@ fn launch<R: Runtime>(
 /// `command` with `arguments` to the adapter: its body. A `launch` starts
 /// from the adapter's `launch_defaults`.
 #[tauri::command]
-pub async fn dap_request(
+pub(crate) async fn dap_request(
     sessions: State<'_, Sessions>,
     root: String,
     adapter: AdapterId,
@@ -127,7 +127,7 @@ pub async fn dap_request(
 
 /// Stops `adapter`'s session for `root`, if it runs.
 #[tauri::command]
-pub async fn dap_stop(
+pub(crate) async fn dap_stop(
     sessions: State<'_, Sessions>,
     root: String,
     adapter: AdapterId,

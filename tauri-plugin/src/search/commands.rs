@@ -37,7 +37,7 @@ fn check_root(workspace: &Workspace, root: Option<&str>, scope: Scope) -> Result
 /// Find All: streams matching files over `on_batch` and resolves with the
 /// totals once done or cancelled.
 #[tauri::command]
-pub async fn find_in_files(
+pub(crate) async fn find_in_files(
     workspace: State<'_, Workspace>,
     searches: State<'_, Searches>,
     layout: State<'_, Layout>,
@@ -87,14 +87,14 @@ pub async fn find_in_files(
 
 /// Stops whatever search is running.
 #[tauri::command]
-pub fn find_cancel(searches: State<'_, Searches>) {
+pub(crate) fn find_cancel(searches: State<'_, Searches>) {
     searches.current.store(0, Ordering::SeqCst);
 }
 
 /// Replace All over what a search would cover: open documents' new text
 /// comes back for the UI to put in their buffers, other files are rewritten.
 #[tauri::command]
-pub async fn replace_in_files(
+pub(crate) async fn replace_in_files(
     workspace: State<'_, Workspace>,
     layout: State<'_, Layout>,
     views: State<'_, TextViews>,
@@ -115,7 +115,7 @@ pub async fn replace_in_files(
 /// A file explorer's search and filters: the project's files and folders,
 /// the ones a lazily listed tree hasn't opened too.
 #[tauri::command]
-pub async fn project_items(
+pub(crate) async fn project_items(
     workspace: State<'_, Workspace>,
     layout: State<'_, Layout>,
     root: String,
@@ -129,7 +129,7 @@ pub async fn project_items(
 /// Separate from `find_in_files`, so typing in an explorer never cancels a
 /// Find in Files still running.
 #[tauri::command]
-pub async fn project_files_containing(
+pub(crate) async fn project_files_containing(
     workspace: State<'_, Workspace>,
     layout: State<'_, Layout>,
     views: State<'_, TextViews>,

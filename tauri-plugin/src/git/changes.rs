@@ -18,7 +18,7 @@ use crate::blocking;
 /// The repository's state for Git Changes and the status bar — `None` when
 /// `root` isn't in a repository.
 #[tauri::command]
-pub async fn git_status(
+pub(crate) async fn git_status(
     workspace: State<'_, Workspace>,
     root: String,
 ) -> Result<Option<RepoStatus>, Message> {
@@ -27,7 +27,7 @@ pub async fn git_status(
 }
 
 #[tauri::command]
-pub async fn git_stage(
+pub(crate) async fn git_stage(
     workspace: State<'_, Workspace>,
     lock: State<'_, WriteLock>,
     root: String,
@@ -39,7 +39,7 @@ pub async fn git_stage(
 }
 
 #[tauri::command]
-pub async fn git_unstage(
+pub(crate) async fn git_unstage(
     workspace: State<'_, Workspace>,
     lock: State<'_, WriteLock>,
     root: String,
@@ -51,7 +51,7 @@ pub async fn git_unstage(
 }
 
 #[tauri::command]
-pub async fn git_discard(
+pub(crate) async fn git_discard(
     workspace: State<'_, Workspace>,
     lock: State<'_, WriteLock>,
     root: String,
@@ -69,7 +69,7 @@ pub async fn git_discard(
     clippy::too_many_arguments,
     reason = "Tauri injects state as separate parameters; the UI sends the rest"
 )]
-pub async fn git_commit(
+pub(crate) async fn git_commit(
     workspace: State<'_, Workspace>,
     lock: State<'_, WriteLock>,
     root: String,
@@ -93,7 +93,7 @@ pub async fn git_commit(
 }
 
 #[tauri::command]
-pub async fn git_last_message(
+pub(crate) async fn git_last_message(
     workspace: State<'_, Workspace>,
     root: String,
 ) -> Result<String, Message> {
@@ -102,7 +102,7 @@ pub async fn git_last_message(
 }
 
 #[tauri::command]
-pub async fn git_diff_texts(
+pub(crate) async fn git_diff_texts(
     workspace: State<'_, Workspace>,
     views: State<'_, TextViews>,
     root: String,
@@ -115,7 +115,7 @@ pub async fn git_diff_texts(
 }
 
 #[tauri::command]
-pub async fn git_head_text(
+pub(crate) async fn git_head_text(
     workspace: State<'_, Workspace>,
     views: State<'_, TextViews>,
     root: String,

@@ -39,7 +39,7 @@ fn app_state_file<R: Runtime>(app: &AppHandle<R>) -> Result<PathBuf, Message> {
 
 /// The project's remembered state (open files, layout, expanded folders…).
 #[tauri::command]
-pub fn workspace_load(
+pub(crate) fn workspace_load(
     workspace: State<'_, Workspace>,
     options: State<'_, StateOptions>,
     project_root: String,
@@ -50,7 +50,7 @@ pub fn workspace_load(
 }
 
 #[tauri::command]
-pub fn workspace_save(
+pub(crate) fn workspace_save(
     workspace: State<'_, Workspace>,
     options: State<'_, StateOptions>,
     project_root: String,
@@ -64,11 +64,11 @@ pub fn workspace_save(
 /// What isn't tied to a project (recent projects, the last one opened, the
 /// layout with none open).
 #[tauri::command]
-pub fn app_state_load<R: Runtime>(app: AppHandle<R>) -> Result<Value, Message> {
+pub(crate) fn app_state_load<R: Runtime>(app: AppHandle<R>) -> Result<Value, Message> {
     Ok(read_json(&app_state_file(&app)?))
 }
 
 #[tauri::command]
-pub fn app_state_save<R: Runtime>(app: AppHandle<R>, value: Value) -> Result<(), Message> {
+pub(crate) fn app_state_save<R: Runtime>(app: AppHandle<R>, value: Value) -> Result<(), Message> {
     Ok(write_json(&app_state_file(&app)?, &value)?)
 }

@@ -6,7 +6,7 @@ use substrate_platform::search::{OpenDocument, Scope, SearchQuery};
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 /// What to find, as the UI sends it.
-pub struct FindRequest {
+pub(crate) struct FindRequest {
     /// This search's id: a newer one replaces it.
     pub(super) search_id: u64,
     /// The project root — required for `Project` scope, used for relative paths otherwise.

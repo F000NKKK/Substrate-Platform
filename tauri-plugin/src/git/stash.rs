@@ -11,7 +11,7 @@ use super::checked;
 use crate::blocking;
 
 #[tauri::command]
-pub async fn git_stash_list(
+pub(crate) async fn git_stash_list(
     workspace: State<'_, Workspace>,
     root: String,
 ) -> Result<Vec<StashEntry>, Message> {
@@ -20,7 +20,7 @@ pub async fn git_stash_list(
 }
 
 #[tauri::command]
-pub async fn git_stash_push(
+pub(crate) async fn git_stash_push(
     workspace: State<'_, Workspace>,
     lock: State<'_, WriteLock>,
     root: String,
@@ -33,7 +33,7 @@ pub async fn git_stash_push(
 }
 
 #[tauri::command]
-pub async fn git_stash_op(
+pub(crate) async fn git_stash_op(
     workspace: State<'_, Workspace>,
     lock: State<'_, WriteLock>,
     root: String,
@@ -46,11 +46,11 @@ pub async fn git_stash_op(
 }
 
 #[tauri::command]
-pub async fn git_config_get() -> Result<GlobalConfig, Message> {
+pub(crate) async fn git_config_get() -> Result<GlobalConfig, Message> {
     blocking(|| Ok::<_, Message>(config::get())).await
 }
 
 #[tauri::command]
-pub async fn git_config_set(key: String, value: String) -> Result<(), Message> {
+pub(crate) async fn git_config_set(key: String, value: String) -> Result<(), Message> {
     blocking(move || config::set(&key, &value)).await
 }

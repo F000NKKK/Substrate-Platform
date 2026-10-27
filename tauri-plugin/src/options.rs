@@ -1,7 +1,7 @@
 //! What a product tells the plugin about itself.
 
 /// What a product tells the plugin about itself.
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Options {
     /// What a search keeps out of the walk, and where generated code lives.
     #[cfg(feature = "search")]

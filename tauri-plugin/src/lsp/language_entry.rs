@@ -6,7 +6,7 @@ use serde::Serialize;
 /// server serves it.
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct LanguageEntry {
+pub(crate) struct LanguageEntry {
     /// Its id.
     pub(super) id: String,
     /// Its file extensions.

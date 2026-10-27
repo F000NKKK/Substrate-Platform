@@ -11,20 +11,20 @@ use tauri::State;
 
 /// Opens a web or mail link.
 #[tauri::command]
-pub fn open_url(url: String) -> Result<(), Message> {
+pub(crate) fn open_url(url: String) -> Result<(), Message> {
     Ok(process::open_link(&url)?)
 }
 
 /// Opens a file or folder of the workspace.
 #[tauri::command]
-pub fn open_path(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
+pub(crate) fn open_path(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
     workspace.check(Path::new(&path))?;
     Ok(process::open_path(Path::new(&path))?)
 }
 
 /// Shows a file or folder of the workspace in the file manager.
 #[tauri::command]
-pub fn reveal_path(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
+pub(crate) fn reveal_path(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
     workspace.check(Path::new(&path))?;
     Ok(process::reveal(Path::new(&path))?)
 }
