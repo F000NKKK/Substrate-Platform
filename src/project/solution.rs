@@ -1,18 +1,48 @@
-//! What an IDE asks of a [`Solution`]: its projects and folders by id, the
+//! A solution, and what an IDE asks of it: its projects and folders by id, the
 //! tree they make, which configuration of a project a solution
 //! configuration builds, and the order to build them in.
 
 use std::collections::BTreeSet;
 
-use super::messages;
-use super::model::{Configuration, ConfigurationMapping, ProjectEntry, Solution, SolutionFolder};
-use crate::message::Message;
+use serde::{Deserialize, Serialize};
+
+use super::{
+    Configuration, ConfigurationMapping, ProjectEntry, ProjectError, Section, SolutionFolder,
+};
+
+/// A solution: its projects and how they're built together.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct Solution {
+    /// Its name.
+    pub name: String,
+    /// Its configurations.
+    #[serde(default)]
+    pub configurations: Vec<Configuration>,
+    /// Its solution folders.
+    #[serde(default)]
+    pub folders: Vec<SolutionFolder>,
+    /// Its projects, as it lists them.
+    #[serde(default)]
+    pub projects: Vec<ProjectEntry>,
+    /// The format's header settings, in order (a `.sln`'s format and
+    /// Visual Studio versions).
+    #[serde(default)]
+    pub properties: Vec<(String, String)>,
+    /// What else the format keeps, in order — the model's own parts
+    /// (configurations, nesting) stand where the file had them.
+    #[serde(default)]
+    pub sections: Vec<Section>,
+}
 
 impl Solution {
+    /// The project of `id`.
+    #[must_use]
     pub fn project(&self, id: &str) -> Option<&ProjectEntry> {
         self.projects.iter().find(|p| p.id == id)
     }
 
+    /// The solution folder of `id`.
+    #[must_use]
     pub fn folder(&self, id: &str) -> Option<&SolutionFolder> {
         self.folders.iter().find(|f| f.id == id)
     }
@@ -39,6 +69,7 @@ impl Solution {
 
     /// What `configuration` does with `project`: its own mapping, else the
     /// project's configuration of the same name, built.
+    #[must_use]
     pub fn mapping(
         &self,
         project: &ProjectEntry,
@@ -58,10 +89,14 @@ impl Solution {
     }
 
     /// The projects `configuration` builds, each after its dependencies.
+    ///
+    /// # Errors
+    ///
+    /// A dependency cycle, or a dependency on a project the solution lacks.
     pub fn build_order(
         &self,
         configuration: &Configuration,
-    ) -> Result<Vec<&ProjectEntry>, Message> {
+    ) -> Result<Vec<&ProjectEntry>, ProjectError> {
         let mut order = Vec::new();
         let (mut done, mut visiting) = (BTreeSet::new(), BTreeSet::new());
         for project in &self.projects {
@@ -78,18 +113,21 @@ impl Solution {
         done: &mut BTreeSet<&'s str>,
         visiting: &mut BTreeSet<&'s str>,
         order: &mut Vec<&'s ProjectEntry>,
-    ) -> Result<(), Message> {
+    ) -> Result<(), ProjectError> {
         if done.contains(project.id.as_str()) {
             return Ok(());
         }
         if !visiting.insert(project.id.as_str()) {
-            return Err(Message::new(messages::DEPENDENCY_CYCLE).arg("project", &project.name));
+            return Err(ProjectError::DependencyCycle {
+                project: project.name.clone(),
+            });
         }
         for dependency in &project.dependencies {
             let Some(next) = self.project(dependency) else {
-                return Err(Message::new(messages::UNKNOWN_DEPENDENCY)
-                    .arg("project", &project.name)
-                    .arg("dependency", dependency));
+                return Err(ProjectError::UnknownDependency {
+                    project: project.name.clone(),
+                    dependency: dependency.clone(),
+                });
             };
             self.visit(next, done, visiting, order)?;
         }
@@ -145,9 +183,11 @@ mod tests {
             projects: vec![project("a", &["b"]), project("b", &["a"])],
             ..Default::default()
         };
+        let error = solution.build_order(&debug()).unwrap_err();
+        assert!(matches!(error, ProjectError::DependencyCycle { .. }));
         assert_eq!(
-            solution.build_order(&debug()).unwrap_err().text,
-            messages::DEPENDENCY_CYCLE
+            crate::message::Message::from(error).text,
+            crate::project::messages::DEPENDENCY_CYCLE
         );
     }
 

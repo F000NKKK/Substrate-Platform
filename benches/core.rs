@@ -5,7 +5,7 @@
 use std::hint::black_box;
 
 use criterion::{BatchSize, Criterion, criterion_group, criterion_main};
-use substrate_platform::fs::dir::list_dir;
+use substrate_platform::fs::dir::list;
 use substrate_platform::run::{Level, LogSink};
 use substrate_platform::terminal::Utf8Chunker;
 
@@ -25,7 +25,7 @@ const STDERR_LINES: &[&str] = &[
 fn pty_output(c: &mut Criterion) {
     // Terminal output as it comes off a pty: mostly ASCII with ANSI escapes
     // and some multi-byte text, split at arbitrary 4 KiB read boundaries.
-    let line = "\x1b[32m✓\x1b[0m test dir::tests::list_dir — ok (世界) 🦀\r\n";
+    let line = "\x1b[32m✓\x1b[0m test dir::tests::list — ok (世界) 🦀\r\n";
     let stream = line.repeat(64 * 1024 / line.len()).into_bytes();
     let mut group = c.benchmark_group("utf8_chunker");
     group.bench_function("4k_reads", |b| {
@@ -85,7 +85,7 @@ fn log_sink(c: &mut Criterion) {
 
 fn directory_listing(c: &mut Criterion) {
     let dir = std::env::temp_dir().join(format!("substrate-bench-dir-{}", std::process::id()));
-    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::remove_dir_all(&dir).ok();
     std::fs::create_dir_all(&dir).unwrap();
     for i in 0..2_000 {
         if i % 10 == 0 {
@@ -94,8 +94,8 @@ fn directory_listing(c: &mut Criterion) {
             std::fs::File::create(dir.join(format!("Source_File_{i:04}.rs"))).unwrap();
         }
     }
-    c.bench_function("list_dir/2000_entries", |b| {
-        b.iter(|| list_dir(black_box(&dir)).unwrap().len())
+    c.bench_function("list/2000_entries", |b| {
+        b.iter(|| list(black_box(&dir)).unwrap().len())
     });
     std::fs::remove_dir_all(&dir).unwrap();
 }

@@ -16,15 +16,26 @@
 //! project a folder holds is told by marker files ([`ProjectStandard`]).
 //! Feature `project`.
 
+mod entry;
+mod error;
+mod error_message;
 mod format;
+mod item;
 pub mod messages;
 mod model;
+mod reference;
+mod settings;
 mod solution;
+mod solution_folder;
 mod standard;
 
+pub use entry::ProjectEntry;
+pub use error::ProjectError;
 pub use format::{Formats, ProjectFormat, SolutionFormat};
-pub use model::{
-    Configuration, ConfigurationMapping, ConfiguredProperties, Item, Project, ProjectEntry,
-    Reference, Section, Solution, SolutionFolder,
-};
+pub use item::Item;
+pub use model::Project;
+pub use reference::Reference;
+pub use settings::{Configuration, ConfigurationMapping, ConfiguredProperties, Section};
+pub use solution::Solution;
+pub use solution_folder::SolutionFolder;
 pub use standard::ProjectStandard;

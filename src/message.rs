@@ -3,7 +3,7 @@
 //! Everything Substrate says to a user is one of these, so the UI shows it
 //! in the user's language by default (`errorText` / `t(text, args)`).
 //!
-//! The templates are declared once, in their module's [`messages!`] block;
+//! The templates are declared once, in their module's [`messages!`](crate::messages) block;
 //! the UI gets them generated (`substrate-messages` writes
 //! `ui/src/infra/host/host.generated.ts`), never retyped.
 
@@ -144,8 +144,8 @@ mod tests {
 
     #[test]
     fn fills_placeholders_for_display() {
-        let m = Message::new("{path} already exists").arg("path", "/a");
-        assert_eq!(m.to_string(), "/a already exists");
+        let message = Message::new("{path} already exists").arg("path", "/a");
+        assert_eq!(message.to_string(), "/a already exists");
         assert_eq!(Message::verbatim("raw").to_string(), "raw");
     }
 

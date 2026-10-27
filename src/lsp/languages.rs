@@ -24,12 +24,11 @@ use std::path::Path;
 use serde::Deserialize;
 use serde_json::Value;
 
-use super::messages;
-use crate::message::Message;
+use super::LspError;
 
 /// How a language server is started.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
-pub struct ServerDef {
+pub struct ServerDefinition {
     pub command: String,
     #[serde(default)]
     pub args: Vec<String>,
@@ -40,7 +39,7 @@ pub struct ServerDef {
     pub initialization_options: Option<toml::Table>,
 }
 
-impl ServerDef {
+impl ServerDefinition {
     /// The server's name for the user: its program.
     pub fn name(&self) -> &str {
         Path::new(&self.command)
@@ -49,7 +48,7 @@ impl ServerDef {
             .unwrap_or(&self.command)
     }
 
-    /// The options as JSON, for [`super::LspClient::initialize`].
+    /// The options as JSON, for [`super::Client::initialize`].
     pub fn initialization_options(&self) -> Option<Value> {
         self.initialization_options
             .as_ref()
@@ -65,7 +64,7 @@ pub struct Language {
     pub extensions: Vec<String>,
     /// Whole file names (`Dockerfile`, `Cargo.lock`), compared exactly.
     pub file_names: Vec<String>,
-    pub server: Option<ServerDef>,
+    pub server: Option<ServerDefinition>,
 }
 
 impl Language {
@@ -93,7 +92,7 @@ struct LanguageEntry {
     extensions: Vec<String>,
     #[serde(default)]
     file_names: Vec<String>,
-    server: Option<ServerDef>,
+    server: Option<ServerDefinition>,
 }
 
 /// A product's languages, in its list's order of ids.
@@ -103,9 +102,13 @@ pub struct Languages {
 }
 
 impl Languages {
-    pub fn parse(text: &str) -> Result<Self, Message> {
-        let file: LanguageFile = toml::from_str(text)
-            .map_err(|e| Message::new(messages::INVALID_LIST).arg("error", e.message()))?;
+    /// Parses the list of languages from TOML.
+    ///
+    /// # Errors
+    ///
+    /// The server has stopped, does not answer in time, or refuses.
+    pub fn parse(text: &str) -> Result<Self, LspError> {
+        let file: LanguageFile = toml::from_str(text).map_err(LspError::InvalidList)?;
         let languages = file
             .language
             .into_iter()

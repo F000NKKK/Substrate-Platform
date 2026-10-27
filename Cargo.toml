@@ -2,6 +2,48 @@
 [workspace]
 members = ["tauri-plugin"]
 
+# Craftbook's lint set (templates/workspace-lints.toml). Wave 0 of the
+# migration (craftbook adoption/substrate-platform.md §4) turns every `deny`
+# into `warn`, so the build stays green while the backlog is worked off;
+# wave 11 turns them back to `deny`.
+[workspace.lints.rust]
+missing_docs = "warn"
+missing_debug_implementations = "warn"
+unsafe_code = "warn"
+unreachable_pub = "warn"
+unused_qualifications = "warn"
+elided_lifetimes_in_paths = "warn"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+too_many_lines = "warn"
+too_many_arguments = "warn"
+excessive_nesting = "warn"
+cognitive_complexity = "warn"
+fn_params_excessive_bools = "warn"
+struct_excessive_bools = "warn"
+module_name_repetitions = "warn"
+unwrap_used = "warn"
+panic = "warn"
+todo = "warn"
+unreachable = "warn"
+unimplemented = "warn"
+dbg_macro = "warn"
+print_stdout = "warn"
+print_stderr = "warn"
+allow_attributes = "warn"
+allow_attributes_without_reason = "warn"
+undocumented_unsafe_blocks = "warn"
+wildcard_imports = "warn"
+let_underscore_must_use = "warn"
+let_underscore_untyped = "warn"
+missing_errors_doc = "warn"
+missing_panics_doc = "warn"
+mod_module_files = "allow"
+self_named_module_files = "warn"
+large_types_passed_by_value = "warn"
+shadow_unrelated = "warn"
+
 [package]
 name = "substrate-platform"
 version = "0.4.0"
@@ -21,11 +63,14 @@ git = []
 # language list from TOML.
 lsp = ["run", "dep:serde_json"]
 project = []
-run = ["dep:anyhow", "dep:toml", "dep:libc"]
+run = ["dep:toml", "dep:libc"]
 search = ["dep:globset", "dep:ignore", "dep:regex"]
 state = ["dep:serde_json"]
 terminal = ["dep:anyhow", "dep:portable-pty"]
 full = ["fs", "git", "lsp", "project", "run", "search", "state", "terminal"]
+
+[lints]
+workspace = true
 
 [dependencies]
 anyhow = { version = "1", optional = true }
@@ -36,6 +81,7 @@ notify = { version = "8", optional = true }
 portable-pty = { version = "0.9", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", optional = true }
+thiserror = "2"
 toml = { version = "1", optional = true }
 
 # `kill(-pgid, ...)` — cancelling a task kills its whole process group (see

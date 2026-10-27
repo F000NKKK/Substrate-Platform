@@ -1,14 +1,14 @@
 //! History: a branch's commits, and the files a commit changed.
 
+use super::GitError;
 use super::run::{absolute, git, has_head, require_repo, run};
-use super::status::{ChangeKind, FileChange, change};
-use crate::message::Message;
+use super::status::{ChangeKind, FileChange};
 use serde::Serialize;
 use std::path::Path;
 
 #[derive(Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct CommitInfo {
+pub struct Commit {
     pub hash: String,
     pub short_hash: String,
     pub parents: Vec<String>,
@@ -23,14 +23,14 @@ pub struct CommitInfo {
 
 const LOG_FORMAT: &str = "--format=%H%x1f%h%x1f%P%x1f%an%x1f%ae%x1f%at%x1f%D%x1f%s%x1e";
 
-fn parse_log(raw: &str) -> Vec<CommitInfo> {
+fn parse_log(raw: &str) -> Vec<Commit> {
     raw.split('\x1e')
         .filter_map(|record| {
             let fields: Vec<&str> = record.trim_start_matches('\n').split('\x1f').collect();
             let [hash, short, parents, author, email, date, refs, subject] = fields[..] else {
                 return None;
             };
-            Some(CommitInfo {
+            Some(Commit {
                 hash: hash.to_string(),
                 short_hash: short.to_string(),
                 parents: parents.split_whitespace().map(str::to_string).collect(),
@@ -49,7 +49,11 @@ fn parse_log(raw: &str) -> Vec<CommitInfo> {
 }
 
 /// A page of `rev`'s history (HEAD when empty), newest first.
-pub fn log(root: &Path, rev: &str, skip: u32, max: u32) -> Result<Vec<CommitInfo>, Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn log(root: &Path, rev: &str, skip: u32, max: u32) -> Result<Vec<Commit>, GitError> {
     let top = require_repo(root)?;
     if rev.is_empty() && !has_head(&top) {
         return Ok(Vec::new());
@@ -75,16 +79,20 @@ fn parse_name_status(raw: &str) -> Vec<FileChange> {
         let Some(first) = fields.next() else { break };
         if matches!(kind, ChangeKind::Renamed | ChangeKind::Copied) {
             let Some(second) = fields.next() else { break };
-            files.push(change(second, Some(first), kind));
+            files.push(FileChange::new(second, Some(first), kind));
         } else {
-            files.push(change(first, None, kind));
+            files.push(FileChange::new(first, None, kind));
         }
     }
     files
 }
 
 /// The files a commit changed, compared with its first parent.
-pub fn commit_files(root: &Path, hash: &str) -> Result<Vec<FileChange>, Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn commit_files(root: &Path, hash: &str) -> Result<Vec<FileChange>, GitError> {
     let top = require_repo(root)?;
     let parents = run(git(&top).args(["rev-list", "--parents", "-n", "1", hash]))?;
     let raw = match parents.split_whitespace().nth(1) {
@@ -104,7 +112,7 @@ pub fn commit_files(root: &Path, hash: &str) -> Result<Vec<FileChange>, Message>
     };
     let mut files = parse_name_status(&raw);
     for file in &mut files {
-        file.abs_path = absolute(&top, &file.path);
+        file.absolute_path = absolute(&top, &file.path);
     }
     Ok(files)
 }
@@ -119,10 +127,10 @@ mod tests {
         assert_eq!(
             parse_name_status(raw),
             [
-                change("src/a.rs", None, ChangeKind::Modified),
-                change("new.rs", Some("old.rs"), ChangeKind::Renamed),
-                change("added file.txt", None, ChangeKind::Added),
-                change("gone.rs", None, ChangeKind::Deleted),
+                FileChange::new("src/a.rs", None, ChangeKind::Modified),
+                FileChange::new("new.rs", Some("old.rs"), ChangeKind::Renamed),
+                FileChange::new("added file.txt", None, ChangeKind::Added),
+                FileChange::new("gone.rs", None, ChangeKind::Deleted),
             ]
         );
     }

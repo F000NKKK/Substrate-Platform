@@ -1,3 +1,5 @@
+//! Language-server tests: framing, the client, languages and URIs.
+
 use std::io::{BufReader, Cursor, PipeReader, PipeWriter};
 use std::path::Path;
 use std::sync::mpsc;
@@ -6,6 +8,7 @@ use std::time::Duration;
 use serde_json::{Value, json};
 
 use super::*;
+use crate::message::Message;
 
 /// A client wired to a fake server on this thread's other end: what the
 /// client wrote is read from `from_client`, what the server says goes into
@@ -25,12 +28,12 @@ impl FakeServer {
     }
 }
 
-fn connected() -> (LspClient, FakeServer, mpsc::Receiver<Notification>) {
+fn connected() -> (Client, FakeServer, mpsc::Receiver<Notification>) {
     let (client_in, server_out) = std::io::pipe().unwrap();
     let (server_in, client_out) = std::io::pipe().unwrap();
     let (tx, rx) = mpsc::channel();
-    let client = LspClient::connect("fake-ls", client_in, client_out, move |n| {
-        let _ = tx.send(n);
+    let client = Client::connect("fake-ls", client_in, client_out, move |n| {
+        tx.send(n).ok();
     });
     let server = FakeServer {
         from_client: BufReader::new(server_in),
@@ -88,11 +91,12 @@ fn an_error_response_is_a_message_naming_server_and_method() {
         "error": { "code": -32803, "message": "can't rename here" },
     }));
     let error = asking.join().unwrap().unwrap_err();
-    assert_eq!(error.text, messages::ERROR);
+    assert!(matches!(error, LspError::Rejected { .. }));
     assert_eq!(
         error.to_string(),
         "fake-ls couldn't do textDocument/rename: can't rename here"
     );
+    assert_eq!(Message::from(error).text, messages::ERROR);
 }
 
 #[test]
@@ -190,10 +194,10 @@ fn a_server_that_goes_away_fails_what_waits_and_what_comes() {
     std::thread::sleep(Duration::from_millis(50));
     drop(server);
     let error = asking.join().unwrap().unwrap_err();
-    assert_eq!(error.text, messages::STOPPED);
+    assert_eq!(Message::from(error).text, messages::STOPPED);
     assert!(client.is_stopped());
     assert_eq!(
-        client.notify("x", Value::Null).unwrap_err().text,
+        Message::from(client.notify("x", Value::Null).unwrap_err()).text,
         messages::STOPPED
     );
 }
@@ -209,7 +213,7 @@ fn a_request_without_an_answer_times_out_and_is_cancelled() {
     };
     let request = server.recv();
     assert_eq!(
-        asking.join().unwrap().unwrap_err().text,
+        Message::from(asking.join().unwrap().unwrap_err()).text,
         messages::TIMED_OUT
     );
     let cancel = server.recv();
@@ -252,7 +256,7 @@ fn languages_are_found_by_file_name_then_extension() {
 #[test]
 fn a_bad_list_says_why() {
     let error = Languages::parse("[language.rust]\nextension = [\"rs\"]").unwrap_err();
-    assert_eq!(error.text, messages::INVALID_LIST);
+    assert_eq!(Message::from(error).text, messages::INVALID_LIST);
 }
 
 #[test]
@@ -287,13 +291,13 @@ fn rust_analyzer_answers_a_hover() {
     let text = "/// The answer.\nfn answer() -> u32 { 42 }\nfn main() { answer(); }\n";
     std::fs::write(&main, text).unwrap();
 
-    let server = ServerDef {
+    let server = ServerDefinition {
         command: "rust-analyzer".into(),
         args: Vec::new(),
         env: Default::default(),
         initialization_options: None,
     };
-    let client = LspClient::start(&server, &dir, crate::run::LogSink::new(), |_| {}).unwrap();
+    let client = Client::start(&server, &dir, crate::run::LogSink::new(), |_| {}).unwrap();
     let capabilities = client.initialize(&dir, None).unwrap();
     assert!(capabilities.get("hoverProvider").is_some());
     client.did_open(&main, "rust", 1, text).unwrap();
@@ -315,7 +319,7 @@ fn rust_analyzer_answers_a_hover() {
         std::thread::sleep(Duration::from_millis(500));
     }
     client.shutdown();
-    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::remove_dir_all(&dir).ok();
     assert!(
         hover["contents"]["value"]
             .as_str()

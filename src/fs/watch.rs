@@ -5,6 +5,7 @@
 //! nobody looks at costs nothing. Events are coalesced: a burst (a
 //! checkout, a build writing many files) arrives as one batch of paths.
 
+use super::FsError;
 use crate::sync::Locked;
 use std::collections::{BTreeSet, HashSet};
 use std::path::PathBuf;
@@ -20,25 +21,29 @@ pub const DEFAULT_QUIET: Duration = Duration::from_millis(150);
 
 /// Watches a set of folders; changed paths (files or folders directly in a
 /// watched folder, or the folder itself) go to the callback in batches.
-pub struct DirWatcher {
+pub struct DirectoryWatcher {
     watcher: Mutex<RecommendedWatcher>,
     watched: Mutex<HashSet<PathBuf>>,
 }
 
-impl DirWatcher {
+impl DirectoryWatcher {
     /// A watcher calling `on_change` (from its own thread) with each
     /// batch, sorted and without duplicates, once `quiet` passes without
-    /// another change. Watches nothing until [`DirWatcher::set`].
+    /// another change. Watches nothing until [`DirectoryWatcher::set`].
+    ///
+    /// # Errors
+    ///
+    /// The path can't be used.
     pub fn new(
         quiet: Duration,
         on_change: impl Fn(Vec<PathBuf>) + Send + 'static,
-    ) -> notify::Result<Self> {
+    ) -> Result<Self, FsError> {
         let (tx, rx) = mpsc::channel::<Vec<PathBuf>>();
         let watcher = notify::recommended_watcher(move |res: notify::Result<notify::Event>| {
             if let Ok(ev) = res
                 && changes_content(&ev.kind)
             {
-                let _ = tx.send(ev.paths);
+                tx.send(ev.paths).ok();
             }
         })?;
         std::thread::Builder::new()
@@ -56,7 +61,7 @@ impl DirWatcher {
                     on_change(batch.into_iter().collect());
                 }
             })
-            .map_err(|e| notify::Error::generic(&e.to_string()))?;
+            .map_err(|e| FsError::Watch(notify::Error::generic(&e.to_string())))?;
         Ok(Self {
             watcher: Mutex::new(watcher),
             watched: Mutex::new(HashSet::new()),
@@ -71,7 +76,7 @@ impl DirWatcher {
         let mut watcher = self.watcher.locked();
         let mut watched = self.watched.locked();
         for gone in watched.difference(&wanted) {
-            let _ = watcher.unwatch(gone);
+            watcher.unwatch(gone).ok();
         }
         watched.retain(|p| wanted.contains(p));
         for new in wanted {
@@ -107,7 +112,7 @@ mod tests {
 
     fn temp_dir(name: &str) -> PathBuf {
         let d = std::env::temp_dir().join(format!("substrate-watch-{name}-{}", std::process::id()));
-        let _ = std::fs::remove_dir_all(&d);
+        std::fs::remove_dir_all(&d).ok();
         std::fs::create_dir_all(&d).unwrap();
         d.canonicalize().unwrap()
     }
@@ -133,7 +138,8 @@ mod tests {
         std::fs::create_dir(&other).unwrap();
         let batches = Arc::new(Mutex::new(Vec::new()));
         let sink = batches.clone();
-        let w = DirWatcher::new(Duration::from_millis(50), move |b| sink.locked().push(b)).unwrap();
+        let w = DirectoryWatcher::new(Duration::from_millis(50), move |b| sink.locked().push(b))
+            .unwrap();
         w.set([dir.clone()]);
         assert_eq!(w.watched(), std::slice::from_ref(&dir));
 
@@ -160,7 +166,7 @@ mod tests {
         std::fs::write(&file, "three").unwrap();
         std::thread::sleep(Duration::from_millis(300));
         assert!(batches.locked().is_empty());
-        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::remove_dir_all(&dir).ok();
     }
 
     #[test]
@@ -168,8 +174,8 @@ mod tests {
         let dir = temp_dir("burst");
         let batches = Arc::new(Mutex::new(Vec::new()));
         let sink = batches.clone();
-        let w =
-            DirWatcher::new(Duration::from_millis(200), move |b| sink.locked().push(b)).unwrap();
+        let w = DirectoryWatcher::new(Duration::from_millis(200), move |b| sink.locked().push(b))
+            .unwrap();
         w.set([dir.clone()]);
         for i in 0..20 {
             std::fs::write(dir.join(format!("f{i}.txt")), "x").unwrap();
@@ -181,6 +187,6 @@ mod tests {
             .count()
             >= 20));
         assert_eq!(batches.locked().len(), 1);
-        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::remove_dir_all(&dir).ok();
     }
 }

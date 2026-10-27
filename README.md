@@ -60,15 +60,15 @@ flowchart LR
 
 ## 🦀 Rust Crate
 
-Always there: `message` (user-facing text as templates the UI translates), `events`, `process` (what a started program's environment should be) `workspace` (the folders the user opened; paths outside them are refused), `sync` (locks that outlive a panic), `text_view` (a product's binary formats read and written as text, so search, replace and diffs see what the editor shows) and `commands` (the host commands by domain: the one list permissions, handlers and the UI's copy come from). Every other module is a Cargo feature of its name, so a product builds only what it uses (`full` turns on all):
+Always there: `message` (user-facing text as templates the UI translates), `events`, `process` (what a started program's environment should be) `workspace` (the folders the user opened; paths outside them are refused), `sync` (locks that outlive a panic), `text_view` (a product's binary formats read and written as text, so search, replace and diffs see what the editor shows; the product builds a `TextViews` value and hands it to the plugin's `Options`) and `commands` (the host commands by domain: the one list permissions, handlers and the UI's copy come from). Every other module is a Cargo feature of its name, so a product builds only what it uses (`full` turns on all):
 
 | Feature / module | What it does |
 |---|---|
-| `run` | `run::task` runs an external process without blocking and streams stdout/stderr line by line into a `LogSink`; `TaskHandle` has `is_running`, `exit_status`, `wait` and `cancel` (which kills the whole process tree). `run::workflow`: named multi-step flows from a TOML file — steps run in order and stop at the first failure, a step can call another workflow (cycles are detected), `${var}` is substituted. `run::log`: a cloneable, append-only `LogSink` with bounded retention. |
+| `run` | `run::spawn_task` runs an external process without blocking and streams stdout/stderr line by line into a `LogSink`; `TaskHandle` has `is_running`, `exit_status`, `wait` and `cancel` (which kills the whole process tree). `run::workflow`: named multi-step flows from a TOML file — steps run in order and stop at the first failure, a step can call another workflow (cycles are detected), `${var}` is substituted. `run::LogSink`: a cloneable, append-only `LogSink` with bounded retention. |
 | `terminal` | A real cross-platform pseudo-terminal (`PtySession`, via `portable-pty`) with `PtyOptions`; `Utf8Chunker` so output never splits a multi-byte character; `detect_shells()` lists the shells that are installed. |
-| `fs` | `fs::dir`: one-level directory listing (folders first, case-insensitive), create/rename/remove, read/write as text or bytes. `fs::watch`: `DirWatcher`, debounced change notifications. |
+| `fs` | `fs::dir`: one-level directory listing (folders first, case-insensitive), create/rename/remove, read/write as text or bytes. `fs::watch`: `DirectoryWatcher`, debounced change notifications. |
 | `project` | The project and solution model and its API — no format of its own, and it reads no files. `Solution`: solution folders, configurations and platforms, each project's configuration per solution configuration, build dependencies (`build_order`), plus ordered properties and sections for everything else a format keeps; `Project`: properties (per configuration too), target frameworks, items, references. The product implements `SolutionFormat` / `ProjectFormat` for its files (`.sln`, `.slnx`, `.csproj`, its own) and registers them in `Formats`; `ProjectStandard` tells a project's kind from the file list the product gives it. |
-| `lsp` | Language servers over the Language Server Protocol. `Languages`: the product's TOML list of languages — extensions, file names and the server that serves each (`command`, `args`, `env`, `initialization_options`); `for_path` picks a file's language. `LspClient`: starts a server (stderr into a `LogSink`) or connects to any stream, `initialize`/`shutdown`, requests matched to their responses with a timeout (and `$/cancelRequest`), the server's notifications to a callback, its own requests (`workspace/configuration`, progress, registration) answered; `did_open`/`did_change`/`did_save`/`did_close` with full-text sync. Params and results stay JSON, so a new language is a line in the list. `uri`: paths as `file://` URIs and back. |
+| `lsp` | Language servers over the Language Server Protocol. `Languages`: the product's TOML list of languages — extensions, file names and the server that serves each (`command`, `args`, `env`, `initialization_options`); `for_path` picks a file's language. `lsp::Client`: starts a server (stderr into a `LogSink`) or connects to any stream, `initialize`/`shutdown`, requests matched to their responses with a timeout (and `$/cancelRequest`), the server's notifications to a callback, its own requests (`workspace/configuration`, progress, registration) answered; `did_open`/`did_change`/`did_save`/`did_close` with full-text sync. Params and results stay JSON, so a new language is a line in the list. `uri`: paths as `file://` URIs and back. |
 | `git` | Source Control over the `git` CLI: status, staging, commits, diffs, history, branches, remotes, stashes, settings. |
 | `search` | Find and Replace in Files: a `.gitignore`-aware walk of the project (or only the open documents' unsaved buffers), results file by file; what the walk leaves out is the product's `Layout`. |
 | `state` | What an IDE remembers between runs: a project's and the app's JSON state; reading never fails, writing is atomic. |
@@ -108,11 +108,11 @@ steps = [
 
 ```rust
 use std::collections::HashMap;
-use substrate_platform::run::{LogSink, WorkflowFile, run_workflow};
+use substrate_platform::run::{LogSink, workflow};
 
-let file = WorkflowFile::parse(&std::fs::read_to_string("workflow.toml")?)?;
+let file = workflow::File::parse(&std::fs::read_to_string("workflow.toml")?)?;
 let vars = HashMap::from([("log".to_string(), "debug".to_string())]);
-let result = run_workflow(file, "ci", vars, ".", LogSink::new()).wait();
+let result = workflow::run(file, "ci", vars, ".", LogSink::new()).wait();
 assert!(result.is_success());
 ```
 

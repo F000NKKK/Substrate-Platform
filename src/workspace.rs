@@ -16,6 +16,44 @@ crate::messages! {
     }
 }
 
+/// Why a path is not the workspace's — what the UI says is
+/// [`Message::from`].
+#[derive(Debug, PartialEq, Eq, thiserror::Error)]
+pub enum WorkspaceError {
+    /// No project is open.
+    #[error("no project is open")]
+    NothingOpen,
+    /// The path, and its ancestors, are not on disk.
+    #[error("{} doesn't resolve to anything on disk", .path.display())]
+    NotOnDisk {
+        /// The path.
+        path: PathBuf,
+    },
+    /// The path is outside every open project.
+    #[error("{} is outside any open project", .path.display())]
+    Outside {
+        /// The path.
+        path: PathBuf,
+    },
+    /// The path could not be read.
+    #[error("{0}")]
+    Unreadable(String),
+}
+
+impl From<WorkspaceError> for Message {
+    fn from(error: WorkspaceError) -> Self {
+        match error {
+            WorkspaceError::NothingOpen => Message::new(NOTHING_OPEN),
+            WorkspaceError::NotOnDisk { path } => {
+                Message::new(NOT_ON_DISK).arg("path", path.display())
+            }
+            WorkspaceError::Outside { path } => Message::new(OUTSIDE).arg("path", path.display()),
+            WorkspaceError::Unreadable(text) => Message::verbatim(text),
+        }
+    }
+}
+
+/// The workspace: the folders the user opened and the project shown now.
 #[derive(Default)]
 pub struct Workspace {
     roots: Mutex<Vec<PathBuf>>,
@@ -25,7 +63,7 @@ pub struct Workspace {
 
 /// `path`, or — for one not created yet (a new file, a rename's
 /// destination) — its nearest existing ancestor, canonical.
-fn resolve(path: &Path) -> Result<PathBuf, Message> {
+fn resolve(path: &Path) -> Result<PathBuf, WorkspaceError> {
     let mut candidate = path.to_path_buf();
     loop {
         if let Ok(resolved) = candidate.canonicalize() {
@@ -33,7 +71,11 @@ fn resolve(path: &Path) -> Result<PathBuf, Message> {
         }
         match candidate.parent() {
             Some(parent) if !parent.as_os_str().is_empty() => candidate = parent.to_path_buf(),
-            _ => return Err(Message::new(NOT_ON_DISK).arg("path", path.display())),
+            _ => {
+                return Err(WorkspaceError::NotOnDisk {
+                    path: path.to_path_buf(),
+                });
+            }
         }
     }
 }
@@ -44,22 +86,32 @@ pub struct Roots(Vec<PathBuf>);
 
 impl Roots {
     /// `Ok` when `path` is under one of them.
-    pub fn check(&self, path: &Path) -> Result<(), Message> {
+    ///
+    /// # Errors
+    ///
+    /// The path is outside the workspace, or can't be read.
+    pub fn check(&self, path: &Path) -> Result<(), WorkspaceError> {
         if self.0.is_empty() {
-            return Err(Message::new(NOTHING_OPEN));
+            return Err(WorkspaceError::NothingOpen);
         }
         let canonical = resolve(path)?;
         if self.0.iter().any(|root| canonical.starts_with(root)) {
             Ok(())
         } else {
-            Err(Message::new(OUTSIDE).arg("path", path.display()))
+            Err(WorkspaceError::Outside {
+                path: path.to_path_buf(),
+            })
         }
     }
 }
 
 impl Workspace {
     /// `Ok` when `path` is under an open project or a picked file.
-    pub fn check(&self, path: &Path) -> Result<(), Message> {
+    ///
+    /// # Errors
+    ///
+    /// The path is outside the workspace, or can't be read.
+    pub fn check(&self, path: &Path) -> Result<(), WorkspaceError> {
         self.roots().check(path)
     }
 
@@ -70,8 +122,14 @@ impl Workspace {
 
     /// Lets the host touch `path` too — a file the user picked in a native
     /// dialog outside every open project (the picking is the trust signal).
-    pub fn allow(&self, path: &Path) -> Result<PathBuf, Message> {
-        let canonical = path.canonicalize()?;
+    ///
+    /// # Errors
+    ///
+    /// The path is outside the workspace, or can't be read.
+    pub fn allow(&self, path: &Path) -> Result<PathBuf, WorkspaceError> {
+        let canonical = path
+            .canonicalize()
+            .map_err(|e| WorkspaceError::Unreadable(e.to_string()))?;
         let mut roots = self.roots.locked();
         if !roots.iter().any(|root| canonical.starts_with(root)) {
             roots.push(canonical.clone());
@@ -80,7 +138,11 @@ impl Workspace {
     }
 
     /// `root` opened as the current project.
-    pub fn open(&self, root: &Path) -> Result<PathBuf, Message> {
+    ///
+    /// # Errors
+    ///
+    /// The path is outside the workspace, or can't be read.
+    pub fn open(&self, root: &Path) -> Result<PathBuf, WorkspaceError> {
         let canonical = self.allow(root)?;
         *self.current.locked() = Some(canonical.clone());
         Ok(canonical)
@@ -102,13 +164,30 @@ mod tests {
 
     #[test]
     fn only_what_was_opened() {
-        let ws = Workspace::default();
+        let workspace = Workspace::default();
         let here = std::env::temp_dir();
-        assert_eq!(ws.check(&here), Err(Message::new(NOTHING_OPEN)));
-        ws.open(&here).unwrap();
-        assert!(ws.check(&here.join("not-yet-created.txt")).is_ok());
-        assert_eq!(ws.current(), here.canonicalize().ok());
-        ws.close();
-        assert!(ws.current().is_none() && ws.check(&here).is_ok());
+        assert_eq!(workspace.check(&here), Err(WorkspaceError::NothingOpen));
+        workspace.open(&here).unwrap();
+        assert!(workspace.check(&here.join("not-yet-created.txt")).is_ok());
+        assert_eq!(workspace.current(), here.canonicalize().ok());
+        workspace.close();
+        assert!(workspace.current().is_none() && workspace.check(&here).is_ok());
+    }
+}
+
+#[cfg(test)]
+mod error_tests {
+    use super::*;
+
+    #[test]
+    fn a_path_outside_is_worded_with_it() {
+        let outside = std::path::PathBuf::from("/definitely/not/open");
+        let message = Message::from(WorkspaceError::Outside { path: outside });
+        assert_eq!(message.text, OUTSIDE);
+        assert_eq!(message.args["path"], "/definitely/not/open");
+        assert_eq!(
+            Message::from(WorkspaceError::NothingOpen).text,
+            NOTHING_OPEN
+        );
     }
 }

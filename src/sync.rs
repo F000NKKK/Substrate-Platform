@@ -37,14 +37,14 @@ mod tests {
 
     #[test]
     fn a_poisoned_lock_still_opens() {
-        let m = std::sync::Arc::new(Mutex::new(1));
-        let held = std::sync::Arc::clone(&m);
+        let mutex = std::sync::Arc::new(Mutex::new(1));
+        let held = std::sync::Arc::clone(&mutex);
         let _ = std::thread::spawn(move || {
             let _guard = held.lock().unwrap();
             panic!("poison");
         })
         .join();
-        assert!(m.lock().is_err());
-        assert_eq!(*m.locked(), 1);
+        assert!(mutex.lock().is_err());
+        assert_eq!(*mutex.locked(), 1);
     }
 }

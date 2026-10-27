@@ -1,7 +1,7 @@
 //! Git's own global settings that the Source Control options page edits.
 
+use super::GitError;
 use super::run::{git, run};
-use crate::message::Message;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -59,14 +59,20 @@ pub fn get() -> GlobalConfig {
 }
 
 /// Sets one of [`GLOBAL_KEYS`] in `~/.gitconfig` — removes it when `value` is empty.
-pub fn set(key: &str, value: &str) -> Result<(), Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn set(key: &str, value: &str) -> Result<(), GitError> {
     if !GLOBAL_KEYS.contains(&key) {
-        return Err(Message::new(super::messages::NOT_SETTABLE).arg("key", key));
+        return Err(GitError::NotSettable {
+            key: key.to_string(),
+        });
     }
     let home = home();
     if value.trim().is_empty() {
         // Exit code 5: it wasn't set to begin with.
-        let _ = run(git(&home).args(["config", "--global", "--unset-all", key]));
+        run(git(&home).args(["config", "--global", "--unset-all", key])).ok();
         return Ok(());
     }
     run(git(&home).args(["config", "--global", key, value.trim()])).map(drop)

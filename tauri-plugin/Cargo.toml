@@ -19,6 +19,9 @@ search = ["substrate-platform/search"]
 state = ["substrate-platform/state", "dep:serde_json"]
 terminal = ["substrate-platform/terminal"]
 
+[lints]
+workspace = true
+
 [dependencies]
 substrate-platform = { path = ".." }
 tauri = "2"

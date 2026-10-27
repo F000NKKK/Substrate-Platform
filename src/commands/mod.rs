@@ -4,62 +4,20 @@
 //! and the UI's copy (`typescript`) are made from. Substrate's own domains —
 //! its host plugin's commands — are here too ([`SUBSTRATE`]).
 
+mod domain;
 pub mod fs;
 pub mod git;
 pub mod lsp;
 pub mod open;
 pub mod search;
 pub mod state;
+mod substrate;
 pub mod terminal;
+mod typescript;
 
-/// The host plugin's name: Substrate's commands are `plugin:substrate|<command>`.
-pub const SUBSTRATE_PLUGIN: &str = "substrate";
-
-/// A domain of commands: its key in the UI's copy, its plugin, its commands.
-pub struct Domain {
-    pub key: &'static str,
-    pub plugin: &'static str,
-    pub commands: &'static [&'static str],
-}
-
-/// Substrate's own domains: every command of its host plugin.
-pub const SUBSTRATE: &[&Domain] = &[
-    &open::DOMAIN,
-    &fs::DOMAIN,
-    &git::DOMAIN,
-    &search::DOMAIN,
-    &state::DOMAIN,
-    &terminal::DOMAIN,
-    &lsp::DOMAIN,
-];
-
-/// Every command of `domains`, in order — a plugin's permissions.
-pub fn names(domains: &[&Domain]) -> Vec<&'static str> {
-    domains
-        .iter()
-        .flat_map(|d| d.commands.iter().copied())
-        .collect()
-}
-
-/// `domains` as a TypeScript constant `name`: `name.<domain>.<command>` is
-/// `{ plugin, command }` (what the UI's `invokeCommand` takes); `doc` is its comment.
-pub fn typescript(name: &str, doc: &str, domains: &[&Domain]) -> String {
-    let mut out = format!("/** {doc} */\nexport const {name} = {{\n");
-    for domain in domains {
-        out.push_str(&format!("  {}: {{\n", domain.key));
-        for command in domain.commands {
-            out.push_str(&format!(
-                "    {}: {{ plugin: {:?}, command: {:?} }},\n",
-                crate::message::camel(command),
-                domain.plugin,
-                command
-            ));
-        }
-        out.push_str("  },\n");
-    }
-    out.push_str("} as const;\n");
-    out
-}
+pub use domain::Domain;
+pub use substrate::{SUBSTRATE, SUBSTRATE_PLUGIN};
+pub use typescript::{names, typescript};
 
 #[cfg(test)]
 mod tests {
