@@ -1,0 +1,69 @@
+/* The data inspector: a property tree with the value at the row's end. */
+.sp-inspector {
+  font-size: var(--sp-font-size-sm);
+  color: var(--sp-text);
+}
+
+.sp-inspector-row {
+  display: inline-flex;
+  gap: var(--sp-space-sm);
+  align-items: baseline;
+  min-width: 0;
+}
+
+.sp-inspector-name {
+  font-weight: 500;
+}
+
+.sp-inspector-type {
+  color: var(--sp-text-faint);
+  font-family: var(--sp-font-mono);
+}
+
+.sp-inspector-value {
+  font-family: var(--sp-font-mono);
+  color: var(--sp-text-muted);
+}
+
+.sp-inspector-value[data-kind="none"],
+.sp-inspector-value[data-kind="default"] {
+  color: var(--sp-text-faint);
+  font-style: italic;
+}
+
+.sp-inspector-value[data-kind="missing"],
+.sp-inspector-problem,
+.sp-inspector-error {
+  color: var(--sp-danger);
+}
+
+.sp-inspector-error {
+  padding: var(--sp-space-sm);
+}
+
+.sp-inspector-issue {
+  color: var(--sp-danger);
+}
+
+.sp-inspector-input,
+.sp-inspector-select {
+  font: inherit;
+  font-family: var(--sp-font-mono);
+  color: var(--sp-text);
+  background: var(--sp-surface-2);
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius-sm);
+  padding: 0 var(--sp-space-xs);
+  min-width: 6ch;
+  max-width: 24ch;
+}
+
+.sp-inspector-input:focus,
+.sp-inspector-select:focus {
+  outline: none;
+  border-color: var(--sp-accent);
+}
+
+.sp-inspector-input[aria-invalid="true"] {
+  border-color: var(--sp-danger);
+}
