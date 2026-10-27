@@ -30,12 +30,18 @@ pub struct Entry {
 
 impl From<DirEntryInfo> for Entry {
     fn from(e: DirEntryInfo) -> Self {
-        Entry { name: e.name, path: e.path.to_string_lossy().into_owned(), kind: e.kind }
+        Entry {
+            name: e.name,
+            path: e.path.to_string_lossy().into_owned(),
+            kind: e.kind,
+        }
     }
 }
 
 fn failed(path: &Path, error: impl ToString) -> Message {
-    Message::new(FAILED).arg("path", path.display()).arg("error", error.to_string())
+    Message::new(FAILED)
+        .arg("path", path.display())
+        .arg("error", error.to_string())
 }
 
 /// `path`, once it's known to be in the workspace.
@@ -48,7 +54,9 @@ fn inside(ws: &Workspace, path: &str) -> Res<PathBuf> {
 #[tauri::command]
 pub fn dir_list(ws: State<'_, Workspace>, path: String) -> Res<Vec<Entry>> {
     let path = inside(&ws, &path)?;
-    dir::list_dir(&path).map(|all| all.into_iter().map(Entry::from).collect()).map_err(|e| failed(&path, e))
+    dir::list_dir(&path)
+        .map(|all| all.into_iter().map(Entry::from).collect())
+        .map_err(|e| failed(&path, e))
 }
 
 #[tauri::command]
@@ -114,10 +122,17 @@ pub fn allow_path(ws: State<'_, Workspace>, path: String) -> Res<()> {
 /// Watches exactly `folders` for changes made outside the IDE; each burst
 /// comes back as one [`events::FILES_CHANGED`], spelled like `folders`.
 #[tauri::command]
-pub fn fs_watch<R: Runtime>(app: AppHandle<R>, watcher: State<'_, Watcher>, folders: Vec<String>) -> Res<()> {
+pub fn fs_watch<R: Runtime>(
+    app: AppHandle<R>,
+    watcher: State<'_, Watcher>,
+    folders: Vec<String>,
+) -> Res<()> {
     if watcher.0.get().is_none() {
         let made = DirWatcher::new(DEFAULT_QUIET, move |paths| {
-            let paths: Vec<String> = paths.iter().map(|p| p.to_string_lossy().into_owned()).collect();
+            let paths: Vec<String> = paths
+                .iter()
+                .map(|p| p.to_string_lossy().into_owned())
+                .collect();
             let _ = app.emit(events::FILES_CHANGED, paths);
         })
         .map_err(Message::verbatim)?;

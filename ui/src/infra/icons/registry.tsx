@@ -51,6 +51,8 @@ const defaultIcons: Record<string, IconComponent> = {
   info: glyphs.IconInfo,
   error: glyphs.IconError,
   warning: glyphs.IconWarning,
+  eye: glyphs.IconEye,
+  eyeOff: glyphs.IconEyeOff,
   preview: glyphs.IconPreview,
   previewSide: glyphs.IconPreviewSide,
   code: glyphs.IconCode,

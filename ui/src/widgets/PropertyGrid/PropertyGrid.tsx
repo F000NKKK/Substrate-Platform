@@ -1,9 +1,9 @@
 import { useT } from "../../infra/i18n";
 import "./PropertyGrid.css";
 import { DescriptionPane, ObjectLine, PropertyGridToolbar } from "./PropertyGridChrome";
-import { PropertyRows } from "./PropertyRows";
-import type { PropertyGridProps } from "./propertyTypes";
-import { usePropertyGrid } from "./usePropertyGrid";
+import { PropertyRows } from "./cells/PropertyRows";
+import type { PropertyGridProps } from "./state/propertyTypes";
+import { usePropertyGrid } from "./state/usePropertyGrid";
 
 /**
  * Visual Studio's Properties window body: an object selector line (bold

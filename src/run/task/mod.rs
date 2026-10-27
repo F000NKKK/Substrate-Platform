@@ -224,7 +224,7 @@ fn spawn_streaming(
 /// and holding the output pipes open. On Unix the child leads its own process
 /// group (see `spawn_streaming`), so the whole group is signalled at once; on
 /// Windows `taskkill /T` walks the process tree instead.
-fn kill_tree(child: &mut Child) {
+pub(crate) fn kill_tree(child: &mut Child) {
     #[cfg(unix)]
     {
         if let Ok(pgid) = libc::pid_t::try_from(child.id()) {
@@ -319,8 +319,18 @@ fn finish_streamed(mut running: StreamingChild, cancel: &AtomicBool, sink: &LogS
 /// a chain of steps strictly one after another instead of firing them all in
 /// parallel like [`spawn`] does. Reports its own "exited with ..." line into
 /// `sink`, same as [`spawn`]; setting `cancel` kills the child early.
-pub(crate) fn run_streamed(task: &Task, sink: &LogSink, cancel: &AtomicBool) -> std::io::Result<TaskExit> {
-    let running = spawn_streaming(&task.program, &task.args, task.cwd.as_deref(), &task.envs, sink)?;
+pub(crate) fn run_streamed(
+    task: &Task,
+    sink: &LogSink,
+    cancel: &AtomicBool,
+) -> std::io::Result<TaskExit> {
+    let running = spawn_streaming(
+        &task.program,
+        &task.args,
+        task.cwd.as_deref(),
+        &task.envs,
+        sink,
+    )?;
     Ok(finish_streamed(running, cancel, sink))
 }
 

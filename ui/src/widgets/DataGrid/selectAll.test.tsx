@@ -1,7 +1,7 @@
 import { act, createElement, type KeyboardEvent } from "react";
 import { createRoot } from "react-dom/client";
 import { beforeAll, describe, expect, it } from "vitest";
-import { useDataGrid } from "./useDataGrid";
+import { useDataGrid } from "./state/useDataGrid";
 
 beforeAll(() => {
   (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;

@@ -26,6 +26,8 @@ export interface ShellLayout {
   /** Whether a panel is currently on screen (pinned, peeking as a flyout, floating, or a center tab) rather than collapsed to its strip. */
   isVisible: (id: string) => boolean;
   dockTo: (id: string, anchor: DockAnchor) => void;
+  /** Puts `id` among the center's tabs before `before` (`null`: last) — dragging a tab along the strip. */
+  placeInCenter: (id: string, before: string | null) => void;
   floatAt: (id: string, x: number, y: number) => void;
   /** Moves a floating panel (no-op for one that isn't floating). */
   moveFloat: (id: string, x: number, y: number) => void;

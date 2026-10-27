@@ -3,8 +3,8 @@
 //! a process in must resolve under one of them — an IDE never reaches
 //! outside what the user opened.
 
-use crate::sync::Locked;
 use crate::message::Message;
+use crate::sync::Locked;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
@@ -49,7 +49,11 @@ impl Roots {
             return Err(Message::new(NOTHING_OPEN));
         }
         let canonical = resolve(path)?;
-        if self.0.iter().any(|root| canonical.starts_with(root)) { Ok(()) } else { Err(Message::new(OUTSIDE).arg("path", path.display())) }
+        if self.0.iter().any(|root| canonical.starts_with(root)) {
+            Ok(())
+        } else {
+            Err(Message::new(OUTSIDE).arg("path", path.display()))
+        }
     }
 }
 

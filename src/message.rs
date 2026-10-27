@@ -78,6 +78,8 @@ pub fn catalog() -> Vec<(&'static str, &'static str, &'static str)> {
         crate::fs::messages::ALL,
         #[cfg(feature = "git")]
         crate::git::messages::ALL,
+        #[cfg(feature = "lsp")]
+        crate::lsp::messages::ALL,
         #[cfg(feature = "project")]
         crate::project::messages::ALL,
         crate::process::ALL,
@@ -113,7 +115,11 @@ pub fn typescript() -> String {
         crate::commands::SUBSTRATE,
     ));
     out.push('\n');
-    out.push_str(&crate::events::typescript("events", "The events Substrate's host sends its UI.", crate::events::ALL));
+    out.push_str(&crate::events::typescript(
+        "events",
+        "The events Substrate's host sends its UI.",
+        crate::events::ALL,
+    ));
     out
 }
 

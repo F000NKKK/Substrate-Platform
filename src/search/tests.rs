@@ -146,7 +146,10 @@ fn file_mask_globs() {
 fn layout() -> Layout {
     Layout {
         skip_dirs: vec![".build".to_string()],
-        generated: vec![Generated { dir: PathBuf::from(".build/generated"), extension: "rs".to_string() }],
+        generated: vec![Generated {
+            dir: PathBuf::from(".build/generated"),
+            extension: "rs".to_string(),
+        }],
     }
 }
 
@@ -185,7 +188,14 @@ fn generated_code_is_searched_only_when_asked() {
             ..query("needle")
         };
         run_search(
-            &Search { root: Some(&root), scope: Scope::Project, query: &q, documents: &[], max_lines: 100, layout: &layout() },
+            &Search {
+                root: Some(&root),
+                scope: Scope::Project,
+                query: &q,
+                documents: &[],
+                max_lines: 100,
+                layout: &layout(),
+            },
             &|| true,
             &mut |f| files.push(f.rel_path),
         )
@@ -229,7 +239,12 @@ fn project_entries_and_content_matches_skip_what_search_skips() {
         .map(|p| rel(p))
         .collect();
     assert_eq!(containing, ["notes.md", "src/lib.rs"]);
-    assert_eq!(files_containing(&dir, &query("needle"), 1, &layout()).unwrap().len(), 1);
+    assert_eq!(
+        files_containing(&dir, &query("needle"), 1, &layout())
+            .unwrap()
+            .len(),
+        1
+    );
     let _ = std::fs::remove_dir_all(&dir);
 }
 
@@ -239,7 +254,14 @@ fn project_search_skips_ignored_build_and_binary_files() {
     let root = dir.to_string_lossy().into_owned();
     let mut files = Vec::new();
     let summary = run_search(
-        &Search { root: Some(&root), scope: Scope::Project, query: &query("needle"), documents: &[], max_lines: 100, layout: &layout() },
+        &Search {
+            root: Some(&root),
+            scope: Scope::Project,
+            query: &query("needle"),
+            documents: &[],
+            max_lines: 100,
+            layout: &layout(),
+        },
         &|| true,
         &mut |f| files.push(f.rel_path),
     )
@@ -260,7 +282,14 @@ fn project_search_skips_ignored_build_and_binary_files() {
     };
     let mut files = Vec::new();
     let summary = run_search(
-        &Search { root: Some(&root), scope: Scope::Project, query: &q, documents: &docs, max_lines: 100, layout: &layout() },
+        &Search {
+            root: Some(&root),
+            scope: Scope::Project,
+            query: &q,
+            documents: &docs,
+            max_lines: 100,
+            layout: &layout(),
+        },
         &|| true,
         &mut |f| files.push((f.rel_path, f.hits.len())),
     )
@@ -276,7 +305,14 @@ fn project_search_skips_ignored_build_and_binary_files() {
 
     // The cap stops the search.
     let summary = run_search(
-        &Search { root: Some(&root), scope: Scope::Project, query: &q, documents: &docs, max_lines: 2, layout: &layout() },
+        &Search {
+            root: Some(&root),
+            scope: Scope::Project,
+            query: &q,
+            documents: &docs,
+            max_lines: 2,
+            layout: &layout(),
+        },
         &|| true,
         &mut |_| {},
     )
@@ -284,7 +320,14 @@ fn project_search_skips_ignored_build_and_binary_files() {
     assert!(summary.truncated);
     assert_eq!(summary.matching_lines, 2);
     let summary = run_search(
-        &Search { root: Some(&root), scope: Scope::Project, query: &q, documents: &docs, max_lines: 2, layout: &layout() },
+        &Search {
+            root: Some(&root),
+            scope: Scope::Project,
+            query: &q,
+            documents: &docs,
+            max_lines: 2,
+            layout: &layout(),
+        },
         &|| false,
         &mut |_| {},
     )
@@ -328,4 +371,25 @@ fn replace_writes_files_and_returns_buffers() {
         "needle\n"
     );
     std::fs::remove_dir_all(dir).unwrap();
+}
+
+/// A kind of file kept reversed on disk, read and written through its view.
+#[test]
+fn a_registered_view_is_what_search_reads() {
+    fn read(p: &Path) -> Option<String> {
+        Some(std::fs::read_to_string(p).ok()?.chars().rev().collect())
+    }
+    fn write(p: &Path, text: &str) -> Result<(), String> {
+        std::fs::write(p, text.chars().rev().collect::<String>()).map_err(|e| e.to_string())
+    }
+    use crate::text_view::{TextView, register_text_view, text_view};
+    register_text_view("reversed", TextView { read, write });
+    let dir = std::env::temp_dir().join(format!("substrate-views-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let file = dir.join("a.reversed");
+    std::fs::write(&file, "olleh").unwrap();
+    assert_eq!(read_text(&file, true).as_deref(), Some("hello"));
+    (text_view(&file).unwrap().write)(&file, "bye").unwrap();
+    assert_eq!(std::fs::read_to_string(&file).unwrap(), "eyb");
+    std::fs::remove_dir_all(&dir).unwrap();
 }

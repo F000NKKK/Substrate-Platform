@@ -133,10 +133,7 @@ mod tests {
         std::fs::create_dir(&other).unwrap();
         let batches = Arc::new(Mutex::new(Vec::new()));
         let sink = batches.clone();
-        let w = DirWatcher::new(Duration::from_millis(50), move |b| {
-            sink.locked().push(b)
-        })
-        .unwrap();
+        let w = DirWatcher::new(Duration::from_millis(50), move |b| sink.locked().push(b)).unwrap();
         w.set([dir.clone()]);
         assert_eq!(w.watched(), std::slice::from_ref(&dir));
 
@@ -171,10 +168,8 @@ mod tests {
         let dir = temp_dir("burst");
         let batches = Arc::new(Mutex::new(Vec::new()));
         let sink = batches.clone();
-        let w = DirWatcher::new(Duration::from_millis(200), move |b| {
-            sink.locked().push(b)
-        })
-        .unwrap();
+        let w =
+            DirWatcher::new(Duration::from_millis(200), move |b| sink.locked().push(b)).unwrap();
         w.set([dir.clone()]);
         for i in 0..20 {
             std::fs::write(dir.join(format!("f{i}.txt")), "x").unwrap();

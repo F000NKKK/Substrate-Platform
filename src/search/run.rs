@@ -120,11 +120,29 @@ pub struct Search<'a> {
 
 /// Runs a search, handing each matching file to `emit` as it's found;
 /// `keep_going` is polled between files.
-pub fn run_search(search: &Search, keep_going: &dyn Fn() -> bool, emit: &mut dyn FnMut(FileResult)) -> Result<FindSummary, Message> {
-    let Search { root, scope, query, documents, max_lines, layout } = *search;
+pub fn run_search(
+    search: &Search,
+    keep_going: &dyn Fn() -> bool,
+    emit: &mut dyn FnMut(FileResult),
+) -> Result<FindSummary, Message> {
+    let Search {
+        root,
+        scope,
+        query,
+        documents,
+        max_lines,
+        layout,
+    } = *search;
     let matcher = Matcher::new(query)?;
     let mask = FileMask::parse(&query.file_mask)?;
-    let plan = plan(root, scope, documents, &mask, query.include_generated, layout);
+    let plan = plan(
+        root,
+        scope,
+        documents,
+        &mask,
+        query.include_generated,
+        layout,
+    );
     let mut summary = FindSummary::default();
     for (path, source) in &plan.items {
         if !keep_going() {

@@ -1,0 +1,30 @@
+.sp-suggestions {
+  position: fixed;
+  z-index: 300;
+  max-height: 260px;
+  max-width: calc(100vw - 2 * var(--sp-space-xs));
+  overflow-y: auto;
+  padding: var(--sp-space-2xs);
+  background: var(--sp-surface-glass);
+  backdrop-filter: blur(var(--sp-blur));
+  -webkit-backdrop-filter: blur(var(--sp-blur));
+  border: 1px solid var(--sp-border-strong);
+  border-radius: var(--sp-radius-xs);
+  box-shadow: var(--sp-shadow-md);
+  font-family: var(--sp-font-ui);
+  font-size: var(--sp-font-size);
+  color: var(--sp-text);
+}
+
+.sp-suggestion {
+  padding: var(--sp-space-2xs) var(--sp-space-xs);
+  border-radius: var(--sp-radius-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}
+
+.sp-suggestion[aria-selected="true"] {
+  background: var(--sp-accent-soft);
+}

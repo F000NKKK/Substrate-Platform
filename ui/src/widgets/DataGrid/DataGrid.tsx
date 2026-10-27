@@ -3,7 +3,7 @@ import { ContextMenu } from "../ContextMenu";
 import { IconButton } from "../IconButton";
 import { IconClose } from "../../infra/icons";
 import { tn, useT } from "../../infra/i18n";
-import { useDataGrid, formatAggregate, DEFAULT_ROW_HEIGHT } from "./useDataGrid";
+import { useDataGrid, formatAggregate, DEFAULT_ROW_HEIGHT } from "./state/useDataGrid";
 import { buildDataGridMenuItems } from "./contextMenuItems";
 import "./DataGrid.css";
 

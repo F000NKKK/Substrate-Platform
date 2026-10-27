@@ -23,7 +23,9 @@ const IGNORE_EVERYTHING: &str = "*\n";
 const PARTIAL_EXTENSION: &str = "json.partial";
 
 fn failed(path: &Path, error: impl ToString) -> Message {
-    Message::new(messages::FAILED).arg("path", path.display()).arg("error", error.to_string())
+    Message::new(messages::FAILED)
+        .arg("path", path.display())
+        .arg("error", error.to_string())
 }
 
 /// The JSON object in `path` — empty for a missing, unreadable or corrupt
@@ -70,7 +72,10 @@ mod tests {
         let dir = std::env::temp_dir().join(format!("substrate-state-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         private_dir(&dir).unwrap();
-        assert_eq!(std::fs::read_to_string(dir.join(GITIGNORE)).unwrap(), IGNORE_EVERYTHING);
+        assert_eq!(
+            std::fs::read_to_string(dir.join(GITIGNORE)).unwrap(),
+            IGNORE_EVERYTHING
+        );
         let file = dir.join(WORKSPACE_FILE);
         assert_eq!(read_json(&file), Value::Object(Map::new()));
         let value = serde_json::json!({ "open": ["a.rs"] });

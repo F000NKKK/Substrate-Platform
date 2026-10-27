@@ -10,8 +10,9 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant};
 use substrate_platform::message::Message;
 use substrate_platform::search::{
-    DEFAULT_MAX_LINES, FileResult, FindSummary, Layout, OpenDocument, ProjectEntry, ReplaceRequest, ReplaceSummary,
-    Scope, Search, SearchQuery, files_containing, project_entries, run_replace, run_search,
+    DEFAULT_MAX_LINES, FileResult, FindSummary, Layout, OpenDocument, ProjectEntry, ReplaceRequest,
+    ReplaceSummary, Scope, Search, SearchQuery, files_containing, project_entries, run_replace,
+    run_search,
 };
 use substrate_platform::workspace::{NOTHING_OPEN, Workspace};
 use tauri::State;
@@ -87,17 +88,15 @@ pub async fn find_in_files(
             max_lines: request.max_lines.unwrap_or(DEFAULT_MAX_LINES),
             layout: &layout,
         };
-        let summary = run_search(
-            &search,
-            &keep_going,
-            &mut |file| {
-                pending.push(file);
-                if last_flush.elapsed() > BATCH_EVERY {
-                    let _ = on_batch.send(FindBatch { files: std::mem::take(&mut pending) });
-                    last_flush = Instant::now();
-                }
-            },
-        );
+        let summary = run_search(&search, &keep_going, &mut |file| {
+            pending.push(file);
+            if last_flush.elapsed() > BATCH_EVERY {
+                let _ = on_batch.send(FindBatch {
+                    files: std::mem::take(&mut pending),
+                });
+                last_flush = Instant::now();
+            }
+        });
         if !pending.is_empty() {
             let _ = on_batch.send(FindBatch { files: pending });
         }
@@ -115,7 +114,11 @@ pub fn find_cancel(searches: State<'_, Searches>) {
 /// Replace All over what a search would cover: open documents' new text
 /// comes back for the UI to put in their buffers, other files are rewritten.
 #[tauri::command]
-pub async fn replace_in_files(ws: State<'_, Workspace>, layout: State<'_, Layout>, request: ReplaceRequest) -> Res<ReplaceSummary> {
+pub async fn replace_in_files(
+    ws: State<'_, Workspace>,
+    layout: State<'_, Layout>,
+    request: ReplaceRequest,
+) -> Res<ReplaceSummary> {
     check_root(&ws, request.root.as_deref(), request.scope)?;
     let roots = ws.roots();
     let layout = layout.inner().clone();
@@ -125,7 +128,11 @@ pub async fn replace_in_files(ws: State<'_, Workspace>, layout: State<'_, Layout
 /// A file explorer's search and filters: the project's files and folders,
 /// the ones a lazily listed tree hasn't opened too.
 #[tauri::command]
-pub async fn project_items(ws: State<'_, Workspace>, layout: State<'_, Layout>, root: String) -> Res<Vec<ProjectEntry>> {
+pub async fn project_items(
+    ws: State<'_, Workspace>,
+    layout: State<'_, Layout>,
+    root: String,
+) -> Res<Vec<ProjectEntry>> {
     ws.check(Path::new(&root))?;
     let layout = layout.inner().clone();
     blocking(move || Ok(project_entries(Path::new(&root), &layout))).await
@@ -135,8 +142,14 @@ pub async fn project_items(ws: State<'_, Workspace>, layout: State<'_, Layout>, 
 /// Separate from `find_in_files`, so typing in an explorer never cancels a
 /// Find in Files still running.
 #[tauri::command]
-pub async fn project_files_containing(ws: State<'_, Workspace>, layout: State<'_, Layout>, root: String, query: SearchQuery) -> Res<Vec<String>> {
+pub async fn project_files_containing(
+    ws: State<'_, Workspace>,
+    layout: State<'_, Layout>,
+    root: String,
+    query: SearchQuery,
+) -> Res<Vec<String>> {
     ws.check(Path::new(&root))?;
     let layout = layout.inner().clone();
-    blocking(move || files_containing(Path::new(&root), &query, MAX_CONTAINING_FILES, &layout)).await
+    blocking(move || files_containing(Path::new(&root), &query, MAX_CONTAINING_FILES, &layout))
+        .await
 }

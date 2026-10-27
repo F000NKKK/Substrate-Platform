@@ -5,7 +5,7 @@ import { test } from "vitest";
 import { flattenVisible } from "./Tree/useTree";
 import type { TreeNode } from "./Tree";
 import { nestFiles, type FileTreeNode } from "./FileTree";
-import { buildDisplayItems, filterRows, sortRows } from "./DataGrid/useDataGrid";
+import { buildDisplayItems, filterRows, sortRows } from "./DataGrid/state/useDataGrid";
 import type { DataGridColumn } from "./DataGrid";
 import { appendOutputLine, clearOutputBuffer } from "./OutputPanel/outputBuffer";
 

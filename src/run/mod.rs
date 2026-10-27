@@ -8,4 +8,6 @@ pub mod workflow;
 
 pub use log::{Level, LogLine, LogSink};
 pub use task::{Task, TaskExit, TaskHandle, spawn as spawn_task};
-pub use workflow::{WorkflowDef, WorkflowFile, WorkflowHandle, WorkflowResult, WorkflowStep, run as run_workflow};
+pub use workflow::{
+    WorkflowDef, WorkflowFile, WorkflowHandle, WorkflowResult, WorkflowStep, run as run_workflow,
+};

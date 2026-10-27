@@ -37,4 +37,7 @@ registerTranslations(RU, {
   "Sort ascending": "Сортировать по возрастанию",
   "Sort descending": "Сортировать по убыванию",
   "Clear sort": "Отменить сортировку",
+  "Zoom": "Масштаб",
+  "Fit to window": "По размеру окна",
+  "Actual size": "Исходный размер",
 });

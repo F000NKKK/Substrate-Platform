@@ -1,9 +1,9 @@
-export type { EditorProps, EditorComponent } from "./EditorBase";
-export { TextEditor } from "./TextEditor";
-export type { TextEditorProps } from "./TextEditor";
-export { CodeEditor } from "./CodeEditor";
-export type { CodeEditorProps } from "./CodeEditor";
-export type { EditorPointRequest, EditorHoverTip, EditorHoverProvider } from "./editorPointer";
+export type { EditorProps, EditorComponent } from "./registry/EditorBase";
+export { TextEditor } from "./code/TextEditor";
+export type { TextEditorProps } from "./code/TextEditor";
+export { CodeEditor } from "./code/CodeEditor";
+export type { CodeEditorProps } from "./code/CodeEditor";
+export type { EditorPointRequest, EditorHoverTip, EditorHoverProvider } from "./code/editorPointer";
 export {
   PlainTextEditor,
   JsonEditor,
@@ -21,23 +21,23 @@ export {
   jsonLanguage,
   xmlLanguage,
   xmlSchemaLanguage,
-} from "./languageEditors";
-export type { XmlSchema } from "./languageEditors";
-export { editorSyncListener, editorApplyText, editorRevealRange, editorSetLinkedRange, linkedRangeHighlight } from "./editorSync";
-export type { EditorSyncUpdate } from "./editorSync";
+} from "./code/languageEditors";
+export type { XmlSchema } from "./code/languageEditors";
+export { editorSyncListener, editorApplyText, editorRevealRange, editorSetLinkedRange, linkedRangeHighlight } from "./code/editorSync";
+export type { EditorSyncUpdate } from "./code/editorSync";
 export type { EditorView } from "@codemirror/view";
-export { changeGutter, setChangeBaseline } from "./changeGutter";
-export { ImageEditor } from "./ImageEditor";
-export type { ImageEditorProps } from "./ImageEditor";
-export { PropertiesGridEditor } from "./PropertiesGridEditor";
-export { isBinaryFile, registerEditorProvider, editorProvidersFor, useEditorProviders, generalEditorProviders, editorProviderById, editorProviderIcon, EDITOR_KIND } from "./registry";
-export type { EditorKind, EditorProvider } from "./registry";
-export { MultiViewEditor } from "./MultiViewEditor";
-export { MarkdownPreview, MarkdownSplitEditor, setMarkdownLinkHandler } from "./MarkdownPreview";
-export type { MarkdownPreviewProps, MarkdownLinkHandler } from "./MarkdownPreview";
-export { renderMarkdown } from "./markdownRender";
-export type { MultiViewEditorProps } from "./MultiViewEditor";
-export { getEditorView, useEditorView } from "./editorRegistry";
+export { changeGutter, setChangeBaseline } from "./gutters/changeGutter";
+export { ImageEditor } from "./views/ImageEditor";
+export type { ImageEditorProps } from "./views/ImageEditor";
+export { PropertiesGridEditor } from "./views/PropertiesGridEditor";
+export { isBinaryFile, registerEditorProvider, editorProvidersFor, useEditorProviders, generalEditorProviders, editorProviderById, editorProviderIcon, EDITOR_KIND } from "./registry/registry";
+export type { EditorKind, EditorProvider } from "./registry/registry";
+export { MultiViewEditor } from "./views/MultiViewEditor";
+export { MarkdownPreview, MarkdownSplitEditor, setMarkdownLinkHandler } from "./markdown/MarkdownPreview";
+export type { MarkdownPreviewProps, MarkdownLinkHandler } from "./markdown/MarkdownPreview";
+export { renderMarkdown } from "./markdown/markdownRender";
+export type { MultiViewEditorProps } from "./views/MultiViewEditor";
+export { getEditorView, useEditorView } from "./registry/editorRegistry";
 export {
   editorCanUndo,
   editorCanRedo,
@@ -58,6 +58,6 @@ export {
   editorPaste,
   editorSetText,
   revealLine,
-} from "./editorCommands";
-export { registerDocumentCommands, useDocumentCommands, notifyDocumentCommands } from "./documentCommands";
-export type { DocumentCommands } from "./documentCommands";
+} from "./code/editorCommands";
+export { registerDocumentCommands, useDocumentCommands, notifyDocumentCommands } from "./code/documentCommands";
+export type { DocumentCommands } from "./code/documentCommands";

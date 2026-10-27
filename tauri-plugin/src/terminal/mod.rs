@@ -2,13 +2,13 @@
 //! chooses; their output and exit go to the UI as
 //! [`events::TERMINAL_OUTPUT`] / [`events::TERMINAL_EXIT`]. Feature `terminal`.
 
-use substrate_platform::sync::Locked;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::{Mutex, MutexGuard};
 use substrate_platform::events;
 use substrate_platform::message::Message;
+use substrate_platform::sync::Locked;
 use substrate_platform::terminal::messages::{CANT_START, FAILED};
 use substrate_platform::terminal::{PtyOptions, PtySession, ShellInfo, detect_shells};
 use substrate_platform::workspace::Workspace;
@@ -57,7 +57,12 @@ pub fn terminal_shells() -> Vec<ShellInfo> {
 }
 
 #[tauri::command]
-pub fn terminal_spawn<R: Runtime>(app: AppHandle<R>, terminals: State<'_, Terminals>, ws: State<'_, Workspace>, spec: Spawn) -> Result<(), Message> {
+pub fn terminal_spawn<R: Runtime>(
+    app: AppHandle<R>,
+    terminals: State<'_, Terminals>,
+    ws: State<'_, Workspace>,
+    spec: Spawn,
+) -> Result<(), Message> {
     // "Open in Terminal" on a folder of the workspace; otherwise the open project.
     let cwd = match spec.cwd {
         Some(dir) => {
@@ -70,14 +75,29 @@ pub fn terminal_spawn<R: Runtime>(app: AppHandle<R>, terminals: State<'_, Termin
     let (out_app, out_id) = (app.clone(), spec.id.clone());
     let (exit_app, exit_id) = (app, spec.id.clone());
     let session = PtySession::spawn_utf8(
-        PtyOptions { shell: spec.shell, cwd, ..PtyOptions::default() },
+        PtyOptions {
+            shell: spec.shell,
+            cwd,
+            ..PtyOptions::default()
+        },
         spec.cols,
         spec.rows,
         move |data| {
-            let _ = out_app.emit(events::TERMINAL_OUTPUT, Output { id: out_id.clone(), data });
+            let _ = out_app.emit(
+                events::TERMINAL_OUTPUT,
+                Output {
+                    id: out_id.clone(),
+                    data,
+                },
+            );
         },
         move || {
-            let _ = exit_app.emit(events::TERMINAL_EXIT, Exit { id: exit_id.clone() });
+            let _ = exit_app.emit(
+                events::TERMINAL_EXIT,
+                Exit {
+                    id: exit_id.clone(),
+                },
+            );
         },
     )
     .map_err(|e| failed(CANT_START, e))?;
@@ -86,15 +106,26 @@ pub fn terminal_spawn<R: Runtime>(app: AppHandle<R>, terminals: State<'_, Termin
 }
 
 #[tauri::command]
-pub fn terminal_write(terminals: State<'_, Terminals>, id: String, data: String) -> Result<(), Message> {
+pub fn terminal_write(
+    terminals: State<'_, Terminals>,
+    id: String,
+    data: String,
+) -> Result<(), Message> {
     match terminals.sessions().get_mut(&id) {
-        Some(session) => session.write(data.as_bytes()).map_err(|e| failed(FAILED, e)),
+        Some(session) => session
+            .write(data.as_bytes())
+            .map_err(|e| failed(FAILED, e)),
         None => Ok(()),
     }
 }
 
 #[tauri::command]
-pub fn terminal_resize(terminals: State<'_, Terminals>, id: String, cols: u16, rows: u16) -> Result<(), Message> {
+pub fn terminal_resize(
+    terminals: State<'_, Terminals>,
+    id: String,
+    cols: u16,
+    rows: u16,
+) -> Result<(), Message> {
     match terminals.sessions().get(&id) {
         Some(session) => session.resize(cols, rows).map_err(|e| failed(FAILED, e)),
         None => Ok(()),

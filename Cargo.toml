@@ -4,7 +4,7 @@ members = ["tauri-plugin"]
 
 [package]
 name = "substrate-platform"
-version = "0.2.1"
+version = "0.4.0"
 edition = "2024"
 rust-version = "1.99"
 authors = ["F000NK"]
@@ -17,12 +17,15 @@ repository = "https://github.com/F000NKKK/Substrate-Platform"
 [features]
 fs = ["dep:notify"]
 git = []
+# The language servers: `lsp` starts them through `run` and reads their
+# language list from TOML.
+lsp = ["run", "dep:serde_json"]
 project = []
 run = ["dep:anyhow", "dep:toml", "dep:libc"]
 search = ["dep:globset", "dep:ignore", "dep:regex"]
 state = ["dep:serde_json"]
 terminal = ["dep:anyhow", "dep:portable-pty"]
-full = ["fs", "git", "project", "run", "search", "state", "terminal"]
+full = ["fs", "git", "lsp", "project", "run", "search", "state", "terminal"]
 
 [dependencies]
 anyhow = { version = "1", optional = true }

@@ -26,7 +26,11 @@ impl ProjectStandard {
     pub fn detect(files: &[String], standards: &[ProjectStandard]) -> Option<String> {
         standards
             .iter()
-            .find(|s| s.detect_files.iter().all(|marker| files.iter().any(|f| matches(marker, f))))
+            .find(|s| {
+                s.detect_files
+                    .iter()
+                    .all(|marker| files.iter().any(|f| matches(marker, f)))
+            })
             .map(|s| s.id.clone())
     }
 }
@@ -34,7 +38,10 @@ impl ProjectStandard {
 /// Whether `path` fits `pattern`, whose `*`s stand for any run of
 /// characters within one name.
 fn matches(pattern: &str, path: &str) -> bool {
-    let (patterns, names): (Vec<&str>, Vec<&str>) = (pattern.split(SEPARATOR).collect(), path.split(SEPARATOR).collect());
+    let (patterns, names): (Vec<&str>, Vec<&str>) = (
+        pattern.split(SEPARATOR).collect(),
+        path.split(SEPARATOR).collect(),
+    );
     patterns.len() == names.len() && patterns.iter().zip(&names).all(|(p, n)| name_matches(p, n))
 }
 
@@ -63,7 +70,10 @@ mod tests {
     use super::*;
 
     fn standard(id: &str, files: &[&str]) -> ProjectStandard {
-        ProjectStandard { id: id.to_string(), detect_files: files.iter().map(|f| f.to_string()).collect() }
+        ProjectStandard {
+            id: id.to_string(),
+            detect_files: files.iter().map(|f| f.to_string()).collect(),
+        }
     }
 
     fn files(names: &[&str]) -> Vec<String> {
@@ -78,15 +88,24 @@ mod tests {
             standard("rust", &["Cargo.toml"]),
             standard("node", &["package.json"]),
         ];
-        assert_eq!(ProjectStandard::detect(&here, &standards).as_deref(), Some("rust"));
+        assert_eq!(
+            ProjectStandard::detect(&here, &standards).as_deref(),
+            Some("rust")
+        );
         assert_eq!(ProjectStandard::detect(&here, &standards[..1]), None);
     }
 
     #[test]
     fn a_marker_with_a_wildcard_matches_by_name() {
         let here = files(&["App.csproj", "src/App.sln"]);
-        let standards = [standard("fsharp", &["*.fsproj"]), standard("csharp", &["*.csproj", "src/*.sln"])];
-        assert_eq!(ProjectStandard::detect(&here, &standards).as_deref(), Some("csharp"));
+        let standards = [
+            standard("fsharp", &["*.fsproj"]),
+            standard("csharp", &["*.csproj", "src/*.sln"]),
+        ];
+        assert_eq!(
+            ProjectStandard::detect(&here, &standards).as_deref(),
+            Some("csharp")
+        );
     }
 
     #[test]

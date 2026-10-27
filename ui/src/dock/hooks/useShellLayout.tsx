@@ -32,7 +32,7 @@ export function useShellLayout(options: ShellLayoutOptions): ShellLayout {
   const { anchorSize, setAnchorSize, idsByAnchor, centerIds, pinnedInAnchor, flyoutInAnchor, floatingIds } = anchorQueries;
   const { toggle, pin, unpin } = pinning;
   const { close, show, hide, isVisible } = panelVisibility;
-  const { dockTo, floatAt, moveFloat, resizeFloat } = panelMoves;
+  const { dockTo, placeInCenter, floatAt, moveFloat, resizeFloat } = panelMoves;
   return {
     panelsById,
     mainId: main.id,
@@ -53,6 +53,7 @@ export function useShellLayout(options: ShellLayoutOptions): ShellLayout {
     hide,
     isVisible,
     dockTo,
+    placeInCenter,
     floatAt,
     moveFloat,
     resizeFloat,

@@ -1,13 +1,13 @@
 import { useEffect, useRef } from "react";
 import { useKeybinding } from "../infra/keys/keys";
 import { useShell } from "../shell/ShellContext";
-import { setChangeBaseline } from "../widgets/Editor/changeGutter";
-import { getEditorView, useEditorView } from "../widgets/Editor/editorRegistry";
-import { BranchPickerHost } from "./BranchPicker";
-import { GIT_CHANGES_PANEL } from "./GitChangesWindow";
-import { gitApi } from "./gitApi";
-import { openGitRepository, useRevealedGitDocument } from "./gitDocuments";
-import { gitState, refreshGit, setGitRoot, useGit } from "./gitStore";
+import { setChangeBaseline } from "../widgets/Editor/gutters/changeGutter";
+import { getEditorView, useEditorView } from "../widgets/Editor/registry/editorRegistry";
+import { BranchPickerHost } from "./windows/BranchPicker";
+import { GIT_CHANGES_PANEL } from "./windows/GitChangesWindow";
+import { gitApi } from "./store/gitApi";
+import { openGitRepository, useRevealedGitDocument } from "./store/gitDocuments";
+import { gitState, refreshGit, setGitRoot, useGit } from "./store/gitStore";
 import { useIdeHost } from "../infra/host/ideHost";
 
 const POLL_MS = 5000;

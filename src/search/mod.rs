@@ -186,7 +186,10 @@ pub struct FileMask {
 impl FileMask {
     /// Every file.
     pub fn all() -> Self {
-        Self { include: None, exclude: None }
+        Self {
+            include: None,
+            exclude: None,
+        }
     }
 
     pub fn parse(mask: &str) -> Result<Self, Message> {
@@ -207,8 +210,11 @@ impl FileMask {
                 all = true;
                 continue;
             }
-            let glob = Glob::new(&glob.replace('\\', "/"))
-                .map_err(|err| Message::new(messages::BAD_MASK).arg("mask", part).arg("error", err))?;
+            let glob = Glob::new(&glob.replace('\\', "/")).map_err(|err| {
+                Message::new(messages::BAD_MASK)
+                    .arg("mask", part)
+                    .arg("error", err)
+            })?;
             if negated {
                 exclude.add(glob);
                 any_exclude = true;
@@ -219,7 +225,11 @@ impl FileMask {
         }
         let build = |builder: GlobSetBuilder, any: bool| -> Result<Option<GlobSet>, Message> {
             if any {
-                builder.build().map(Some).map_err(|err| Message::new(messages::BAD_MASK).arg("mask", mask).arg("error", err))
+                builder.build().map(Some).map_err(|err| {
+                    Message::new(messages::BAD_MASK)
+                        .arg("mask", mask)
+                        .arg("error", err)
+                })
             } else {
                 Ok(None)
             }

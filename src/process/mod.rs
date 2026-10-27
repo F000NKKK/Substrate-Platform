@@ -39,8 +39,14 @@ pub fn host_env() -> Vec<(OsString, Option<OsString>)> {
     let mut out: Vec<(OsString, Option<OsString>)> = std::env::vars_os()
         .filter(|(_, v)| std::env::split_paths(v).any(|p| p.starts_with(&appdir)))
         .map(|(k, v)| {
-            let kept: Vec<PathBuf> = std::env::split_paths(&v).filter(|p| !p.as_os_str().is_empty() && !p.starts_with(&appdir)).collect();
-            let value = if kept.is_empty() { None } else { std::env::join_paths(kept).ok() };
+            let kept: Vec<PathBuf> = std::env::split_paths(&v)
+                .filter(|p| !p.as_os_str().is_empty() && !p.starts_with(&appdir))
+                .collect();
+            let value = if kept.is_empty() {
+                None
+            } else {
+                std::env::join_paths(kept).ok()
+            };
             (k, value)
         })
         .collect();

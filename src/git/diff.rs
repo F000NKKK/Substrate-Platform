@@ -34,22 +34,37 @@ pub struct DiffTexts {
     pub binary: bool,
 }
 
-/// A blob's text, `None` if it doesn't exist there; `Err` only for binary content.
+/// A blob's text (through its text view or the repository's textconv),
+/// `None` if it doesn't exist there; `Err` only for binary content.
 fn side_text(top: &Path, side: &DiffSide) -> Result<Option<String>, ()> {
     let bytes = match side.rev.as_str() {
         "" => return Ok(None),
-        WORKTREE => match std::fs::read(absolute(top, &side.path)) {
-            Ok(bytes) => bytes,
-            Err(_) => return Ok(None),
-        },
+        WORKTREE => {
+            let file = absolute(top, &side.path);
+            if let Some(view) = crate::text_view::text_view(Path::new(&file)) {
+                return Ok((view.read)(Path::new(&file)));
+            }
+            match std::fs::read(&file) {
+                Ok(bytes) => bytes,
+                Err(_) => return Ok(None),
+            }
+        }
         rev => {
             let spec = if rev == INDEX {
                 format!(":{}", side.path)
             } else {
                 format!("{rev}:{}", side.path)
             };
+            // A file the product reads as text: through the same view as on
+            // disk, so both sides of its diff are the same text of it.
+            if let Some(view) = crate::text_view::text_view(Path::new(&side.path)) {
+                return Ok(
+                    blob(top, &spec).and_then(|bytes| through_view(view, &side.path, &bytes))
+                );
+            }
+            // As the repository shows it: through its textconv, if the path has one.
             match git(top)
-                .args(["cat-file", "blob", &spec])
+                .args(["cat-file", "--textconv", &spec])
                 .stdout(Stdio::piped())
                 .stderr(Stdio::null())
                 .output()
@@ -63,6 +78,35 @@ fn side_text(top: &Path, side: &DiffSide) -> Result<Option<String>, ()> {
         return Err(());
     }
     Ok(Some(String::from_utf8_lossy(&bytes).into_owned()))
+}
+
+/// The bytes of blob `spec` (`<rev>:<path>`, `:<path>`), `None` if there's none.
+fn blob(top: &Path, spec: &str) -> Option<Vec<u8>> {
+    let out = git(top)
+        .args(["cat-file", "blob", spec])
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .output()
+        .ok()?;
+    out.status.success().then_some(out.stdout)
+}
+
+/// Where a blob is put for a text view to read it: a folder of its own, its file's name kept.
+const VIEW_DIR: &str = "substrate-diff";
+static VIEW_SEQ: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+/// `bytes` (a blob of `path`) as `view` reads its file: written under its
+/// own name in a scratch folder (views go by the name), read, removed.
+fn through_view(view: crate::text_view::TextView, path: &str, bytes: &[u8]) -> Option<String> {
+    let seq = VIEW_SEQ.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    let dir = std::env::temp_dir().join(format!("{VIEW_DIR}-{}-{seq}", std::process::id()));
+    let file = dir.join(Path::new(path).file_name()?);
+    let text = std::fs::create_dir_all(&dir)
+        .and_then(|()| std::fs::write(&file, bytes))
+        .ok()
+        .and_then(|()| (view.read)(&file));
+    let _ = std::fs::remove_dir_all(&dir);
+    text
 }
 
 /// Both sides of a file's diff, for the diff view.
@@ -104,4 +148,29 @@ pub fn head_text(root: &Path, path: &Path) -> Result<Option<String>, Message> {
         },
     )
     .unwrap_or(None))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::text_view::{TextView, register_text_view};
+
+    fn upper(path: &Path) -> Option<String> {
+        std::fs::read_to_string(path).ok().map(|s| s.to_uppercase())
+    }
+
+    fn no_write(_: &Path, _: &str) -> Result<(), String> {
+        Ok(())
+    }
+
+    #[test]
+    fn a_blob_reads_through_the_view_its_file_does() {
+        let view = TextView {
+            read: upper,
+            write: no_write,
+        };
+        register_text_view("difftest", view);
+        let text = through_view(view, "dir/a.difftest", b"binary-ish");
+        assert_eq!(text.as_deref(), Some("BINARY-ISH"));
+    }
 }
