@@ -53,4 +53,13 @@ permissions = [
   "allow-terminal-write",
   "allow-terminal-resize",
   "allow-terminal-kill",
+  "allow-lsp-languages",
+  "allow-lsp-start",
+  "allow-lsp-request",
+  "allow-lsp-notify",
+  "allow-lsp-did-open",
+  "allow-lsp-did-change",
+  "allow-lsp-did-save",
+  "allow-lsp-did-close",
+  "allow-lsp-stop",
 ]

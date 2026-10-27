@@ -6,6 +6,7 @@
 
 pub mod fs;
 pub mod git;
+pub mod lsp;
 pub mod open;
 pub mod search;
 pub mod state;
@@ -29,6 +30,7 @@ pub const SUBSTRATE: &[&Domain] = &[
     &search::DOMAIN,
     &state::DOMAIN,
     &terminal::DOMAIN,
+    &lsp::DOMAIN,
 ];
 
 /// Every command of `domains`, in order — a plugin's permissions.

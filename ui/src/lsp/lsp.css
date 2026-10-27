@@ -1,0 +1,11 @@
+/* A language server's hover: its text as written (Markdown unrendered), wrapped. */
+.sp-lsp-hover {
+  max-width: 72ch;
+  max-height: 24em;
+  overflow: auto;
+  padding: var(--sp-space-xs) var(--sp-space-sm);
+  white-space: pre-wrap;
+  font-family: var(--sp-font-mono);
+  font-size: var(--sp-font-size-sm);
+  color: var(--sp-text);
+}
