@@ -31,6 +31,7 @@ pub struct Message {
 
 impl Message {
     /// A message with no placeholders filled yet.
+    #[must_use]
     pub fn new(text: &'static str) -> Self {
         Self {
             text,
@@ -39,6 +40,11 @@ impl Message {
     }
 
     /// With `{name}` set to `value`.
+    #[must_use]
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "`impl ToString` takes whatever prints (`path.display()`, numbers) without the caller borrowing it"
+    )]
     pub fn arg(mut self, name: &'static str, value: impl ToString) -> Self {
         self.args.insert(name, value.to_string());
         self

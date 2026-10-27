@@ -6,6 +6,10 @@ use substrate_git_domain::branches::Branch;
 /// A local or remote-tracking branch with its tip.
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "the UI reads remote, current and gone as three separate flags of a branch"
+)]
 pub(crate) struct BranchDto {
     name: String,
     remote: bool,

@@ -4,9 +4,7 @@
 
 use std::collections::BTreeSet;
 
-use crate::{
-    Configuration, ConfigurationMapping, ProjectEntry, ProjectError, Section, SolutionFolder,
-};
+use crate::{Configuration, ProjectEntry, ProjectError, Section, SolutionFolder};
 
 /// A solution: its projects and how they're built together.
 #[derive(Debug, Clone, Default, PartialEq)]
@@ -60,27 +58,6 @@ impl Solution {
             .filter(move |p| p.folder.as_deref() == folder)
     }
 
-    /// What `configuration` does with `project`: its own mapping, else the
-    /// project's configuration of the same name, built.
-    #[must_use]
-    pub fn mapping(
-        &self,
-        project: &ProjectEntry,
-        configuration: &Configuration,
-    ) -> ConfigurationMapping {
-        project
-            .configurations
-            .iter()
-            .find(|m| &m.solution == configuration)
-            .cloned()
-            .unwrap_or_else(|| ConfigurationMapping {
-                solution: configuration.clone(),
-                project: configuration.clone(),
-                build: true,
-                deploy: false,
-            })
-    }
-
     /// The projects `configuration` builds, each after its dependencies.
     ///
     /// # Errors
@@ -95,7 +72,7 @@ impl Solution {
         for project in &self.projects {
             self.visit(project, &mut done, &mut visiting, &mut order)?;
         }
-        order.retain(|p| self.mapping(p, configuration).build);
+        order.retain(|p| p.mapping(configuration).build);
         Ok(order)
     }
 
@@ -134,12 +111,13 @@ impl Solution {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ConfigurationMapping;
 
     fn project(id: &str, dependencies: &[&str]) -> ProjectEntry {
         ProjectEntry {
             id: id.into(),
             name: id.into(),
-            dependencies: dependencies.iter().map(|d| d.to_string()).collect(),
+            dependencies: dependencies.iter().map(ToString::to_string).collect(),
             ..Default::default()
         }
     }

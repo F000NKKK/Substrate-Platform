@@ -60,6 +60,24 @@ implemented by `substrate_run_process::SystemLauncher`.
 | `substrate-host-contract` | features forwarded to `substrate-platform` | `dap`, `fs`, `git`, `lsp`, `project`, `search`, `state`, `terminal` pull in the matching domain crates (`substrate-dap-domain`, `substrate-workspace-fs`, `substrate-git-domain`, `substrate-lsp-domain`, `substrate-project-domain`, `substrate-search-domain`, `substrate-state-json`, `substrate-terminal-domain`); `full` is all of them |
 | `tauri-plugin-substrate` | `dap`, `fs`, `git`, `lsp`, `search`, `state`, `terminal` forwarding to `substrate-platform` | same names, backed by the crates above; `tauri_plugin_substrate::Workspace` is still re-exported |
 
+## Wave 11
+
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings` passes
+  and is the CI static gate; the workspace's clippy lints are `deny`.
+- `substrate_project_domain::Solution::mapping(project, configuration)` moved
+  to `ProjectEntry::mapping(&self, configuration)`.
+- `substrate_lsp_app::Client` builds its JSON-RPC messages with the params
+  moved in rather than copied; its public signatures are unchanged.
+- `substrate_dap_domain::adapters` is flat: `Adapter`, `AdapterDefinition`,
+  `AdapterId` and `Adapters` are still exported from the crate root.
+- `substrate_run_domain::workflow::substitute` is generic over the map's
+  hasher.
+- `Message::arg` is `#[must_use]`.
+- serde derives were already out of every domain crate after waves 5–10 (the
+  DTOs live in `tauri-plugin-substrate`'s `wire` modules,
+  `substrate_dap_app::wire` and the `*-toml` crates); wave 11 found nothing
+  more to move.
+
 ## Gates
 
 `cargo llvm-cov --package substrate-platform` is gone; CI measures per crate

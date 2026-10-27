@@ -22,8 +22,7 @@ impl Client {
         let root_uri = uri::from_path(root);
         let folder_name = root
             .file_name()
-            .map(|n| n.to_string_lossy().into_owned())
-            .unwrap_or_else(|| root_uri.clone());
+            .map_or_else(|| root_uri.clone(), |n| n.to_string_lossy().into_owned());
         let mut params = json!({
             "processId": std::process::id(),
             "clientInfo": { "name": "substrate-platform", "version": env!("CARGO_PKG_VERSION") },

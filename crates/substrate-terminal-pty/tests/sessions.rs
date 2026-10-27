@@ -81,5 +81,5 @@ fn a_program_that_is_not_there_does_not_start() {
 fn the_search_path_finds_sh() {
     assert!(SystemShells.is_installed("sh"));
     assert!(!SystemShells.is_installed("no-such-shell-anywhere"));
-    assert!(!SystemShells.default_shell().is_empty());
+    assert_ne!(SystemShells.default_shell(), "");
 }

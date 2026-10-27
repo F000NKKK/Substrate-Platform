@@ -10,7 +10,7 @@ pub enum Reference {
         /// Its file or folder.
         path: PathBuf,
     },
-    /// A package from a feed (NuGet, crates.io, npm).
+    /// A package from a feed (`NuGet`, crates.io, npm).
     Package {
         /// The package's name.
         name: String,

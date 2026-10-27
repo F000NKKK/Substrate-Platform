@@ -45,6 +45,7 @@ impl Handle {
     }
 
     /// Blocks until every step has finished (or the run stopped early).
+    #[must_use]
     pub fn wait(&self) -> Outcome {
         self.shared.result.wait()
     }

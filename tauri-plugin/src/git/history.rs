@@ -1,4 +1,8 @@
 //! The history and the branches.
+#![expect(
+    clippy::unreachable,
+    reason = "the expansion of `#[tauri::command]` contains `unreachable!`"
+)]
 
 use substrate_git_app::branching;
 use substrate_git_app::ports::{Branches, History};
@@ -15,6 +19,10 @@ use super::{SourceControl, checked};
 use crate::blocking;
 
 #[tauri::command]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "Tauri injects state as separate parameters; the UI sends the rest"
+)]
 pub(crate) async fn git_log(
     workspace: State<'_, Workspace>,
     source: State<'_, SourceControl>,

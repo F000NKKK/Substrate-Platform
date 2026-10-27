@@ -17,7 +17,7 @@ pub(crate) fn project_walk(root: &Path, layout: &Layout) -> ignore::Walk {
         .git_exclude(true)
         .require_git(false)
         .parents(true)
-        .sort_by_file_name(|a, b| a.cmp(b))
+        .sort_by_file_name(Ord::cmp)
         .filter_entry(move |entry| !is_skipped_directory(entry, &layout));
     builder.build()
 }

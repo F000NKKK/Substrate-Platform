@@ -2,7 +2,7 @@
 
 use std::path::PathBuf;
 
-use crate::{ConfigurationMapping, Section};
+use crate::{Configuration, ConfigurationMapping, Section};
 
 /// A project as its solution lists it.
 #[derive(Debug, Clone, Default, PartialEq)]
@@ -25,4 +25,22 @@ pub struct ProjectEntry {
     pub configurations: Vec<ConfigurationMapping>,
     /// What else the format keeps about it, in order.
     pub sections: Vec<Section>,
+}
+
+impl ProjectEntry {
+    /// What `configuration` does with this project: its own mapping, else
+    /// the project's configuration of the same name, built.
+    #[must_use]
+    pub fn mapping(&self, configuration: &Configuration) -> ConfigurationMapping {
+        self.configurations
+            .iter()
+            .find(|m| &m.solution == configuration)
+            .cloned()
+            .unwrap_or_else(|| ConfigurationMapping {
+                solution: configuration.clone(),
+                project: configuration.clone(),
+                build: true,
+                deploy: false,
+            })
+    }
 }

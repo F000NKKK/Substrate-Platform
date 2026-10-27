@@ -2,7 +2,7 @@
 
 /// What a shell clears its screen with, by its program — the rest: `clear`.
 /// `\r`, not `\n`: the byte a physical Enter key sends over the pty.
-/// Bash's readline also takes `\n`, PSReadLine (pwsh) only `\r`.
+/// Bash's readline also takes `\n`, `PSReadLine` (pwsh) only `\r`.
 const CLEAR_COMMANDS: &[(&[&str], &str)] = &[
     (&["pwsh", "powershell"], "Clear-Host\r"),
     (&["cmd"], "cls\r"),

@@ -1,4 +1,8 @@
 //! What the scenarios share: scratch projects, queries and the adapters.
+#![expect(
+    clippy::unwrap_used,
+    reason = "helpers of the scenarios: a failed setup is the test failing"
+)]
 
 use std::path::{Path, PathBuf};
 

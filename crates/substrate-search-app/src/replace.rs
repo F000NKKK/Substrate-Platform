@@ -53,6 +53,9 @@ pub fn replace(
     Ok(summary)
 }
 
+/// Whether a path may be rewritten: the host's refusal, as a message.
+type MayWrite<'a> = &'a dyn Fn(&Path) -> Result<(), Message>;
+
 /// A replace's matcher and replacement.
 struct Replacer<'a> {
     matcher: Matcher,
@@ -79,7 +82,7 @@ impl Replacer<'_> {
     fn on_disk(
         &self,
         path: &Path,
-        (documents, may_write): (&impl DocumentSource, &dyn Fn(&Path) -> Result<(), Message>),
+        (documents, may_write): (&impl DocumentSource, MayWrite<'_>),
         summary: &mut ReplaceSummary,
     ) {
         let Some(text) = documents.read_text(path, Decoding::Strict) else {

@@ -7,8 +7,8 @@ use substrate_run_app::{LogSink, TaskHandle};
 use substrate_run_domain::{Task, TaskExit};
 use substrate_run_process::SystemLauncher;
 
-fn spawn(task: Task, sink: LogSink) -> std::io::Result<TaskHandle> {
-    substrate_run_app::spawn(&SystemLauncher, &task, sink)
+fn spawn(task: &Task, sink: LogSink) -> std::io::Result<TaskHandle> {
+    substrate_run_app::spawn(&SystemLauncher, task, sink)
 }
 
 fn texts(sink: &LogSink) -> Vec<String> {
@@ -19,7 +19,7 @@ fn texts(sink: &LogSink) -> Vec<String> {
 fn reports_success_and_exit_line_after_all_output() {
     let sink = LogSink::new();
     let script = "for i in 1 2 3 4 5; do echo out$i; echo err$i >&2; done";
-    let handle = spawn(Task::new("sh").args(["-c", script]), sink.clone()).unwrap();
+    let handle = spawn(&Task::new("sh").args(["-c", script]), sink.clone()).unwrap();
 
     let exit = handle.wait();
     assert_eq!(
@@ -41,7 +41,7 @@ fn reports_success_and_exit_line_after_all_output() {
 #[test]
 fn reports_failure_exit_code() {
     let sink = LogSink::new();
-    let handle = spawn(Task::new("sh").args(["-c", "exit 3"]), sink.clone()).unwrap();
+    let handle = spawn(&Task::new("sh").args(["-c", "exit 3"]), sink.clone()).unwrap();
     assert_eq!(
         handle.wait(),
         TaskExit {
@@ -55,7 +55,7 @@ fn reports_failure_exit_code() {
 #[test]
 fn cancel_kills_the_process() {
     let sink = LogSink::new();
-    let handle = spawn(Task::new("sleep").arg("30"), sink.clone()).unwrap();
+    let handle = spawn(&Task::new("sleep").arg("30"), sink.clone()).unwrap();
     assert!(handle.is_running());
     handle.cancel();
 
@@ -70,7 +70,7 @@ fn cancel_kills_grandchildren_too() {
     // The grandchild inherits the pipes and outlives a plain kill of `sh`;
     // it reports its pid first so the test can check it's gone afterward.
     let script = "sleep 30 & echo $!; wait";
-    let handle = spawn(Task::new("sh").args(["-c", script]), sink.clone()).unwrap();
+    let handle = spawn(&Task::new("sh").args(["-c", script]), sink.clone()).unwrap();
     let grandchild = loop {
         if let Some(pid) = texts(&sink)
             .iter()
@@ -97,5 +97,5 @@ fn cancel_kills_grandchildren_too() {
 
 #[test]
 fn spawn_failure_is_an_error() {
-    assert!(spawn(Task::new("/nonexistent/program"), LogSink::new()).is_err());
+    assert!(spawn(&Task::new("/nonexistent/program"), LogSink::new()).is_err());
 }

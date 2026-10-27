@@ -23,7 +23,7 @@ fn stderr_levels(c: &mut Criterion) {
         .iter()
         .cycle()
         .take(10_000)
-        .map(|l| l.to_string())
+        .map(ToString::to_string)
         .collect();
     c.bench_function("level_of_stderr_line/10k", |b| {
         b.iter(|| {
@@ -31,7 +31,7 @@ fn stderr_levels(c: &mut Criterion) {
                 .iter()
                 .filter(|l| Level::of_stderr_line(black_box(l)) != Level::Info)
                 .count()
-        })
+        });
     });
 }
 

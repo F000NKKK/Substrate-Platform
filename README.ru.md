@@ -222,7 +222,7 @@ substrate-workspace-fs = { path = "../Substrate-Platform/crates/substrate-worksp
 ```sh
 cargo build --workspace --all-features
 cargo test --workspace --all-features
-cargo clippy --workspace --all-targets --all-features
+cargo clippy --workspace --all-targets --all-features -- -D warnings
 ```
 
 Версия Rust (1.99) закреплена в `rust-toolchain.toml`.

@@ -1,7 +1,7 @@
 //! Starting other programs with the system's own environment. A program
-//! packaged as an AppImage runs with variables its runtime set for it —
+//! packaged as an `AppImage` runs with variables its runtime set for it —
 //! `LD_LIBRARY_PATH` into its mount, its GTK and GIO modules, `APPDIR`… —
-//! and a program it starts that inherits them loads the AppImage's
+//! and a program it starts that inherits them loads the `AppImage`'s
 //! libraries instead of its own, and fails (`version 'LIBSYSTEMD_254' not
 //! found`). Everything a product starts goes through here — programs
 //! ([`command`], [`start`]), and links and files opened with the user's

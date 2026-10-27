@@ -1,4 +1,12 @@
 //! Find and Replace in Files, as commands.
+#![expect(
+    clippy::unreachable,
+    reason = "the expansion of `#[tauri::command]` contains `unreachable!`"
+)]
+#![expect(
+    clippy::needless_pass_by_value,
+    reason = "Tauri hands a command its arguments by value: `State` and deserialized parameters cannot be borrowed"
+)]
 
 use std::cell::Cell;
 use std::path::Path;
@@ -44,6 +52,10 @@ fn check_root(workspace: &Workspace, root: Option<&str>, scope: Scope) -> Result
 /// Find All: streams matching files over `on_batch` and resolves with the
 /// totals once done or cancelled.
 #[tauri::command]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "Tauri injects state as separate parameters; the UI sends the rest"
+)]
 pub(crate) async fn find_in_files(
     workspace: State<'_, Workspace>,
     searches: State<'_, Searches>,

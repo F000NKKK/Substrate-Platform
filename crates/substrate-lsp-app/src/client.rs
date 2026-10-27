@@ -16,6 +16,7 @@ use substrate_run_app::ports::ServiceLauncher;
 use substrate_run_domain::Task;
 
 use crate::connection::Connection;
+use crate::envelope::envelope;
 
 /// How long [`Client::request`] waits for an answer.
 pub const REQUEST_TIMEOUT: Duration = Duration::from_secs(30);
@@ -129,12 +130,7 @@ impl Client {
         let id = self.connection.next_id.fetch_add(1, Ordering::Relaxed);
         let (tx, rx) = mpsc::channel();
         self.connection.pending.locked().insert(id, tx);
-        let sent = self.connection.send(&json!({
-            "jsonrpc": "2.0",
-            "id": id,
-            "method": method,
-            "params": params,
-        }));
+        let sent = self.connection.send(&envelope(Some(id), method, params));
         if let Err(e) = sent {
             self.connection.pending.locked().remove(&id);
             return Err(e);
@@ -159,10 +155,6 @@ impl Client {
     ///
     /// The server has stopped, or the stream can't be written.
     pub fn notify(&self, method: &str, params: Value) -> Result<(), LspError> {
-        self.connection.send(&json!({
-            "jsonrpc": "2.0",
-            "method": method,
-            "params": params,
-        }))
+        self.connection.send(&envelope(None, method, params))
     }
 }

@@ -44,6 +44,7 @@ pub const ALL: &[(&str, &str)] = &[
 
 /// `events` — (name in code, event) — as a TypeScript constant `name`; `doc`
 /// is its comment. A product's own events go to its UI the same way.
+#[must_use]
 pub fn typescript(name: &str, doc: &str, events: &[(&str, &str)]) -> String {
     let mut out = ["/** ", doc, " */\nexport const ", name, " = {\n"].concat();
     for (key, event) in events {

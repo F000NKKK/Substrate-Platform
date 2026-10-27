@@ -48,6 +48,7 @@ impl TaskHandle {
     }
 
     /// Blocks until the task has finished (output fully drained included).
+    #[must_use]
     pub fn wait(&self) -> TaskExit {
         self.shared.exit.wait()
     }

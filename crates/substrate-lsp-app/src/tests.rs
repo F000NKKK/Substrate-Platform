@@ -25,8 +25,8 @@ impl FakeServer {
         read_frame(&mut self.from_client).unwrap().unwrap()
     }
 
-    fn send(&mut self, message: Value) {
-        write_frame(&mut self.to_client, &message).unwrap();
+    fn send(&mut self, message: &Value) {
+        write_frame(&mut self.to_client, message).unwrap();
     }
 }
 
@@ -55,8 +55,8 @@ fn a_request_gets_its_own_response() {
     assert_eq!(request["method"], "textDocument/hover");
     assert_eq!(request["params"], json!({ "x": 1 }));
     // An unrelated id first: it must not be taken for the answer.
-    server.send(json!({ "jsonrpc": "2.0", "id": 999, "result": "no" }));
-    server.send(json!({ "jsonrpc": "2.0", "id": request["id"], "result": { "contents": "doc" } }));
+    server.send(&json!({ "jsonrpc": "2.0", "id": 999, "result": "no" }));
+    server.send(&json!({ "jsonrpc": "2.0", "id": request["id"], "result": { "contents": "doc" } }));
     assert_eq!(
         asking.join().unwrap().unwrap(),
         json!({ "contents": "doc" })
@@ -71,7 +71,7 @@ fn an_error_response_is_a_message_naming_server_and_method() {
         std::thread::spawn(move || client.request("textDocument/rename", Value::Null))
     };
     let request = server.recv();
-    server.send(json!({
+    server.send(&json!({
         "jsonrpc": "2.0",
         "id": request["id"],
         "error": { "code": -32803, "message": "can't rename here" },
@@ -88,7 +88,7 @@ fn an_error_response_is_a_message_naming_server_and_method() {
 #[test]
 fn notifications_reach_the_listener() {
     let (_client, mut server, heard) = connected();
-    server.send(json!({
+    server.send(&json!({
         "jsonrpc": "2.0",
         "method": "textDocument/publishDiagnostics",
         "params": { "uri": "file:///a.rs", "diagnostics": [] },
@@ -101,7 +101,7 @@ fn notifications_reach_the_listener() {
 #[test]
 fn the_servers_requests_are_answered() {
     let (_client, mut server, _) = connected();
-    server.send(json!({
+    server.send(&json!({
         "jsonrpc": "2.0",
         "id": "c1",
         "method": "workspace/configuration",
@@ -111,7 +111,7 @@ fn the_servers_requests_are_answered() {
         server.recv(),
         json!({ "jsonrpc": "2.0", "id": "c1", "result": [null, null] })
     );
-    server.send(json!({ "jsonrpc": "2.0", "id": 7, "method": "x/unknown" }));
+    server.send(&json!({ "jsonrpc": "2.0", "id": 7, "method": "x/unknown" }));
     assert_eq!(server.recv()["error"]["code"], -32601);
 }
 
@@ -135,7 +135,7 @@ fn initialize_names_the_workspace_then_says_initialized() {
         request["params"]["initializationOptions"],
         json!({ "opt": true })
     );
-    server.send(json!({
+    server.send(&json!({
         "jsonrpc": "2.0",
         "id": request["id"],
         "result": { "capabilities": { "hoverProvider": true } },

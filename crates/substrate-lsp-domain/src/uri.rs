@@ -6,12 +6,16 @@ use std::path::{Path, PathBuf};
 
 const SCHEME: &str = "file://";
 
+/// The digits of a percent-encoded byte.
+const HEX: &[u8; 16] = b"0123456789ABCDEF";
+
 /// Bytes a path keeps as they are in a URI.
 fn unreserved(b: u8) -> bool {
     b.is_ascii_alphanumeric() || matches!(b, b'-' | b'.' | b'_' | b'~' | b'/' | b':')
 }
 
 /// `path` (absolute) as a `file://` URI.
+#[must_use]
 pub fn from_path(path: &Path) -> String {
     let text = path.to_string_lossy();
     let mut slashed = text.replace('\\', "/");
@@ -24,7 +28,9 @@ pub fn from_path(path: &Path) -> String {
         if unreserved(b) {
             out.push(b as char);
         } else {
-            out.push_str(&format!("%{b:02X}"));
+            out.push('%');
+            out.push(char::from(HEX[usize::from(b >> 4)]));
+            out.push(char::from(HEX[usize::from(b & 0xF)]));
         }
     }
     out
@@ -32,6 +38,7 @@ pub fn from_path(path: &Path) -> String {
 
 /// The path a `file://` URI names — `None` for another scheme or bad
 /// encoding.
+#[must_use]
 pub fn to_path(uri: &str) -> Option<PathBuf> {
     let rest = uri.strip_prefix(SCHEME)?;
     // A host (`file://server/share`) isn't a local path.

@@ -21,7 +21,7 @@ fn a_query_reads_the_checkboxes_the_ui_sends() {
     assert_eq!(query.word, WordMatch::Anywhere);
     assert_eq!(query.syntax, PatternSyntax::Regex);
     assert_eq!(query.generated, GeneratedCode::Include);
-    assert!(query.file_mask.is_empty());
+    assert_eq!(query.file_mask, "");
 }
 
 #[test]
