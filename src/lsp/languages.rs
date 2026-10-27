@@ -24,8 +24,7 @@ use std::path::Path;
 use serde::Deserialize;
 use serde_json::Value;
 
-use super::messages;
-use crate::message::Message;
+use super::LspError;
 
 /// How a language server is started.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -103,9 +102,13 @@ pub struct Languages {
 }
 
 impl Languages {
-    pub fn parse(text: &str) -> Result<Self, Message> {
-        let file: LanguageFile = toml::from_str(text)
-            .map_err(|e| Message::new(messages::INVALID_LIST).arg("error", e.message()))?;
+    /// Parses the list of languages from TOML.
+    ///
+    /// # Errors
+    ///
+    /// The server has stopped, does not answer in time, or refuses.
+    pub fn parse(text: &str) -> Result<Self, LspError> {
+        let file: LanguageFile = toml::from_str(text).map_err(LspError::InvalidList)?;
         let languages = file
             .language
             .into_iter()

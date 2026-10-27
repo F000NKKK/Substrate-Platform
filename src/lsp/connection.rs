@@ -10,12 +10,11 @@ use std::sync::{Mutex, mpsc};
 use serde_json::{Value, json};
 
 use super::answer::answer;
-use super::{Notification, framing, messages};
-use crate::message::Message;
+use super::{LspError, Notification, framing};
 use crate::sync::Locked;
 
 /// What a request gets back.
-pub(super) type Reply = Result<Value, Message>;
+pub(super) type Reply = Result<Value, LspError>;
 /// Who hears what the server says unasked.
 pub(super) type OnNotification = Box<dyn Fn(Notification) + Send + Sync>;
 
@@ -50,23 +49,21 @@ impl Connection {
     }
 
     /// Sends one message, unless the stream has ended.
-    pub(super) fn send(&self, message: &Value) -> Result<(), Message> {
+    pub(super) fn send(&self, message: &Value) -> Result<(), LspError> {
         if self.stopped.load(Ordering::Acquire) {
-            return Err(self.stopped_message());
+            return Err(self.stopped_error());
         }
-        framing::write(&mut *self.writer.locked(), message).map_err(|e| self.failed(e))
+        framing::write(&mut *self.writer.locked(), message).map_err(|source| LspError::Failed {
+            server: self.name.clone(),
+            source,
+        })
     }
 
-    /// The message for a failure to speak to the server.
-    pub(super) fn failed(&self, error: impl ToString) -> Message {
-        Message::new(messages::FAILED)
-            .arg("server", &self.name)
-            .arg("error", error.to_string())
-    }
-
-    /// The message for a server no longer running.
-    pub(super) fn stopped_message(&self) -> Message {
-        Message::new(messages::STOPPED).arg("server", &self.name)
+    /// The error for a server no longer running.
+    pub(super) fn stopped_error(&self) -> LspError {
+        LspError::Stopped {
+            server: self.name.clone(),
+        }
     }
 
     /// The stream ended: every request still waiting fails.
@@ -105,7 +102,7 @@ impl Connection {
             }),
         };
         // A failed send means the stream ended, which the read loop sees next.
-        let _ = self.send(&reply);
+        self.send(&reply).ok();
     }
 
     /// Hands the response `message` to the request `id` waiting for it.
@@ -115,13 +112,18 @@ impl Connection {
             return;
         };
         let reply = match message.get("error") {
-            Some(error) => Err(Message::new(messages::ERROR).arg("server", &self.name).arg(
-                "error",
-                error.get("message").and_then(Value::as_str).unwrap_or(""),
-            )),
+            Some(error) => Err(LspError::Rejected {
+                server: self.name.clone(),
+                method: String::new(),
+                reason: error
+                    .get("message")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default()
+                    .to_string(),
+            }),
             None => Ok(message.get("result").cloned().unwrap_or(Value::Null)),
         };
         // The request gave up waiting (it timed out): nobody to tell.
-        let _ = waiting.send(reply);
+        waiting.send(reply).ok();
     }
 }

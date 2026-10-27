@@ -4,8 +4,7 @@ use std::path::Path;
 
 use serde_json::{Map, Value};
 
-use super::failed;
-use crate::message::Message;
+use super::StateError;
 
 /// A state file being written, before it takes the real one's place.
 const PARTIAL_EXTENSION: &str = "json.partial";
@@ -28,12 +27,15 @@ pub fn read_json(path: &Path) -> Value {
 /// # Errors
 ///
 /// The folder or file can't be written.
-pub fn write_json(path: &Path, value: &Value) -> Result<(), Message> {
+pub fn write_json(path: &Path, value: &Value) -> Result<(), StateError> {
     if let Some(dir) = path.parent() {
-        std::fs::create_dir_all(dir).map_err(|e| failed(dir, e))?;
+        std::fs::create_dir_all(dir).map_err(|e| StateError::io(dir, e))?;
     }
-    let json = serde_json::to_string_pretty(value).map_err(|e| failed(path, e))?;
+    let json = serde_json::to_string_pretty(value).map_err(|source| StateError::Json {
+        path: path.to_path_buf(),
+        source,
+    })?;
     let partial = path.with_extension(PARTIAL_EXTENSION);
-    std::fs::write(&partial, json).map_err(|e| failed(&partial, e))?;
-    std::fs::rename(&partial, path).map_err(|e| failed(path, e))
+    std::fs::write(&partial, json).map_err(|e| StateError::io(&partial, e))?;
+    std::fs::rename(&partial, path).map_err(|e| StateError::io(path, e))
 }

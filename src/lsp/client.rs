@@ -13,8 +13,7 @@ use std::time::Duration;
 use serde_json::{Value, json};
 
 use super::connection::Connection;
-use super::{Notification, ServerDefinition, capabilities, messages, uri};
-use crate::message::Message;
+use super::{LspError, Notification, ServerDefinition, capabilities, uri};
 use crate::run::LogSink;
 use crate::sync::Locked;
 
@@ -39,16 +38,19 @@ impl Client {
     /// stdout carry the protocol, its stderr goes to `log`, and
     /// `on_notification` hears what it says unasked — on the reader's
     /// thread, so it should hand off rather than block.
+    ///
+    /// # Errors
+    ///
+    /// The server has stopped, does not answer in time, or refuses.
     pub fn start(
         server: &ServerDefinition,
         cwd: &Path,
         log: LogSink,
         on_notification: impl Fn(Notification) + Send + Sync + 'static,
-    ) -> Result<Self, Message> {
-        let cant_start = |error: &dyn ToString| {
-            Message::new(messages::CANT_START)
-                .arg("server", server.name())
-                .arg("error", error.to_string())
+    ) -> Result<Self, LspError> {
+        let cant_start = |source: std::io::Error| LspError::CantStart {
+            server: server.name().to_string(),
+            source,
         };
         let mut command = crate::process::command(&server.command);
         command
@@ -62,12 +64,12 @@ impl Client {
         // (`cargo check` under rust-analyzer) — see `run::kill_tree`.
         #[cfg(unix)]
         std::os::unix::process::CommandExt::process_group(&mut command, 0);
-        let mut child = command.spawn().map_err(|e| cant_start(&e))?;
+        let mut child = command.spawn().map_err(cant_start)?;
         let (Some(stdin), Some(stdout), Some(stderr)) =
             (child.stdin.take(), child.stdout.take(), child.stderr.take())
         else {
             crate::run::kill_tree(&mut child);
-            return Err(cant_start(&"no pipes"));
+            return Err(cant_start(std::io::Error::other("no pipes")));
         };
         std::thread::spawn(move || {
             for line in BufReader::new(stderr).lines().map_while(Result::ok) {
@@ -108,18 +110,26 @@ impl Client {
     }
 
     /// Sends `method` and waits up to [`REQUEST_TIMEOUT`] for its result.
-    pub fn request(&self, method: &str, params: Value) -> Result<Value, Message> {
+    ///
+    /// # Errors
+    ///
+    /// The server has stopped, does not answer in time, or refuses.
+    pub fn request(&self, method: &str, params: Value) -> Result<Value, LspError> {
         self.request_within(method, params, REQUEST_TIMEOUT)
     }
 
     /// [`Self::request`] with its own timeout. A request that times out is
     /// cancelled (`$/cancelRequest`).
+    ///
+    /// # Errors
+    ///
+    /// The server has stopped, does not answer in time, or refuses.
     pub fn request_within(
         &self,
         method: &str,
         params: Value,
         timeout: Duration,
-    ) -> Result<Value, Message> {
+    ) -> Result<Value, LspError> {
         let id = self.connection.next_id.fetch_add(1, Ordering::Relaxed);
         let (tx, rx) = mpsc::channel();
         self.connection.pending.locked().insert(id, tx);
@@ -134,19 +144,25 @@ impl Client {
             return Err(e);
         }
         match rx.recv_timeout(timeout) {
-            Ok(reply) => reply.map_err(|e| e.arg("method", method)),
+            Ok(reply) => reply.map_err(|e| e.answering(method)),
             Err(mpsc::RecvTimeoutError::Timeout) => {
                 self.connection.pending.locked().remove(&id);
-                let _ = self.notify("$/cancelRequest", json!({ "id": id }));
-                Err(Message::new(messages::TIMED_OUT)
-                    .arg("server", &self.connection.name)
-                    .arg("method", method))
+                self.notify("$/cancelRequest", json!({ "id": id })).ok();
+                Err(LspError::TimedOut {
+                    server: self.connection.name.clone(),
+                    method: method.to_string(),
+                })
             }
-            Err(mpsc::RecvTimeoutError::Disconnected) => Err(self.connection.stopped_message()),
+            Err(mpsc::RecvTimeoutError::Disconnected) => Err(self.connection.stopped_error()),
         }
     }
 
-    pub fn notify(&self, method: &str, params: Value) -> Result<(), Message> {
+    /// Sends a notification to the server; no answer is awaited.
+    ///
+    /// # Errors
+    ///
+    /// The server has stopped, does not answer in time, or refuses.
+    pub fn notify(&self, method: &str, params: Value) -> Result<(), LspError> {
         self.connection.send(&json!({
             "jsonrpc": "2.0",
             "method": method,
@@ -156,11 +172,15 @@ impl Client {
 
     /// `initialize` for the workspace at `root`, then `initialized`: the
     /// server's capabilities (the result's `capabilities`).
+    ///
+    /// # Errors
+    ///
+    /// The server has stopped, does not answer in time, or refuses.
     pub fn initialize(
         &self,
         root: &Path,
         initialization_options: Option<Value>,
-    ) -> Result<Value, Message> {
+    ) -> Result<Value, LspError> {
         let root_uri = uri::from_path(root);
         let folder_name = root
             .file_name()
@@ -183,13 +203,17 @@ impl Client {
 
     /// `textDocument/didOpen`: the editor holds `path` now, `text` is its
     /// content at `version`.
+    ///
+    /// # Errors
+    ///
+    /// The server has stopped, does not answer in time, or refuses.
     pub fn did_open(
         &self,
         path: &Path,
         language_id: &str,
         version: i64,
         text: &str,
-    ) -> Result<(), Message> {
+    ) -> Result<(), LspError> {
         self.notify(
             "textDocument/didOpen",
             json!({ "textDocument": {
@@ -203,7 +227,11 @@ impl Client {
 
     /// `textDocument/didChange` with the whole new text (full sync — every
     /// server accepts it).
-    pub fn did_change(&self, path: &Path, version: i64, text: &str) -> Result<(), Message> {
+    ///
+    /// # Errors
+    ///
+    /// The server has stopped, does not answer in time, or refuses.
+    pub fn did_change(&self, path: &Path, version: i64, text: &str) -> Result<(), LspError> {
         self.notify(
             "textDocument/didChange",
             json!({
@@ -213,14 +241,24 @@ impl Client {
         )
     }
 
-    pub fn did_save(&self, path: &Path) -> Result<(), Message> {
+    /// `textDocument/didSave`: the editor saved `path`.
+    ///
+    /// # Errors
+    ///
+    /// The server has stopped, does not answer in time, or refuses.
+    pub fn did_save(&self, path: &Path) -> Result<(), LspError> {
         self.notify(
             "textDocument/didSave",
             json!({ "textDocument": { "uri": uri::from_path(path) } }),
         )
     }
 
-    pub fn did_close(&self, path: &Path) -> Result<(), Message> {
+    /// `textDocument/didClose`: the editor closed `path`.
+    ///
+    /// # Errors
+    ///
+    /// The server has stopped, does not answer in time, or refuses.
+    pub fn did_close(&self, path: &Path) -> Result<(), LspError> {
         self.notify(
             "textDocument/didClose",
             json!({ "textDocument": { "uri": uri::from_path(path) } }),
@@ -231,8 +269,9 @@ impl Client {
     /// that is killed. Nothing can be sent afterwards.
     pub fn shutdown(&self) {
         if !self.is_stopped() {
-            let _ = self.request_within("shutdown", Value::Null, SHUTDOWN_TIMEOUT);
-            let _ = self.notify("exit", Value::Null);
+            self.request_within("shutdown", Value::Null, SHUTDOWN_TIMEOUT)
+                .ok();
+            self.notify("exit", Value::Null).ok();
         }
         self.connection.stop();
         if let Some(mut child) = self.connection.child.locked().take() {
@@ -244,7 +283,7 @@ impl Client {
                 std::thread::sleep(EXIT_POLL);
             }
             crate::run::kill_tree(&mut child);
-            let _ = child.wait();
+            child.wait().ok();
         }
     }
 }

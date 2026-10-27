@@ -1,10 +1,10 @@
 //! Reading `git status`: running it, and parsing its porcelain v2.
 
+use crate::git::GitError;
 use std::path::Path;
 
 use super::{ChangeKind, FileChange, Operation, RepoStatus};
 use crate::git::run::{git, repo_of, run};
-use crate::message::Message;
 
 /// Parses `git status --porcelain=v2 --branch --show-stash -z`.
 #[must_use]
@@ -91,7 +91,7 @@ fn branch_header(status: &mut RepoStatus, header: &str) {
 /// # Errors
 ///
 /// What `git` reports when it can't read the repository.
-pub fn read(root: &Path) -> Result<Option<RepoStatus>, Message> {
+pub fn read(root: &Path) -> Result<Option<RepoStatus>, GitError> {
     let Some((top, git_dir)) = repo_of(root)? else {
         return Ok(None);
     };

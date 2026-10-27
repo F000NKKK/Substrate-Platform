@@ -2,8 +2,7 @@
 
 use std::path::Path;
 
-use super::failed;
-use crate::message::Message;
+use super::StateError;
 
 /// What keeps a private folder out of version control, from inside it.
 pub(super) const GITIGNORE: &str = ".gitignore";
@@ -17,11 +16,11 @@ pub(super) const IGNORE_EVERYTHING: &str = "*\n";
 /// # Errors
 ///
 /// The folder or its ignore file can't be written.
-pub fn private_dir(dir: &Path) -> Result<(), Message> {
-    std::fs::create_dir_all(dir).map_err(|e| failed(dir, e))?;
+pub fn private_dir(dir: &Path) -> Result<(), StateError> {
+    std::fs::create_dir_all(dir).map_err(|e| StateError::io(dir, e))?;
     let ignore = dir.join(GITIGNORE);
     if ignore.exists() {
         return Ok(());
     }
-    std::fs::write(&ignore, IGNORE_EVERYTHING).map_err(|e| failed(&ignore, e))
+    std::fs::write(&ignore, IGNORE_EVERYTHING).map_err(|e| StateError::io(&ignore, e))
 }

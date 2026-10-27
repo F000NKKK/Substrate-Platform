@@ -1,7 +1,7 @@
 //! Running `git`: set up for a GUI host, its failures made actionable, its
 //! long runs streamed; and finding the repository a folder is in.
 
-use super::messages;
+use super::{GitError, messages};
 use crate::message::Message;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::path::{Path, PathBuf};
@@ -61,17 +61,17 @@ pub(crate) fn git(dir: &Path) -> Command {
     command
 }
 
-fn spawn_error(err: std::io::Error) -> Message {
+fn spawn_error(err: std::io::Error) -> GitError {
     if err.kind() == std::io::ErrorKind::NotFound {
-        Message::new(messages::MISSING)
+        GitError::Missing
     } else {
-        Message::new(messages::CANT_START).arg("error", err)
+        GitError::CantStart(err)
     }
 }
 
 /// What git said about a failure — its stderr, else its stdout (a merge
 /// reports conflicts there), mapped to something actionable where we can.
-fn failure(stderr: &str, stdout: &str) -> Message {
+fn failure(stderr: &str, stdout: &str) -> GitError {
     let text = if stderr.trim().is_empty() {
         stdout
     } else {
@@ -80,19 +80,21 @@ fn failure(stderr: &str, stdout: &str) -> Message {
     friendly(text.trim())
 }
 
-pub(crate) fn friendly(text: &str) -> Message {
+pub(crate) fn friendly(text: &str) -> GitError {
     let lower = text.to_lowercase();
     if AUTH_SIGNS.iter().any(|sign| lower.contains(sign)) {
-        Message::new(messages::AUTH_FAILED)
+        GitError::AuthFailed
     } else if IDENTITY_SIGNS.iter().any(|sign| lower.contains(sign)) {
-        Message::new(messages::NO_IDENTITY)
+        GitError::NoIdentity
     } else {
-        Message::verbatim(text)
+        GitError::Failed {
+            text: text.to_string(),
+        }
     }
 }
 
 /// Runs `command` to completion — its stdout when it succeeded, else what it said went wrong.
-pub(crate) fn run(command: &mut Command) -> Result<String, Message> {
+pub(crate) fn run(command: &mut Command) -> Result<String, GitError> {
     let out = command
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -107,7 +109,7 @@ pub(crate) fn run(command: &mut Command) -> Result<String, Message> {
 }
 
 /// Like [`run`], feeding `input` to the command's stdin.
-pub(crate) fn run_with_input(command: &mut Command, input: &str) -> Result<String, Message> {
+pub(crate) fn run_with_input(command: &mut Command, input: &str) -> Result<String, GitError> {
     let mut child = command
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -128,7 +130,7 @@ pub(crate) fn run_with_input(command: &mut Command, input: &str) -> Result<Strin
 
 /// Runs `command` with its output streamed line by line to `out`, headed by the
 /// command line itself. Progress meters (`\r` rewrites) only show their final state.
-pub(crate) fn stream(out: Output, command: &mut Command, shown: &str) -> Result<(), Message> {
+pub(crate) fn stream(out: Output, command: &mut Command, shown: &str) -> Result<(), GitError> {
     out(Message::new(messages::RUNNING).arg("command", shown));
     let mut child = command
         .stdout(Stdio::piped())
@@ -136,11 +138,11 @@ pub(crate) fn stream(out: Output, command: &mut Command, shown: &str) -> Result<
         .spawn()
         .map_err(|e| {
             let err = spawn_error(e);
-            out(err.clone());
+            out(Message::from(&err));
             err
         })?;
     let (Some(stdout), Some(stderr)) = (child.stdout.take(), child.stderr.take()) else {
-        return Err(Message::new(messages::CANT_START).arg("error", "no output"));
+        return Err(GitError::CantStart(std::io::Error::other("no output")));
     };
     let (stdout, stderr, status) = std::thread::scope(|scope| {
         let stdout = scope.spawn(move || forward_lines(stdout, out));
@@ -187,7 +189,7 @@ fn forward_lines(reader: impl Read, out: Output) -> String {
 }
 
 /// Streams a `git args` run in `top` to `out` (see [`stream`]).
-pub(crate) fn stream_git(out: Output, top: &Path, args: &[&str]) -> Result<(), Message> {
+pub(crate) fn stream_git(out: Output, top: &Path, args: &[&str]) -> Result<(), GitError> {
     stream(out, git(top).args(args), &args.join(" "))
 }
 
@@ -195,7 +197,7 @@ pub(crate) fn stream_git(out: Output, top: &Path, args: &[&str]) -> Result<(), M
 /// top folder — canonical, like project roots, so paths built on it match
 /// the ones in open tabs — and its `.git` directory. `None` when it isn't
 /// in a repository at all.
-pub(crate) fn repo_of(root: &Path) -> Result<Option<(PathBuf, PathBuf)>, Message> {
+pub(crate) fn repo_of(root: &Path) -> Result<Option<(PathBuf, PathBuf)>, GitError> {
     let out = git(root)
         .args(["rev-parse", "--show-toplevel", "--absolute-git-dir"])
         .stdout(Stdio::piped())
@@ -223,14 +225,18 @@ pub(crate) fn repo_of(root: &Path) -> Result<Option<(PathBuf, PathBuf)>, Message
 }
 
 /// The working tree's top folder of the repository `root` is in.
-pub(crate) fn require_repo(root: &Path) -> Result<PathBuf, Message> {
+pub(crate) fn require_repo(root: &Path) -> Result<PathBuf, GitError> {
     repo_of(root)?
         .map(|(top, _)| top)
-        .ok_or_else(|| Message::new(messages::NOT_A_REPOSITORY))
+        .ok_or(GitError::NotARepository)
 }
 
 /// The working tree's top folder of the repository `root` is in, if it's in one.
-pub fn repo_root(root: &Path) -> Result<Option<PathBuf>, Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn repo_root(root: &Path) -> Result<Option<PathBuf>, GitError> {
     Ok(repo_of(root)?.map(|(top, _)| top))
 }
 
@@ -252,19 +258,24 @@ mod tests {
 
     #[test]
     fn explains_auth_and_identity_failures() {
-        assert_eq!(
+        assert!(matches!(
             friendly(
                 "fatal: could not read Username for 'https://github.com': terminal prompts disabled"
             ),
-            Message::new(messages::AUTH_FAILED)
-        );
-        assert_eq!(
+            GitError::AuthFailed
+        ));
+        assert!(matches!(
             friendly("Author identity unknown\n\n*** Please tell me who you are."),
-            Message::new(messages::NO_IDENTITY)
+            GitError::NoIdentity
+        ));
+        let other = friendly("error: pathspec 'x' did not match");
+        assert_eq!(
+            Message::from(other),
+            Message::verbatim("error: pathspec 'x' did not match")
         );
         assert_eq!(
-            friendly("error: pathspec 'x' did not match"),
-            Message::verbatim("error: pathspec 'x' did not match")
+            Message::from(GitError::AuthFailed),
+            Message::new(messages::AUTH_FAILED)
         );
     }
 }

@@ -1,7 +1,7 @@
 //! Stashes: listing, stashing, applying, popping, dropping.
 
+use super::GitError;
 use super::run::{git, require_repo, run, write_lock};
-use crate::message::Message;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
@@ -32,7 +32,12 @@ fn parse_stashes(raw: &str) -> Vec<StashEntry> {
         .collect()
 }
 
-pub fn list(root: &Path) -> Result<Vec<StashEntry>, Message> {
+/// The stash list, newest first.
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn list(root: &Path) -> Result<Vec<StashEntry>, GitError> {
     let top = require_repo(root)?;
     Ok(parse_stashes(&run(git(&top).args([
         "stash",
@@ -52,7 +57,12 @@ pub enum StashMode {
     Staged,
 }
 
-pub fn push(root: &Path, message: &str, mode: StashMode) -> Result<(), Message> {
+/// Stashes the changes, with `message`.
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn push(root: &Path, message: &str, mode: StashMode) -> Result<(), GitError> {
     let top = require_repo(root)?;
     let _lock = write_lock();
     let mut command = git(&top);
@@ -77,7 +87,11 @@ pub enum StashOperation {
 }
 
 /// Applies, pops or drops stash `index`.
-pub fn perform(root: &Path, index: u32, operation: StashOperation) -> Result<(), Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn perform(root: &Path, index: u32, operation: StashOperation) -> Result<(), GitError> {
     let top = require_repo(root)?;
     let _lock = write_lock();
     let verb = match operation {

@@ -4,6 +4,7 @@
 
 mod default_shell;
 pub mod messages;
+mod pty_error;
 mod pty_options;
 mod pty_session;
 mod shell;
@@ -11,6 +12,7 @@ mod size;
 mod utf8_chunker;
 
 pub use default_shell::default_shell;
+pub use pty_error::PtyError;
 pub use pty_options::PtyOptions;
 pub use pty_session::PtySession;
 pub use shell::{Shell, detect_shells};

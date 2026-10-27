@@ -4,8 +4,7 @@ use std::path::{Path, PathBuf};
 
 use serde_json::Value;
 use substrate_platform::events;
-use substrate_platform::lsp::messages::NO_SERVER;
-use substrate_platform::lsp::{Client, Languages, ServerDefinition};
+use substrate_platform::lsp::{Client, Languages, LspError, ServerDefinition};
 use substrate_platform::message::Message;
 use substrate_platform::run::LogSink;
 use substrate_platform::workspace::Workspace;
@@ -58,7 +57,9 @@ pub async fn lsp_start<R: Runtime>(
     let definition = languages
         .get(&language)
         .and_then(|l| l.server.clone())
-        .ok_or_else(|| Message::new(NO_SERVER).arg("language", &language))?;
+        .ok_or_else(|| LspError::NoServer {
+            language: language.clone(),
+        })?;
     let started = blocking(move || launch(&app, &definition, &root, &language)).await?;
     let capabilities = started.capabilities.clone();
     // Another start may have won the race while this one initialized.
@@ -76,7 +77,7 @@ fn launch<R: Runtime>(
     definition: &ServerDefinition,
     root: &str,
     language: &str,
-) -> Result<Server, Message> {
+) -> Result<Server, LspError> {
     let log = LogSink::new();
     let (log_app, log_root, log_language) = (app.clone(), root.to_string(), language.to_string());
     log.on_push(move |line| {
@@ -86,7 +87,7 @@ fn launch<R: Runtime>(
             line: line.text.clone(),
         };
         // The UI window is gone: nobody to tell.
-        let _ = log_app.emit(events::LSP_OUTPUT, event);
+        log_app.emit(events::LSP_OUTPUT, event).ok();
     });
     let dir = PathBuf::from(root);
     let (note_app, note_root, note_language) =
@@ -99,7 +100,7 @@ fn launch<R: Runtime>(
             params: notification.params,
         };
         // The UI window is gone: nobody to tell.
-        let _ = note_app.emit(events::LSP_NOTIFICATION, event);
+        note_app.emit(events::LSP_NOTIFICATION, event).ok();
     })?;
     match client.initialize(&dir, definition.initialization_options()) {
         Ok(capabilities) => Ok(Server {
@@ -135,7 +136,7 @@ pub fn lsp_notify(
     method: String,
     params: Value,
 ) -> Result<(), Message> {
-    servers.client(&root, &language)?.notify(&method, params)
+    Ok(servers.client(&root, &language)?.notify(&method, params)?)
 }
 
 /// The editor opened `path` (in the workspace) with `text` at `version`.
@@ -155,9 +156,9 @@ pub fn lsp_did_open(
 ) -> Result<(), Message> {
     let path = PathBuf::from(path);
     workspace.check(&path)?;
-    servers
+    Ok(servers
         .client(&root, &language)?
-        .did_open(&path, &language, version, &text)
+        .did_open(&path, &language, version, &text)?)
 }
 
 /// The editor changed `path` to `text` at `version`.
@@ -170,9 +171,9 @@ pub fn lsp_did_change(
     version: i64,
     text: String,
 ) -> Result<(), Message> {
-    servers
+    Ok(servers
         .client(&root, &language)?
-        .did_change(Path::new(&path), version, &text)
+        .did_change(Path::new(&path), version, &text)?)
 }
 
 /// The editor saved `path`.
@@ -183,7 +184,9 @@ pub fn lsp_did_save(
     language: String,
     path: String,
 ) -> Result<(), Message> {
-    servers.client(&root, &language)?.did_save(Path::new(&path))
+    Ok(servers
+        .client(&root, &language)?
+        .did_save(Path::new(&path))?)
 }
 
 /// The editor closed `path`.
@@ -194,9 +197,9 @@ pub fn lsp_did_close(
     language: String,
     path: String,
 ) -> Result<(), Message> {
-    servers
+    Ok(servers
         .client(&root, &language)?
-        .did_close(Path::new(&path))
+        .did_close(Path::new(&path))?)
 }
 
 /// Stops `language`'s server for `root`, if it runs.
@@ -210,7 +213,7 @@ pub async fn lsp_stop(
     if let Some(server) = server {
         blocking(move || {
             server.client.shutdown();
-            Ok(())
+            Ok::<_, Message>(())
         })
         .await?;
     }

@@ -2,8 +2,7 @@
 
 use globset::{Glob, GlobSet, GlobSetBuilder};
 
-use crate::message::Message;
-use crate::search::messages;
+use crate::search::SearchError;
 
 /// VS's "all files" masks: they'd skip extensionless files as globs.
 const ALL_FILES: [&str; 2] = ["*.*", "*"];
@@ -34,8 +33,8 @@ impl FileMask {
     ///
     /// # Errors
     ///
-    /// [`messages::BAD_MASK`] for a glob that doesn't parse.
-    pub fn parse(mask: &str) -> Result<Self, Message> {
+    /// [`SearchError::BadMask`] for a glob that doesn't parse.
+    pub fn parse(mask: &str) -> Result<Self, SearchError> {
         let mut include = Globs::default();
         let mut exclude = Globs::default();
         let mut all = false;
@@ -89,7 +88,7 @@ impl Default for Globs {
 
 impl Globs {
     /// Adds `glob`, written `part` in the mask.
-    fn add(&mut self, glob: &str, part: &str) -> Result<(), Message> {
+    fn add(&mut self, glob: &str, part: &str) -> Result<(), SearchError> {
         let glob = Glob::new(&glob.replace('\\', "/")).map_err(|err| bad_mask(part, err))?;
         self.builder.add(glob);
         self.any = true;
@@ -97,7 +96,7 @@ impl Globs {
     }
 
     /// The set — `None` when nothing was added.
-    fn build(self, mask: &str) -> Result<Option<GlobSet>, Message> {
+    fn build(self, mask: &str) -> Result<Option<GlobSet>, SearchError> {
         if !self.any {
             return Ok(None);
         }
@@ -108,8 +107,9 @@ impl Globs {
     }
 }
 
-fn bad_mask(mask: &str, error: globset::Error) -> Message {
-    Message::new(messages::BAD_MASK)
-        .arg("mask", mask)
-        .arg("error", error)
+fn bad_mask(mask: &str, source: globset::Error) -> SearchError {
+    SearchError::BadMask {
+        mask: mask.to_string(),
+        source,
+    }
 }

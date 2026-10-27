@@ -8,9 +8,12 @@
 //! default app ([`open_link`], [`open_path`], [`reveal`]).
 
 mod environment;
+mod error;
+mod error_message;
 mod messages;
 mod open;
 
 pub use environment::{command, host_environment};
+pub use error::ProcessError;
 pub use messages::{ALL, CANT_START, NOT_A_LINK};
 pub use open::{open_link, open_path, reveal, start};

@@ -49,21 +49,25 @@ pub fn terminal_spawn<R: Runtime>(
             rows: spec.rows,
         },
         move |data| {
-            let _ = out_app.emit(
-                events::TERMINAL_OUTPUT,
-                Output {
-                    id: out_id.clone(),
-                    data,
-                },
-            );
+            out_app
+                .emit(
+                    events::TERMINAL_OUTPUT,
+                    Output {
+                        id: out_id.clone(),
+                        data,
+                    },
+                )
+                .ok();
         },
         move || {
-            let _ = exit_app.emit(
-                events::TERMINAL_EXIT,
-                Exit {
-                    id: exit_id.clone(),
-                },
-            );
+            exit_app
+                .emit(
+                    events::TERMINAL_EXIT,
+                    Exit {
+                        id: exit_id.clone(),
+                    },
+                )
+                .ok();
         },
     )
     .map_err(|e| failed(CANT_START, e))?;
@@ -103,6 +107,6 @@ pub fn terminal_resize(
 #[tauri::command]
 pub fn terminal_kill(terminals: State<'_, Terminals>, id: String) {
     if let Some(mut session) = terminals.sessions().remove(&id) {
-        let _ = session.kill();
+        session.kill().ok();
     }
 }

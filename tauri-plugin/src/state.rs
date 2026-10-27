@@ -57,7 +57,7 @@ pub fn workspace_save(
 ) -> Result<(), Message> {
     let dir = project_dir(&workspace, &options, &project_root)?;
     private_dir(&dir)?;
-    write_json(&dir.join(WORKSPACE_FILE), &value)
+    Ok(write_json(&dir.join(WORKSPACE_FILE), &value)?)
 }
 
 /// What isn't tied to a project (recent projects, the last one opened, the
@@ -69,5 +69,5 @@ pub fn app_state_load<R: Runtime>(app: AppHandle<R>) -> Result<Value, Message> {
 
 #[tauri::command]
 pub fn app_state_save<R: Runtime>(app: AppHandle<R>, value: Value) -> Result<(), Message> {
-    write_json(&app_state_file(&app)?, &value)
+    Ok(write_json(&app_state_file(&app)?, &value)?)
 }

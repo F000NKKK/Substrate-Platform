@@ -3,9 +3,7 @@
 use std::collections::HashMap;
 use std::sync::{Mutex, MutexGuard};
 
-use substrate_platform::lsp::Client;
-use substrate_platform::lsp::messages::STOPPED;
-use substrate_platform::message::Message;
+use substrate_platform::lsp::{Client, LspError};
 use substrate_platform::sync::Locked;
 
 use super::server::Server;
@@ -24,11 +22,13 @@ impl Servers {
     /// # Errors
     ///
     /// No such server runs.
-    pub(super) fn client(&self, root: &str, language: &str) -> Result<Client, Message> {
+    pub(super) fn client(&self, root: &str, language: &str) -> Result<Client, LspError> {
         self.running()
             .get(&(root.to_string(), language.to_string()))
             .map(|s| s.client.clone())
-            .ok_or_else(|| Message::new(STOPPED).arg("server", language))
+            .ok_or_else(|| LspError::Stopped {
+                server: language.to_string(),
+            })
     }
 
     /// Stops every server — the app is closing.

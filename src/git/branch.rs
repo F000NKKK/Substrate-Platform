@@ -1,7 +1,7 @@
 //! Branches: listing, switching, creating, deleting.
 
+use super::GitError;
 use super::run::{git, require_repo, run, write_lock};
-use crate::message::Message;
 use serde::Serialize;
 use std::path::Path;
 
@@ -95,7 +95,11 @@ pub enum DeleteMode {
 }
 
 /// Every local and remote-tracking branch.
-pub fn list(root: &Path) -> Result<Vec<Branch>, Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn list(root: &Path) -> Result<Vec<Branch>, GitError> {
     let top = require_repo(root)?;
     Ok(parse_branches(&run(git(&top).args([
         "for-each-ref",
@@ -107,7 +111,11 @@ pub fn list(root: &Path) -> Result<Vec<Branch>, Message> {
 
 /// Checks out a branch. A remote one (`origin/feature`) gets a local branch
 /// tracking it, as Visual Studio does.
-pub fn switch(root: &Path, name: &str, source: BranchSource) -> Result<(), Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn switch(root: &Path, name: &str, source: BranchSource) -> Result<(), GitError> {
     let top = require_repo(root)?;
     let _lock = write_lock();
     let mut command = git(&top);
@@ -119,12 +127,16 @@ pub fn switch(root: &Path, name: &str, source: BranchSource) -> Result<(), Messa
 }
 
 /// New Branch: from `start` (the current commit when empty), checked out or not.
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
 pub fn create(
     root: &Path,
     name: &str,
     start: &str,
     checkout: BranchCheckout,
-) -> Result<(), Message> {
+) -> Result<(), GitError> {
     let top = require_repo(root)?;
     let _lock = write_lock();
     let mut command = git(&top);
@@ -139,7 +151,11 @@ pub fn create(
 }
 
 /// Deletes a local branch, merged or (`DeleteMode::Force`) not.
-pub fn delete(root: &Path, name: &str, mode: DeleteMode) -> Result<(), Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn delete(root: &Path, name: &str, mode: DeleteMode) -> Result<(), GitError> {
     let top = require_repo(root)?;
     let _lock = write_lock();
     let flag = match mode {

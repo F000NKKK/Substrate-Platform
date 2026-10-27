@@ -6,8 +6,9 @@ use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
-use super::{Configuration, ConfigurationMapping, ProjectEntry, Section, SolutionFolder, messages};
-use crate::message::Message;
+use super::{
+    Configuration, ConfigurationMapping, ProjectEntry, ProjectError, Section, SolutionFolder,
+};
 
 /// A solution: its projects and how they're built together.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
@@ -95,7 +96,7 @@ impl Solution {
     pub fn build_order(
         &self,
         configuration: &Configuration,
-    ) -> Result<Vec<&ProjectEntry>, Message> {
+    ) -> Result<Vec<&ProjectEntry>, ProjectError> {
         let mut order = Vec::new();
         let (mut done, mut visiting) = (BTreeSet::new(), BTreeSet::new());
         for project in &self.projects {
@@ -112,18 +113,21 @@ impl Solution {
         done: &mut BTreeSet<&'s str>,
         visiting: &mut BTreeSet<&'s str>,
         order: &mut Vec<&'s ProjectEntry>,
-    ) -> Result<(), Message> {
+    ) -> Result<(), ProjectError> {
         if done.contains(project.id.as_str()) {
             return Ok(());
         }
         if !visiting.insert(project.id.as_str()) {
-            return Err(Message::new(messages::DEPENDENCY_CYCLE).arg("project", &project.name));
+            return Err(ProjectError::DependencyCycle {
+                project: project.name.clone(),
+            });
         }
         for dependency in &project.dependencies {
             let Some(next) = self.project(dependency) else {
-                return Err(Message::new(messages::UNKNOWN_DEPENDENCY)
-                    .arg("project", &project.name)
-                    .arg("dependency", dependency));
+                return Err(ProjectError::UnknownDependency {
+                    project: project.name.clone(),
+                    dependency: dependency.clone(),
+                });
             };
             self.visit(next, done, visiting, order)?;
         }
@@ -179,9 +183,11 @@ mod tests {
             projects: vec![project("a", &["b"]), project("b", &["a"])],
             ..Default::default()
         };
+        let error = solution.build_order(&debug()).unwrap_err();
+        assert!(matches!(error, ProjectError::DependencyCycle { .. }));
         assert_eq!(
-            solution.build_order(&debug()).unwrap_err().text,
-            messages::DEPENDENCY_CYCLE
+            crate::message::Message::from(error).text,
+            crate::project::messages::DEPENDENCY_CYCLE
         );
     }
 

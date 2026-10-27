@@ -17,8 +17,9 @@
 //! Feature `project`.
 
 mod entry;
+mod error;
+mod error_message;
 mod format;
-mod formats;
 mod item;
 pub mod messages;
 mod model;
@@ -26,17 +27,15 @@ mod reference;
 mod settings;
 mod solution;
 mod solution_folder;
-mod solution_format;
 mod standard;
 
 pub use entry::ProjectEntry;
-pub use format::ProjectFormat;
-pub use formats::Formats;
+pub use error::ProjectError;
+pub use format::{Formats, ProjectFormat, SolutionFormat};
 pub use item::Item;
 pub use model::Project;
 pub use reference::Reference;
 pub use settings::{Configuration, ConfigurationMapping, ConfiguredProperties, Section};
 pub use solution::Solution;
 pub use solution_folder::SolutionFolder;
-pub use solution_format::SolutionFormat;
 pub use standard::ProjectStandard;

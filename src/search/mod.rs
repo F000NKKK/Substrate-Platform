@@ -8,6 +8,8 @@
 //! Feature `search`.
 
 mod coverage;
+mod error;
+mod error_message;
 mod find;
 pub mod messages;
 mod open_document;
@@ -21,6 +23,7 @@ mod scope;
 mod source;
 mod walk;
 
+pub use error::SearchError;
 pub use find::{DEFAULT_MAX_LINES, Search, find};
 pub use open_document::OpenDocument;
 pub use pattern::{FileMask, Matcher, ReplacementMode};

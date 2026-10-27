@@ -7,7 +7,7 @@ use super::plan::Plan;
 use super::source::Source;
 use super::{
     Decoding, FileMask, Layout, Matcher, ReplaceRequest, ReplaceSummary, ReplacedDocument,
-    ReplacedFile, ReplacementMode, messages, read_text,
+    ReplacedFile, ReplacementMode, SearchError, read_text,
 };
 use crate::message::Message;
 
@@ -24,7 +24,7 @@ pub fn replace(
     request: &ReplaceRequest,
     layout: &Layout,
     may_write: &dyn Fn(&Path) -> Result<(), Message>,
-) -> Result<ReplaceSummary, Message> {
+) -> Result<ReplaceSummary, SearchError> {
     let replacer = Replacer {
         matcher: Matcher::new(&request.query)?,
         replacement: &request.replacement,
@@ -89,7 +89,8 @@ impl Replacer<'_> {
         if count == 0 {
             return;
         }
-        match may_write(path).and_then(|()| write_text(path, &text)) {
+        let written = may_write(path).and_then(|()| write_text(path, &text).map_err(Message::from));
+        match written {
             Ok(()) => {
                 summary.total += count;
                 summary.files.push(ReplacedFile {
@@ -103,14 +104,13 @@ impl Replacer<'_> {
 }
 
 /// Writes `text` to `path`, through its text view if its kind has one.
-fn write_text(path: &Path, text: &str) -> Result<(), Message> {
+fn write_text(path: &Path, text: &str) -> Result<(), SearchError> {
     match crate::text_view::find(path) {
         Some(view) => (view.write)(path, text),
         None => std::fs::write(path, text).map_err(|e| e.to_string()),
     }
-    .map_err(|err| {
-        Message::new(messages::WRITE_FAILED)
-            .arg("path", path.display())
-            .arg("error", err)
+    .map_err(|reason| SearchError::WriteFailed {
+        path: path.to_path_buf(),
+        reason,
     })
 }

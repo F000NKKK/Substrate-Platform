@@ -1,7 +1,7 @@
 //! The two sides of a file's diff, and what a file holds in the last commit.
 
+use super::GitError;
 use super::run::{absolute, git, repo_of, require_repo};
-use crate::message::Message;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::process::Stdio;
@@ -105,12 +105,16 @@ fn through_view(view: crate::text_view::TextView, path: &str, bytes: &[u8]) -> O
         .and_then(|()| std::fs::write(&file, bytes))
         .ok()
         .and_then(|()| (view.read)(&file));
-    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::remove_dir_all(&dir).ok();
     text
 }
 
 /// Both sides of a file's diff, for the diff view.
-pub fn texts(root: &Path, left: &DiffSide, right: &DiffSide) -> Result<DiffTexts, Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn texts(root: &Path, left: &DiffSide, right: &DiffSide) -> Result<DiffTexts, GitError> {
     let top = require_repo(root)?;
     Ok(match (side_text(&top, left), side_text(&top, right)) {
         (Ok(left), Ok(right)) => DiffTexts {
@@ -128,7 +132,11 @@ pub fn texts(root: &Path, left: &DiffSide, right: &DiffSide) -> Result<DiffTexts
 /// What `path` (absolute) holds in the last commit — the editor's change
 /// markers compare against it. `None` for a file outside the repository,
 /// not committed yet, or binary.
-pub fn head_text(root: &Path, path: &Path) -> Result<Option<String>, Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn head_text(root: &Path, path: &Path) -> Result<Option<String>, GitError> {
     let Some((top, _)) = repo_of(root)? else {
         return Ok(None);
     };

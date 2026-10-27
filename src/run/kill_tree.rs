@@ -26,14 +26,15 @@ pub(crate) fn kill_tree(child: &mut Child) {
         use std::os::windows::process::CommandExt;
         /// Don't flash a console window for `taskkill` from a GUI host.
         const CREATE_NO_WINDOW: u32 = 0x0800_0000;
-        let _ = crate::process::command("taskkill")
+        crate::process::command("taskkill")
             .args(["/T", "/F", "/PID", &child.id().to_string()])
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .creation_flags(CREATE_NO_WINDOW)
-            .status();
+            .status()
+            .ok();
     }
     // Still needed when the above failed, and the only option elsewhere.
     // Errors here mean it already exited, which the next try_wait sees.
-    let _ = child.kill();
+    child.kill().ok();
 }

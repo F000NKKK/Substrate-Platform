@@ -1,16 +1,16 @@
 //! Staging and unstaging changes.
 
+use crate::git::GitError;
 use std::path::Path;
 
 use crate::git::run::{git, has_head, require_repo, run, write_lock};
-use crate::message::Message;
 
 /// Stages `paths` (repo-relative) — every change when empty. Deletions too.
 ///
 /// # Errors
 ///
 /// No repository at `root`, or what `git` reports.
-pub fn stage(root: &Path, paths: &[String]) -> Result<(), Message> {
+pub fn stage(root: &Path, paths: &[String]) -> Result<(), GitError> {
     let top = require_repo(root)?;
     let _lock = write_lock();
     run(git(&top).args(["add", "--all", "--"]).args(paths)).map(drop)
@@ -22,7 +22,7 @@ pub fn stage(root: &Path, paths: &[String]) -> Result<(), Message> {
 /// # Errors
 ///
 /// No repository at `root`, or what `git` reports.
-pub fn unstage(root: &Path, paths: &[String]) -> Result<(), Message> {
+pub fn unstage(root: &Path, paths: &[String]) -> Result<(), GitError> {
     let top = require_repo(root)?;
     let _lock = write_lock();
     if !has_head(&top) {

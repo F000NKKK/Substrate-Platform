@@ -41,7 +41,7 @@ pub async fn git_stash_op(
 
 #[tauri::command]
 pub async fn git_config_get() -> Result<GlobalConfig, Message> {
-    blocking(|| Ok(config::get())).await
+    blocking(|| Ok::<_, Message>(config::get())).await
 }
 
 #[tauri::command]

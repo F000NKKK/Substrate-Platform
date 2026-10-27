@@ -9,7 +9,7 @@ use super::{
     Decoding, FileMask, FileResult, FindSummary, Layout, Matcher, OpenDocument, Scope, SearchQuery,
     line_hits, read_text,
 };
-use crate::message::Message;
+use crate::search::SearchError;
 
 /// Default cap on matching lines per search.
 pub const DEFAULT_MAX_LINES: usize = 20_000;
@@ -45,7 +45,7 @@ pub fn find(
     search: &Search<'_>,
     keep_going: &dyn Fn() -> bool,
     emit: &mut dyn FnMut(FileResult),
-) -> Result<FindSummary, Message> {
+) -> Result<FindSummary, SearchError> {
     let matcher = Matcher::new(search.query)?;
     let mask = FileMask::parse(&search.query.file_mask)?;
     let coverage = Coverage {

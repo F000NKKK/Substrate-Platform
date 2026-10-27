@@ -9,7 +9,7 @@ use std::sync::{Arc, Mutex};
 
 use portable_pty::{CommandBuilder, MasterPty, PtyPair, native_pty_system};
 
-use super::{PtyOptions, TerminalSize, Utf8Chunker, default_shell};
+use super::{PtyError, PtyOptions, TerminalSize, Utf8Chunker, default_shell};
 use crate::sync::Locked;
 
 /// A running shell session backed by a real OS pty.
@@ -40,7 +40,7 @@ impl PtySession {
         size: TerminalSize,
         on_output: impl FnMut(Vec<u8>) + Send + 'static,
         on_exit: impl FnOnce() + Send + 'static,
-    ) -> anyhow::Result<Self> {
+    ) -> Result<Self, PtyError> {
         let options = PtyOptions {
             shell,
             cwd,
@@ -60,15 +60,25 @@ impl PtySession {
         size: TerminalSize,
         on_output: impl FnMut(Vec<u8>) + Send + 'static,
         on_exit: impl FnOnce() + Send + 'static,
-    ) -> anyhow::Result<Self> {
-        let pair = native_pty_system().openpty(size.pty())?;
-        let child = pair.slave.spawn_command(command(options))?;
+    ) -> Result<Self, PtyError> {
+        let pair = native_pty_system()
+            .openpty(size.pty())
+            .map_err(|e| PtyError::Open(e.into()))?;
+        let child = pair
+            .slave
+            .spawn_command(command(options))
+            .map_err(|e| PtyError::Spawn(e.into()))?;
         // The slave end is only needed to spawn the child; drop our copy so
         // the master gets EOF when the child exits instead of hanging open.
         let PtyPair { master, slave } = pair;
         drop(slave);
-        read_in_background(master.try_clone_reader()?, on_output, on_exit);
-        let writer = master.take_writer()?;
+        let reader = master
+            .try_clone_reader()
+            .map_err(|e| PtyError::Stream(e.into()))?;
+        read_in_background(reader, on_output, on_exit);
+        let writer = master
+            .take_writer()
+            .map_err(|e| PtyError::Stream(e.into()))?;
         Ok(Self {
             master,
             writer,
@@ -89,7 +99,7 @@ impl PtySession {
         size: TerminalSize,
         on_output: impl FnMut(String) + Send + 'static,
         on_exit: impl FnOnce() + Send + 'static,
-    ) -> anyhow::Result<Self> {
+    ) -> Result<Self, PtyError> {
         // Shared between the output and exit callbacks (both run on the same
         // reader thread, so the lock is never contended) so a truncated
         // character still pending at EOF gets flushed before `on_exit`.
@@ -142,9 +152,10 @@ impl PtySession {
     /// # Errors
     ///
     /// The pty refuses the size.
-    pub fn resize(&self, size: TerminalSize) -> anyhow::Result<()> {
-        self.master.resize(size.pty())?;
-        Ok(())
+    pub fn resize(&self, size: TerminalSize) -> Result<(), PtyError> {
+        self.master
+            .resize(size.pty())
+            .map_err(|e| PtyError::Resize(e.into()))
     }
 
     /// `None` if the shell is still running.

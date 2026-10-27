@@ -8,6 +8,6 @@ use tauri::{AppHandle, Emitter, Runtime};
 pub(super) fn output<R: Runtime>(app: &AppHandle<R>) -> impl Fn(Message) + Sync + '_ {
     move |line| {
         // The UI window is gone: nobody to tell.
-        let _ = app.emit(events::GIT_OUTPUT, line);
+        app.emit(events::GIT_OUTPUT, line).ok();
     }
 }

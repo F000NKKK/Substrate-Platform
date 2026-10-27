@@ -1,11 +1,10 @@
 //! Long runs, streamed to an [`Output`]: fetch, pull, push, sync; merge and
 //! rebase; finishing or aborting what's in progress; clone and init.
 
+use super::GitError;
 use super::branch::{current, has_upstream};
-use super::messages;
 use super::run::{Output, git, repo_of, require_repo, run, stream, stream_git, write_lock};
 use super::status::Operation;
-use crate::message::Message;
 use serde::Deserialize;
 use std::path::Path;
 
@@ -14,7 +13,7 @@ const ORIGIN: &str = "origin";
 
 /// Where a branch without an upstream gets pushed: its own `pushRemote`,
 /// the repository's `remote.pushDefault`, `origin`, else the only remote.
-fn push_remote(top: &Path, branch: &str) -> Result<String, Message> {
+fn push_remote(top: &Path, branch: &str) -> Result<String, GitError> {
     let config = |key: &str| {
         run(git(top).args(["config", "--get", key]))
             .ok()
@@ -37,17 +36,17 @@ fn push_remote(top: &Path, branch: &str) -> Result<String, Message> {
     }
     match remotes[..] {
         [only] => Ok(only.to_string()),
-        [] => Err(Message::new(messages::NO_PUSH_REMOTE)),
-        _ => Err(Message::new(messages::NO_ORIGIN)),
+        [] => Err(GitError::NoPushRemote),
+        _ => Err(GitError::NoOrigin),
     }
 }
 
-fn push(out: Output, top: &Path) -> Result<(), Message> {
+fn push(out: Output, top: &Path) -> Result<(), GitError> {
     if has_upstream(top) {
         return stream_git(out, top, &["push", "--progress"]);
     }
     // Push and create the upstream, as Visual Studio does for a new branch.
-    let branch = current(top).ok_or_else(|| Message::new(messages::DETACHED_PUSH))?;
+    let branch = current(top).ok_or(GitError::DetachedPush)?;
     let remote = push_remote(top, &branch)?;
     stream_git(
         out,
@@ -56,9 +55,9 @@ fn push(out: Output, top: &Path) -> Result<(), Message> {
     )
 }
 
-fn pull(out: Output, top: &Path) -> Result<(), Message> {
+fn pull(out: Output, top: &Path) -> Result<(), GitError> {
     if !has_upstream(top) {
-        return Err(Message::new(messages::NO_UPSTREAM));
+        return Err(GitError::NoUpstream);
     }
     stream_git(out, top, &["pull", "--progress"])
 }
@@ -74,7 +73,11 @@ pub enum RemoteOperation {
 }
 
 /// Fetch / Pull / Push / Sync.
-pub fn synchronize(root: &Path, operation: RemoteOperation, out: Output) -> Result<(), Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn synchronize(root: &Path, operation: RemoteOperation, out: Output) -> Result<(), GitError> {
     let top = require_repo(root)?;
     let _lock = write_lock();
     match operation {
@@ -95,12 +98,16 @@ pub enum Integration {
 }
 
 /// Merge into Current / Rebase onto — streamed, since either can stop on conflicts.
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
 pub fn integrate(
     root: &Path,
     integration: Integration,
     branch: &str,
     out: Output,
-) -> Result<(), Message> {
+) -> Result<(), GitError> {
     let top = require_repo(root)?;
     let _lock = write_lock();
     match integration {
@@ -119,13 +126,16 @@ pub enum Resolution {
 }
 
 /// Continues or aborts the merge/rebase/cherry-pick/revert in progress.
-pub fn resolve(root: &Path, resolution: Resolution, out: Output) -> Result<(), Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn resolve(root: &Path, resolution: Resolution, out: Output) -> Result<(), GitError> {
     let Some((top, git_dir)) = repo_of(root)? else {
-        return Err(Message::new(messages::NOT_A_REPOSITORY));
+        return Err(GitError::NotARepository);
     };
     let _lock = write_lock();
-    let operation = Operation::in_progress(&git_dir)
-        .ok_or_else(|| Message::new(messages::NOTHING_IN_PROGRESS))?;
+    let operation = Operation::in_progress(&git_dir).ok_or(GitError::NothingInProgress)?;
     // A merge is continued by committing it.
     if resolution == Resolution::Continue && operation == Operation::Merge {
         return stream_git(out, &top, &["commit", "--no-edit"]);
@@ -151,7 +161,11 @@ pub fn clone_directory_name(url: &str) -> String {
 
 /// Clone a Repository: into `parent/<name>` (the URL's name when empty);
 /// the new working tree's path.
-pub fn clone(url: &str, parent: &Path, name: &str, out: Output) -> Result<String, Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn clone(url: &str, parent: &Path, name: &str, out: Output) -> Result<String, GitError> {
     let name = if name.trim().is_empty() {
         clone_directory_name(url)
     } else {
@@ -163,7 +177,7 @@ pub fn clone(url: &str, parent: &Path, name: &str, out: Output) -> Result<String
             .map(|mut d| d.next().is_some())
             .unwrap_or(true)
     {
-        return Err(Message::new(messages::CLONE_TARGET_NOT_EMPTY).arg("path", dest.display()));
+        return Err(GitError::CloneTargetNotEmpty { path: dest });
     }
     let dest_text = dest.to_string_lossy().into_owned();
     stream(
@@ -175,7 +189,11 @@ pub fn clone(url: &str, parent: &Path, name: &str, out: Output) -> Result<String
 }
 
 /// Create Git Repository: `git init` in `root`, on `branch` (git's own default when empty).
-pub fn init(root: &Path, branch: &str, out: Output) -> Result<(), Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn init(root: &Path, branch: &str, out: Output) -> Result<(), GitError> {
     let mut args = vec!["init"];
     if !branch.trim().is_empty() {
         args.extend(["--initial-branch", branch.trim()]);

@@ -2,8 +2,8 @@
 
 use std::path::Path;
 
-use super::Project;
 use crate::message::Message;
+use crate::project::Project;
 
 /// A project file format: `.csproj`, `Cargo.toml`, a product's own.
 pub trait ProjectFormat: Send + Sync {

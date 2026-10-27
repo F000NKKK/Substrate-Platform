@@ -3,13 +3,14 @@
 //! the app's (in its config folder). Reading never fails: a missing or
 //! corrupt file is an empty object; writing is atomic. Feature `state`.
 
-mod failure;
+mod error;
+mod error_message;
 mod file_names;
 mod json;
 pub mod messages;
 mod private_dir;
 
-use failure::failed;
+pub use error::StateError;
 pub use file_names::{APP_STATE_FILE, WORKSPACE_FILE};
 pub use json::{read_json, write_json};
 pub use private_dir::private_dir;

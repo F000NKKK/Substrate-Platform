@@ -1,10 +1,10 @@
 //! Undo Changes.
 
+use crate::git::GitError;
 use std::path::Path;
 
 use super::{ChangeKind, DiscardItem};
 use crate::git::run::{git, has_head, require_repo, run, write_lock};
-use crate::message::Message;
 
 /// Undo Changes: an unstaged change goes back to what's staged (an untracked
 /// file is deleted), a staged one back to the last commit — index and disk
@@ -13,7 +13,7 @@ use crate::message::Message;
 /// # Errors
 ///
 /// No repository at `root`, or what `git` reports.
-pub fn discard(root: &Path, items: Vec<DiscardItem>) -> Result<(), Message> {
+pub fn discard(root: &Path, items: Vec<DiscardItem>) -> Result<(), GitError> {
     let top = require_repo(root)?;
     let _lock = write_lock();
     let head = has_head(&top);

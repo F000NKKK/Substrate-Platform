@@ -85,7 +85,7 @@ fn log_sink(c: &mut Criterion) {
 
 fn directory_listing(c: &mut Criterion) {
     let dir = std::env::temp_dir().join(format!("substrate-bench-dir-{}", std::process::id()));
-    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::remove_dir_all(&dir).ok();
     std::fs::create_dir_all(&dir).unwrap();
     for i in 0..2_000 {
         if i % 10 == 0 {

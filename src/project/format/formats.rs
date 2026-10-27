@@ -2,8 +2,8 @@
 
 use std::path::Path;
 
-use super::{Project, ProjectFormat, Solution, SolutionFormat, messages};
-use crate::message::Message;
+use super::{ProjectFormat, SolutionFormat};
+use crate::project::{Project, ProjectError, Solution};
 
 /// The formats a product knows: a file opens with the first that reads it.
 #[derive(Default)]
@@ -50,10 +50,11 @@ impl Formats {
     /// # Errors
     ///
     /// No format reads `path`, or what the format refuses.
-    pub fn load_solution(&self, path: &Path) -> Result<Solution, Message> {
+    pub fn load_solution(&self, path: &Path) -> Result<Solution, ProjectError> {
         self.solution_format(path)
             .ok_or_else(|| no_format(path))?
             .load(path)
+            .map_err(ProjectError::Format)
     }
 
     /// Writes `solution` to `path` in its format.
@@ -61,10 +62,11 @@ impl Formats {
     /// # Errors
     ///
     /// No format reads `path`, or what the format refuses.
-    pub fn save_solution(&self, solution: &Solution, path: &Path) -> Result<(), Message> {
+    pub fn save_solution(&self, solution: &Solution, path: &Path) -> Result<(), ProjectError> {
         self.solution_format(path)
             .ok_or_else(|| no_format(path))?
             .save(solution, path)
+            .map_err(ProjectError::Format)
     }
 
     /// The project in `path`, read by its format.
@@ -72,10 +74,11 @@ impl Formats {
     /// # Errors
     ///
     /// No format reads `path`, or what the format refuses.
-    pub fn load_project(&self, path: &Path) -> Result<Project, Message> {
+    pub fn load_project(&self, path: &Path) -> Result<Project, ProjectError> {
         self.project_format(path)
             .ok_or_else(|| no_format(path))?
             .load(path)
+            .map_err(ProjectError::Format)
     }
 
     /// Writes `project` to `path` in its format.
@@ -83,21 +86,26 @@ impl Formats {
     /// # Errors
     ///
     /// No format reads `path`, or what the format refuses.
-    pub fn save_project(&self, project: &Project, path: &Path) -> Result<(), Message> {
+    pub fn save_project(&self, project: &Project, path: &Path) -> Result<(), ProjectError> {
         self.project_format(path)
             .ok_or_else(|| no_format(path))?
             .save(project, path)
+            .map_err(ProjectError::Format)
     }
 }
 
 /// The message for a file no format reads.
-fn no_format(path: &Path) -> Message {
-    Message::new(messages::NO_FORMAT).arg("path", path.display())
+fn no_format(path: &Path) -> ProjectError {
+    ProjectError::NoFormat {
+        path: path.to_path_buf(),
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::message::Message;
+    use crate::project::messages;
 
     /// A format reading files of one extension, into an empty solution named by it.
     struct ByExtension(&'static str);
@@ -136,12 +144,8 @@ mod tests {
             formats.load_solution(Path::new("App.sln")).unwrap().name,
             "sln"
         );
-        assert_eq!(
-            formats
-                .load_solution(Path::new("App.toml"))
-                .unwrap_err()
-                .text,
-            messages::NO_FORMAT
-        );
+        let error = formats.load_solution(Path::new("App.toml")).unwrap_err();
+        assert!(matches!(error, ProjectError::NoFormat { .. }));
+        assert_eq!(Message::from(error).text, messages::NO_FORMAT);
     }
 }

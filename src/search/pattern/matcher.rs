@@ -3,9 +3,8 @@
 use regex::{Regex, RegexBuilder};
 
 use super::ReplacementMode;
-use crate::message::Message;
+use crate::search::SearchError;
 use crate::search::SearchQuery;
-use crate::search::messages;
 
 /// The compiled pattern, with VS's "Match whole word" applied as a check on
 /// each match's neighbours (the regex engine has no lookaround) rather than
@@ -22,11 +21,11 @@ impl Matcher {
     ///
     /// # Errors
     ///
-    /// [`messages::EMPTY`] for an empty pattern, [`messages::BAD_PATTERN`]
+    /// [`SearchError::EmptyPattern`] for an empty pattern, [`SearchError::BadPattern`]
     /// for a regular expression that doesn't compile.
-    pub fn new(query: &SearchQuery) -> Result<Self, Message> {
+    pub fn new(query: &SearchQuery) -> Result<Self, SearchError> {
         if query.pattern.is_empty() {
-            return Err(Message::new(messages::EMPTY));
+            return Err(SearchError::EmptyPattern);
         }
         let source = if query.regex {
             query.pattern.clone()
@@ -38,7 +37,7 @@ impl Matcher {
             .multi_line(true)
             .crlf(true)
             .build()
-            .map_err(|err| Message::new(messages::BAD_PATTERN).arg("error", err))?;
+            .map_err(SearchError::BadPattern)?;
         Ok(Self {
             pattern,
             whole_word: query.whole_word,

@@ -13,6 +13,8 @@ mod answer;
 mod capabilities;
 mod client;
 mod connection;
+mod error;
+mod error_message;
 mod framing;
 mod languages;
 pub mod messages;
@@ -20,6 +22,7 @@ mod notification;
 pub mod uri;
 
 pub use client::{Client, REQUEST_TIMEOUT};
+pub use error::LspError;
 pub use languages::{Language, Languages, ServerDefinition};
 pub use notification::Notification;
 

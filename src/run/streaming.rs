@@ -140,7 +140,7 @@ fn finish_streamed(mut running: StreamingChild, cancel: &AtomicBool, sink: &LogS
     };
     // Only ever returns Disconnected (all readers done) or Timeout (a
     // grandchild holds the pipes: its lines may trail the exit line).
-    let _ = running.readers_done.recv_timeout(grace);
+    running.readers_done.recv_timeout(grace).ok();
     if cancelled {
         sink.warn("(process cancelled)");
         return TaskExit::CANCELLED;

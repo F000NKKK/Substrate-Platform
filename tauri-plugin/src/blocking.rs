@@ -9,10 +9,11 @@ use substrate_platform::message::Message;
 ///
 /// What `work` returns, or the failure of its thread.
 #[cfg(any(feature = "git", feature = "lsp", feature = "search"))]
-pub(crate) async fn blocking<T: Send + 'static>(
-    work: impl FnOnce() -> Result<T, Message> + Send + 'static,
+pub(crate) async fn blocking<T: Send + 'static, E: Into<Message> + Send + 'static>(
+    work: impl FnOnce() -> Result<T, E> + Send + 'static,
 ) -> Result<T, Message> {
     tauri::async_runtime::spawn_blocking(work)
         .await
         .map_err(Message::verbatim)?
+        .map_err(Into::into)
 }

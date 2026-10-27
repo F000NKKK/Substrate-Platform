@@ -7,8 +7,7 @@ use std::ffi::OsString;
 use std::path::Path;
 use std::process::Command;
 
-use super::{CANT_START, NOT_A_LINK, command};
-use crate::message::Message;
+use super::{ProcessError, command};
 
 /// What opens a link or a file with the user's default app: the program
 /// and the arguments before the target.
@@ -37,7 +36,11 @@ const SELECT_FLAG: &str = "/select,";
 
 /// Starts `program` and leaves it running — waited for on a thread of its
 /// own, so it doesn't stay a zombie. A macOS `.app` starts through the opener.
-pub fn start(program: &Path) -> Result<(), Message> {
+///
+/// # Errors
+///
+/// The program or the opener can't be started.
+pub fn start(program: &Path) -> Result<(), ProcessError> {
     let invocation =
         if cfg!(target_os = "macos") && program.extension().is_some_and(|x| x == APP_BUNDLE) {
             opener(program.as_os_str())
@@ -48,13 +51,21 @@ pub fn start(program: &Path) -> Result<(), Message> {
 }
 
 /// Opens `path` — a file or folder — in the user's default app.
-pub fn open_path(path: &Path) -> Result<(), Message> {
+///
+/// # Errors
+///
+/// The program or the opener can't be started.
+pub fn open_path(path: &Path) -> Result<(), ProcessError> {
     spawn(opener(path.as_os_str()))
 }
 
 /// Shows `path` in the file manager: selected where the system can, else
 /// its folder opened.
-pub fn reveal(path: &Path) -> Result<(), Message> {
+///
+/// # Errors
+///
+/// The program or the opener can't be started.
+pub fn reveal(path: &Path) -> Result<(), ProcessError> {
     spawn(revealer(path))
 }
 
@@ -80,9 +91,15 @@ fn revealer(path: &Path) -> Command {
 }
 
 /// Opens `url` — a web or mail link — in the user's default app.
-pub fn open_link(url: &str) -> Result<(), Message> {
+///
+/// # Errors
+///
+/// The program or the opener can't be started.
+pub fn open_link(url: &str) -> Result<(), ProcessError> {
     if !LINK_SCHEMES.iter().any(|scheme| url.starts_with(scheme)) {
-        return Err(Message::new(NOT_A_LINK).arg("url", url));
+        return Err(ProcessError::NotALink {
+            url: url.to_string(),
+        });
     }
     spawn(opener(OsStr::new(url)))
 }
@@ -97,12 +114,13 @@ fn opener(target: &OsStr) -> Command {
 
 /// Starts `invocation` and waits for it on a thread of its own, so it doesn't
 /// stay a zombie.
-fn spawn(mut invocation: Command) -> Result<(), Message> {
-    let mut child = invocation.spawn().map_err(|e| {
-        Message::new(CANT_START)
-            .arg("program", invocation.get_program().to_string_lossy())
-            .arg("error", e)
-    })?;
+fn spawn(mut invocation: Command) -> Result<(), ProcessError> {
+    let mut child = invocation
+        .spawn()
+        .map_err(|source| ProcessError::CantStart {
+            program: invocation.get_program().to_string_lossy().into_owned(),
+            source,
+        })?;
     std::thread::spawn(move || child.wait());
     Ok(())
 }
@@ -110,13 +128,14 @@ fn spawn(mut invocation: Command) -> Result<(), Message> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::process::NOT_A_LINK;
 
     #[test]
     fn only_links_open() {
-        assert_eq!(
-            open_link("file:///etc/passwd").unwrap_err().text,
-            NOT_A_LINK
-        );
-        assert_eq!(open_link("/bin/sh").unwrap_err().text, NOT_A_LINK);
+        for not_a_link in ["file:///etc/passwd", "/bin/sh"] {
+            let error = open_link(not_a_link).unwrap_err();
+            assert!(matches!(error, ProcessError::NotALink { .. }));
+            assert_eq!(crate::message::Message::from(error).text, NOT_A_LINK);
+        }
     }
 }

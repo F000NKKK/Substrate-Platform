@@ -1,8 +1,8 @@
 //! History: a branch's commits, and the files a commit changed.
 
+use super::GitError;
 use super::run::{absolute, git, has_head, require_repo, run};
 use super::status::{ChangeKind, FileChange};
-use crate::message::Message;
 use serde::Serialize;
 use std::path::Path;
 
@@ -49,7 +49,11 @@ fn parse_log(raw: &str) -> Vec<Commit> {
 }
 
 /// A page of `rev`'s history (HEAD when empty), newest first.
-pub fn log(root: &Path, rev: &str, skip: u32, max: u32) -> Result<Vec<Commit>, Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn log(root: &Path, rev: &str, skip: u32, max: u32) -> Result<Vec<Commit>, GitError> {
     let top = require_repo(root)?;
     if rev.is_empty() && !has_head(&top) {
         return Ok(Vec::new());
@@ -84,7 +88,11 @@ fn parse_name_status(raw: &str) -> Vec<FileChange> {
 }
 
 /// The files a commit changed, compared with its first parent.
-pub fn commit_files(root: &Path, hash: &str) -> Result<Vec<FileChange>, Message> {
+///
+/// # Errors
+///
+/// No repository at the folder, or what `git` reports.
+pub fn commit_files(root: &Path, hash: &str) -> Result<Vec<FileChange>, GitError> {
     let top = require_repo(root)?;
     let parents = run(git(&top).args(["rev-list", "--parents", "-n", "1", hash]))?;
     let raw = match parents.split_whitespace().nth(1) {

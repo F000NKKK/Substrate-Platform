@@ -8,6 +8,7 @@
 
 mod definition;
 mod file;
+mod file_error;
 mod handle;
 mod outcome;
 mod runner;
@@ -16,6 +17,7 @@ mod step;
 
 pub use definition::Definition;
 pub use file::File;
+pub use file_error::FileError;
 pub use handle::Handle;
 pub use outcome::Outcome;
 pub use runner::run;

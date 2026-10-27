@@ -1,5 +1,6 @@
 //! Find and Replace in Files, as commands.
 
+use std::cell::Cell;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::Ordering;
@@ -26,7 +27,7 @@ const MAX_CONTAINING_FILES: usize = 5_000;
 /// `root` checked against the workspace — required for a project search.
 fn check_root(workspace: &Workspace, root: Option<&str>, scope: Scope) -> Result<(), Message> {
     match root {
-        Some(root) => workspace.check(Path::new(root)),
+        Some(root) => Ok(workspace.check(Path::new(root))?),
         None if scope == Scope::Project => Err(Message::new(NOTHING_OPEN)),
         None => Ok(()),
     }
@@ -48,7 +49,9 @@ pub async fn find_in_files(
     let layout = layout.inner().clone();
     blocking(move || {
         let id = request.search_id;
-        let keep_going = || current.load(Ordering::SeqCst) == id;
+        // The UI dropped its end of the channel: nobody to search for.
+        let listener_gone = Cell::new(false);
+        let keep_going = || current.load(Ordering::SeqCst) == id && !listener_gone.get();
         let mut pending = Vec::new();
         let mut last_flush = Instant::now();
         let search = Search {
@@ -62,14 +65,16 @@ pub async fn find_in_files(
         let summary = find(&search, &keep_going, &mut |file| {
             pending.push(file);
             if last_flush.elapsed() > BATCH_EVERY {
-                let _ = on_batch.send(FindBatch {
+                let batch = FindBatch {
                     files: std::mem::take(&mut pending),
-                });
+                };
+                listener_gone.set(on_batch.send(batch).is_err());
                 last_flush = Instant::now();
             }
         });
         if !pending.is_empty() {
-            let _ = on_batch.send(FindBatch { files: pending });
+            // The summary below still goes back to the caller.
+            on_batch.send(FindBatch { files: pending }).ok();
         }
         summary
     })
@@ -93,7 +98,12 @@ pub async fn replace_in_files(
     check_root(&workspace, request.root.as_deref(), request.scope)?;
     let roots = workspace.roots();
     let layout = layout.inner().clone();
-    blocking(move || replace(&request, &layout, &|path| roots.check(path))).await
+    blocking(move || {
+        replace(&request, &layout, &|path| {
+            roots.check(path).map_err(Message::from)
+        })
+    })
+    .await
 }
 
 /// A file explorer's search and filters: the project's files and folders,
@@ -106,7 +116,7 @@ pub async fn project_items(
 ) -> Result<Vec<WalkEntry>, Message> {
     workspace.check(Path::new(&root))?;
     let layout = layout.inner().clone();
-    blocking(move || Ok(project_entries(Path::new(&root), &layout))).await
+    blocking(move || Ok::<_, Message>(project_entries(Path::new(&root), &layout))).await
 }
 
 /// "Search within file contents": the project files whose text matches.

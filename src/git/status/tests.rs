@@ -100,7 +100,7 @@ fn parses_conflicts() {
 #[test]
 fn status_of_a_scratch_repository() {
     let dir = std::env::temp_dir().join(format!("substrate-git-test-{}", std::process::id()));
-    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::remove_dir_all(&dir).ok();
     std::fs::create_dir_all(&dir).unwrap();
     if run(git(&dir).args(["init", "-q", "--initial-branch", "main"])).is_err() {
         return;
@@ -118,6 +118,6 @@ fn status_of_a_scratch_repository() {
     stage(&dir, &["a.txt".into()]).unwrap();
     let staged = read(&dir).unwrap().unwrap().staged;
     assert_eq!((staged.len(), staged[0].kind), (1, ChangeKind::Added));
-    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::remove_dir_all(&dir).ok();
     assert!(read(&std::env::temp_dir()).is_ok());
 }

@@ -8,7 +8,7 @@ use super::*;
 #[test]
 fn state_round_trips_and_a_bad_file_reads_empty() {
     let dir = std::env::temp_dir().join(format!("substrate-state-{}", std::process::id()));
-    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::remove_dir_all(&dir).ok();
     private_dir(&dir).unwrap();
     assert_eq!(
         std::fs::read_to_string(dir.join(GITIGNORE)).unwrap(),

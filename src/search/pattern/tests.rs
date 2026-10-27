@@ -1,7 +1,7 @@
 //! The query, the matcher and the file mask's tests.
 
 use super::*;
-use crate::search::SearchQuery;
+use crate::search::{SearchError, SearchQuery};
 
 fn query(pattern: &str) -> SearchQuery {
     SearchQuery {
@@ -110,8 +110,9 @@ fn file_mask_globs() {
 #[test]
 fn an_invalid_mask_glob_is_refused() {
     let error = FileMask::parse("*.rs; src/[").unwrap_err();
-    assert_eq!(error.text, crate::search::messages::BAD_MASK);
-    assert_eq!(error.args["mask"], "src/[");
+    let message = crate::message::Message::from(error);
+    assert_eq!(message.text, crate::search::messages::BAD_MASK);
+    assert_eq!(message.args["mask"], "src/[");
     assert!(FileMask::parse("!src/[").is_err());
 }
 
@@ -126,5 +127,9 @@ fn excludes_alone_cover_everything_else() {
 #[test]
 fn an_empty_pattern_is_refused() {
     let error = Matcher::new(&query("")).unwrap_err();
-    assert_eq!(error.text, crate::search::messages::EMPTY);
+    assert!(matches!(error, SearchError::EmptyPattern));
+    assert_eq!(
+        crate::message::Message::from(error).text,
+        crate::search::messages::EMPTY
+    );
 }

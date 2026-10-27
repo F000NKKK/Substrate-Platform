@@ -3,7 +3,7 @@
 use std::path::{Path, PathBuf};
 
 use super::{Decoding, Layout, read_text};
-use crate::message::Message;
+use crate::search::SearchError;
 use crate::search::{FileMask, Matcher, SearchQuery};
 
 /// The walk over a project's own files: .gitignore'd entries (whether or
@@ -47,7 +47,7 @@ pub fn files_containing(
     query: &SearchQuery,
     limit: usize,
     layout: &Layout,
-) -> Result<Vec<String>, Message> {
+) -> Result<Vec<String>, SearchError> {
     let matcher = Matcher::new(query)?;
     let mask = FileMask::parse(&query.file_mask)?;
     Ok(project_files(root, &mask, layout)
