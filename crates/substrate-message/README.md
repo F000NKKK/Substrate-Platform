@@ -26,7 +26,7 @@ assert_eq!(Message::verbatim("raw").to_string(), "raw");
 ## Depends on / used by
 
 Depends on nothing in the workspace. Used by
-[`substrate-platform`](../../README.md) (every module declares its templates
+every context's domain crate (each declares its templates
 with `messages!`), [`substrate-host-contract`](../substrate-host-contract/README.md)
 and [`tauri-plugin-substrate`](../../tauri-plugin/README.md).
 

@@ -1,10 +1,5 @@
 # Layer and context map for craftcheck (craftbook rust/06-tooling.md §6.3).
-# Today's single-crate map, copied from craftbook adoption/substrate-platform;
-# the target map of that page replaces it with the crate split (wave 5).
-[[crate]]
-name = "substrate-platform"
-layer = "infra"      # really mixed: shared-kernel + domain + app + infra + interface (commands, events)
-context = "substrate"
+# The crate split of craftbook adoption/substrate-platform, finished in wave 10.
 [[crate]]
 name = "substrate-git-domain"
 layer = "domain"
@@ -119,23 +114,27 @@ name = "substrate-dap-toml"
 layer = "infra"
 context = "debug-adapter"
 
-# The core is one context until the split reaches it (waves 6-10).
-[[context_edge]]
-from = "host-ui-contract"
-to = "substrate"
-relation = "customer-supplier"
+[[crate]]
+name = "substrate-project-domain"
+layer = "domain"
+context = "project-model"
+[[crate]]
+name = "substrate-project-app"
+layer = "app"
+context = "project-model"
+[[crate]]
+name = "substrate-project-toml"
+layer = "infra"
+context = "project-model"
+[[crate]]
+name = "substrate-state-json"
+layer = "infra"
+context = "ide-state"
+
 [[context_edge]]
 from = "host-ui-contract"
 to = "message"
 relation = "published-language"
-[[context_edge]]
-from = "substrate"
-to = "message"
-relation = "shared-kernel"
-[[context_edge]]
-from = "source-control"
-to = "substrate"
-relation = "customer-supplier"
 [[context_edge]]
 from = "source-control"
 to = "message"
@@ -143,10 +142,6 @@ relation = "shared-kernel"
 [[context_edge]]
 from = "host-ui-contract"
 to = "source-control"
-relation = "customer-supplier"
-[[context_edge]]
-from = "search"
-to = "substrate"
 relation = "customer-supplier"
 [[context_edge]]
 from = "search"
@@ -175,14 +170,6 @@ relation = "customer-supplier"
 [[context_edge]]
 from = "host-ui-contract"
 to = "run"
-relation = "customer-supplier"
-[[context_edge]]
-from = "substrate"
-to = "run"
-relation = "customer-supplier"
-[[context_edge]]
-from = "substrate"
-to = "process"
 relation = "customer-supplier"
 [[context_edge]]
 from = "source-control"
@@ -248,4 +235,20 @@ relation = "customer-supplier"
 [[context_edge]]
 from = "host-ui-contract"
 to = "workspace"
+relation = "customer-supplier"
+[[context_edge]]
+from = "project-model"
+to = "message"
+relation = "shared-kernel"
+[[context_edge]]
+from = "ide-state"
+to = "message"
+relation = "shared-kernel"
+[[context_edge]]
+from = "host-ui-contract"
+to = "project-model"
+relation = "customer-supplier"
+[[context_edge]]
+from = "host-ui-contract"
+to = "ide-state"
 relation = "customer-supplier"

@@ -3349,9 +3349,10 @@ dependencies = [
  "substrate-git-domain",
  "substrate-lsp-domain",
  "substrate-message",
- "substrate-platform",
  "substrate-process",
+ "substrate-project-domain",
  "substrate-search-domain",
+ "substrate-state-json",
  "substrate-terminal-domain",
  "substrate-workspace-domain",
  "substrate-workspace-fs",
@@ -3403,21 +3404,37 @@ dependencies = [
 ]
 
 [[package]]
-name = "substrate-platform"
-version = "0.4.0"
-dependencies = [
- "serde",
- "serde_json",
- "substrate-message",
- "thiserror 2.0.21",
-]
-
-[[package]]
 name = "substrate-process"
 version = "0.1.0"
 dependencies = [
  "substrate-message",
  "thiserror 2.0.21",
+]
+
+[[package]]
+name = "substrate-project-app"
+version = "0.1.0"
+dependencies = [
+ "substrate-message",
+ "substrate-project-domain",
+]
+
+[[package]]
+name = "substrate-project-domain"
+version = "0.1.0"
+dependencies = [
+ "substrate-message",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "substrate-project-toml"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "substrate-message",
+ "substrate-project-domain",
+ "toml 1.1.3+spec-1.1.0",
 ]
 
 [[package]]
@@ -3483,6 +3500,15 @@ dependencies = [
  "substrate-search-app",
  "substrate-search-domain",
  "substrate-workspace-domain",
+]
+
+[[package]]
+name = "substrate-state-json"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "substrate-message",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -3821,13 +3847,13 @@ dependencies = [
  "substrate-lsp-app",
  "substrate-lsp-domain",
  "substrate-message",
- "substrate-platform",
  "substrate-process",
  "substrate-run-app",
  "substrate-run-process",
  "substrate-search-app",
  "substrate-search-domain",
  "substrate-search-ignore",
+ "substrate-state-json",
  "substrate-terminal-app",
  "substrate-terminal-domain",
  "substrate-terminal-pty",

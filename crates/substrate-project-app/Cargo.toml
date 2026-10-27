@@ -1,0 +1,17 @@
+[package]
+name = "substrate-project-app"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "Opens and saves solutions and projects through the formats a product registers."
+license = "AGPL-3.0-only"
+readme = "README.md"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]
+substrate-message = { version = "0.1.0", path = "../substrate-message" }
+substrate-project-domain = { version = "0.1.0", path = "../substrate-project-domain" }

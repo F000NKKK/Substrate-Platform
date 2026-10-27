@@ -8,6 +8,7 @@ const started = messages.process;
 
 /** Projects, solutions, the open folders and what they start, in Russian (templates generated from Rust). */
 registerTranslations(RU, {
+  [project.invalidStandards]: "Список стандартов проектов недопустим: {error}",
   [project.noFormat]: "Приложение не знает формата, в котором записан {path}.",
   [project.dependencyCycle]: "{project} зависит от самого себя через свои зависимости сборки.",
   [project.unknownDependency]: "{project} зависит от {dependency}, которого нет в решении.",

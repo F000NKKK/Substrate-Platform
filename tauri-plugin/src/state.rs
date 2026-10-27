@@ -6,9 +6,7 @@ use std::path::{Path, PathBuf};
 
 use serde_json::Value;
 use substrate_message::Message;
-use substrate_platform::state::{
-    APP_STATE_FILE, WORKSPACE_FILE, private_dir, read_json, write_json,
-};
+use substrate_state_json::{APP_STATE_FILE, WORKSPACE_FILE, private_dir, read_json, write_json};
 use substrate_workspace_app::Workspace;
 use tauri::{AppHandle, Manager, Runtime, State};
 

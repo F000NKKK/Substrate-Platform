@@ -31,7 +31,7 @@
 
 | Часть | Где | Что даёт |
 |---|---|---|
-| 🦀 **Rust-крейт** `substrate-platform` | корень репозитория | Запуск процессов и workflow, журнал вывода, PTY-терминалы, работа с файлами, модель проектов и решений. Без UI. |
+| 🦀 **Rust-крейты** `substrate-*` | [`crates/`](crates) | Запуск процессов и workflow, журнал вывода, PTY-терминалы, работа с файлами, модель проектов и решений, языковые серверы, адаптеры отладки, система управления версиями, поиск. Без UI. |
 | ⚛️ **UI-пакет** `substrate-platform-ui` | [`ui/`](ui) | Оконная оболочка с докингом, редакторы, виджеты, диалоги, настройки, темы и локализация для React. Своего бэкенда не имеет. |
 
 Предметную логику продукт приносит сам: свои форматы файлов, типы проектов,
@@ -51,7 +51,7 @@ flowchart LR
     end
     subgraph sp["Substrate Platform"]
         spui["substrate-platform-ui<br/>оболочка · редакторы · виджеты"]
-        sprs["substrate-platform<br/>terminal · fs · project · state"]
+        sprs["substrate-* crates<br/>terminal · fs · project · state"]
     end
     ui --> spui
     be --> sprs
@@ -60,21 +60,24 @@ flowchart LR
 
 ## 🦀 Rust-крейт
 
-Всегда есть: `workspace` (открытые пользователем папки; пути вне их отклоняются), `sync` (блокировки, переживающие панику), `text_view` (бинарные форматы продукта читаются и пишутся как текст, чтобы поиск, замена и сравнения видели то же, что редактор; продукт собирает значение `TextViews` и передаёт его в `Options` плагина). Рядом [`crates/substrate-process`](crates/substrate-process) запускает программы с окружением системы и открывает ссылки и файлы, а [`crates/substrate-message`](crates/substrate-message) — общее ядро (`Message`: тексты для пользователя в виде шаблонов, которые переводит UI, и макрос `messages!`), а [`crates/substrate-host-contract`](crates/substrate-host-contract) — контракт с UI (`commands`: команды хоста по доменам, единый список, из которого получаются разрешения, обработчики и копия для UI; `events`; генератор `cargo run -p substrate-host-contract --all-features --bin substrate-messages`). Остальные модули — Cargo features с тем же именем, продукт собирает только то, чем пользуется (`full` включает все):
+Rust-часть — набор крейтов в [`crates/`](crates), по группе на контекст и слой (domain, app, адаптер; слои и связи в [`craftbook.toml`](craftbook.toml), словарь в [`docs/context-map.md`](docs/context-map.md)). Крейта-фасада нет: продукт зависит от нужных ему крейтов, а Tauri-плагин `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) связывает их с командами за Cargo-features (`dap`, `fs`, `git`, `lsp`, `search`, `state`, `terminal`). Языки `lsp` и адаптеры `dap` задаёт продукт через `Options::languages` и `Options::adapters`.
 
-| Feature / модуль | Что делает |
-|---|---|
-| `run` (не модуль этого крейта) | Запуск инструментов в четырёх крейтах: [`substrate-run-domain`](crates/substrate-run-domain) (`Task`, `TaskExit`, `LogLine`, `Level` и типы `workflow`: `File`, `Definition`, `Step`, `Outcome`), [`substrate-run-app`](crates/substrate-run-app) (`spawn` запускает внешний процесс без блокировки и построчно передаёт stdout/stderr в `LogSink`; у `TaskHandle` есть `is_running`, `exit_status`, `wait` и `cancel` (завершает всё дерево процессов); `workflow::run`: шаги идут по порядку и останавливаются на первой ошибке, шаг может вызвать другой сценарий (циклы обнаруживаются), подставляется `${var}`; порт `ports::ProcessLauncher`), [`substrate-run-process`](crates/substrate-run-process) (`SystemLauncher` и `kill_tree`; единственный `unsafe`) и [`substrate-run-toml`](crates/substrate-run-toml) (`parse_workflow`: файл сценариев в `File` домена). `LogSink` — клонируемый журнал только на добавление, с ограниченным хранением. |
-| `terminal` | Настоящий кроссплатформенный псевдотерминал (`PtySession`, через `portable-pty`) с `PtyOptions`; `Utf8Chunker`, чтобы вывод не разрывал многобайтовые символы; `detect_shells()` перечисляет установленные оболочки. |
-| `fs` | `fs::dir`: список содержимого папки (сначала папки, без учёта регистра), создание/переименование/удаление, чтение/запись текста или байтов. `fs::watch`: `DirectoryWatcher`, уведомления об изменениях с подавлением дребезга. |
-| `project` | Модель проектов и решений и API к ней — без собственного формата и без чтения файлов. `Solution`: папки решения, конфигурации и платформы, конфигурация каждого проекта для каждой конфигурации решения, зависимости сборки (`build_order`), а также упорядоченные свойства и секции для всего остального, что хранит формат; `Project`: свойства (в том числе по конфигурациям), целевые платформы, элементы, ссылки. Продукт реализует `SolutionFormat` / `ProjectFormat` для своих файлов (`.sln`, `.slnx`, `.csproj`, свои) и регистрирует их в `Formats`; `ProjectStandard` определяет вид проекта по списку файлов, который передаёт продукт. |
-| `lsp` | Языковые серверы по Language Server Protocol. `Languages`: TOML-список языков продукта — расширения, имена файлов и сервер (`command`, `args`, `env`, `initialization_options`). `lsp::Client` запускает сервер или подключается к любому потоку: запросы с ответами и таймаутом, уведомления сервера в обратный вызов, его собственные запросы отвечаются, `did_open`/`did_change`/`did_save`/`did_close`. Параметры и результаты остаются JSON, поэтому новый язык — строка в списке. `uri`: пути как `file://` и обратно. |
-| `dap` | Адаптеры отладки по Debug Adapter Protocol — отладочный двойник `lsp`. `Adapters`: TOML-список продукта — `[adapter.<id>]` с `languages`, `command`, `args`, `env` и `launch_defaults` (с чего начинается каждый `launch`). `dap::Client` запускает адаптер (stderr в `LogSink`) или подключается к любому потоку: запросы с номерами `Seq` и таймаутом (ждать могут несколько сразу: многие адаптеры отвечают на `launch` только после `configurationDone`), типизированные запросы (`initialize`, `launch`, `attach`, `set_breakpoints`, `configuration_done`, `stack_trace`, `scopes`, `variables`, `resume`, `step_over`/`step_in`/`step_out`, `pause`, `evaluate`, `disconnect`…), результаты — JSON адаптера. То, что адаптер сообщает сам, — типизированное `Event` (`Stopped`, `Output`, `Terminated`…; неизвестное хранится как `Other { name, body }`); его собственные запросы (`runInTerminal`, `startDebugging`) получают ответ-ошибку. Кадрирование — то же, что у `lsp`. |
-| `search` (feature плагина; в этом крейте модуля нет) | Поиск и замена в файлах, в [`substrate-search-domain`](crates/substrate-search-domain), [`substrate-search-app`](crates/substrate-search-app) и [`substrate-search-ignore`](crates/substrate-search-ignore): обход проекта с учётом `.gitignore` (или только несохранённых буферов открытых документов), результаты по файлам; что обход пропускает, задаёт `Layout` продукта. |
-| `state` | Что IDE помнит между запусками: JSON-состояние проекта и приложения; чтение никогда не падает, запись атомарна. |
-| `git` (feature плагина; в этом крейте модуля нет) | Система управления версиями через CLI `git` тремя крейтами: [`substrate-git-domain`](crates/substrate-git-domain) (состояние, изменения, ветви, фиксации, спрятанные изменения, сравнения, `GitError`), [`substrate-git-app`](crates/substrate-git-app) (порты и `WriteLock`, который берут операции записи) и [`substrate-git-gitcli`](crates/substrate-git-gitcli) (`GitCli`: запускает `git` и разбирает его porcelain). |
+| Контекст | Крейты | Что делает |
+|---|---|---|
+| общее ядро | [`substrate-message`](crates/substrate-message), [`substrate-lock`](crates/substrate-lock), [`substrate-framing`](crates/substrate-framing) | `Message` (текст для пользователя как шаблоны, которые переводит UI) и макрос `messages!`; `Locked`/`ReadWrite` (блокировки, переживающие панику); кадрирование Content-Length. |
+| workspace | `substrate-workspace-domain`, `-app`, `-fs` | Открытые пользователем папки (пути вне их отклоняются), их просмотр, изменение и наблюдение, бинарные форматы продукта как текст (`TextViews`). Порт — `PathResolver`. |
+| run | `substrate-run-domain`, `-app`, `-process`, `-toml` | Задачи с построчным выводом в `LogSink`, workflow из них (шаги по порядку, вложенные workflow, `${var}`), порты `ProcessLauncher` и `ServiceLauncher`, `SystemLauncher` (убивает деревья процессов; единственный `unsafe`). |
+| process | [`substrate-process`](crates/substrate-process) | Запуск программ с окружением системы, открытие ссылок и файлов. |
+| terminal | `substrate-terminal-domain`, `-app`, `-pty` | Настоящий псевдотерминал за портом `PtyOpener`, `Utf8Chunker`, установленные оболочки. |
+| language-server | `substrate-lsp-domain`, `-app`, `-toml` | Языки продукта и их серверы по Language Server Protocol (`Client`, запуск через `ServiceLauncher`). |
+| debug-adapter | `substrate-dap-domain`, `-app`, `-toml` | Адаптеры отладки продукта по Debug Adapter Protocol. |
+| project-model | `substrate-project-domain`, `-app`, `-toml` | `Solution` и `Project` без собственного формата: продукт реализует `SolutionFormat`/`ProjectFormat` и регистрирует их в `Formats`; `ProjectStandard` определяет вид проекта. |
+| ide-state | [`substrate-state-json`](crates/substrate-state-json) | JSON-состояние проекта и приложения: чтение не падает, запись атомарна. |
+| source-control | `substrate-git-domain`, `-app`, `-gitcli` | Состояние, индекс, фиксации, ветви, remotes, stash и сравнения через `git`. |
+| search | `substrate-search-domain`, `-app`, `-ignore` | Поиск и замена в файлах с обходом, учитывающим `.gitignore`. |
+| host-ui-contract | [`substrate-host-contract`](crates/substrate-host-contract), [`tauri-plugin/`](tauri-plugin) | Каталог команд и событий, из которого генерируется UI (`cargo run -p substrate-host-contract --all-features --bin substrate-messages`), и Tauri-плагин. |
 
-У Tauri-плагина `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) те же features для его команд (`dap`, `fs`, `git`, `lsp`, `search`, `state`, `terminal`); список языков `lsp` и адаптеров `dap` передаёт продукт в `Options::languages` и `Options::adapters`.
+Переход со старого крейта `substrate-platform`: [docs/migration-waves-9-11.md](docs/migration-waves-9-11.md).
 
 Какие пути хосту можно трогать, решает сам хост, уровнем выше.
 
@@ -199,7 +202,9 @@ import { PlatformShell, ThemeProvider, StatusBar } from "substrate-platform-ui";
 ```toml
 # Cargo.toml
 [dependencies]
-substrate-platform = { path = "../Substrate-Platform" }
+# the crates you use, e.g.
+substrate-run-app = { path = "../Substrate-Platform/crates/substrate-run-app" }
+substrate-workspace-fs = { path = "../Substrate-Platform/crates/substrate-workspace-fs" }
 ```
 
 ```jsonc
@@ -215,9 +220,9 @@ substrate-platform = { path = "../Substrate-Platform" }
 ## 🛠️ Разработка
 
 ```sh
-cargo build
-cargo test
-cargo clippy --all-targets
+cargo build --workspace --all-features
+cargo test --workspace --all-features
+cargo clippy --workspace --all-targets --all-features
 ```
 
 Версия Rust (1.99) закреплена в `rust-toolchain.toml`.

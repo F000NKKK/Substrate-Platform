@@ -12,12 +12,12 @@ pub fn catalog() -> Vec<(&'static str, &'static str, &'static str)> {
         #[cfg(feature = "lsp")]
         substrate_lsp_domain::messages::ALL,
         #[cfg(feature = "project")]
-        substrate_platform::project::messages::ALL,
+        substrate_project_domain::messages::ALL,
         substrate_process::ALL,
         #[cfg(feature = "search")]
         substrate_search_domain::messages::ALL,
         #[cfg(feature = "state")]
-        substrate_platform::state::messages::ALL,
+        substrate_state_json::messages::ALL,
         #[cfg(feature = "terminal")]
         substrate_terminal_domain::messages::ALL,
         substrate_workspace_domain::messages::ALL,

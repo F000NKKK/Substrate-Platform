@@ -36,11 +36,12 @@ code, so we can agree on the approach first.
    python3 <craftbook>/tools/craftcheck check . --baseline .craftcheck-baseline
    python3 <craftbook>/tools/craftcheck deps . --baseline .craftcheck-deps-baseline
    cargo test --workspace --all-features
-   cargo llvm-cov --package substrate-platform --all-features --lib --summary-only
+   cargo llvm-cov --workspace --all-features --json --summary-only --output-path coverage.json
+   python3 .github/scripts/coverage_floors.py coverage.json
    (cd ui && npm install && npm test)
    ```
 
-   Every module is a feature, so tests run with `--all-features`; plain
+   Tests run with `--all-features`: the plugin's contexts are features, and plain
    `cargo test` skips most of them. `tauri-plugin` needs GTK and WebKitGTK
    on Linux (`libgtk-3-dev libwebkit2gtk-4.1-dev libsoup-3.0-dev
    libayatana-appindicator3-dev librsvg2-dev`).
