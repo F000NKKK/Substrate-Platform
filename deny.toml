@@ -24,10 +24,18 @@ allow = [
 ]
 confidence-threshold = 0.9
 
-# The workspace's own crates carry the project's licence (it may be AGPL or
-# commercial); only third-party crates are checked.
+# The workspace's own crates carry the project's licence (AGPL here), so each
+# published one is an exception by name; third-party crates stay checked.
 [licenses.private]
 ignore = true
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-platform"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "tauri-plugin-substrate"
 
 [bans]
 multiple-versions = "warn"
