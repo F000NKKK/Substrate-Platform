@@ -46,7 +46,11 @@ code, so we can agree on the approach first.
    libayatana-appindicator3-dev librsvg2-dev`).
 
    The lint set is at `warn` while the code is migrated to Craftbook
-   (`adoption/substrate-platform.md` there): a change adds no new warning
+   (`adoption/substrate-platform.md` there), except `missing_docs`,
+   `missing_debug_implementations`, `unreachable_pub` and
+   `elided_lifetimes_in_paths`, which are `deny`: a product building Substrate
+   by path sees its warnings, so these stay at zero in every feature
+   combination. A change adds no new warning
    and no new `craftcheck` finding, and regenerates the baselines when it
    removes some (`--write-baseline`; they only shrink). Coverage only goes up.
 4. Open a pull request that explains what changed and why.
