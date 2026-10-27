@@ -10,7 +10,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "bench": "vitest bench --run"
+    "bench": "vitest bench --run",
+    "test:layout": "node e2e/layout.mjs"
   },
   "peerDependencies": {
     "react": "^19",

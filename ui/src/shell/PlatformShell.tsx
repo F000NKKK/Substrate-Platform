@@ -72,9 +72,11 @@ export function PlatformShell({
   const hasRight = hasDock("right");
   const hasBottom = hasDock("bottom");
 
+  // Only a side that has something docked on it is inset: an empty dock (everything dragged away) has no strip to line up with.
+  const occupied = (anchor: ToolWindowAnchor) => layout.idsByAnchor(anchor).length > 0;
   const bottomInsetStyle: CSSProperties = {
-    marginLeft: hasLeft ? "calc(var(--sp-toolwindow-strip) + var(--sp-space-xs))" : undefined,
-    marginRight: hasRight ? "calc(var(--sp-toolwindow-strip) + var(--sp-space-xs))" : undefined,
+    marginLeft: hasLeft && occupied("left") ? "calc(var(--sp-toolwindow-strip) + var(--sp-space-xs))" : undefined,
+    marginRight: hasRight && occupied("right") ? "calc(var(--sp-toolwindow-strip) + var(--sp-space-xs))" : undefined,
   };
 
   function handleMainDragOver(e: DragEvent) {
