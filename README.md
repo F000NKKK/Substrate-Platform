@@ -76,6 +76,8 @@ Always there: `workspace` (the folders the user opened; paths outside them are r
 
 The Tauri plugin `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) has the same features for its commands (`dap`, `fs`, `git`, `lsp`, `search`, `state`, `terminal`); `lsp`'s languages and `dap`'s adapters are the product's, passed in `Options::languages` and `Options::adapters`. `dap` has four commands (`dap_adapters`, `dap_start`, `dap_request`, `dap_stop`) and two events (`substrate://dap-event`, `substrate://dap-output`); the UI's `ui/src/dap` has the host, the shared `DapSession` (breakpoints per file, launch, run control, call stack, variables), a CodeMirror extension for the breakpoint gutter and the current line, and a small debug toolbar, call stack and variables panel.
 
+The UI's `ui/src/inspector` is a product-neutral data inspector: `DataInspector` shows a value (Substrate Data's JSON form) and the `ShapeDoc` that describes it (`{ root, defs }`, as `substrate_data::json` writes it) as a property tree — structs, lists, maps, optionals, plain and tagged enums, scalars with their types. Props: `shape` (the `ShapeDoc` JSON, parsed with typed `InspectorError`s, or a `ShapeDescription`), `value`, `readOnly` (default `true`), `onEdit(path, value)` (only called when editable: bool, integer, float, string and enum variant, validated against the shape), `diagnostics` (`{ path, message }`, shown on rows and their ancestors) and `rootName`. The pure model (`parseShapeDescription`, `buildRows`) is exported too; the host decides what an edit does.
+
 Which paths a host may touch is deliberately left to the host, one layer up.
 
 ### Run a task
