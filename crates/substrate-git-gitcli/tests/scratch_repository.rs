@@ -33,6 +33,9 @@ fn status_of_a_scratch_repository() {
     if !git(&dir, &["init", "-q", "--initial-branch", "main"]) {
         return;
     }
+    // The commit below goes through `GitCli`, so the identity must live in the repository.
+    assert!(git(&dir, &["config", "user.name", "Test"]));
+    assert!(git(&dir, &["config", "user.email", "test@example.com"]));
     let cli = GitCli::new(TextViews::default());
     std::fs::write(dir.join("a.txt"), "one\n").expect("write");
     let status = cli.status(&dir).expect("status").expect("a repository");
