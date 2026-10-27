@@ -69,6 +69,26 @@ crate = "substrate-search-app"
 allow = ["AGPL-3.0-only"]
 crate = "substrate-search-ignore"
 
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-process"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-run-domain"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-run-app"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-run-process"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-run-toml"
+
 [bans]
 multiple-versions = "warn"
 wildcards = "deny"

@@ -51,7 +51,7 @@ flowchart LR
     end
     subgraph sp["Substrate Platform"]
         spui["substrate-platform-ui<br/>shell · editors · widgets"]
-        sprs["substrate-platform<br/>run · terminal · fs · project · git"]
+        sprs["substrate-platform<br/>terminal · fs · project · state"]
     end
     ui --> spui
     be --> sprs
@@ -60,11 +60,11 @@ flowchart LR
 
 ## 🦀 Rust Crate
 
-Always there: `process` (what a started program's environment should be) `workspace` (the folders the user opened; paths outside them are refused), `sync` (locks that outlive a panic), `text_view` (a product's binary formats read and written as text, so search, replace and diffs see what the editor shows; the product builds a `TextViews` value and hands it to the plugin's `Options`). Beside it, [`crates/substrate-message`](crates/substrate-message) is the shared kernel (`Message`: user-facing text as templates the UI translates, and the `messages!` macro) and [`crates/substrate-host-contract`](crates/substrate-host-contract) is the contract with the UI (`commands`: the host commands by domain, the one list permissions, handlers and the UI's copy come from; `events`; the generator `cargo run -p substrate-host-contract --all-features --bin substrate-messages`). Every other module is a Cargo feature of its name, so a product builds only what it uses (`full` turns on all):
+Always there: `workspace` (the folders the user opened; paths outside them are refused), `sync` (locks that outlive a panic), `text_view` (a product's binary formats read and written as text, so search, replace and diffs see what the editor shows; the product builds a `TextViews` value and hands it to the plugin's `Options`). Beside it, [`crates/substrate-process`](crates/substrate-process) starts programs with the system's own environment and opens links and files, and [`crates/substrate-message`](crates/substrate-message) is the shared kernel (`Message`: user-facing text as templates the UI translates, and the `messages!` macro) and [`crates/substrate-host-contract`](crates/substrate-host-contract) is the contract with the UI (`commands`: the host commands by domain, the one list permissions, handlers and the UI's copy come from; `events`; the generator `cargo run -p substrate-host-contract --all-features --bin substrate-messages`). Every other module is a Cargo feature of its name, so a product builds only what it uses (`full` turns on all):
 
 | Feature / module | What it does |
 |---|---|
-| `run` | `run::spawn_task` runs an external process without blocking and streams stdout/stderr line by line into a `LogSink`; `TaskHandle` has `is_running`, `exit_status`, `wait` and `cancel` (which kills the whole process tree). `run::workflow`: named multi-step flows from a TOML file — steps run in order and stop at the first failure, a step can call another workflow (cycles are detected), `${var}` is substituted. `run::LogSink`: a cloneable, append-only `LogSink` with bounded retention. |
+| `run` (no module of this crate) | Running tools, in four crates: [`substrate-run-domain`](crates/substrate-run-domain) (`Task`, `TaskExit`, `LogLine`, `Level`, and the `workflow` types `File`, `Definition`, `Step`, `Outcome`), [`substrate-run-app`](crates/substrate-run-app) (`spawn` runs an external process without blocking and streams stdout/stderr line by line into a `LogSink`; `TaskHandle` has `is_running`, `exit_status`, `wait` and `cancel`, which kills the whole process tree; `workflow::run`: steps run in order and stop at the first failure, a step can call another workflow (cycles are detected), `${var}` is substituted; the `ports::ProcessLauncher` port), [`substrate-run-process`](crates/substrate-run-process) (`SystemLauncher`, and `kill_tree`; the only `unsafe`) and [`substrate-run-toml`](crates/substrate-run-toml) (`parse_workflow`: a workflow file into the domain's `File`). `LogSink` is a cloneable, append-only log with bounded retention. |
 | `terminal` | A real cross-platform pseudo-terminal (`PtySession`, via `portable-pty`) with `PtyOptions`; `Utf8Chunker` so output never splits a multi-byte character; `detect_shells()` lists the shells that are installed. |
 | `fs` | `fs::dir`: one-level directory listing (folders first, case-insensitive), create/rename/remove, read/write as text or bytes. `fs::watch`: `DirectoryWatcher`, debounced change notifications. |
 | `project` | The project and solution model and its API — no format of its own, and it reads no files. `Solution`: solution folders, configurations and platforms, each project's configuration per solution configuration, build dependencies (`build_order`), plus ordered properties and sections for everything else a format keeps; `Project`: properties (per configuration too), target frameworks, items, references. The product implements `SolutionFormat` / `ProjectFormat` for its files (`.sln`, `.slnx`, `.csproj`, its own) and registers them in `Formats`; `ProjectStandard` tells a project's kind from the file list the product gives it. |
@@ -81,12 +81,15 @@ Which paths a host may touch is deliberately left to the host, one layer up.
 ### Run a task
 
 ```rust
-use substrate_platform::run::{LogSink, Task, spawn_task};
+use substrate_run_app::{LogSink, spawn};
+use substrate_run_domain::Task;
+use substrate_run_process::SystemLauncher;
 
 let sink = LogSink::new();
 sink.on_push(|line| println!("{:?} {}", line.level, line.text));
 
-let handle = spawn_task(Task::new("cargo").arg("build").cwd("/path/to/project"), sink)?;
+let task = Task::new("cargo").arg("build").cwd("/path/to/project");
+let handle = spawn(&SystemLauncher, &task, sink)?;
 let exit = handle.wait();
 println!("success: {}, code: {:?}", exit.success, exit.code);
 ```
@@ -109,11 +112,16 @@ steps = [
 
 ```rust
 use std::collections::HashMap;
-use substrate_platform::run::{LogSink, workflow};
+use std::sync::Arc;
+use substrate_run_app::LogSink;
+use substrate_run_app::workflow::{Request, run};
+use substrate_run_process::SystemLauncher;
+use substrate_run_toml::parse_workflow;
 
-let file = workflow::File::parse(&std::fs::read_to_string("workflow.toml")?)?;
+let file = parse_workflow(&std::fs::read_to_string("workflow.toml")?)?;
 let vars = HashMap::from([("log".to_string(), "debug".to_string())]);
-let result = workflow::run(file, "ci", vars, ".", LogSink::new()).wait();
+let request = Request { file, name: "ci".to_string(), vars, cwd: ".".into() };
+let result = run(Arc::new(SystemLauncher), request, LogSink::new()).wait();
 assert!(result.is_success());
 ```
 

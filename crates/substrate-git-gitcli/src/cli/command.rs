@@ -9,7 +9,7 @@ use std::process::{Command, Stdio};
 /// English (`LC_MESSAGES=C`, the rest of the locale kept) — what failed is
 /// recognized by them.
 pub(crate) fn git(dir: &Path) -> Command {
-    let mut command = substrate_platform::process::command("git");
+    let mut command = substrate_process::command("git");
     command
         .current_dir(dir)
         .args(["-c", "core.quotepath=false", "-c", "color.ui=false"])

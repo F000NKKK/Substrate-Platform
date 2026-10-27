@@ -1,0 +1,15 @@
+[package]
+name = "substrate-run-domain"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "Running tools' vocabulary: a task to run, how it ended, log lines, and the named multi-step workflows."
+license = "AGPL-3.0-only"
+readme = "README.md"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]

@@ -30,6 +30,26 @@ name = "substrate-search-ignore"
 layer = "infra"
 context = "search"
 [[crate]]
+name = "substrate-process"
+layer = "infra"
+context = "process"
+[[crate]]
+name = "substrate-run-domain"
+layer = "domain"
+context = "run"
+[[crate]]
+name = "substrate-run-app"
+layer = "app"
+context = "run"
+[[crate]]
+name = "substrate-run-process"
+layer = "infra"
+context = "run"
+[[crate]]
+name = "substrate-run-toml"
+layer = "infra"
+context = "run"
+[[crate]]
 name = "tauri-plugin-substrate"
 layer = "interface"
 context = "host-ui-contract"
@@ -78,4 +98,36 @@ relation = "shared-kernel"
 [[context_edge]]
 from = "host-ui-contract"
 to = "search"
+relation = "customer-supplier"
+[[context_edge]]
+from = "run"
+to = "process"
+relation = "customer-supplier"
+[[context_edge]]
+from = "run"
+to = "message"
+relation = "shared-kernel"
+[[context_edge]]
+from = "process"
+to = "message"
+relation = "shared-kernel"
+[[context_edge]]
+from = "host-ui-contract"
+to = "process"
+relation = "customer-supplier"
+[[context_edge]]
+from = "host-ui-contract"
+to = "run"
+relation = "customer-supplier"
+[[context_edge]]
+from = "substrate"
+to = "run"
+relation = "customer-supplier"
+[[context_edge]]
+from = "substrate"
+to = "process"
+relation = "customer-supplier"
+[[context_edge]]
+from = "source-control"
+to = "process"
 relation = "customer-supplier"

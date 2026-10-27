@@ -13,7 +13,7 @@ renames the other in the same change. Contexts are listed in
 | Message | Text for the user: an English template with `{name}` placeholders, and their values. The template is the key the UI's translation catalogs use. | `message::Message` |
 | Template | One message's English text, declared once in its module's `messages!` block. | `messages!`, `*::messages::*` |
 | Verbatim | Text that is not ours to translate: a tool's own output. | `Message::verbatim` |
-| Error | Why an operation failed, as a typed enum per family; the interface turns it into a `Message` once, on the way out. | `substrate_git_domain::GitError`, `substrate_search_domain::SearchError`, `lsp::LspError`, `dap::DapError`, `fs::FsError`, `state::StateError`, `process::ProcessError`, `project::ProjectError`, `workspace::WorkspaceError`, `terminal::PtyError`, `run::workflow::FileError` |
+| Error | Why an operation failed, as a typed enum per family; the interface turns it into a `Message` once, on the way out. | `substrate_git_domain::GitError`, `substrate_search_domain::SearchError`, `lsp::LspError`, `dap::DapError`, `fs::FsError`, `state::StateError`, `substrate_process::ProcessError`, `project::ProjectError`, `workspace::WorkspaceError`, `terminal::PtyError`, `substrate_run_toml::FileError` |
 
 ## Workspace
 
@@ -73,14 +73,14 @@ renames the other in the same change. Contexts are listed in
 
 | Term | Meaning | In code |
 |---|---|---|
-| Task | One external command, its output streamed into a log. | `run::Task` |
-| Task exit | How a task ended. | `run::TaskExit` |
-| Workflow | Named steps run one after another, stopping at the first failure. | `run::workflow::run`, `run::workflow::Handle` |
-| Workflow file | One `workflow.toml`: named workflows, each a definition of steps. | `run::workflow::File`, `run::workflow::Definition` |
-| Step | Runs one command, or composes another workflow. | `run::workflow::Step` |
-| Outcome | How a workflow run ended: succeeded, failed, cancelled. | `run::workflow::Outcome` |
-| Log sink | An append-only log any feature pushes lines into. | `run::LogSink` |
-| Log line, level | One line of a log and its severity (info, warn, error). | `run::LogLine`, `run::Level` |
+| Task | One external command, its output streamed into a log. | `substrate_run_domain::Task` |
+| Task exit | How a task ended. | `substrate_run_domain::TaskExit` |
+| Workflow | Named steps run one after another, stopping at the first failure. | `substrate_run_app::workflow::run`, `substrate_run_app::workflow::Handle` |
+| Workflow file | One `workflow.toml`: named workflows, each a definition of steps. | `substrate_run_domain::workflow::File`, `substrate_run_domain::workflow::Definition` |
+| Step | Runs one command, or composes another workflow. | `substrate_run_domain::workflow::Step` |
+| Outcome | How a workflow run ended: succeeded, failed, cancelled. | `substrate_run_domain::workflow::Outcome` |
+| Log sink | An append-only log any feature pushes lines into. | `substrate_run_app::LogSink` |
+| Log line, level | One line of a log and its severity (info, warn, error). | `substrate_run_domain::LogLine`, `substrate_run_domain::Level` |
 
 ## Terminal
 
@@ -139,7 +139,7 @@ renames the other in the same change. Contexts are listed in
 
 | Term | Meaning | In code |
 |---|---|---|
-| Host environment | How a started program's environment differs from this process's (an AppImage's variables removed). | `process::host_environment` |
+| Host environment | How a started program's environment differs from this process's (an AppImage's variables removed). | `substrate_process::host_environment` |
 | Command domain | A group of host commands under a plugin. | `commands::Domain` |
 | Event | A message the host sends its UI, by name. | `events` |
 | Port | A trait a context's app crate declares and an adapter crate implements. | `substrate_git_app::ports::{WorkingTree, History, Diffs, Branches, Stashes, Remotes, Settings}` |

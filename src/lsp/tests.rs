@@ -282,7 +282,7 @@ fn rust_analyzer_answers_a_hover() {
         env: Default::default(),
         initialization_options: None,
     };
-    let client = Client::start(&server, &dir, crate::run::LogSink::new(), |_| {}).unwrap();
+    let client = Client::start(&server, &dir, substrate_run_app::LogSink::new(), |_| {}).unwrap();
     let capabilities = client.initialize(&dir, None).unwrap();
     assert!(capabilities.get("hoverProvider").is_some());
     client.did_open(&main, "rust", 1, text).unwrap();

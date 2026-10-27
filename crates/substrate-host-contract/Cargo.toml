@@ -28,6 +28,7 @@ workspace = true
 substrate-git-domain = { version = "0.1.0", path = "../substrate-git-domain", optional = true }
 substrate-search-domain = { version = "0.1.0", path = "../substrate-search-domain", optional = true }
 substrate-message = { version = "0.1.0", path = "../substrate-message" }
+substrate-process = { version = "0.1.0", path = "../substrate-process" }
 substrate-platform = { version = "0.4.0", path = "../.." }
 
 # The UI's generated copy covers every module's messages.

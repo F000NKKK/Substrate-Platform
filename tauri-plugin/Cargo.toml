@@ -13,10 +13,10 @@ links = "tauri-plugin-substrate"
 
 # Each command group is a feature of its name, turning on the core's module.
 [features]
-dap = ["substrate-platform/dap", "dep:serde_json"]
+dap = ["substrate-platform/dap", "dep:serde_json", "dep:substrate-run-app"]
 fs = ["substrate-platform/fs"]
 git = ["dep:substrate-git-app", "dep:substrate-git-domain", "dep:substrate-git-gitcli"]
-lsp = ["substrate-platform/lsp", "dep:serde_json"]
+lsp = ["substrate-platform/lsp", "dep:serde_json", "dep:substrate-run-app"]
 search = ["dep:substrate-search-app", "dep:substrate-search-domain", "dep:substrate-search-ignore"]
 state = ["substrate-platform/state", "dep:serde_json"]
 terminal = ["substrate-platform/terminal"]
@@ -33,6 +33,8 @@ substrate-search-domain = { version = "0.1.0", path = "../crates/substrate-searc
 substrate-search-ignore = { version = "0.1.0", path = "../crates/substrate-search-ignore", optional = true }
 substrate-host-contract = { version = "0.1.0", path = "../crates/substrate-host-contract" }
 substrate-message = { version = "0.1.0", path = "../crates/substrate-message" }
+substrate-process = { version = "0.1.0", path = "../crates/substrate-process" }
+substrate-run-app = { version = "0.1.0", path = "../crates/substrate-run-app", optional = true }
 substrate-platform = { version = "0.4.0", path = ".." }
 tauri = "2"
 serde = { version = "1", features = ["derive"] }

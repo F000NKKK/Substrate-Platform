@@ -6,8 +6,8 @@ use serde_json::Value;
 use substrate_host_contract::events;
 use substrate_message::Message;
 use substrate_platform::dap::{AdapterDefinition, AdapterId, Adapters, Client, Command, DapError};
-use substrate_platform::run::LogSink;
 use substrate_platform::workspace::Workspace;
+use substrate_run_app::LogSink;
 use tauri::{AppHandle, Emitter, Runtime, State};
 
 use super::Sessions;
