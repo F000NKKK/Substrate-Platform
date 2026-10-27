@@ -1,6 +1,6 @@
 //! Running tools' use cases. [`spawn`] starts a [`Task`](substrate_run_domain::Task)
 //! with its output streamed line by line into a [`LogSink`]; [`workflow::run`]
-//! chains tasks step by step. Starting a process is the [`ProcessLauncher`]
+//! chains tasks step by step. Starting a process is the [`ports::ProcessLauncher`]
 //! port, implemented by `substrate-run-process`.
 #![forbid(unsafe_code)]
 #![doc = include_str!("../README.md")]
