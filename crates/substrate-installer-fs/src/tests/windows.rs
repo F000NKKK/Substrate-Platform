@@ -4,7 +4,6 @@
 
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
-use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
 use substrate_installer_app::control::CancelToken;
@@ -17,9 +16,25 @@ use substrate_installer_domain::platforms::Os;
 use super::fixtures::{Setup, asset, installer, product, request, version, with_control};
 use crate::ProductFailure;
 
-/// Writing a script and running it must not overlap another test's fork, or
-/// the kernel refuses to run a file that is still open for writing.
-static SCRIPTS: Mutex<()> = Mutex::new(());
+/// The kernel's "text file busy": a script was run while another thread's
+/// fork still held it open for writing. It passes at once, so it is retried.
+const TEXT_FILE_BUSY: i32 = 26;
+
+/// Runs `attempt` again while the system says the script is busy.
+fn retrying<T>(mut attempt: impl FnMut() -> Result<T, ProductError>) -> Result<T, ProductError> {
+    let mut result = attempt();
+    for _ in 0..50 {
+        let busy = matches!(&result, Err(ProductError::Failed(cause))
+            if matches!(cause.downcast_ref::<ProductFailure>(),
+                Some(ProductFailure::StartSetup { source, .. }) if source.raw_os_error() == Some(TEXT_FILE_BUSY)));
+        if !busy {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(20));
+        result = attempt();
+    }
+    result
+}
 
 fn script(setup: &Setup, body: &str) -> PathBuf {
     let path = setup.package("setup.exe", format!("#!/bin/sh\n{body}\n").as_bytes());
@@ -34,18 +49,17 @@ fn install(
 ) -> Result<PathBuf, ProductError> {
     let ide = product("yog-idle", "yog-idle");
     let (v, name) = (version("1.0"), asset("setup.exe"));
-    with_control(token, |control| {
-        setup
-            .products
-            .install(&request(Item::Product(&ide), &v, package, &name), control)
+    retrying(|| {
+        with_control(token, |control| {
+            setup
+                .products
+                .install(&request(Item::Product(&ide), &v, package, &name), control)
+        })
     })
 }
 
 #[test]
 fn the_setup_runs_silently_into_the_products_folder() {
-    let _guard = SCRIPTS
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner);
     let setup = Setup::new(Os::Windows, &[]);
     let package = script(
         &setup,
@@ -61,9 +75,6 @@ fn the_setup_runs_silently_into_the_products_folder() {
 
 #[test]
 fn a_failing_setup_reports_its_exit_code() {
-    let _guard = SCRIPTS
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner);
     let setup = Setup::new(Os::Windows, &[]);
     let package = script(&setup, "exit 3");
     let ProductError::Failed(cause) = install(&setup, &package, &CancelToken::new()).unwrap_err()
@@ -79,9 +90,6 @@ fn a_failing_setup_reports_its_exit_code() {
 
 #[test]
 fn a_setup_that_cannot_start_is_a_typed_failure() {
-    let _guard = SCRIPTS
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner);
     let setup = Setup::new(Os::Windows, &[]);
     let package = setup.package("setup.exe", b"not runnable");
     let ProductError::Failed(cause) = install(&setup, &package, &CancelToken::new()).unwrap_err()
@@ -94,9 +102,6 @@ fn a_setup_that_cannot_start_is_a_typed_failure() {
 
 #[test]
 fn cancelling_kills_a_running_setup() {
-    let _guard = SCRIPTS
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner);
     let setup = Setup::new(Os::Windows, &[]);
     let package = script(&setup, "sleep 30");
     let token = CancelToken::new();
@@ -114,9 +119,6 @@ fn cancelling_kills_a_running_setup() {
 
 #[test]
 fn uninstalling_runs_the_products_uninstaller_then_removes_the_folder() {
-    let _guard = SCRIPTS
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner);
     let setup = Setup::new(Os::Windows, &[]);
     let ide = product("yog-idle", "yog-idle");
     let v = version("1.0");
@@ -136,8 +138,10 @@ fn uninstalling_runs_the_products_uninstaller_then_removes_the_folder() {
         program: &folder.join("yog-idle.exe"),
         mode: RemovalMode::Uninstall,
     };
-    with_control(&CancelToken::new(), |control| {
-        setup.products.remove(&removal, control)
+    retrying(|| {
+        with_control(&CancelToken::new(), |control| {
+            setup.products.remove(&removal, control)
+        })
     })
     .unwrap();
     assert!(marker.is_file());
@@ -146,18 +150,17 @@ fn uninstalling_runs_the_products_uninstaller_then_removes_the_folder() {
 
 #[test]
 fn the_installer_itself_is_a_program_too() {
-    let _guard = SCRIPTS
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner);
     let setup = Setup::new(Os::Windows, &[]);
     let own = installer();
     let package = script(&setup, "exit 0");
     let (v, name) = (version("2"), asset("setup.exe"));
-    let program = with_control(&CancelToken::new(), |control| {
-        setup.products.install(
-            &request(Item::Installer(&own), &v, &package, &name),
-            control,
-        )
+    let program = retrying(|| {
+        with_control(&CancelToken::new(), |control| {
+            setup.products.install(
+                &request(Item::Installer(&own), &v, &package, &name),
+                control,
+            )
+        })
     })
     .unwrap();
     assert_eq!(

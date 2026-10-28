@@ -19,9 +19,10 @@ pub(crate) fn segment(text: &str) -> OsString {
             }
         })
         .collect();
-    match safe.as_str() {
-        "" | "." | ".." => SUBSTITUTE.to_string().into(),
-        _ => safe.into(),
+    if safe.is_empty() || safe.chars().all(|c| c == '.') && safe.len() <= 2 {
+        SUBSTITUTE.to_string().into()
+    } else {
+        safe.into()
     }
 }
 

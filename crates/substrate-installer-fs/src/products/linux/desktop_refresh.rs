@@ -3,7 +3,7 @@
 use std::path::Path;
 use std::process::{Command, Stdio};
 
-use crate::products::launcher_dirs::DesktopCaches;
+use crate::products::desktop_caches::DesktopCaches;
 
 /// Tools that read a desktop's entries again, with whether they take the
 /// entries' folder: the freedesktop database, KDE Plasma 6, KDE Plasma 5.

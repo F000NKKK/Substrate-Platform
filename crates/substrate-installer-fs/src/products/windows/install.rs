@@ -7,7 +7,8 @@ use substrate_installer_app::ports::tools::ToolControl;
 
 use super::setup_command::install_command;
 use super::setup_run::run_setup;
-use crate::products::host_products::{HostProducts, InstallJob};
+use crate::products::host_products::HostProducts;
+use crate::products::install_job::InstallJob;
 use crate::products::package_kind::PackageKind;
 use crate::products::product_failure::io_error;
 use crate::promote::remove_any;

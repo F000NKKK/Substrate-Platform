@@ -8,8 +8,10 @@ use substrate_installer_app::ports::unpacking::{Strip, UnpackRequest};
 use substrate_installer_domain::releases::ArchiveKind;
 
 use super::desktop_refresh::refresh;
-use super::launcher_plan::{LauncherEntry, plan_launcher};
-use crate::products::host_products::{HostProducts, InstallJob};
+use super::launcher_entry::LauncherEntry;
+use super::launcher_plan::plan_launcher;
+use crate::products::host_products::HostProducts;
+use crate::products::install_job::InstallJob;
 use crate::products::package_kind::PackageKind;
 use crate::products::product_failure::{ProductFailure, io_error, unpack_error};
 use crate::promote::remove_any;

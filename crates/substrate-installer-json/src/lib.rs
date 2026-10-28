@@ -6,13 +6,16 @@
 #![doc = include_str!("../README.md")]
 
 mod damage;
-mod json_store;
+mod header;
+mod json_installed_store;
+mod loaded;
 mod record;
 mod store_file;
 mod store_warning;
 
 pub use damage::Damage;
-pub use json_store::{JsonInstalledStore, Loaded};
+pub use json_installed_store::JsonInstalledStore;
+pub use loaded::Loaded;
 pub use record::RecordError;
 pub use store_warning::StoreWarning;
 

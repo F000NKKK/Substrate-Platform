@@ -12,6 +12,7 @@ use substrate_installer_domain::channel::Item;
 use substrate_installer_domain::platforms::Os;
 use substrate_installer_domain::versions::Version;
 
+use super::install_job::InstallJob;
 use super::launcher_dirs::LauncherDirs;
 use super::package_kind::PackageKind;
 use super::product_facts::ProductFacts;
@@ -19,14 +20,6 @@ use super::product_failure::io_error;
 use super::windows::uninstall_on_windows;
 use crate::HomeLayout;
 use crate::promote::remove_any;
-
-/// What an install needs to know once the package is told apart.
-#[derive(Debug, Clone, Copy)]
-pub(super) struct InstallJob<'a> {
-    pub(super) request: &'a ProductInstall<'a>,
-    pub(super) facts: ProductFacts<'a>,
-    pub(super) kind: PackageKind,
-}
 
 /// Installs and removes programs the way the operating system does:
 ///

@@ -2,7 +2,9 @@
 
 mod desktop_refresh;
 mod install;
+mod launcher_entry;
 mod launcher_plan;
 mod unlist;
 
-pub use launcher_plan::{LauncherEntry, LauncherPlan, plan_launcher};
+pub use launcher_entry::LauncherEntry;
+pub use launcher_plan::{LauncherPlan, plan_launcher};

@@ -5,7 +5,7 @@ use std::sync::Arc;
 use substrate_installer_app::ports::records::{InstalledStore, StoreError};
 use substrate_installer_domain::inventory::InstalledSet;
 
-use super::{sample, store_in};
+use super::fixtures::{sample, store_in};
 use crate::JsonInstalledStore;
 
 #[test]

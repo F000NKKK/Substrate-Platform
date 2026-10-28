@@ -3,25 +3,11 @@
 use std::path::{Path, PathBuf};
 
 use substrate_installer_domain::ids::ProductId;
-use substrate_installer_domain::texts::{Description, Label};
+
+use super::launcher_entry::LauncherEntry;
 
 /// The file extension of a launcher entry.
 const ENTRY_EXTENSION: &str = "desktop";
-
-/// What a launcher entry lists a program as.
-#[derive(Debug, Clone, Copy)]
-pub struct LauncherEntry<'a> {
-    /// The product; the entry's file is named after it.
-    pub id: &'a ProductId,
-    /// The name the desktop shows.
-    pub name: &'a Label,
-    /// The tooltip, when the product has a description.
-    pub comment: Option<&'a Description>,
-    /// The program that starts it.
-    pub program: &'a Path,
-    /// A PNG icon, when there is one.
-    pub icon: Option<&'a Path>,
-}
 
 /// What to write to list a program among the desktop's applications: the
 /// entry's path and its text.
@@ -88,6 +74,8 @@ fn exec_path(program: &Path) -> String {
 
 #[cfg(test)]
 mod tests {
+    use substrate_installer_domain::texts::{Description, Label};
+
     use super::*;
 
     fn plan(program: &str, icon: Option<&Path>, comment: Option<&str>) -> LauncherPlan {

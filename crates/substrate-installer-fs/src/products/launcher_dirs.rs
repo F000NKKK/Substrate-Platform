@@ -2,20 +2,12 @@
 
 use std::path::{Path, PathBuf};
 
+use super::desktop_caches::DesktopCaches;
+
 /// Where Linux desktops look for a user's launcher entries, under the user's home.
 const LINUX_APPLICATIONS: [&str; 3] = [".local", "share", "applications"];
 /// Where macOS keeps a user's applications, under the user's home.
 const MAC_APPLICATIONS: &str = "Applications";
-
-/// Whether the desktop's caches of launcher entries are told about a change.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum DesktopCaches {
-    /// `update-desktop-database` and KDE's `kbuildsycoca` are run when
-    /// present, so a desktop does not start a removed program.
-    Refresh,
-    /// The caches are left as they are.
-    Leave,
-}
 
 /// The folders where a program is listed so the user can start it.
 #[derive(Debug, Clone)]

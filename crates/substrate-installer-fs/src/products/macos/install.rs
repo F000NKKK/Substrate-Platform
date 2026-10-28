@@ -8,7 +8,8 @@ use substrate_installer_app::ports::unpacking::{Strip, UnpackRequest};
 
 use super::application_link::application_link;
 use super::find_application::find_application;
-use crate::products::host_products::{HostProducts, InstallJob};
+use crate::products::host_products::HostProducts;
+use crate::products::install_job::InstallJob;
 use crate::products::package_kind::PackageKind;
 use crate::products::product_failure::{ProductFailure, io_error, unpack_error};
 use crate::promote::remove_any;

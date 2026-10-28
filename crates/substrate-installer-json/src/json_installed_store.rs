@@ -9,20 +9,13 @@ use substrate_installer_domain::inventory::InstalledSet;
 use substrate_lock::Locked;
 
 use crate::damage::Damage;
-use crate::store_file::{FORMAT_VERSION, Header, StoreFile};
+use crate::header::Header;
+use crate::loaded::Loaded;
+use crate::store_file::{FORMAT_VERSION, StoreFile};
 use crate::store_warning::StoreWarning;
 
 /// What a file being written is called beside the real one.
 const PARTIAL_EXTENSION: &str = "json.partial";
-
-/// What was read: the records, and why they are none when the file was passed over.
-#[derive(Debug)]
-pub struct Loaded {
-    /// The records; empty when the file is missing or was passed over.
-    pub set: InstalledSet,
-    /// Why the file was passed over; none when it was read or is not there.
-    pub warning: Option<StoreWarning>,
-}
 
 type WarningSink = Box<dyn Fn(&StoreWarning) + Send + Sync>;
 
