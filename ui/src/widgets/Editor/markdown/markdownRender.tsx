@@ -2,10 +2,13 @@
 import markdownIt, { type MarkdownIt, type Token } from "markdown-it";
 import footnote from "markdown-it-footnote";
 import githubAlerts from "markdown-it-github-alerts";
-import katexPlugin from "@vscode/markdown-it-katex";
+import katexModule from "@vscode/markdown-it-katex";
 import katex from "katex";
 import hljs from "highlight.js";
 import DOMPurify from "dompurify";
+
+// The package is CommonJS with `exports.default`: Node-style bundlers (Vite 8) hand over the whole exports object, older ones its default.
+const katexPlugin = ("default" in katexModule ? katexModule.default : katexModule) as typeof katexModule;
 
 // Markdown to HTML the way VS Code's preview does it: markdown-it with GFM
 // (tables, strikethrough, autolinks, task lists), footnotes, GitHub alerts
