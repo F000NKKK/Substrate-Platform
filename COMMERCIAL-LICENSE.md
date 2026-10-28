@@ -49,7 +49,7 @@ the Commercial License.
 ## This is not a substitute for legal advice
 
 This document is a plain-language summary of commercial terms, not itself
-a binding contract. Contact F000NK (burtelgamerpro@gmail.com) to arrange an
+a binding contract. Contact F000NK (galexeev.science@gmail.com) to arrange an
 actual signed commercial agreement, and have your own lawyer review it
 before relying on it for a real business — license terms like these carry
 real legal weight and this summary hasn't been reviewed by counsel.
