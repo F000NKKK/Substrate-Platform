@@ -5,4 +5,5 @@ mod fixtures;
 mod layout;
 mod linux;
 mod macos;
+mod running;
 mod windows;

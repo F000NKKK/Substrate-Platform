@@ -43,7 +43,10 @@ impl HostProducts {
 
     /// Links `application` into the applications folder, replacing a link
     /// an earlier version made.
-    fn link_application(&self, application: &Path) -> Result<(), ProductError> {
+    pub(in crate::products) fn link_application(
+        &self,
+        application: &Path,
+    ) -> Result<(), ProductError> {
         let applications = &self.launchers().applications;
         let Some(link) = application_link(applications, application) else {
             return Ok(());

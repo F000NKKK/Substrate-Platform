@@ -75,11 +75,20 @@ impl HostProducts {
         folder: &Path,
         program: &Path,
     ) -> Result<(), ProductError> {
+        self.register_program(&job.facts, folder, program)
+    }
+
+    pub(in crate::products) fn register_program(
+        &self,
+        facts: &crate::products::product_facts::ProductFacts<'_>,
+        folder: &Path,
+        program: &Path,
+    ) -> Result<(), ProductError> {
         let icon = folder.join(ICON_FILE);
         let entry = LauncherEntry {
-            id: job.facts.id,
-            name: job.facts.name,
-            comment: job.facts.description,
+            id: facts.id,
+            name: facts.name,
+            comment: facts.description,
             program,
             icon: icon.is_file().then_some(icon.as_path()),
         };

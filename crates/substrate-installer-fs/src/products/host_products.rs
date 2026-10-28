@@ -92,6 +92,10 @@ impl HostProducts {
         &self.layout
     }
 
+    pub(super) fn os(&self) -> Os {
+        self.os
+    }
+
     pub(super) fn unpacker(&self) -> &dyn Unpacker {
         &*self.unpacker
     }

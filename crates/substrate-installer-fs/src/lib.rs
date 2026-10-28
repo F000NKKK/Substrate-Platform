@@ -18,7 +18,7 @@ pub use disk_files::DiskFiles;
 pub use home_layout::HomeLayout;
 pub use products::{
     DesktopCaches, HostProducts, LauncherDirs, LauncherEntry, LauncherPlan, PackageKind,
-    ProductFailure, plan_launcher,
+    ProductFailure, RunningBundle, RunningProduct, plan_launcher,
 };
 
 #[cfg(test)]

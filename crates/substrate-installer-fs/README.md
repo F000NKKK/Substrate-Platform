@@ -60,3 +60,11 @@ Used by products' composition roots.
 ## License
 
 AGPL-3.0-only; see [LICENSE](../../LICENSE).
+
+## First launch
+
+`HostProducts::place_running` retains a local `RunningProduct` without a download:
+Linux takes the original `APPIMAGE`, macOS takes the complete `.app`, and Windows
+records the executable already placed by NSIS. Copies are staged before replacing
+the destination. Starting the retained copy repairs its desktop launcher without
+replacing its own files.
