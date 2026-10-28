@@ -22,7 +22,7 @@ const STRIP_VAR = "var(--sp-toolwindow-strip)";
  * edge. Because the handle lives in the same flex slot as the panel it
  * resizes, it can never end up driving a different panel.
  */
-function ResizeHandle({
+export function ResizeHandle({
   anchor,
   panelId,
   mode,
@@ -72,7 +72,7 @@ function ResizeHandle({
   );
 }
 
-function sizeStyle(anchor: ToolWindowAnchor, size: number): CSSProperties {
+export function sizeStyle(anchor: ToolWindowAnchor, size: number): CSSProperties {
   return anchor === "bottom" ? { height: size } : { width: size };
 }
 

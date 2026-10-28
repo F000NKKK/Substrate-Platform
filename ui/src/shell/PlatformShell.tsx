@@ -1,6 +1,7 @@
 import type { CSSProperties, DragEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { ToolWindowDock } from "../dock/ToolWindowDock/ToolWindowDock";
+import { TabGroupDock } from "../dock/TabGroupDock";
 import { CenterDock } from "../dock/CenterDock/CenterDock";
 import { FloatingPanel } from "../dock/FloatingPanel/FloatingPanel";
 import { useShellLayout } from "../dock/hooks/useShellLayout";
@@ -38,6 +39,7 @@ export function PlatformShell({
   main,
   toolWindows,
   defaultPinned,
+  tabbedAnchors,
   persistKey,
   extraCenterPanels,
   onCloseDynamicPanel,
@@ -122,6 +124,9 @@ export function PlatformShell({
     }
   }
 
+  const Dock = ({ anchor }: { anchor: ToolWindowAnchor }) =>
+    tabbedAnchors?.includes(anchor) ? <TabGroupDock anchor={anchor} layout={layout} /> : <ToolWindowDock anchor={anchor} layout={layout} />;
+
   return (
     <ShellContext.Provider value={controller}>
       <div className="sp-shell">
@@ -130,18 +135,18 @@ export function PlatformShell({
           {/* The guides sit at the middle of the whole window, whatever's docked. */}
           {dragOver && <DockGuides main={dragOver.main} documents={dragOver.documents} hover={dragOver.target} />}
           <div className="sp-shell-upper">
-            {hasLeft && <ToolWindowDock anchor="left" layout={layout} />}
+            {hasLeft && <Dock anchor="left" />}
 
             <div className="sp-shell-main">
               <CenterDock layout={layout} />
             </div>
 
-            {hasRight && <ToolWindowDock anchor="right" layout={layout} />}
+            {hasRight && <Dock anchor="right" />}
           </div>
 
           {hasBottom && (
             <div className="sp-shell-bottom-inset" style={bottomInsetStyle}>
-              <ToolWindowDock anchor="bottom" layout={layout} />
+              <Dock anchor="bottom" />
             </div>
           )}
 

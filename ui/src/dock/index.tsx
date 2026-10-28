@@ -1,4 +1,5 @@
 export { ToolWindowDock } from "./ToolWindowDock";
+export { TabGroupDock } from "./TabGroupDock";
 export { CenterDock } from "./CenterDock";
 export { DockStrip } from "./DockStrip";
 export { PanelSurface } from "./PanelSurface";
