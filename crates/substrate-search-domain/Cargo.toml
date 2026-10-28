@@ -13,7 +13,7 @@ repository = "https://github.com/F000NKKK/Substrate-Platform"
 workspace = true
 
 [dependencies]
-globset = "0.4.20"
+globset = "0.4.21"
 regex = "1.13.1"
 substrate-message = { version = "0.1.0", path = "../substrate-message" }
 thiserror = "2"
