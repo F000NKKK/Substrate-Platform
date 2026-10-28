@@ -30,7 +30,7 @@ pub(crate) fn rustup_init_url(platform: PlatformTag, host: &str) -> Result<HttpU
     } else {
         "rustup-init"
     };
-    HttpUrl::new(format!("{DIST}/{host}/{file}"))
+    HttpUrl::new([DIST, host, file].join("/"))
 }
 
 #[cfg(test)]

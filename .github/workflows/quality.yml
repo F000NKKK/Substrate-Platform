@@ -40,8 +40,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
-      - run: python3 .craftbook/tools/craftcheck check . --baseline .craftcheck-baseline
-      - run: python3 .craftbook/tools/craftcheck deps . --baseline .craftcheck-deps-baseline
+      - run: python3 .craftbook/tools/craftcheck check .
+      - run: python3 .craftbook/tools/craftcheck deps .
 
   fmt-nightly:
     runs-on: ubuntu-latest

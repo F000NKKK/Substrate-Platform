@@ -33,8 +33,8 @@ code, so we can agree on the approach first.
    ```bash
    cargo fmt --all --check
    cargo clippy --workspace --all-targets --all-features -- -D warnings
-   python3 <craftbook>/tools/craftcheck check . --baseline .craftcheck-baseline
-   python3 <craftbook>/tools/craftcheck deps . --baseline .craftcheck-deps-baseline
+   python3 <craftbook>/tools/craftcheck check .
+   python3 <craftbook>/tools/craftcheck deps .
    cargo test --workspace --all-features
    cargo llvm-cov --workspace --all-features --json --summary-only --output-path coverage.json
    python3 .github/scripts/coverage_floors.py coverage.json
@@ -53,9 +53,8 @@ code, so we can agree on the approach first.
    `unused_qualifications`, `missing_debug_implementations`,
    `unreachable_pub` and `elided_lifetimes_in_paths`, which are `deny`: a
    product building Substrate by path sees its warnings, so these stay at
-   zero in every feature combination. A change adds no new `craftcheck`
-   finding, and regenerates the baselines when it removes some
-   (`--write-baseline`; they only shrink). Coverage only goes up.
+   zero in every feature combination. `craftcheck` reports no
+   finding at all, with no baseline. Coverage only goes up.
 4. Open a pull request that explains what changed and why.
 
 Substrate stays generic: no Yog-specific formats or logic, only infrastructure any IDE could use.
