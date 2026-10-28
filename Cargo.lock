@@ -3775,7 +3775,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-search-domain"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "globset",
  "regex",
@@ -3785,7 +3785,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-search-ignore"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "ignore",
  "substrate-message",
