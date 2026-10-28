@@ -6,9 +6,8 @@ use substrate_installer_domain::releases::Release;
 use substrate_installer_domain::sources::{CrateName, RepoSlug, Source, Toolchain};
 use substrate_installer_domain::versions::Version;
 
-use super::crate_versions;
-use super::github_releases;
 use super::source_archive::SourceArchive;
+use super::{crate_versions, github_releases};
 use crate::{HttpClient, ReleaseReadError};
 
 /// Releases a GitHub repository is asked for (its newest).

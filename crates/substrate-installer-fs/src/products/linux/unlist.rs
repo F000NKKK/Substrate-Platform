@@ -1,10 +1,9 @@
 //! Taking a program off the desktop's list.
 
-use crate::products::host_products::HostProducts;
-use crate::products::product_facts::ProductFacts;
-
 use super::desktop_refresh::refresh;
 use super::launcher_plan::entry_path;
+use crate::products::host_products::HostProducts;
+use crate::products::product_facts::ProductFacts;
 
 impl HostProducts {
     /// Removes the product's launcher entry and tells the desktop. An entry
