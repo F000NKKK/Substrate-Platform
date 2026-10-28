@@ -20,7 +20,7 @@ pub enum CatalogFileError {
     },
     /// The entries are individually fine but do not make a catalog (an id
     /// twice, a reference to nothing, a requirement cycle).
-    #[error("{}{source}", place(*.location, .path.as_ref()))]
+    #[error("{}{source}", Place(*.location, .path.as_ref()))]
     Rejected {
         /// The line of the entry the domain names, when the file has it.
         location: Option<Location>,
@@ -59,10 +59,18 @@ impl fmt::Display for Summary<'_> {
     }
 }
 
-fn place(location: Option<Location>, path: Option<&Path>) -> String {
-    match (location, path) {
-        (Some(at), Some(path)) => format!("{at}: {path}: "),
-        (Some(at), None) => format!("{at}: "),
-        _ => String::new(),
+/// Where a rejection happened: `line: path: `, whichever parts are known.
+struct Place<'p>(Option<Location>, Option<&'p Path>);
+
+impl fmt::Display for Place<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let Some(at) = self.0 else {
+            return Ok(());
+        };
+        write!(f, "{at}: ")?;
+        match self.1 {
+            Some(path) => write!(f, "{path}: "),
+            None => Ok(()),
+        }
     }
 }
