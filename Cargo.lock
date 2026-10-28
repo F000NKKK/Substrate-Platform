@@ -3595,7 +3595,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-installer-data"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "substrate-data",
  "substrate-installer-app",
@@ -3639,7 +3639,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-installer-process"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "libc",
  "substrate-installer-app",
