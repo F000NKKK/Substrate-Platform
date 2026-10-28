@@ -13,6 +13,12 @@ Phase 1 is two crates and no adapters:
 |---|---|---|
 | `substrate-installer-domain` | domain | the vocabulary and the rules; no I/O, no `async`, no serde |
 | `substrate-installer-app` | app | the use cases and the ports (traits); tested with in-memory fakes of every port |
+| `substrate-installer-http` | infra | `ReleaseSource` (GitHub releases and source archives, crates.io, toolchains) and `Downloader` (resumable, SHA-256 verified, cancellable, streamable) over `ureq`, with an `ETag` cache of JSON answers; the GitHub token is passed in |
+| `substrate-installer-toml` | infra | the catalog file (`[installer]`, `[[group]]`, `[[product]]`, `[[workload]]`, `[[component]]`, `revision`, `manifest`, `source` tables of kind `github`, `git`, `crate`, `rustup`, `rust-targets`) into a checked `Catalog` (`parse_catalog`, `newer_revision`), and a release's `{"requires": {"id": ">=x"}}` into `Needs` (`parse_needs`); every problem is a typed error with its line and field; read-only |
+| `substrate-installer-process` | infra | `ToolRunner` over rustup and cargo (output streamed, paused with `SIGSTOP` to the process group, cancelled by killing the tree, rustup fetched by a documented bootstrap step) and `SystemDetector` (rustup toolchains and targets, `cargo install`ed crates the catalog's sources imply) |
+| `substrate-installer-archive` | infra | `Unpacker` for zip, tar.gz, tar.xz (pure Rust) and a Debian package's files, from a file or a stream: drops the top folder, keeps Unix modes (without setuid/setgid) and links, checks the cancel token between entries and chunks, refuses `..`, absolute entries, links that point outside and writes through links (`EntryEscapes`); a zip stream is spooled to an unnamed file first, because a zip keeps modes and links at its end |
+| `substrate-installer-fs` | infra | `InstallLayout` under one home folder (`products/<id>/<version>`, `components/<id>/<version>`, `cache/`, `staging/`), `InstallFiles` (the old folder is kept until the new one is in place, copy across disks, `Contents/Home` of a macOS bundle recorded) and `ProductInstaller` per platform (Linux `AppImage` or `.deb` plus a `.desktop` entry, Windows silent setup, macOS `.app` linked into `~/Applications`); archives go through an injected `Unpacker`, and the launcher, setup command and link are pure plans |
+| `substrate-installer-json` | infra | `InstalledStore` as one versioned JSON file (`{"version": 1, "installed": [...]}`, atomic write); a damaged or other-format file reads as an empty set with a typed `StoreWarning` |
 
 Adapters (GitHub and crates.io listing, an HTTP downloader, an unpacker, a
 file store for the records, rustup and cargo, the platform's program
@@ -118,8 +124,12 @@ adapters it needs) is later work.
 ## Open questions
 
 - Reading a release's manifest (`Needs`) is an adapter's job (download the
-  small asset named by `Catalog::manifest`, parse it); `plans::conflicts` takes
-  the parsed needs.
+  small asset named by `Catalog::manifest`, then `substrate-installer-toml`'s
+  `parse_needs`); `plans::conflicts` takes the parsed needs.
+- A catalog file naming a source kind the domain has no variant for (Yog's
+  `adoptium` and `zig`) is refused by `parse_catalog`, naming the kind and its
+  line; those kinds come with their ports, or a product keeps them out of its
+  catalog.
 - Finding the `Host` (platform and system libraries) is an adapter's job too;
   the use cases take it as a value.
 - Developer news (Yog Installer's recent releases of its own repos) is not in

@@ -1,0 +1,27 @@
+[package]
+name = "substrate-installer-process"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "Runs rustup and cargo for the installer context (output streamed, paused and killed with the whole process group) and finds the toolchains and tools already on the machine."
+license = "AGPL-3.0-only"
+readme = "README.md"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]
+substrate-installer-app = { version = "0.1.0", path = "../substrate-installer-app" }
+substrate-installer-domain = { version = "0.1.0", path = "../substrate-installer-domain" }
+substrate-process = { version = "0.1.0", path = "../substrate-process" }
+substrate-run-process = { version = "0.1.0", path = "../substrate-run-process" }
+thiserror = "2"
+
+# `kill(-pgid, SIGSTOP)` — pausing a tool stops its whole process group.
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[dev-dependencies]
+tempfile = "3"

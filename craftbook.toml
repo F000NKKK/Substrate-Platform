@@ -102,6 +102,10 @@ name = "substrate-lsp-toml"
 layer = "infra"
 context = "language-server"
 [[crate]]
+name = "substrate-installer-http"
+layer = "infra"
+context = "installer"
+[[crate]]
 name = "substrate-dap-domain"
 layer = "domain"
 context = "debug-adapter"
@@ -133,6 +137,26 @@ context = "installer"
 [[crate]]
 name = "substrate-installer-app"
 layer = "app"
+context = "installer"
+[[crate]]
+name = "substrate-installer-toml"
+layer = "infra"
+context = "installer"
+[[crate]]
+name = "substrate-installer-process"
+layer = "infra"
+context = "installer"
+[[crate]]
+name = "substrate-installer-archive"
+layer = "infra"
+context = "installer"
+[[crate]]
+name = "substrate-installer-fs"
+layer = "infra"
+context = "installer"
+[[crate]]
+name = "substrate-installer-json"
+layer = "infra"
 context = "installer"
 [[crate]]
 name = "substrate-state-json"
@@ -259,4 +283,12 @@ relation = "customer-supplier"
 [[context_edge]]
 from = "host-ui-contract"
 to = "ide-state"
+relation = "customer-supplier"
+[[context_edge]]
+from = "installer"
+to = "process"
+relation = "customer-supplier"
+[[context_edge]]
+from = "installer"
+to = "run"
 relation = "customer-supplier"
