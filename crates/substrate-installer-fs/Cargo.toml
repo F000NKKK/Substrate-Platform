@@ -1,0 +1,21 @@
+[package]
+name = "substrate-installer-fs"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "An installer on the real file system: where things go under a home folder, moving a staging folder into place, and installing a platform's programs with their launcher."
+license = "AGPL-3.0-only"
+readme = "README.md"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]
+substrate-installer-app = { version = "0.1.0", path = "../substrate-installer-app" }
+substrate-installer-domain = { version = "0.1.0", path = "../substrate-installer-domain" }
+thiserror = "2"
+
+[dev-dependencies]
+tempfile = "3"

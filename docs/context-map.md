@@ -9,7 +9,7 @@ The measured gap and the migration plan are in Craftbook's
 
 `substrate-message` (shared kernel) and `substrate-host-contract` (the
 command and event catalog, the generator of the UI's copy) are split out
-(wave 5), and source-control is split into `substrate-git-domain`, `substrate-git-app` and `substrate-git-gitcli` (wave 6) and search into `substrate-search-domain`, `-app` and `-ignore` (wave 7), run and process (wave 8), workspace, terminal, language-server and debug-adapter (wave 9). `substrate-platform` still holds project and state, each behind a
+(wave 5), and source-control is split into `substrate-git-domain`, `substrate-git-app` and `substrate-git-gitcli` (wave 6) and search into `substrate-search-domain`, `-app` and `-ignore` (wave 7), run and process (wave 8), workspace, terminal, language-server and debug-adapter (wave 9). `substrate-installer-domain` and `substrate-installer-app` (the installer context: the engine of an installer like Visual Studio Installer, phase 1, no adapters yet; see [installer.md](installer.md)) are new. `substrate-platform` still holds project and state, each behind a
 Cargo feature of its name; `tauri-plugin-substrate` is the interface layer
 (Tauri commands, the composition root). The split goes on context by context.
 
@@ -27,6 +27,7 @@ Cargo feature of its name; `tauri-plugin-substrate` is the interface layer
 | debug-adapter | `substrate-dap-domain`, `substrate-dap-app`, `substrate-dap-toml` (wave 9) | the product's debug adapters, spoken to over DAP | as split: the toml crate is the file-format anticorruption layer, servers and adapters start through `ServiceLauncher` |
 | project-model | `project` | solutions and projects as an IDE models them | `substrate-project-domain`, `substrate-project-app` |
 | ide-state | `state` | what the IDE remembers between runs | `substrate-state-app`, `substrate-state-json` (infra) |
+| installer | `substrate-installer-domain`, `substrate-installer-app`, `substrate-installer-http`, `substrate-installer-data`, `substrate-installer-process`, `substrate-installer-archive`, `substrate-installer-fs` (phase 1; adapters come next, see [installer.md](installer.md)) | the catalog of products, workloads and components and where each is published; releases, selections, plans, compatibility, what is installed; listing, planning and applying through ports | as split: the ports (`ReleaseSource`, `Downloader`, `Unpacker`, `InstalledStore`, `ToolRunner`, `InstallLayout`, `InstallFiles`, `ProductInstaller`, `SystemDetector`) are in the app crate; adapter crates (infra) implement them |
 | process | `substrate-process` (wave 8) | starting programs with the system's own environment, opening links and files | `substrate-process` (infra) |
 | host-ui-contract | `substrate-host-contract`: `commands`, `events`, `bin/substrate-messages` | the command and event catalog the UI is generated from | `substrate-host-contract` (interface), `tauri-plugin-substrate` (interface) |
 

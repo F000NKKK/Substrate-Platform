@@ -1,0 +1,49 @@
+[
+  {
+    "tag_name": "v2.2.0",
+    "name": "",
+    "published_at": null,
+    "html_url": "https://github.com/o/r/releases/tag/v2.2.0",
+    "tarball_url": null,
+    "draft": true,
+    "prerelease": false,
+    "assets": []
+  },
+  {
+    "tag_name": "v2.1.0",
+    "name": "Two point one",
+    "published_at": "2026-05-01T10:00:00Z",
+    "html_url": "https://github.com/o/r/releases/tag/v2.1.0",
+    "tarball_url": "https://api.github.com/repos/o/r/tarball/v2.1.0",
+    "draft": false,
+    "prerelease": true,
+    "assets": [
+      {
+        "name": "tool-linux.tar.gz",
+        "browser_download_url": "https://github.com/o/r/releases/download/v2.1.0/tool-linux.tar.gz",
+        "size": 1234,
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "tool-windows.zip",
+        "browser_download_url": "https://github.com/o/r/releases/download/v2.1.0/tool-windows.zip",
+        "size": 99,
+        "digest": null
+      },
+      {
+        "name": "odd.bin",
+        "browser_download_url": "https://github.com/o/r/releases/download/v2.1.0/odd.bin",
+        "size": 5,
+        "digest": "md5:abc"
+      }
+    ]
+  },
+  {
+    "tag_name": "2.0.0",
+    "name": null,
+    "published_at": "2026-01-01T10:00:00Z",
+    "html_url": "https://github.com/o/r/releases/tag/2.0.0",
+    "tarball_url": "https://api.github.com/repos/o/r/tarball/2.0.0",
+    "assets": []
+  }
+]

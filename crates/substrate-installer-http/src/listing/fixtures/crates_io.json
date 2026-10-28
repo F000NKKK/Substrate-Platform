@@ -1,0 +1,9 @@
+{
+  "crate": { "id": "demo" },
+  "versions": [
+    { "num": "0.3.0", "yanked": false },
+    { "num": "0.10.0", "yanked": false },
+    { "num": "0.9.1", "yanked": true },
+    { "num": "0.9.0", "yanked": false }
+  ]
+}
