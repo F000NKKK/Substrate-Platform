@@ -5,7 +5,7 @@ use substrate_installer_domain::platforms::PlatformTag;
 use substrate_installer_domain::texts::TextError;
 
 /// Why rustup could not be fetched; the `cause` of a
-/// [`ToolError::Unavailable`] for rustup.
+/// [`substrate_installer_app::ports::tools::ToolError::Unavailable`] for rustup.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum BootstrapError {
