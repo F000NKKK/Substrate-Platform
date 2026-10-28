@@ -5,8 +5,9 @@ use std::time::Duration;
 use ureq::http::Response;
 use ureq::{Agent, Body};
 
+use crate::cached_answer::CachedAnswer;
 use crate::rate_limit::{is_rate_limited, retry_after_seconds};
-use crate::response_cache::{CachedAnswer, ResponseCache};
+use crate::response_cache::ResponseCache;
 use crate::{ClientConfig, Endpoints, GithubToken, HttpError};
 
 /// GitHub's API wants this media type.

@@ -2,6 +2,8 @@
 
 mod mock_server;
 mod reply;
+mod request;
 
-pub(crate) use mock_server::{MockServer, Request};
+pub(crate) use mock_server::MockServer;
 pub(crate) use reply::Reply;
+pub(crate) use request::Request;

@@ -3,16 +3,9 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use serde::{Deserialize, Serialize};
+use crate::cached_answer::CachedAnswer;
 use sha2::{Digest, Sha256};
 use substrate_installer_domain::releases::Sha256 as DomainDigest;
-
-/// A kept answer: the `ETag` it came with and its body.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub(crate) struct CachedAnswer {
-    pub(crate) etag: Option<String>,
-    pub(crate) body: String,
-}
 
 /// A folder of answers, one file per address. Best effort: a file that
 /// cannot be read or written only means the question is asked again.

@@ -5,19 +5,12 @@ use substrate_installer_domain::releases::{
 };
 use substrate_installer_domain::versions::Version;
 
-use super::github_dto::{GithubAssetDto, GithubReleaseDto};
+use super::github_asset_dto::GithubAssetDto;
+use super::github_release_dto::GithubReleaseDto;
+use super::source_archive::SourceArchive;
 
 /// A GitHub asset's digest starts so.
 const SHA256_PREFIX: &str = "sha256:";
-
-/// Whether a release also carries the tag's source archive.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(super) enum SourceArchive {
-    /// The archive is an asset too (a `git` source installs from it).
-    Included,
-    /// Only the files the release published.
-    Left,
-}
 
 /// The releases `json` lists, in its order (newest first). Drafts are left
 /// out; so is a release whose tag is not a version. Pre-releases stay: a beta

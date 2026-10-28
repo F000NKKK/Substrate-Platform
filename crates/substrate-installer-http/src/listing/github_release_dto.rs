@@ -1,6 +1,8 @@
-//! GitHub's release list, as the API spells it.
+//! A release of GitHub's list, as the API spells it.
 
 use serde::Deserialize;
+
+use super::github_asset_dto::GithubAssetDto;
 
 /// A release of `GET /repos/{repo}/releases`.
 #[derive(Debug, Deserialize)]
@@ -15,14 +17,4 @@ pub(super) struct GithubReleaseDto {
     pub(super) draft: bool,
     #[serde(default)]
     pub(super) assets: Vec<GithubAssetDto>,
-}
-
-/// A file of a release.
-#[derive(Debug, Deserialize)]
-pub(super) struct GithubAssetDto {
-    pub(super) name: String,
-    pub(super) browser_download_url: String,
-    pub(super) size: Option<u64>,
-    /// `sha256:` and 64 hex digits.
-    pub(super) digest: Option<String>,
 }

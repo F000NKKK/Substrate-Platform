@@ -7,7 +7,8 @@ use substrate_installer_domain::sources::{CrateName, RepoSlug, Source, Toolchain
 use substrate_installer_domain::versions::Version;
 
 use super::crate_versions;
-use super::github_releases::{self, SourceArchive};
+use super::github_releases;
+use super::source_archive::SourceArchive;
 use crate::{HttpClient, ReleaseReadError};
 
 /// Releases a GitHub repository is asked for (its newest).
@@ -32,13 +33,14 @@ impl HttpReleaseSource {
 
     fn github(&self, repo: &RepoSlug, archive: SourceArchive) -> Result<Vec<Release>, Cause> {
         let base = self.client.endpoints().github();
-        let url = format!("{base}repos/{repo}/releases?per_page={GITHUB_PAGE}");
+        let page = GITHUB_PAGE.to_string();
+        let url = [base, "repos/", repo.as_str(), "/releases?per_page=", &page].concat();
         let json = self.client.json_text(&url)?;
         github_releases::parse(&json, archive).map_err(|source| json_error(url, source))
     }
 
     fn crate_versions(&self, name: &CrateName) -> Result<Vec<Release>, Cause> {
-        let url = format!("{}crates/{name}", self.client.endpoints().crates());
+        let url = [self.client.endpoints().crates(), "crates/", name.as_str()].concat();
         let json = self.client.json_text(&url)?;
         crate_versions::parse(&json).map_err(|source| json_error(url, source))
     }

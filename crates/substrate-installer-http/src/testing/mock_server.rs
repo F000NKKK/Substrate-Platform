@@ -7,15 +7,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread::JoinHandle;
 
-use super::Reply;
-
-/// A request the server got.
-#[derive(Debug, Clone)]
-pub(crate) struct Request {
-    pub(crate) path: String,
-    /// Header names in lowercase.
-    pub(crate) headers: HashMap<String, String>,
-}
+use super::{Reply, Request};
 
 type Seen = Arc<Mutex<Vec<Request>>>;
 

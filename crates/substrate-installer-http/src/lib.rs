@@ -16,6 +16,7 @@
 #![forbid(unsafe_code)]
 #![doc = include_str!("../README.md")]
 
+mod cached_answer;
 mod client_config;
 mod download;
 mod endpoints;

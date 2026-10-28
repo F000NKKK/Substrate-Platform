@@ -33,11 +33,11 @@ impl Reply {
 
     /// The bytes on the wire; the connection closes after them.
     pub(crate) fn to_bytes(&self) -> Vec<u8> {
-        let mut lines = vec![format!("HTTP/1.1 {} X", self.status)];
+        let mut lines = vec![["HTTP/1.1 ", &self.status.to_string(), " X"].concat()];
         lines.extend(
             self.headers
                 .iter()
-                .map(|(name, value)| format!("{name}: {value}")),
+                .map(|(name, value)| [name.as_str(), ": ", value.as_str()].concat()),
         );
         lines.push(format!("Content-Length: {}", self.body.len()));
         lines.push("Connection: close".to_owned());
