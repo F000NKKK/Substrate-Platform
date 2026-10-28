@@ -127,6 +127,40 @@ renames the other in the same change. Contexts are listed in
 | Format | How a solution or project file is read and written; the product's. | `substrate_project_app::ports::SolutionFormat`, `substrate_project_app::ports::ProjectFormat` |
 | Project standard | A kind of project, told by marker files. | `substrate_project_domain::ProjectStandard` |
 
+## Installer
+
+| Term | Meaning | In code |
+|---|---|---|
+| Catalog | What can be installed, checked when made: ids unique in one namespace, every reference names something there, no requirement cycle. A reader (an adapter) fills `CatalogParts`. | `substrate_installer_domain::channel::{Catalog, CatalogParts, CatalogError}` |
+| Product | What the installer is for, installed as a whole, with a program that starts it and the workloads it offers. | `substrate_installer_domain::channel::Product` |
+| Installer entry | The installer itself as a product of its own channel, updated first. | `substrate_installer_domain::channel::Installer` |
+| Workload | A named set of components: required (always), recommended (checked, can be unchecked), optional (unchecked). | `substrate_installer_domain::channel::Workload` |
+| Component | One installable part with its group, what it requires and its source. | `substrate_installer_domain::channel::Component` |
+| Group | A heading individual components are listed under. | `substrate_installer_domain::channel::Group` |
+| Item | What an id names in a catalog: a component, a product or the installer entry. | `substrate_installer_domain::channel::Item`, `substrate_installer_domain::ids::ItemId` |
+| Source | Where a component is published, and so how it is installed: GitHub release, git tag, crates.io, rustup toolchain, rustup targets. A closed, `non_exhaustive` enum. | `substrate_installer_domain::sources::Source` |
+| System package | A package on the system's own libraries, taken instead of the bundled one where the host has them. | `substrate_installer_domain::sources::SystemPackage` |
+| Release | One published version of a source, with its assets. | `substrate_installer_domain::releases::{Release, Asset, Sha256}` |
+| Platform tag | An operating system and an architecture, `linux-x86_64`. | `substrate_installer_domain::platforms::PlatformTag` |
+| Host | The machine planning is for: its platform and system libraries. | `substrate_installer_domain::platforms::Host` |
+| Version | A version, compared leniently (semver, missing parts filled, a leading `v` dropped); not semver is older and ordered as text. | `substrate_installer_domain::versions::Version` |
+| Version requirement | A condition on a version in semver's words. | `substrate_installer_domain::versions::VersionRequirement` |
+| Selection | The Modify window's checkboxes: workloads, unchecked recommended parts, checked optional and individual components. | `substrate_installer_domain::choice::Selection` |
+| Why | Why a component is in a selection (required, recommended, chosen, required by another); decides if its checkbox can be cleared. | `substrate_installer_domain::choice::Why` |
+| Change | One thing a plan does: install, update or remove. | `substrate_installer_domain::changes::Change` |
+| Plan | The changes, a component after what it requires, and the release each takes. | `substrate_installer_domain::planning::Plan` |
+| Mode | When downloads happen: install while downloading, or download all then install. | `substrate_installer_domain::planning::Mode` |
+| Managed, system | Who put a found thing there: the installer (it may update and remove it) or someone else (it counts as installed and is left alone). | `substrate_installer_domain::inventory::{Origin, Found}` |
+| Installed record | What the installer installed: item, version, path; the set is read and written whole. | `substrate_installer_domain::inventory::{Installed, InstalledSet}` |
+| Needs, conflict | What a release needs of the other components, and a need the machine will not meet. | `substrate_installer_domain::compat::{Needs, Conflict, check}` |
+| Manifest | The release asset that says its needs; its name is the catalog's. | `substrate_installer_domain::channel::Catalog::manifest` |
+| Installer event | One thing that happened in a plan, for a progress display; and how the plan ended. | `substrate_installer_domain::events::{Event, Outcome}` |
+| Available | The newest release a host can install of each item, and the sources that failed. | `substrate_installer_app::listing::Available` |
+| Situation | What is installed and what is published, which a plan is made against. | `substrate_installer_app::plans::Situation` |
+| Installer (use case) | Applies a plan to a catalog on a host through its adapters. | `substrate_installer_app::installing::Installer` |
+| Cancel token | Pauses, resumes and cancels an operation from another thread. | `substrate_installer_app::control::CancelToken` |
+| Installer ports | What the installer needs from outside: list releases, download, unpack, keep records, run tools, lay out and move files, install programs, detect the system. | `substrate_installer_app::ports::*` |
+
 ## IDE state
 
 | Term | Meaning | In code |
