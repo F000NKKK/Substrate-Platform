@@ -563,3 +563,38 @@
   white-space: nowrap;
   box-shadow: inset 0 -2px 0 var(--sp-accent);
 }
+
+/* A tabbed dock: its panels are the tabs of one pane (see TabGroupDock). */
+.sp-tabgroup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--sp-surface-1);
+  border-radius: var(--sp-radius-sm);
+}
+
+.sp-tabgroup-tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-2xs);
+  padding: var(--sp-space-xs) var(--sp-space-xs) 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.sp-tabgroup-tabs[data-drag-over="true"] {
+  background: var(--sp-accent-soft);
+}
+
+.sp-tabgroup-spacer {
+  flex: 1;
+}
+
+.sp-tabgroup-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
