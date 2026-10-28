@@ -3,6 +3,7 @@
 mod crate_list;
 mod installed_targets;
 mod probe;
+mod process_probe;
 mod process_system_detector;
 mod scan;
 #[cfg(test)]

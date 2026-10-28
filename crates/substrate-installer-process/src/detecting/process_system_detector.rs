@@ -4,7 +4,8 @@ use substrate_installer_app::ports::detection::SystemDetector;
 use substrate_installer_domain::channel::Catalog;
 use substrate_installer_domain::inventory::Found;
 
-use super::probe::{Probe, ProcessProbe};
+use super::probe::Probe;
+use super::process_probe::ProcessProbe;
 use super::scan::Scan;
 use crate::cargo_bin::CargoBin;
 

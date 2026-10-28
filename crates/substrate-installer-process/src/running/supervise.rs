@@ -2,22 +2,14 @@
 
 use std::io;
 use std::path::Path;
-use std::process::{Child, Command, ExitStatus, Stdio};
+use std::process::{Child, Command, Stdio};
 
 use substrate_installer_app::ports::tools::ToolControl;
 use substrate_run_process::kill_tree;
 
+use super::ended::Ended;
 use super::output::Output;
 use super::process_group::{resume, stop};
-
-/// How a supervised program ended.
-#[derive(Debug)]
-pub(super) enum Ended {
-    /// It ran to its end.
-    Exited(ExitStatus),
-    /// The operation was cancelled and the program's tree killed.
-    Cancelled,
-}
 
 /// Runs `program arguments` with the system's own environment in a process
 /// group of its own, telling every line it prints, stopping its group while

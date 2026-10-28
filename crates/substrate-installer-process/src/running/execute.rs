@@ -4,7 +4,8 @@ use std::path::Path;
 
 use substrate_installer_app::ports::tools::{ToolControl, ToolError, ToolProgram};
 
-use super::supervise::{Ended, supervise};
+use super::ended::Ended;
+use super::supervise::supervise;
 
 /// Runs `program` (found at `path`) with `arguments` to a successful end.
 ///

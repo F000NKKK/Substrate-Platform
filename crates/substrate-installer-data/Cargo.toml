@@ -1,0 +1,23 @@
+[package]
+name = "substrate-installer-data"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["F000NK"]
+description = "The installer's own files as Substrate Data: the catalog and a release's compatibility manifest read from text with the line, path and code of every problem, and the records of what is installed kept as an atomically written binary file."
+license = "AGPL-3.0-only"
+readme = "README.md"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]
+substrate-data = "0.4"
+substrate-installer-app = { version = "0.1.0", path = "../substrate-installer-app" }
+substrate-installer-domain = { version = "0.1.0", path = "../substrate-installer-domain" }
+substrate-lock = { version = "0.1.0", path = "../substrate-lock" }
+thiserror = "2"
+
+[dev-dependencies]
+tempfile = "3"

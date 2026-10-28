@@ -21,11 +21,13 @@ mod bootstrap;
 mod cargo_bin;
 mod detecting;
 mod executable;
+mod invocation;
 mod platform;
 mod process_tool_runner;
 mod render;
 mod running;
 mod rustup_host;
+mod unsupported_command;
 
 pub use bootstrap::{BootstrapError, RustupBootstrap, RustupInitFetcher};
 pub use cargo_bin::CargoBin;

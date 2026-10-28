@@ -198,3 +198,31 @@ wildcards = "deny"
 [sources]
 unknown-registry = "deny"
 unknown-git = "deny"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-installer-domain"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-installer-app"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-installer-http"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-installer-archive"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-installer-fs"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-installer-data"
+
+[[licenses.exceptions]]
+allow = ["AGPL-3.0-only"]
+crate = "substrate-installer-process"

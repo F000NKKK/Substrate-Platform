@@ -1,20 +1,10 @@
 //! A typed command as a command line.
 
-use substrate_installer_app::ports::tools::{ToolCommand, ToolProgram};
+use substrate_installer_app::ports::tools::ToolCommand;
 use substrate_installer_domain::sources::{RustTarget, Toolchain};
 
-/// The command line of a [`ToolCommand`]: the program and its arguments.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct Invocation {
-    pub(crate) program: ToolProgram,
-    pub(crate) arguments: Vec<String>,
-}
-
-/// A command this adapter has no command line for (the port's command enum
-/// is `non_exhaustive`).
-#[derive(Debug, thiserror::Error)]
-#[error("this command has no command line in this adapter")]
-pub(crate) struct UnsupportedCommand;
+use crate::invocation::Invocation;
+use crate::unsupported_command::UnsupportedCommand;
 
 /// Renders `command` once; rustup's and cargo's argument spelling lives here
 /// and nowhere else.

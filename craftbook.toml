@@ -139,7 +139,7 @@ name = "substrate-installer-app"
 layer = "app"
 context = "installer"
 [[crate]]
-name = "substrate-installer-toml"
+name = "substrate-installer-data"
 layer = "infra"
 context = "installer"
 [[crate]]
@@ -152,10 +152,6 @@ layer = "infra"
 context = "installer"
 [[crate]]
 name = "substrate-installer-fs"
-layer = "infra"
-context = "installer"
-[[crate]]
-name = "substrate-installer-json"
 layer = "infra"
 context = "installer"
 [[crate]]

@@ -9,8 +9,10 @@ use substrate_installer_domain::platforms::PlatformTag;
 
 use crate::bootstrap::{BootstrapError, RustupBootstrap};
 use crate::cargo_bin::CargoBin;
-use crate::render::{Invocation, UnsupportedCommand, render};
+use crate::invocation::Invocation;
+use crate::render::render;
 use crate::running::execute;
+use crate::unsupported_command::UnsupportedCommand;
 
 /// Runs rustup and cargo as real processes: one command line per
 /// [`ToolCommand`], every output line told to the control, a pause stopping
