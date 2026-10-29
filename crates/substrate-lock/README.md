@@ -30,5 +30,5 @@ products.
 
 ## License
 
-AGPL-3.0-only or a separate commercial agreement; see [LICENSE](LICENSE)
-and [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md).
+AGPL-3.0-only or a separate commercial agreement; see [LICENSE](https://github.com/F000NKKK/Substrate-Platform/blob/master/LICENSE)
+and [COMMERCIAL-LICENSE.md](https://github.com/F000NKKK/Substrate-Platform/blob/master/COMMERCIAL-LICENSE.md).
