@@ -171,9 +171,10 @@ fn a_bundle_for_another_platform_is_rejected() {
 
 #[test]
 fn presentation_installs_a_durable_icon_description_and_matching_desktop_id() {
-    use crate::RunningPresentation;
     use substrate_installer_domain::ids::ProductId;
     use substrate_installer_domain::texts::Description;
+
+    use crate::RunningPresentation;
 
     let setup = Setup::new(Os::Linux, &[]);
     let package = setup.package("Installer.AppImage", b"bundle");
