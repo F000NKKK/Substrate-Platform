@@ -1,6 +1,6 @@
 [package]
 name = "substrate-installer-archive"
-version = "0.1.0"
+version = "0.1.2"
 edition = "2024"
 rust-version = "1.99"
 authors = ["F000NK"]
@@ -15,8 +15,8 @@ workspace = true
 [dependencies]
 flate2 = "1"
 lzma-rust2 = { version = "0.23", default-features = false, features = ["std", "xz"] }
-substrate-installer-app = { version = "0.1.0", path = "../substrate-installer-app" }
-substrate-installer-domain = { version = "0.1.0", path = "../substrate-installer-domain" }
+substrate-installer-app = { version = "0.1.2", path = "../substrate-installer-app" }
+substrate-installer-domain = { version = "0.1.2", path = "../substrate-installer-domain" }
 tar = "0.4"
 tempfile = "3"
 thiserror = "2"

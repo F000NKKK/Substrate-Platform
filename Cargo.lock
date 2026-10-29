@@ -3573,7 +3573,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-installer-app"
-version = "0.1.0"
+version = "0.1.2"
 dependencies = [
  "substrate-installer-domain",
  "thiserror 2.0.21",
@@ -3581,7 +3581,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-installer-archive"
-version = "0.1.0"
+version = "0.1.2"
 dependencies = [
  "flate2",
  "lzma-rust2",
@@ -3595,7 +3595,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-installer-data"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "substrate-data",
  "substrate-installer-app",
@@ -3607,7 +3607,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-installer-domain"
-version = "0.1.0"
+version = "0.1.2"
 dependencies = [
  "semver",
  "thiserror 2.0.21",
@@ -3615,7 +3615,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-installer-fs"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "substrate-installer-app",
  "substrate-installer-domain",
@@ -3625,7 +3625,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-installer-http"
-version = "0.1.0"
+version = "0.1.2"
 dependencies = [
  "serde",
  "serde_json",
@@ -3639,7 +3639,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-installer-process"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "libc",
  "substrate-installer-app",

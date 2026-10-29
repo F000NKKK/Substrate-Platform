@@ -1,6 +1,6 @@
 [package]
 name = "substrate-installer-fs"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 rust-version = "1.99"
 authors = ["F000NK"]
@@ -13,8 +13,8 @@ repository = "https://github.com/F000NKKK/Substrate-Platform"
 workspace = true
 
 [dependencies]
-substrate-installer-app = { version = "0.1.0", path = "../substrate-installer-app" }
-substrate-installer-domain = { version = "0.1.0", path = "../substrate-installer-domain" }
+substrate-installer-app = { version = "0.1.2", path = "../substrate-installer-app" }
+substrate-installer-domain = { version = "0.1.2", path = "../substrate-installer-domain" }
 thiserror = "2"
 
 [dev-dependencies]
