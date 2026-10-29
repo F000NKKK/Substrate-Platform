@@ -19,6 +19,7 @@ use substrate_lock::Locked;
 let counter = Mutex::new(1);
 *counter.locked() += 1;
 assert_eq!(*counter.locked(), 2);
+assert_eq!(*counter.try_locked().unwrap(), 2);
 ```
 
 ## Depends on / used by
@@ -29,4 +30,5 @@ products.
 
 ## License
 
-AGPL-3.0-only; see [LICENSE](../../LICENSE).
+AGPL-3.0-only or a separate commercial agreement; see [LICENSE](LICENSE)
+and [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md).
