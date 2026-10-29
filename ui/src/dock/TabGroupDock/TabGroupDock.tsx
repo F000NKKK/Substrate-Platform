@@ -68,7 +68,10 @@ export function TabGroupDock({ anchor, layout }: TabGroupDockProps) {
                   draggable
                   onDragStart={(e) => startPanelDrag(e, id)}
                   onDragEnd={endPanelDrag}
-                  onClick={() => (id === activeId ? layout.hide(id) : layout.pin(id))}
+                  onClick={() => {
+                    for (const other of pinned) if (other !== id) layout.hide(other);
+                    layout.pin(id);
+                  }}
                   onRequestClose={() => layout.close(id)}
                   title={panel.title}
                 >
@@ -85,7 +88,7 @@ export function TabGroupDock({ anchor, layout }: TabGroupDockProps) {
           </div>
           {active && Component && (
             <div className="sp-tabgroup-body">
-              <ErrorBoundary what={active.title}>
+              <ErrorBoundary key={activeId} what={active.title}>
                 <Component />
               </ErrorBoundary>
             </div>

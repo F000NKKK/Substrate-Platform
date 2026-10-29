@@ -1,7 +1,7 @@
 {
   "name": "substrate-platform-ui",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.2",
   "type": "module",
   "description": "Brand-neutral IDE shell UI (theme tokens, docking shell, generic panels) — the frontend counterpart to the substrate-platform Rust core.",
   "license": "AGPL-3.0-only",

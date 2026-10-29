@@ -50,3 +50,29 @@ it("pins the tab that is clicked", async () => {
   await act(async () => (host.querySelectorAll('[role="tab"]')[0] as HTMLElement).click());
   expect(layout.pin).toHaveBeenCalledWith("a");
 });
+
+it("keeps an active tab open when clicked again", async () => {
+  const layout = layoutOf(["a"]);
+  const host = await mount(layout);
+  await act(async () => (host.querySelector('[role="tab"]') as HTMLElement).click());
+  expect(layout.pin).toHaveBeenCalledWith("a");
+  expect(layout.hide).not.toHaveBeenCalled();
+});
+
+it("a failed panel does not prevent another tab from opening", async () => {
+  const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+  const failed = layoutOf(["a"]);
+  failed.panelsById.a.component = () => { throw new Error("panel crashed"); };
+  const host = document.createElement("div");
+  const root = createRoot(host);
+  try {
+    await act(async () => root.render(createElement(TabGroupDock, { anchor: "bottom", layout: failed })));
+    expect(host.querySelector('.sp-error-boundary')).not.toBeNull();
+    await act(async () => root.render(createElement(TabGroupDock, { anchor: "bottom", layout: layoutOf(["b"]) })));
+    expect(host.textContent).toContain("body of b");
+    expect(host.querySelector('.sp-error-boundary')).toBeNull();
+  } finally {
+    await act(async () => root.unmount());
+    errors.mockRestore();
+  }
+});
