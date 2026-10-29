@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { DockStrip } from "../DockStrip/DockStrip";
 import { PanelSurface } from "../PanelSurface/PanelSurface";
 import { FlyoutFrame } from "../FlyoutFrame/FlyoutFrame";
@@ -36,25 +36,44 @@ export function ResizeHandle({
   style?: CSSProperties;
 }) {
   const [dragging, setDragging] = useState(false);
+  const stopDrag = useRef<(() => void) | null>(null);
+  useEffect(() => () => stopDrag.current?.(), []);
 
   function handlePointerDown(e: ReactPointerEvent) {
+    if (e.button !== 0) return;
     e.preventDefault();
+    stopDrag.current?.();
     const startSize = layout.anchorSize(panelId, anchor, mode);
     const startX = e.clientX;
     const startY = e.clientY;
     setDragging(true);
+    let frame: number | null = null;
+    let nextSize = startSize;
+
+    function flush() {
+      frame = null;
+      layout.setAnchorSize(panelId, anchor, mode, nextSize);
+    }
 
     function onMove(ev: PointerEvent) {
-      if (anchor === "left") layout.setAnchorSize(panelId, anchor, mode, startSize + (ev.clientX - startX));
-      else if (anchor === "right") layout.setAnchorSize(panelId, anchor, mode, startSize - (ev.clientX - startX));
-      else layout.setAnchorSize(panelId, anchor, mode, startSize - (ev.clientY - startY));
+      if (anchor === "left") nextSize = startSize + (ev.clientX - startX);
+      else if (anchor === "right") nextSize = startSize - (ev.clientX - startX);
+      else nextSize = startSize - (ev.clientY - startY);
+      if (frame === null) frame = requestAnimationFrame(flush);
     }
-    function onUp() {
-      setDragging(false);
+    function cleanup() {
+      if (frame !== null) cancelAnimationFrame(frame);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
+      stopDrag.current = null;
     }
+    function onUp() {
+      cleanup();
+      flush();
+      setDragging(false);
+    }
+    stopDrag.current = cleanup;
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
     window.addEventListener("pointercancel", onUp);
