@@ -4,6 +4,7 @@ mod desktop_refresh;
 mod install;
 mod launcher_entry;
 mod launcher_plan;
+mod presentation;
 mod unlist;
 
 pub use launcher_entry::LauncherEntry;

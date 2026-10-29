@@ -168,3 +168,54 @@ fn a_bundle_for_another_platform_is_rejected() {
         Err(ProductError::UnsupportedPackage)
     ));
 }
+
+#[test]
+fn presentation_installs_a_durable_icon_description_and_matching_desktop_id() {
+    use crate::RunningPresentation;
+    use substrate_installer_domain::ids::ProductId;
+    use substrate_installer_domain::texts::Description;
+
+    let setup = Setup::new(Os::Linux, &[]);
+    let package = setup.package("Installer.AppImage", b"bundle");
+    let (own, v) = (installer(), version("1.0.0"));
+    let request = RunningProduct {
+        installer: &own,
+        version: &v,
+        bundle: RunningBundle::AppImage(&package),
+    };
+    let id = ProductId::new("org.example.installer").unwrap();
+    let description = Description::new("Installs development tools").unwrap();
+    let presentation = RunningPresentation {
+        desktop_id: &id,
+        description: &description,
+        icon: b"bundled PNG",
+    };
+    let program = with_control(&CancelToken::new(), |c| {
+        setup
+            .products
+            .place_running_presented(&request, &presentation, c)
+    })
+    .unwrap();
+    let entries = setup.scratch.path().join("user/.local/share/applications");
+    let text = std::fs::read_to_string(entries.join("org.example.installer.desktop")).unwrap();
+    assert!(text.contains("Comment=Installs development tools\n"));
+    let icon = program.parent().unwrap().join("icon.png");
+    assert!(text.contains(&format!("Icon={}\n", icon.display())));
+    assert_eq!(std::fs::read(icon).unwrap(), b"bundled PNG");
+    assert!(!entries.join("installer.desktop").exists());
+    let again = RunningProduct {
+        bundle: RunningBundle::AppImage(&program),
+        ..request
+    };
+    with_control(&CancelToken::new(), |c| {
+        setup
+            .products
+            .place_running_presented(&again, &presentation, c)
+    })
+    .unwrap();
+    assert_eq!(
+        std::fs::read_to_string(entries.join("org.example.installer.desktop")).unwrap(),
+        text
+    );
+    assert!(!entries.join("installer.desktop").exists());
+}

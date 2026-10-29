@@ -19,4 +19,4 @@ pub use launcher_dirs::LauncherDirs;
 pub use linux::{LauncherEntry, LauncherPlan, plan_launcher};
 pub use package_kind::PackageKind;
 pub use product_failure::ProductFailure;
-pub use running::{RunningBundle, RunningProduct};
+pub use running::{RunningBundle, RunningPresentation, RunningProduct};

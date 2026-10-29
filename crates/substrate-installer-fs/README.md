@@ -68,3 +68,9 @@ Linux takes the original `APPIMAGE`, macOS takes the complete `.app`, and Window
 records the executable already placed by NSIS. Copies are staged before replacing
 the destination. Starting the retained copy repairs its desktop launcher without
 replacing its own files.
+
+A host retaining its running installer can call `HostProducts::place_running_presented` with
+`RunningPresentation`: its GTK application id, description and bundled PNG. The icon is copied
+beside the retained program and the desktop file uses that stable application id. Repeating
+placement repairs the metadata and removes the legacy entry just written by `place_running`.
+The original method remains available for callers without bundled presentation metadata.
