@@ -124,7 +124,7 @@ export function PlatformShell({
     }
   }
 
-  const Dock = ({ anchor }: { anchor: ToolWindowAnchor }) =>
+  const dock = (anchor: ToolWindowAnchor) =>
     tabbedAnchors?.includes(anchor) ? <TabGroupDock anchor={anchor} layout={layout} /> : <ToolWindowDock anchor={anchor} layout={layout} />;
 
   return (
@@ -135,18 +135,18 @@ export function PlatformShell({
           {/* The guides sit at the middle of the whole window, whatever's docked. */}
           {dragOver && <DockGuides main={dragOver.main} documents={dragOver.documents} hover={dragOver.target} />}
           <div className="sp-shell-upper">
-            {hasLeft && <Dock anchor="left" />}
+            {hasLeft && dock("left")}
 
             <div className="sp-shell-main">
               <CenterDock layout={layout} />
             </div>
 
-            {hasRight && <Dock anchor="right" />}
+            {hasRight && dock("right")}
           </div>
 
           {hasBottom && (
             <div className="sp-shell-bottom-inset" style={bottomInsetStyle}>
-              <Dock anchor="bottom" />
+              {dock("bottom")}
             </div>
           )}
 
