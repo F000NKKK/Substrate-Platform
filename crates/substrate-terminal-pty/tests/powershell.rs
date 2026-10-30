@@ -1,4 +1,4 @@
-//! A verbose PowerShell startup must not deadlock ConPTY.
+//! A verbose PowerShell startup must not deadlock `ConPTY`.
 #![cfg(windows)]
 
 use std::sync::mpsc;
