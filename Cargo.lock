@@ -3822,7 +3822,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-terminal-pty"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "portable-pty",
  "substrate-process",
@@ -4142,7 +4142,7 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-substrate"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "serde_json",

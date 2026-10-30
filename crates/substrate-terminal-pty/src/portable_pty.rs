@@ -23,6 +23,13 @@ impl PtyOpener for PortablePty {
         let pair = native_pty_system()
             .openpty(pty_size(size))
             .map_err(|e| TerminalError::Open(e.into()))?;
+        // ConPTY can emit startup output before spawning returns. Drain it now,
+        // so a verbose PowerShell profile cannot fill the output pipe.
+        let reader = pair
+            .master
+            .try_clone_reader()
+            .map_err(|e| TerminalError::Stream(e.into()))?;
+        read_in_background(reader, on_output, on_exit);
         let child = pair
             .slave
             .spawn_command(command(options))
@@ -31,10 +38,6 @@ impl PtyOpener for PortablePty {
         // the master gets EOF when the child exits instead of hanging open.
         let PtyPair { master, slave } = pair;
         drop(slave);
-        let reader = master
-            .try_clone_reader()
-            .map_err(|e| TerminalError::Stream(e.into()))?;
-        read_in_background(reader, on_output, on_exit);
         let writer = master
             .take_writer()
             .map_err(|e| TerminalError::Stream(e.into()))?;
