@@ -45,7 +45,8 @@ impl CargoInstallations {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{CargoBin, executable::executable};
+    use crate::CargoBin;
+    use crate::executable::executable;
 
     #[test]
     fn an_installed_package_can_name_a_different_binary() {
