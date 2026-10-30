@@ -1,10 +1,10 @@
-import type { ReactNode } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import { ErrorBoundary } from "../../ErrorBoundary";
 import { Tab } from "../../Tab";
 import { useT } from "../../../infra/i18n";
 import type { EditorProps } from "../registry/EditorBase";
 import { EDITOR_KIND, type EditorProvider } from "../registry/registry";
-import { recordDocumentChange, setDocumentWriter } from "../../../infra/history";
+import { documentHistory, recordDocumentChange, setDocumentWriter } from "../../../infra/history";
 import "./MultiViewEditor.css";
 
 export interface MultiViewEditorProps extends EditorProps {
@@ -51,23 +51,31 @@ export function MultiViewEditor({ providers, view, onViewChange, renderView, sho
             onChange(next);
           },
         };
+  const historyKey = (event: KeyboardEvent) => {
+    if (event.defaultPrevented || props.readOnly || active.kind === EDITOR_KIND.text || !path || !(event.ctrlKey || event.metaKey) || event.altKey) return;
+    if ((event.target as Element).closest(".cm-editor,[data-own-undo]")) return;
+    const key = event.key.toLowerCase();
+    if (key !== "z" && key !== "y") return;
+    event.preventDefault(); event.stopPropagation();
+    const history = documentHistory(path);
+    if (key === "y" || event.shiftKey) history.redo(); else history.undo();
+  };
   // A view's crash stays in it (its message, Try Again); the switcher still works.
   const content = (
     <ErrorBoundary key={active.id} what={t(active.name ?? active.label)}>
       {renderView ? renderView(active, viewProps) : <active.component {...viewProps} />}
     </ErrorBoundary>
   );
-  if (providers.length < 2 || !showSwitcher) return <>{content}</>;
   return (
-    <div className="sp-multiview-editor">
+    <div className="sp-multiview-editor" onKeyDown={historyKey}>
       <div className="sp-multiview-editor-body">{content}</div>
-      <div className="sp-multiview-editor-views" role="tablist">
+      {providers.length > 1 && showSwitcher && <div className="sp-multiview-editor-views" role="tablist">
         {providers.map((p) => (
           <Tab key={p.id} orientation="horizontal" active={p === active} onClick={() => onViewChange?.(p.id)}>
             {t(p.label)}
           </Tab>
         ))}
-      </div>
+      </div>}
     </div>
   );
 }
