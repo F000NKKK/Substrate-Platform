@@ -19,6 +19,7 @@
 
 mod bootstrap;
 mod cargo_bin;
+mod cargo_installations;
 mod detecting;
 mod executable;
 mod invocation;

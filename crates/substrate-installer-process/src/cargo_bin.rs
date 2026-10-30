@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 use substrate_installer_app::ports::tools::ToolProgram;
 use substrate_installer_domain::sources::CrateName;
 
+use crate::cargo_installations::CargoInstallations;
 use crate::executable::executable;
 
 /// cargo's `bin` folder: where `rustup` and `cargo` live and where
@@ -80,7 +81,13 @@ impl CargoBin {
 
     /// The binary `cargo install` puts for the crate `name`.
     pub(crate) fn crate_binary(&self, name: &CrateName) -> PathBuf {
-        self.dir.join(executable(name.as_str()))
+        let binary = self
+            .dir
+            .parent()
+            .and_then(CargoInstallations::load)
+            .and_then(|installed| installed.binary(name).map(str::to_owned));
+        self.dir
+            .join(executable(binary.as_deref().unwrap_or(name.as_str())))
     }
 
     /// Where `rustup` would be if it were installed here.
