@@ -1,3 +1,4 @@
+import { hostFiles } from "../../../infra/host";
 import { useT } from "../../../infra/i18n";
 import { fileTypeOf } from "../../../infra/fileTypes";
 import { useEffect, useState } from "react";
@@ -33,14 +34,16 @@ export function ImageEditor({ path, loadBytes, contentVersion }: ImageEditorProp
   const t = useT();
   const [attempt, retry] = useState(0);
   const url = () => `${convertFileSrc(path)}?v=${contentVersion ?? 0}&retry=${attempt}`;
-  const [src, setSrc] = useState<string | null>(loadBytes ? null : url());
+  const [src, setSrc] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [size, setSize] = useState<[number, number] | null>(null);
 
   useEffect(() => {
     if (!loadBytes) {
-      setSrc(url());
-      return;
+      let current = true;
+      setSrc(null); setError(null);
+      hostFiles.allow(path).then(() => { if (current) setSrc(url()); }).catch(error => { if (current) setError(String(error)); });
+      return () => { current = false; };
     }
     let objectUrl: string | null = null;
     let cancelled = false;

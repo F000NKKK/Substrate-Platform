@@ -10,7 +10,7 @@ use substrate_host_contract::events;
 use substrate_message::Message;
 use substrate_workspace_app::Workspace;
 use substrate_workspace_fs::{DEFAULT_QUIET, DirectoryWatcher, FsError, copy_new, dir, read_text};
-use tauri::{AppHandle, Emitter, Runtime, State};
+use tauri::{AppHandle, Emitter, Manager, Runtime, State};
 
 use super::entry::Entry;
 use super::watcher::Watcher;
@@ -92,9 +92,49 @@ pub(crate) fn file_write(
 
 /// A folder or file the user picked (a native dialog) joins the workspace.
 #[tauri::command]
-pub(crate) fn allow_path(workspace: State<'_, Workspace>, path: String) -> Result<(), Message> {
-    workspace.allow(Path::new(&path))?;
-    Ok(())
+pub(crate) async fn allow_path<R: Runtime>(app: AppHandle<R>, path: String) -> Result<(), Message> {
+    crate::blocking::blocking(move || {
+        let path = app.state::<Workspace>().allow(Path::new(&path))?;
+        let scope = app.asset_protocol_scope();
+        if path.is_dir() {
+            scope.allow_directory(&path, true)
+        } else {
+            scope.allow_file(&path)
+        }
+        .map_err(Message::verbatim)?;
+        Ok::<_, Message>(())
+    })
+    .await
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Arc;
+
+    use substrate_workspace_fs::DiskPaths;
+
+    use super::*;
+
+    #[test]
+    fn a_picked_image_is_allowed_without_admitting_its_siblings() {
+        let directory = tempfile::tempdir().unwrap();
+        let image = directory.path().join("старое превью.png");
+        let sibling = directory.path().join("private.png");
+        std::fs::write(&image, b"existing image bytes").unwrap();
+        std::fs::write(&sibling, b"unpicked image bytes").unwrap();
+        let app = tauri::test::mock_app();
+        app.manage(Workspace::new(Arc::new(DiskPaths)));
+        assert!(!app.asset_protocol_scope().is_allowed(&image));
+        tauri::async_runtime::block_on(allow_path(
+            app.handle().clone(),
+            image.to_string_lossy().into_owned(),
+        ))
+        .unwrap();
+        assert!(app.asset_protocol_scope().is_allowed(&image));
+        assert!(!app.asset_protocol_scope().is_allowed(&sibling));
+        assert!(app.state::<Workspace>().check(&image).is_ok());
+        assert!(app.state::<Workspace>().check(&sibling).is_err());
+    }
 }
 
 /// Watches exactly `folders` for changes made outside the IDE; each burst

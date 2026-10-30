@@ -1,6 +1,6 @@
 [package]
 name = "tauri-plugin-substrate"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 rust-version = "1.99"
 authors = ["F000NK"]
@@ -48,7 +48,7 @@ substrate-workspace-app = { version = "0.1.0", path = "../crates/substrate-works
 substrate-workspace-domain = { version = "0.1.0", path = "../crates/substrate-workspace-domain" }
 substrate-workspace-fs = { version = "0.1.0", path = "../crates/substrate-workspace-fs" }
 substrate-state-json = { version = "0.1.0", path = "../crates/substrate-state-json", optional = true }
-tauri = "2"
+tauri = { version = "2", features = ["protocol-asset"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", optional = true }
 
@@ -58,3 +58,5 @@ tauri-plugin = { version = "2", features = ["build"] }
 
 [dev-dependencies]
 serde_json = "1"
+tauri = { version = "2", features = ["test"] }
+tempfile = "3"

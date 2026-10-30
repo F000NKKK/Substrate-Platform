@@ -9,6 +9,14 @@
 //!
 #![doc = include_str!("../README.md")]
 
+#[cfg(any(
+    feature = "dap",
+    feature = "fs",
+    feature = "git",
+    feature = "lsp",
+    feature = "search",
+    feature = "terminal"
+))]
 mod blocking;
 #[cfg(feature = "dap")]
 mod dap;
