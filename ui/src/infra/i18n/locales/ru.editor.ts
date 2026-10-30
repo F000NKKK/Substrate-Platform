@@ -90,3 +90,5 @@ registerTranslations(RU, {
   "Go To Line": "Перейти к строке",
   "Line number (1 - {lines}):": "Номер строки (1 - {lines}):",
 });
+
+registerTranslations(RU, { "The image could not be loaded: {error}": "Не удалось открыть изображение: {error}" });

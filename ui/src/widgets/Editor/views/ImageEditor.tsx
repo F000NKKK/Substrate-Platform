@@ -1,3 +1,4 @@
+import { useT } from "../../../infra/i18n";
 import { fileTypeOf } from "../../../infra/fileTypes";
 import { useEffect, useState } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
@@ -29,7 +30,9 @@ const UNSIZED: [number, number] = [300, 150];
 export function ImageEditor({ path, loadBytes, contentVersion }: ImageEditorProps) {
   // The version in the URL: the webview caches by it, so a file changed on
   // disk (the host bumps `contentVersion`) shows anew.
-  const url = () => `${convertFileSrc(path)}?v=${contentVersion ?? 0}`;
+  const t = useT();
+  const [attempt, retry] = useState(0);
+  const url = () => `${convertFileSrc(path)}?v=${contentVersion ?? 0}&retry=${attempt}`;
   const [src, setSrc] = useState<string | null>(loadBytes ? null : url());
   const [error, setError] = useState<string | null>(null);
   const [size, setSize] = useState<[number, number] | null>(null);
@@ -58,11 +61,12 @@ export function ImageEditor({ path, loadBytes, contentVersion }: ImageEditorProp
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [path, loadBytes, contentVersion]);
+  }, [path, loadBytes, contentVersion, attempt]);
 
   // The image's own size, for the zoom's 100%.
   useEffect(() => {
     setSize(null);
+    setError(null);
     if (!src) return;
     const img = new Image();
     img.onload = () => setSize([img.naturalWidth || UNSIZED[0], img.naturalHeight || UNSIZED[1]]);
@@ -74,7 +78,10 @@ export function ImageEditor({ path, loadBytes, contentVersion }: ImageEditorProp
   return (
     <div className="sp-image-editor">
       {error ? (
-        <p className="sp-image-editor-error">{error}</p>
+        <div className="sp-image-editor-error" role="alert">
+          <p>{t("The image could not be loaded: {error}", { error })}</p>
+          <button type="button" onClick={() => retry(value => value + 1)}>{t("Retry")}</button>
+        </div>
       ) : (
         src &&
         size && (
