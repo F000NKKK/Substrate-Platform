@@ -82,3 +82,5 @@ export { KeyHints } from "./KeyHints";
 export type { KeyHint, KeyHintsProps } from "./KeyHints";
 export { ProgressBar } from "./ProgressBar";
 export type { ProgressBarProps } from "./ProgressBar";
+export { useFileActions, joinFilePath } from "./FileActions/useFileActions";
+export type { FileActionEntry } from "./FileActions/useFileActions";
