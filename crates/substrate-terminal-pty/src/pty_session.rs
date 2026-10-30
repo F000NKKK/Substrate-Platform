@@ -7,10 +7,12 @@ use portable_pty::{Child, MasterPty, PtySize};
 use substrate_terminal_app::ports::Session;
 use substrate_terminal_domain::{TerminalError, TerminalSize};
 
+use crate::writer::Writer;
+
 /// A running shell session backed by a real OS pty.
 pub(crate) struct PtySession {
     pub(crate) master: Box<dyn MasterPty + Send>,
-    pub(crate) writer: Box<dyn Write + Send>,
+    pub(crate) writer: Writer,
     pub(crate) child: Box<dyn Child + Send + Sync>,
 }
 

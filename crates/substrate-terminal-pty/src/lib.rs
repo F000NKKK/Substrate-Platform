@@ -8,7 +8,10 @@ mod default_shell;
 mod portable_pty;
 mod pty_session;
 mod read_in_background;
+#[cfg(any(windows, test))]
+mod startup_output;
 mod system_shells;
+mod writer;
 
 pub use default_shell::default_shell;
 pub use portable_pty::PortablePty;

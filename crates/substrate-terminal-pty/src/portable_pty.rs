@@ -7,6 +7,7 @@ use substrate_terminal_domain::{SessionOptions, TerminalError, TerminalSize};
 use crate::command::command;
 use crate::pty_session::{PtySession, pty_size};
 use crate::read_in_background::read_in_background;
+use crate::writer::Writer;
 
 /// Starts shells on the OS's own ptys through `portable-pty`.
 #[derive(Debug, Clone, Copy, Default)]
@@ -29,7 +30,18 @@ impl PtyOpener for PortablePty {
             .master
             .try_clone_reader()
             .map_err(|e| TerminalError::Stream(e.into()))?;
-        read_in_background(reader, on_output, on_exit);
+        let writer = Writer::new(
+            pair.master
+                .take_writer()
+                .map_err(|e| TerminalError::Stream(e.into()))?,
+        );
+        read_in_background(
+            reader,
+            on_output,
+            on_exit,
+            #[cfg(windows)]
+            writer.clone(),
+        );
         let child = pair
             .slave
             .spawn_command(command(options))
@@ -38,9 +50,6 @@ impl PtyOpener for PortablePty {
         // the master gets EOF when the child exits instead of hanging open.
         let PtyPair { master, slave } = pair;
         drop(slave);
-        let writer = master
-            .take_writer()
-            .map_err(|e| TerminalError::Stream(e.into()))?;
         Ok(Box::new(PtySession {
             master,
             writer,
