@@ -1,4 +1,5 @@
 export * from "./infra/tokens";
+export { LatestTask } from "./infra/LatestTask";
 export * from "./infra/theme";
 export * from "./infra/icons";
 export * from "./infra/color";
