@@ -24,7 +24,7 @@ pub enum DownloadError {
     #[error("the installing side stopped taking the download")]
     ConsumerStopped(#[source] std::io::Error),
     /// The download failed.
-    #[error("{url} could not be downloaded")]
+    #[error("{url} could not be downloaded: {cause}")]
     Failed {
         /// What was being downloaded.
         url: HttpUrl,

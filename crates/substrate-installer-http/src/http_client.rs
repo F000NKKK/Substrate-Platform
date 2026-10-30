@@ -38,6 +38,7 @@ impl HttpClient {
             .user_agent(config.user_agent)
             // Statuses are read, not raised: a 304 and a rate limit are answers.
             .http_status_as_error(false)
+            .redirect_auth_headers(ureq::config::RedirectAuthHeaders::Never)
             .timeout_connect(Some(CONNECT_TIMEOUT))
             .timeout_per_read(Some(READ_TIMEOUT))
             .build()
@@ -81,7 +82,13 @@ impl HttpClient {
     /// The response to a download of `url` from byte `from` on (a `Range`
     /// request when `from` is not 0). The status is the caller's to read.
     pub(crate) fn file(&self, url: &str, from: u64) -> Result<Response<Body>, HttpError> {
-        let mut request = self.agent.get(url);
+        let mut request = self
+            .agent
+            .get(url)
+            .header("Accept", "application/octet-stream");
+        if let Some(token) = self.token_for(url) {
+            request = request.header("Authorization", token.bearer());
+        }
         if from > 0 {
             request = request.header("Range", format!("bytes={from}-"));
         }

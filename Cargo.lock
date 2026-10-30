@@ -3579,7 +3579,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-installer-app"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "substrate-installer-domain",
  "thiserror 2.0.21",
@@ -3631,7 +3631,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-installer-http"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "serde",
  "serde_json",

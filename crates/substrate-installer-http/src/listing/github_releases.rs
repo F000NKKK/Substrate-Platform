@@ -44,7 +44,7 @@ fn release(dto: GithubReleaseDto, archive: SourceArchive) -> Option<Release> {
 fn asset(dto: GithubAssetDto) -> Option<Asset> {
     let mut asset = Asset::new(
         AssetName::new(dto.name).ok()?,
-        HttpUrl::new(dto.browser_download_url).ok()?,
+        HttpUrl::new(dto.url.unwrap_or(dto.browser_download_url)).ok()?,
     );
     asset.size = dto.size;
     asset.sha256 = dto.digest.as_deref().and_then(digest);

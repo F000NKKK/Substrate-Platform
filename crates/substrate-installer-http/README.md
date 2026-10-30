@@ -24,6 +24,11 @@ with rustls:
 - Not for: finding the GitHub token (`GITHUB_TOKEN`, `gh auth token`: the
   composition root does), unpacking, or installing.
 
+GitHub release assets use their API download URL with `Accept: application/octet-stream`.
+A configured token is attached only to the configured GitHub API base and is stripped on
+redirects; storage/CDN requests and unrelated downloads receive no credentials. Older
+release metadata without an API asset URL retains its browser download URL.
+
 Failures reach the ports as their `cause` (`HttpError`, `ReleaseReadError`);
 `is_rate_limited` tells a rate limit from the rest.
 
