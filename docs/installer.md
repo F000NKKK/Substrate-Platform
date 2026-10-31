@@ -133,3 +133,8 @@ adapters it needs) is later work.
   the use cases take it as a value.
 - Developer news (Yog Installer's recent releases of its own repos) is not in
   `listing`; it can be built from `compatible` by a product.
+
+Linux private Debian installs resolve launcher icons from the extracted package’s
+`usr/share/icons/hicolor/<size>/apps/<program>.png` when no explicit root `icon.png`
+is supplied. The launcher uses an absolute path because private icons are not in
+the system icon theme. Version 0.1.4 of `substrate-installer-fs` includes this fix.

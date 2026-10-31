@@ -18,8 +18,6 @@ use crate::promote::remove_any;
 
 /// Where a Debian package keeps its programs.
 const DEB_BIN: [&str; 2] = ["usr", "bin"];
-/// The icon a product's folder may hold, listed in its launcher entry.
-const ICON_FILE: &str = "icon.png";
 
 impl HostProducts {
     /// Installs the package of `job` in the product's folder and lists the
@@ -84,13 +82,13 @@ impl HostProducts {
         folder: &Path,
         program: &Path,
     ) -> Result<(), ProductError> {
-        let icon = folder.join(ICON_FILE);
+        let icon = super::package_icon::package_icon(folder, &facts.program_file());
         let entry = LauncherEntry {
             id: facts.id,
             name: facts.name,
             comment: facts.description,
             program,
-            icon: icon.is_file().then_some(icon.as_path()),
+            icon: icon.as_deref(),
         };
         let entries = &self.launchers().desktop_entries;
         let plan = plan_launcher(entries, &entry);

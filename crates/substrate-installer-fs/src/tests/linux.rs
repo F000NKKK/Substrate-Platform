@@ -199,3 +199,33 @@ fn forgetting_other_versions_keeps_one() {
         .forget_other_versions(Item::Product(&other), &version("1"))
         .unwrap();
 }
+
+#[test]
+fn a_private_deb_launcher_uses_its_bundled_hicolor_icon() {
+    let setup = Setup::new(
+        Os::Linux,
+        &[
+            "usr/bin/meridian-idle",
+            "usr/share/icons/hicolor/128x128/apps/meridian-idle.png",
+        ],
+    );
+    let ide = product("meridian-idle", "meridian-idle");
+    let v = version("0.2.1");
+    let name = asset("Meridian.IDLE_0.2.1_amd64.deb");
+    let package = setup.package("download", b"deb");
+    with_control(&CancelToken::new(), |control| {
+        setup
+            .products
+            .install(&request(Item::Product(&ide), &v, &package, &name), control)
+    })
+    .unwrap();
+    let icon = setup
+        .layout
+        .product_dir(&ide.id, &v)
+        .join("usr/share/icons/hicolor/128x128/apps/meridian-idle.png");
+    let entry =
+        std::fs::read_to_string(setup.user_file(".local/share/applications/meridian-idle.desktop"))
+            .unwrap();
+    assert!(icon.is_file());
+    assert!(entry.contains(&format!("Icon={}\n", icon.display())));
+}
