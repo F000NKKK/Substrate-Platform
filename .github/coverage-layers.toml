@@ -1,0 +1,159 @@
+# Coverage classifications maintained for Substrate CI.
+[[crate]]
+name = "substrate-git-domain"
+layer = "domain"
+context = "source-control"
+[[crate]]
+name = "substrate-git-app"
+layer = "app"
+context = "source-control"
+[[crate]]
+name = "substrate-git-gitcli"
+layer = "infra"
+context = "source-control"
+[[crate]]
+name = "substrate-search-domain"
+layer = "domain"
+context = "search"
+[[crate]]
+name = "substrate-search-app"
+layer = "app"
+context = "search"
+[[crate]]
+name = "substrate-search-ignore"
+layer = "infra"
+context = "search"
+[[crate]]
+name = "substrate-process"
+layer = "infra"
+context = "process"
+[[crate]]
+name = "substrate-run-domain"
+layer = "domain"
+context = "run"
+[[crate]]
+name = "substrate-run-app"
+layer = "app"
+context = "run"
+[[crate]]
+name = "substrate-run-process"
+layer = "infra"
+context = "run"
+[[crate]]
+name = "substrate-run-toml"
+layer = "infra"
+context = "run"
+[[crate]]
+name = "tauri-plugin-substrate"
+layer = "interface"
+context = "host-ui-contract"
+[[crate]]
+name = "substrate-message"
+layer = "shared-kernel"
+context = "message"
+[[crate]]
+name = "substrate-host-contract"
+layer = "interface"
+context = "host-ui-contract"
+
+[[crate]]
+name = "substrate-lock"
+layer = "shared-kernel"
+context = "lock"
+[[crate]]
+name = "substrate-framing"
+layer = "shared-kernel"
+context = "framing"
+[[crate]]
+name = "substrate-workspace-domain"
+layer = "domain"
+context = "workspace"
+[[crate]]
+name = "substrate-workspace-app"
+layer = "app"
+context = "workspace"
+[[crate]]
+name = "substrate-workspace-fs"
+layer = "infra"
+context = "workspace"
+[[crate]]
+name = "substrate-terminal-domain"
+layer = "domain"
+context = "terminal"
+[[crate]]
+name = "substrate-terminal-app"
+layer = "app"
+context = "terminal"
+[[crate]]
+name = "substrate-terminal-pty"
+layer = "infra"
+context = "terminal"
+[[crate]]
+name = "substrate-lsp-domain"
+layer = "domain"
+context = "language-server"
+[[crate]]
+name = "substrate-lsp-app"
+layer = "app"
+context = "language-server"
+[[crate]]
+name = "substrate-lsp-toml"
+layer = "infra"
+context = "language-server"
+[[crate]]
+name = "substrate-installer-http"
+layer = "infra"
+context = "installer"
+[[crate]]
+name = "substrate-dap-domain"
+layer = "domain"
+context = "debug-adapter"
+[[crate]]
+name = "substrate-dap-app"
+layer = "app"
+context = "debug-adapter"
+[[crate]]
+name = "substrate-dap-toml"
+layer = "infra"
+context = "debug-adapter"
+
+[[crate]]
+name = "substrate-project-domain"
+layer = "domain"
+context = "project-model"
+[[crate]]
+name = "substrate-project-app"
+layer = "app"
+context = "project-model"
+[[crate]]
+name = "substrate-project-toml"
+layer = "infra"
+context = "project-model"
+[[crate]]
+name = "substrate-installer-domain"
+layer = "domain"
+context = "installer"
+[[crate]]
+name = "substrate-installer-app"
+layer = "app"
+context = "installer"
+[[crate]]
+name = "substrate-installer-data"
+layer = "infra"
+context = "installer"
+[[crate]]
+name = "substrate-installer-process"
+layer = "infra"
+context = "installer"
+[[crate]]
+name = "substrate-installer-archive"
+layer = "infra"
+context = "installer"
+[[crate]]
+name = "substrate-installer-fs"
+layer = "infra"
+context = "installer"
+[[crate]]
+name = "substrate-state-json"
+layer = "infra"
+context = "ide-state"
