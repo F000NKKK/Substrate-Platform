@@ -60,7 +60,7 @@ flowchart LR
 
 ## 🦀 Rust Crate
 
-The Rust side is a set of crates under [`crates/`](crates), one group per context and layer (domain, app, adapter; the layers and edges are in [`craftbook.toml`](craftbook.toml), the vocabulary in [`docs/context-map.md`](docs/context-map.md)). There is no facade crate: a product depends on the crates it uses, and the Tauri plugin `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) wires them to commands behind Cargo features (`dap`, `fs`, `git`, `lsp`, `search`, `state`, `terminal`). `lsp`'s languages and `dap`'s adapters are the product's, passed in `Options::languages` and `Options::adapters`.
+The Rust side is a set of crates under [`crates/`](crates), one group per context and layer (domain, app, adapter; the current project policy is in [`CraftBook.toml`](CraftBook.toml), and the context vocabulary is in [`docs/context-map.md`](docs/context-map.md)). There is no facade crate: a product depends on the crates it uses, and the Tauri plugin `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) wires them to commands behind Cargo features (`dap`, `fs`, `git`, `lsp`, `search`, `state`, `terminal`). `lsp`'s languages and `dap`'s adapters are the product's, passed in `Options::languages` and `Options::adapters`.
 
 | Context | Crates | What it does |
 |---|---|---|
