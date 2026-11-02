@@ -31,7 +31,7 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
       - name: Craftbook policy and dependency checks
-        uses: F000NKKK/Craftbook@v2.0.0-rc9
+        uses: F000NKKK/Craftbook@v2.0.0-rc10
         with:
           command: both
           report-format: sarif
