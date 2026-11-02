@@ -60,7 +60,7 @@ flowchart LR
 
 ## 🦀 Rust-крейт
 
-Rust-часть — набор крейтов в [`crates/`](crates), по группе на контекст и слой (domain, app, адаптер; слои и связи в [`craftbook.toml`](craftbook.toml), словарь в [`docs/context-map.md`](docs/context-map.md)). Крейта-фасада нет: продукт зависит от нужных ему крейтов, а Tauri-плагин `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) связывает их с командами за Cargo-features (`dap`, `fs`, `git`, `lsp`, `search`, `state`, `terminal`). Языки `lsp` и адаптеры `dap` задаёт продукт через `Options::languages` и `Options::adapters`.
+Rust-часть — набор крейтов в [`crates/`](crates), по группе на контекст и слой (domain, app, адаптер; слои и связи в [`CraftBook.toml`](CraftBook.toml), словарь в [`docs/context-map.md`](docs/context-map.md)). Крейта-фасада нет: продукт зависит от нужных ему крейтов, а Tauri-плагин `tauri-plugin-substrate` ([`tauri-plugin/`](tauri-plugin)) связывает их с командами за Cargo-features (`dap`, `fs`, `git`, `lsp`, `search`, `state`, `terminal`). Языки `lsp` и адаптеры `dap` задаёт продукт через `Options::languages` и `Options::adapters`.
 
 | Контекст | Крейты | Что делает |
 |---|---|---|
