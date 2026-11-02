@@ -18,3 +18,8 @@ substrate-git-domain = { version = "0.1.0", path = "../substrate-git-domain" }
 substrate-message = { version = "0.1.0", path = "../substrate-message" }
 substrate-process = { version = "0.1.0", path = "../substrate-process" }
 substrate-workspace-domain = { version = "0.1.0", path = "../substrate-workspace-domain" }
+
+[package.metadata.craftbook]
+layer = "infra"
+context = "source-control"
+tags = []
