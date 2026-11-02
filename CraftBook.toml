@@ -14,97 +14,162 @@ no_std = false
 public_api_stable = false
 unsafe_review_required = true
 
-# Enforce dependency direction inside each bounded context.
-# Domain crates must not depend directly on their application or infrastructure crates.
+[architecture]
+require_classification = true
+
+# Architecture attributes are assigned by Cargo.toml first, with these selectors as fallback.
+
+[[package]]
+match = "*-domain"
+layer = "domain"
+tags = ["layer:domain"]
+
+[[package]]
+match = "*-app"
+layer = "app"
+tags = ["layer:app"]
+
+[[package]]
+match = "*-toml"
+layer = "infra"
+tags = ["layer:infra"]
+
+[[package]]
+match = "*-fs"
+layer = "infra"
+tags = ["layer:infra"]
+
+[[package]]
+match = "*-http"
+layer = "infra"
+tags = ["layer:infra"]
+
+[[package]]
+match = "*-process"
+layer = "infra"
+tags = ["layer:infra"]
+
+[[package]]
+match = "*-pty"
+layer = "infra"
+tags = ["layer:infra"]
+
+[[package]]
+match = "*-gitcli"
+layer = "infra"
+tags = ["layer:infra"]
+
+[[package]]
+match = "*-ignore"
+layer = "infra"
+tags = ["layer:infra"]
+
+[[package]]
+match = "*-archive"
+layer = "infra"
+tags = ["layer:infra"]
+
+[[package]]
+match = "*-data"
+layer = "infra"
+tags = ["layer:infra"]
+
+[[package]]
+match = "*-json"
+layer = "infra"
+tags = ["layer:infra"]
+
+[[package]]
+match = "substrate-message"
+layer = "shared-kernel"
+tags = ["layer:shared-kernel"]
+
+[[package]]
+match = "substrate-lock"
+layer = "shared-kernel"
+tags = ["layer:shared-kernel"]
+
+[[package]]
+match = "substrate-framing"
+layer = "shared-kernel"
+tags = ["layer:shared-kernel"]
+
+[[package]]
+match = "tauri-plugin-substrate"
+layer = "interface"
+tags = ["layer:interface"]
+
+[[package]]
+match = "substrate-host-contract"
+layer = "interface"
+tags = ["layer:interface"]
+
+[[package]]
+match = "substrate-git-*"
+context = "source-control"
+
+[[package]]
+match = "substrate-search-*"
+context = "search"
+
+[[package]]
+match = "substrate-run-*"
+context = "run"
+
+[[package]]
+match = "substrate-workspace-*"
+context = "workspace"
+
+[[package]]
+match = "substrate-terminal-*"
+context = "terminal"
+
+[[package]]
+match = "substrate-lsp-*"
+context = "language-server"
+
+[[package]]
+match = "substrate-installer-*"
+context = "installer"
+
+[[package]]
+match = "substrate-dap-*"
+context = "debug-adapter"
+
+[[package]]
+match = "substrate-project-*"
+context = "project-model"
+
+[[package]]
+match = "substrate-process"
+context = "process"
+
+[[package]]
+match = "tauri-plugin-substrate"
+context = "host-ui-contract"
+
+[[package]]
+match = "substrate-host-contract"
+context = "host-ui-contract"
+
+[[package]]
+match = "substrate-message"
+context = "message"
+
+[[package]]
+match = "substrate-lock"
+context = "lock"
+
+[[package]]
+match = "substrate-framing"
+context = "framing"
+
+[[package]]
+match = "substrate-state-json"
+context = "ide-state"
 
 [[dependency_rule]]
-from = "substrate-git-domain"
-disallow = "substrate-git-app"
-
-[[dependency_rule]]
-from = "substrate-git-domain"
-disallow = "substrate-git-gitcli"
-
-[[dependency_rule]]
-from = "substrate-search-domain"
-disallow = "substrate-search-app"
-
-[[dependency_rule]]
-from = "substrate-search-domain"
-disallow = "substrate-search-ignore"
-
-[[dependency_rule]]
-from = "substrate-run-domain"
-disallow = "substrate-run-app"
-
-[[dependency_rule]]
-from = "substrate-run-domain"
-disallow = "substrate-run-process"
-
-[[dependency_rule]]
-from = "substrate-run-domain"
-disallow = "substrate-run-toml"
-
-[[dependency_rule]]
-from = "substrate-workspace-domain"
-disallow = "substrate-workspace-app"
-
-[[dependency_rule]]
-from = "substrate-workspace-domain"
-disallow = "substrate-workspace-fs"
-
-[[dependency_rule]]
-from = "substrate-terminal-domain"
-disallow = "substrate-terminal-app"
-
-[[dependency_rule]]
-from = "substrate-terminal-domain"
-disallow = "substrate-terminal-pty"
-
-[[dependency_rule]]
-from = "substrate-lsp-domain"
-disallow = "substrate-lsp-app"
-
-[[dependency_rule]]
-from = "substrate-lsp-domain"
-disallow = "substrate-lsp-toml"
-
-[[dependency_rule]]
-from = "substrate-dap-domain"
-disallow = "substrate-dap-app"
-
-[[dependency_rule]]
-from = "substrate-dap-domain"
-disallow = "substrate-dap-toml"
-
-[[dependency_rule]]
-from = "substrate-project-domain"
-disallow = "substrate-project-app"
-
-[[dependency_rule]]
-from = "substrate-project-domain"
-disallow = "substrate-project-toml"
-
-[[dependency_rule]]
-from = "substrate-installer-domain"
-disallow = "substrate-installer-http"
-
-[[dependency_rule]]
-from = "substrate-installer-domain"
-disallow = "substrate-installer-app"
-
-[[dependency_rule]]
-from = "substrate-installer-domain"
-disallow = "substrate-installer-data"
-
-[[dependency_rule]]
-from = "substrate-installer-domain"
-disallow = "substrate-installer-process"
-
-[[dependency_rule]]
-from = "substrate-installer-domain"
-disallow = "substrate-installer-archive"
-
-[[dependency_rule]]
-from = "substrate-installer-domain"
-disallow = "substrate-installer-fs"
+id = "ARCH001"
+when = '"layer:domain" in from.tags && ("layer:app" in to.tags || "layer:infra" in to.tags)'
+action = "deny"
+message = "Domain packages cannot directly depend on application or infrastructure packages"
