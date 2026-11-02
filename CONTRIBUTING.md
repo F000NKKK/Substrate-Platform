@@ -33,7 +33,7 @@ code, so we can agree on the approach first.
    ```bash
    cargo fmt --all --check
    cargo clippy --workspace --all-targets --all-features -- -D warnings
-   cargo install cargo-craftcheck --version 2.0.0-rc9 --locked
+   cargo install cargo-craftcheck --version 2.0.0-rc10 --locked
    cargo craftcheck check
    cargo craftcheck deps
    cargo test --workspace --all-features
