@@ -22,8 +22,8 @@ code, so we can agree on the approach first.
 ## Making a change
 
 1. Fork the repository and create a branch from `master`.
-2. Make the change. It is done when it meets Craftbook's definition of done
-   ([§8.6](https://github.com/F000NKKK/craftbook/blob/main/rust/08-testing-and-quality.md#86-definition-of-done)):
+2. Make the change. It is done when it meets the project's quality requirements
+   (see [Craftbook](https://github.com/F000NKKK/Craftbook/blob/main/rust/08-testing-and-quality.md)):
    tests for the new behaviour, every bug fix with a regression test, public
    items documented, [`docs/glossary.md`](docs/glossary.md) and
    [`docs/context-map.md`](docs/context-map.md) current.
@@ -33,8 +33,9 @@ code, so we can agree on the approach first.
    ```bash
    cargo fmt --all --check
    cargo clippy --workspace --all-targets --all-features -- -D warnings
-   python3 <craftbook>/tools/craftcheck check .
-   python3 <craftbook>/tools/craftcheck deps .
+   cargo install cargo-craftcheck --version 2.0.0-rc9 --locked
+   cargo craftcheck check
+   cargo craftcheck deps
    cargo test --workspace --all-features
    cargo llvm-cov --workspace --all-features --json --summary-only --output-path coverage.json
    python3 .github/scripts/coverage_floors.py coverage.json
@@ -48,7 +49,7 @@ code, so we can agree on the approach first.
 
    Craftbook's clippy lint set is `deny` in the workspace and CI runs clippy
    with `-D warnings`: a change adds no warning. Where a lint cannot be met,
-   `#[expect(lint, reason = "…")]` states why (never `#[allow]`). rustc's own
+   use a narrowly scoped lint exception with a documented reason when justified. rustc's own
    lints stay `warn`, except `missing_docs`, `unsafe_code`,
    `unused_qualifications`, `missing_debug_implementations`,
    `unreachable_pub` and `elided_lifetimes_in_paths`, which are `deny`: a
@@ -62,7 +63,7 @@ Substrate stays generic: no Yog-specific formats or logic, only infrastructure a
 ## Style
 
 - Rust follows [Craftbook](https://github.com/F000NKKK/craftbook), our
-  engineering standard: files and modules, functions, naming, types and
+  engineering handbook: files and modules, functions, naming, types and
   errors, docs, tests. Where it is silent, code reads like the code around it.
 - Rust is formatted with `cargo fmt` (`rustfmt.toml`); TypeScript follows the existing formatting.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/):
