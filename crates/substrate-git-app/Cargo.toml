@@ -15,3 +15,8 @@ workspace = true
 [dependencies]
 substrate-git-domain = { version = "0.1.0", path = "../substrate-git-domain" }
 substrate-message = { version = "0.1.0", path = "../substrate-message" }
+
+[package.metadata.craftbook]
+layer = "app"
+context = "source-control"
+tags = []
