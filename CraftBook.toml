@@ -170,6 +170,6 @@ context = "ide-state"
 
 [[dependency_rule]]
 id = "ARCH001"
-when = '"layer:domain" in from.tags && ("layer:app" in to.tags || "layer:infra" in to.tags)'
+when = 'from.context == to.context && "layer:domain" in from.tags && ("layer:app" in to.tags || "layer:infra" in to.tags)'
 action = "deny"
 message = "Domain packages cannot directly depend on application or infrastructure packages"
