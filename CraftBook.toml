@@ -13,3 +13,98 @@ docs = true
 no_std = false
 public_api_stable = false
 unsafe_review_required = true
+
+# Enforce dependency direction inside each bounded context.
+# Domain crates must not depend directly on their application or infrastructure crates.
+
+[[dependency_rule]]
+from = "substrate-git-domain"
+disallow = "substrate-git-app"
+
+[[dependency_rule]]
+from = "substrate-git-domain"
+disallow = "substrate-git-gitcli"
+
+[[dependency_rule]]
+from = "substrate-search-domain"
+disallow = "substrate-search-app"
+
+[[dependency_rule]]
+from = "substrate-search-domain"
+disallow = "substrate-search-ignore"
+
+[[dependency_rule]]
+from = "substrate-run-domain"
+disallow = "substrate-run-app"
+
+[[dependency_rule]]
+from = "substrate-run-domain"
+disallow = "substrate-run-process"
+
+[[dependency_rule]]
+from = "substrate-run-domain"
+disallow = "substrate-run-toml"
+
+[[dependency_rule]]
+from = "substrate-workspace-domain"
+disallow = "substrate-workspace-app"
+
+[[dependency_rule]]
+from = "substrate-workspace-domain"
+disallow = "substrate-workspace-fs"
+
+[[dependency_rule]]
+from = "substrate-terminal-domain"
+disallow = "substrate-terminal-app"
+
+[[dependency_rule]]
+from = "substrate-terminal-domain"
+disallow = "substrate-terminal-pty"
+
+[[dependency_rule]]
+from = "substrate-lsp-domain"
+disallow = "substrate-lsp-app"
+
+[[dependency_rule]]
+from = "substrate-lsp-domain"
+disallow = "substrate-lsp-toml"
+
+[[dependency_rule]]
+from = "substrate-dap-domain"
+disallow = "substrate-dap-app"
+
+[[dependency_rule]]
+from = "substrate-dap-domain"
+disallow = "substrate-dap-toml"
+
+[[dependency_rule]]
+from = "substrate-project-domain"
+disallow = "substrate-project-app"
+
+[[dependency_rule]]
+from = "substrate-project-domain"
+disallow = "substrate-project-toml"
+
+[[dependency_rule]]
+from = "substrate-installer-domain"
+disallow = "substrate-installer-http"
+
+[[dependency_rule]]
+from = "substrate-installer-domain"
+disallow = "substrate-installer-app"
+
+[[dependency_rule]]
+from = "substrate-installer-domain"
+disallow = "substrate-installer-data"
+
+[[dependency_rule]]
+from = "substrate-installer-domain"
+disallow = "substrate-installer-process"
+
+[[dependency_rule]]
+from = "substrate-installer-domain"
+disallow = "substrate-installer-archive"
+
+[[dependency_rule]]
+from = "substrate-installer-domain"
+disallow = "substrate-installer-fs"
