@@ -1,4 +1,4 @@
-# Project policy for cargo-craftcheck.
+# Craftbook v2 policy for Substrate-Platform.
 version = 2
 project = "Substrate-Platform"
 profiles = ["plugin"]
