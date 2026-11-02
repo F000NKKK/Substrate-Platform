@@ -15,3 +15,8 @@ workspace = true
 [dependencies]
 substrate-message = { version = "0.1.0", path = "../substrate-message" }
 thiserror = "2"
+
+[package.metadata.craftbook]
+layer = "domain"
+context = "source-control"
+tags = []
