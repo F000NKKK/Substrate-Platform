@@ -2,13 +2,13 @@
 """Coverage floors per layer (craftbook rust/08-testing-and-quality.md §8.1).
 
 Reads the JSON of `cargo llvm-cov --workspace --all-features --json
---summary-only` and the layer of each crate from craftbook.toml. A crate at
+--summary-only` and the layer of each crate from .github/coverage-layers.toml. A crate at
 or above its layer's floor must stay there. A crate below it is reported,
 not enforced against the layer floor; instead it may not fall below its own
 measured RATCHET (only ever raised). The interface layer has no floor: it is
 reported.
 
-Usage: coverage_floors.py COVERAGE_JSON [CRAFTBOOK_TOML]
+Usage: coverage_floors.py COVERAGE_JSON [COVERAGE_LAYERS_TOML]
 """
 
 import json
@@ -46,7 +46,7 @@ def line_coverage(report):
 
 def main():
     report = json.load(open(sys.argv[1]))
-    config = tomllib.load(open(sys.argv[2] if len(sys.argv) > 2 else "craftbook.toml", "rb"))
+    config = tomllib.load(open(sys.argv[2] if len(sys.argv) > 2 else ".github/coverage-layers.toml", "rb"))
     layers = {c["name"]: c["layer"] for c in config["crate"]}
     layers["tauri-plugin"] = layers["tauri-plugin-substrate"]  # the directory's name
     failed = False
