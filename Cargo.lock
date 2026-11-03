@@ -3635,7 +3635,7 @@ version = "0.1.3"
 dependencies = [
  "serde",
  "serde_json",
- "sha2 0.10.9",
+ "sha2 0.11.1",
  "substrate-installer-app",
  "substrate-installer-domain",
  "tempfile",
