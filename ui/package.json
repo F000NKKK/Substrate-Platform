@@ -44,7 +44,7 @@
     "markdown-it": "^15.0.3",
     "markdown-it-footnote": "^4.0.0",
     "markdown-it-github-alerts": "^1.0.1",
-    "mermaid": "^12.2.0"
+    "mermaid": "^12.3.0"
   },
   "overrides": {
     "katex": "$katex"
@@ -54,6 +54,6 @@
     "@types/react-dom": "^19.3.0",
     "happy-dom": "^21.0.4",
     "typescript": "~7.0.2",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   }
 }
