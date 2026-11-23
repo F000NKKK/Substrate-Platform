@@ -4,10 +4,10 @@ use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use substrate_installer_app::control::CancelToken;
-use substrate_installer_app::ports::tools::{ToolCommand, ToolControl, ToolError, ToolRunner};
+use substrate_installer_app::ports::tools::{ToolCommand, ToolError};
 use substrate_installer_domain::sources::CrateName;
 
-use super::support::{run, runner, script};
+use super::support::{run, run_with_output, runner, script};
 
 #[test]
 fn cancelling_kills_the_whole_tree() {
@@ -62,13 +62,7 @@ fn pausing_stops_the_tool_and_resuming_lets_it_go_on() {
     };
     let counter = Arc::clone(&seen);
     let output = move |_: &str| *counter.lock().unwrap() += 1;
-    let result = runner(dir.path()).run(
-        &command,
-        &ToolControl {
-            cancel: &token,
-            output: &output,
-        },
-    );
+    let result = run_with_output(&runner(dir.path()), &command, &token, &output);
     result.unwrap();
     let (before, during) = pauser.join().unwrap();
     assert_eq!(before, during, "no line while paused");

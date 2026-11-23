@@ -37,23 +37,29 @@ pub(crate) fn run(
     command: &ToolCommand,
     cancel: &CancelToken,
 ) -> (Result<PathBuf, ToolError>, Vec<String>) {
+    let lines = Mutex::new(Vec::new());
+    let output = |line: &str| lines.lock().expect("lock").push(line.to_owned());
+    let result = run_with_output(runner, command, cancel, &output);
+    (result, lines.into_inner().expect("lock"))
+}
+
+/// Runs a fake executable while treating transient Linux ETXTBSY as a retryable
+/// launch race. Both simple and observable-process tests share this behavior.
+pub(crate) fn run_with_output(
+    runner: &ProcessToolRunner,
+    command: &ToolCommand,
+    cancel: &CancelToken,
+    output: &dyn Fn(&str),
+) -> Result<PathBuf, ToolError> {
     let mut attempts = 0;
     loop {
-        let lines = Mutex::new(Vec::new());
-        let output = |line: &str| lines.lock().expect("lock").push(line.to_owned());
-        let result = runner.run(
-            command,
-            &ToolControl {
-                cancel,
-                output: &output,
-            },
-        );
+        let result = runner.run(command, &ToolControl { cancel, output });
         attempts += 1;
         if attempts < 10 && text_file_busy(&result) {
             std::thread::sleep(Duration::from_millis(30));
             continue;
         }
-        return (result, lines.into_inner().expect("lock"));
+        return result;
     }
 }
 
