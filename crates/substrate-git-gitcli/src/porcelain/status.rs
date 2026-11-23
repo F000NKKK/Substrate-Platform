@@ -45,9 +45,7 @@ const ORDINARY_FIELDS: usize = 9;
 fn changed(status: &mut RepoStatus, record: &str, fields: usize, original: Option<&str>) {
     let fields: Vec<&str> = record.splitn(fields, ' ').collect();
     let Some(&path) = fields.last() else { return };
-    let xy: Vec<char> = fields
-        .get(1)
-        .map_or_else(Vec::new, |s| s.chars().collect());
+    let xy: Vec<char> = fields.get(1).map_or_else(Vec::new, |s| s.chars().collect());
     if let Some(kind) = xy.first().copied().and_then(ChangeKind::from_code) {
         let original = matches!(kind, ChangeKind::Renamed | ChangeKind::Copied)
             .then_some(original)
