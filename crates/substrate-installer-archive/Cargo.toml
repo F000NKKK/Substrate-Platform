@@ -2,7 +2,7 @@
 name = "substrate-installer-archive"
 version = "0.1.2"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "Unpacks an installer's downloads: zip, tar.gz, tar.xz and a Debian package's files, from a file or a stream, never outside the folder."
 license = "AGPL-3.0-only"

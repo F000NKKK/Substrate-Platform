@@ -2,7 +2,7 @@
 name = "substrate-installer-fs"
 version = "0.1.4"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "An installer on the real file system: where things go under a home folder, moving a staging folder into place, and installing a platform's programs with their launcher."
 license = "AGPL-3.0-only"

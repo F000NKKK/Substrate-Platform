@@ -2,7 +2,7 @@
 name = "substrate-run-toml"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "Reading a workflow file (TOML) into substrate-run-domain's workflows."
 license = "AGPL-3.0-only"

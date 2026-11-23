@@ -2,7 +2,7 @@
 name = "substrate-process"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "Starting programs with the system's own environment, and opening links and files with the user's default app."
 license = "AGPL-3.0-only"

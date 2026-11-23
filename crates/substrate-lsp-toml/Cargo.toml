@@ -2,7 +2,7 @@
 name = "substrate-lsp-toml"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "Reads a product's list of languages and their language servers from TOML into the language server context's vocabulary."
 license = "AGPL-3.0-only"

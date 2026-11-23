@@ -2,7 +2,7 @@
 name = "substrate-git-gitcli"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "Source control through the git executable: the adapter of substrate-git-app's ports, and the anticorruption layer for git's porcelain output."
 license = "AGPL-3.0-only"

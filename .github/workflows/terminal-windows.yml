@@ -9,7 +9,9 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.99
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.100.0'
       - uses: Swatinem/rust-cache@v2
       - run: cargo clippy -p substrate-terminal-pty --all-targets -- -D warnings
       - run: cargo test -p substrate-terminal-pty --test powershell --locked

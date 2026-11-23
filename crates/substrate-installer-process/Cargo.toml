@@ -2,7 +2,7 @@
 name = "substrate-installer-process"
 version = "0.1.3"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "Runs rustup and cargo for the installer context (output streamed, paused and killed with the whole process group) and finds the toolchains and tools already on the machine."
 license = "AGPL-3.0-only"

@@ -2,7 +2,7 @@
 name = "substrate-lsp-domain"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "The language server context's vocabulary: the languages a product knows and the server each is served by, what a server says unasked, file URIs, and why talking to a server fails."
 license = "AGPL-3.0-only"

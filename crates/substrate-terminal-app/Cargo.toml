@@ -2,7 +2,7 @@
 name = "substrate-terminal-app"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "A terminal's use cases: start a shell session whose output arrives as text, and list the shells a machine has, through the ports a pty adapter implements."
 license = "AGPL-3.0-only"

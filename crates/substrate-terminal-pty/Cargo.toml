@@ -2,7 +2,7 @@
 name = "substrate-terminal-pty"
 version = "0.1.1"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "A terminal on a real, cross-platform pty (Windows, Linux, macOS) through portable-pty, and shell detection on the search path."
 license = "AGPL-3.0-only"

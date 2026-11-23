@@ -2,7 +2,7 @@
 name = "substrate-installer-domain"
 version = "0.1.2"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "An installer's vocabulary: the catalog of products, workloads and components, sources, releases, selections, changes, plans, compatibility and progress events."
 license = "AGPL-3.0-only"

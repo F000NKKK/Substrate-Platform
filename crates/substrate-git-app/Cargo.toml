@@ -2,7 +2,7 @@
 name = "substrate-git-app"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "Source control's use cases: the ports a git adapter implements, and the write operations that never run at the same time."
 license = "AGPL-3.0-only"

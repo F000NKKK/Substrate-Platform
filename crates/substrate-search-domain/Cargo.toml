@@ -2,7 +2,7 @@
 name = "substrate-search-domain"
 version = "0.1.1"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "Find and Replace in Files' vocabulary: the query, its matcher and file mask, line hits, the project layout and why a search fails."
 license = "AGPL-3.0-only"

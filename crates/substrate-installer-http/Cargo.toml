@@ -2,7 +2,7 @@
 name = "substrate-installer-http"
 version = "0.1.3"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "HTTP adapters of the installer ports: GitHub and crates.io release listing with an ETag cache, and a resumable, verified, cancellable downloader."
 license = "AGPL-3.0-only"

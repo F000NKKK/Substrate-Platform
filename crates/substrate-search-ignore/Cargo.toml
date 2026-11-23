@@ -2,7 +2,7 @@
 name = "substrate-search-ignore"
 version = "0.1.1"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "Find and Replace in Files over the file system: a .gitignore-aware walk of a project, and text read and written through the product's text views."
 license = "AGPL-3.0-only"

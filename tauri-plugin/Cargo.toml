@@ -2,7 +2,7 @@
 name = "tauri-plugin-substrate"
 version = "0.1.2"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 license = "AGPL-3.0-only"
 description = "Substrate Platform's host commands for a Tauri app: the workspace boundary, opening links, Source Control, terminals — what Substrate's UI calls, the same in every product."

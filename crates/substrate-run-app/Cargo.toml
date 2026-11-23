@@ -2,7 +2,7 @@
 name = "substrate-run-app"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "Running tools' use cases: spawn a task with its output streamed into a log, run workflows step by step, and the port for starting processes."
 license = "AGPL-3.0-only"

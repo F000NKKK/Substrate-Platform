@@ -2,7 +2,7 @@
 name = "substrate-git-domain"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "Source control's vocabulary: repository status, changes, branches, commits, stashes, diffs and why a git operation fails."
 license = "AGPL-3.0-only"

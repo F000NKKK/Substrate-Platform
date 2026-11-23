@@ -2,7 +2,7 @@
 name = "substrate-installer-data"
 version = "0.1.2"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "The installer's own files as Substrate Data: the catalog and a release's compatibility manifest read from text with the line, path and code of every problem, and the records of what is installed kept as an atomically written binary file."
 license = "AGPL-3.0-only"

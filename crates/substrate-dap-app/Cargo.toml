@@ -2,7 +2,7 @@
 name = "substrate-dap-app"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "A running debug adapter spoken to over the Debug Adapter Protocol: requests matched to responses, events decoded and passed on, the adapter's own requests answered, and the wire shape of events."
 license = "AGPL-3.0-only"

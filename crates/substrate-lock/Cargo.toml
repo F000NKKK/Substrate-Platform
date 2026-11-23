@@ -2,7 +2,7 @@
 name = "substrate-lock"
 version = "0.1.1"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "Locks that outlive a panic: Mutex and RwLock guards that ignore poison, for the shared kernel of every context."
 license = "AGPL-3.0-only"

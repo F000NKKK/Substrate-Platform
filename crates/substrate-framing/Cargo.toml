@@ -2,7 +2,7 @@
 name = "substrate-framing"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.100"
 authors = ["F000NK"]
 description = "The framing the Language Server and Debug Adapter protocols share: a Content-Length header, a blank line, then that many bytes of JSON."
 license = "AGPL-3.0-only"
