@@ -47,8 +47,7 @@ fn changed(status: &mut RepoStatus, record: &str, fields: usize, original: Optio
     let Some(&path) = fields.last() else { return };
     let xy: Vec<char> = fields
         .get(1)
-        .map(|s| s.chars().collect())
-        .unwrap_or_default();
+        .map_or_else(Vec::new, |s| s.chars().collect());
     if let Some(kind) = xy.first().copied().and_then(ChangeKind::from_code) {
         let original = matches!(kind, ChangeKind::Renamed | ChangeKind::Copied)
             .then_some(original)
