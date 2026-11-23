@@ -40,8 +40,7 @@ pub fn detect_shells(probe: &dyn ShellProbe) -> Vec<Shell> {
     let default = probe.default_shell();
     let program = Path::new(&default)
         .file_stem()
-        .map(|stem| stem.to_string_lossy().to_lowercase())
-        .unwrap_or_default();
+        .map_or_else(String::new, |stem| stem.to_string_lossy().to_lowercase());
     vec![Shell {
         command: default,
         ..Shell::new(&program, DEFAULT_LABEL)
