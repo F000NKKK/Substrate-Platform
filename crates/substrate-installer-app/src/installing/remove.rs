@@ -23,8 +23,7 @@ impl<'r> Run<'r> {
         let id = item.id();
         let path = set
             .get(&id, version)
-            .map(|record| record.path.clone())
-            .unwrap_or_default();
+            .map_or_else(Default::default, |record| record.path.clone());
         self.remove_files(item, version, &path, RemovalMode::Uninstall)?;
         set.remove(&id, version);
         self.emit(Event::Removed { item: id });
