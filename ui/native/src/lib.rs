@@ -7,4 +7,4 @@ mod theme;
 mod widgets;
 
 pub use theme::PlatformTheme;
-pub use widgets::{ButtonVariant, button, caption, output_panel, progress};
+pub use widgets::{ButtonVariant, button, caption, confirmation, output_panel, progress};

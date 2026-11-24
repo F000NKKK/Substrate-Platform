@@ -120,16 +120,36 @@ impl PlatformTheme {
             style.spacing.interact_size.y = self.control_height;
             style.spacing.button_padding.x = self.control_padding;
             for kind in [TextStyle::Body, TextStyle::Button] {
-                style
-                    .text_styles
-                    .insert(kind, FontId::new(self.font_size, FontFamily::Proportional));
+                if let Some(font) = style.text_styles.get_mut(&kind) {
+                    *font = FontId::new(self.font_size, FontFamily::Proportional);
+                }
             }
-            style.text_styles.insert(
-                TextStyle::Small,
-                FontId::new(self.small_font_size, FontFamily::Proportional),
-            );
+            if let Some(font) = style.text_styles.get_mut(&TextStyle::Small) {
+                *font = FontId::new(self.small_font_size, FontFamily::Proportional);
+            }
         });
+        install_system_fonts(ctx);
     }
+}
+
+fn install_system_fonts(ctx: &Context) {
+    // A portable app can use installed Windows fonts without shipping them.
+    #[cfg(windows)]
+    if let Some(root) = std::env::var_os("SystemRoot") {
+        let path = std::path::PathBuf::from(root).join("Fonts/segoeui.ttf");
+        if let Ok(font) = std::fs::read(path) {
+            let mut definitions = egui::FontDefinitions::default();
+            definitions
+                .font_data
+                .insert("Segoe UI".into(), egui::FontData::from_owned(font).into());
+            if let Some(proportional) = definitions.families.get_mut(&FontFamily::Proportional) {
+                proportional.insert(0, "Segoe UI".into());
+            }
+            ctx.set_fonts(definitions);
+        }
+    }
+    #[cfg(not(windows))]
+    let _ = ctx;
 }
 
 #[cfg(test)]

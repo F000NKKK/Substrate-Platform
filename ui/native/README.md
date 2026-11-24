@@ -3,7 +3,7 @@
 An egui rendering adapter of Substrate's design system. The canonical design
 tokens are read directly from `ui/src/infra/tokens/tokens.css`; applications do
 not copy the palette or control metrics. The native counterparts of Button,
-Label, ProgressBar and OutputPanel are exposed by this crate. React widgets
+Label, ProgressBar, confirmation and OutputPanel are exposed by this crate. React widgets
 remain the web implementation. Native and web renderers share design tokens,
 not a JavaScript runtime.
 

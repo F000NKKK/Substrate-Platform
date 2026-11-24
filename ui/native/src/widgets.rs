@@ -59,3 +59,27 @@ pub fn output_panel(ui: &mut Ui, lines: &[String]) {
             }
         });
 }
+
+/// Generic inline confirmation with explicit accept and decline actions.
+pub fn confirmation(
+    ui: &mut Ui,
+    theme: &PlatformTheme,
+    message: &str,
+    subject: &str,
+    accept: &str,
+    decline: &str,
+) -> Option<bool> {
+    ui.separator();
+    ui.label(RichText::new(message).color(theme.warning));
+    ui.label(RichText::new(subject).strong());
+    ui.horizontal(|ui| {
+        if ui.add(button(theme, accept, ButtonVariant::Primary)).clicked() {
+            Some(true)
+        } else if ui.add(button(theme, decline, ButtonVariant::Subtle)).clicked() {
+            Some(false)
+        } else {
+            None
+        }
+    })
+    .inner
+}
