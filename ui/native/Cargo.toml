@@ -1,0 +1,17 @@
+[package]
+name = "substrate-ui-native"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.100"
+authors = ["F000NK"]
+description = "Native rendering adapter for the shared Substrate UI design system"
+license = "AGPL-3.0-only"
+publish = false
+readme = "README.md"
+repository = "https://github.com/F000NKKK/Substrate-Platform"
+
+[lints]
+workspace = true
+
+[dependencies]
+egui = { version = "0.37", default-features = false }

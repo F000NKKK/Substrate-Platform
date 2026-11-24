@@ -1,6 +1,6 @@
 # The crates (`crates/`) and the Tauri plugin (`tauri-plugin/`): one target dir.
 [workspace]
-members = ["tauri-plugin", "crates/*"]
+members = ["tauri-plugin", "crates/*", "ui/native"]
 resolver = "3"
 
 # Craftbook's lint set (templates/workspace-lints.toml), as `deny` (wave 11
